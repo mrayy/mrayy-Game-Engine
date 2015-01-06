@@ -37,7 +37,7 @@ math::vector2d OculusBaseController::GetSpeed()
 	float y = diff.x;
 
 	float minOffset = 0.05;
-	float maxOffset = 0.2;
+	float maxOffset = 0.15;
 
 	x = math::sign(x)*math::sqr(math::Min<float>(1.0f, math::Max<float>(0, abs(x) - minOffset) / (maxOffset-minOffset)));
 	y = math::sign(y)*math::sqr(math::Min<float>(1.0f, math::Max<float>(0, abs(y) - minOffset) / (maxOffset - minOffset)));
@@ -59,8 +59,8 @@ float OculusBaseController::GetRotation()
 	float y = AppData::Instance()->oculusDevice->GetOrientation().getYaw();
 
 
-	float minAngle = 30;
-	float maxAngle = 80;
+	float minAngle = 15;
+	float maxAngle = 60;
 
 	y = math::sign(y)*math::sqr(math::Min<float>(1.0f, math::Max<float>(0, abs(y) - minAngle) / (maxAngle - minAngle)));
 	//m_currentRotation = y;

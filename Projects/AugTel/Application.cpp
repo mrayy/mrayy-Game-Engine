@@ -190,7 +190,7 @@ void Application::onEvent(Event* event)
 		{
 			AppData::Instance()->IsDebugging = !AppData::Instance()->IsDebugging;
 		}
-			if(e->press && e->key==KEY_F12)
+		if (e->press && e->key == KEY_F12 )//|| e->press && e->key == 71)
 		{
 				m_screenShotEnabled = !m_screenShotEnabled;
 				m_screenShotTimer = 100;
@@ -537,7 +537,7 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 		if (m_screenShotEnabled && m_screenShotTimer>1)
 		{
 			m_screenShotTimer = 0;
-
+			m_screenShotEnabled = false;
 			math::vector3d sz;
 			sz.x = wnd->GetSize().x;
 			sz.y = wnd->GetSize().y;

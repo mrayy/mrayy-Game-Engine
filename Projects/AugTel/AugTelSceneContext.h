@@ -29,6 +29,7 @@ public:
 	game::GameEntityManager* entManager;
 	HeadMount* headNode;
 	TBee::ICameraVideoSource* videoSource;
+	scene::CameraNode* cameras[2];
 };
 
 }

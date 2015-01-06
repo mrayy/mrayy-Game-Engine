@@ -175,7 +175,7 @@ void TRApplication::onEvent(Event* e)
 		JoystickEvent* evt = (JoystickEvent*)e;
 		if (evt->event == JET_BUTTON_PRESSED)
 		{
-			if (evt->button == 8 && m_controller==EController::Logicool || evt->button== 6 && m_controller==EController::XBox)
+			if (evt->button == 6 && m_controller==EController::Logicool || evt->button== 6 && m_controller==EController::XBox)
 			{
 				m_robotCommunicator->SetLocalControl(!m_robotCommunicator->IsLocalControl());
 			}
@@ -569,9 +569,15 @@ void TRApplication::onRenderDone(scene::ViewPort*vp)
 	video::TextureUnit tex;
 	m_playerGrabber->Blit();
 	tex.SetTexture(m_playerGrabber->GetTexture());
+	math::vector2d txsz;
+	txsz.x = m_playerGrabber->GetTexture()->getSize().x;
+	txsz.y = m_playerGrabber->GetTexture()->getSize().y;
+	float r = (float)vp->GetSize().y / (float)vp->GetSize().x;
+	float w=txsz.x*r;
+	float c = txsz.x - w;
 	getDevice()->useTexture(0, &tex);
 	math::rectf texCoords(1,0,0,1);
-	getDevice()->draw2DImage(vp->getAbsRenderingViewPort(), 1,0,&texCoords);
+	getDevice()->draw2DImage(math::rectf(c/2,0,w,vp->GetSize().y), 1,0,&texCoords);
 /*	*/
 
 	GCPtr<GUI::IFont> font = gFontResourceManager.getDefaultFont();

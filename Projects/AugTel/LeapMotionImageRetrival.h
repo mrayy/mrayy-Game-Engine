@@ -39,6 +39,7 @@ public:
 
 	bool Capture(Leap::Frame &frame);
 
+	video::ITexturePtr GetCapturedTexture(){ return mainTexture; }
 	video::ITexturePtr GetResult(){ return finalTexture; }
 };
 

@@ -25,6 +25,9 @@
 #include "ShaderResourceManager.h"
 #include "ICameraVideoSource.h"
 #include "LeapHandComponent.h"
+#include "FingerTipComponent.h"
+
+#include "TextureResourceManager.h"
 
 namespace mray
 {
@@ -103,6 +106,7 @@ namespace AugTel
 
 		void Update()
 		{
+			return;
 			if (gEngine.getTimer()->getSeconds() - m_lightMapTimer < 200)
 				return;
 			m_lightMapTimer = gEngine.getTimer()->getSeconds();
@@ -160,11 +164,14 @@ namespace AugTel
 
 		VirtualHandsLightImpl* m_handsImpl;
 		
-
+		std::vector<AugTel::FingerTipComponent*> m_leftFingers;
+		std::vector<AugTel::FingerTipComponent*> m_rightFingers;
 		AugTelSceneContext* context;
 		LeapMotionImageRetrival* images[2];
 
 		core::string m_model;
+
+		bool m_screenShot;
 
 		bool enabled;
 		scene::MeshRenderableNode* m_surface[2];
@@ -181,6 +188,8 @@ namespace AugTel
 			m_handController->AddListener(this);
 
 			m_handsImpl = new VirtualHandsLightImpl();
+
+			m_screenShot = false;
 		}
 		~LeapMotionHandsControllerImpl()
 		{
@@ -256,8 +265,8 @@ namespace AugTel
 
 				math::matrix3x3 rotMat;
 
-				for (int j = 0; j < 4; ++j)
-					tcPtr[j] = (rotMat*(tcPtr[j] * 2 - 1))*0.5 - 0.5f;
+			//	for (int j = 0; j < 4; ++j)
+			//		tcPtr[j] = (rotMat*(tcPtr[j] * 2 - 1))*0.5 - 0.5f;
 				ushort idxPtr[6] = { 0, 1, 2, 0, 2, 3 };
 
 				pos->writeData(0, 4 * sizeof(math::vector3d), posPtr, true);
@@ -282,7 +291,7 @@ namespace AugTel
 				rnode->SetTargetRenderGroup(scene::RGH_Transparent + 10);
 				rnode->SetHasCustomRenderGroup(true);
 				m_screenNode[i]->AttachNode(rnode);
-				context->headNode->addChild(m_screenNode[i]);
+				context->headNode -> addChild(m_screenNode[i]);
 				m_screenNode[i]->setPosition(math::vector3d(0, 0, 1));
 				m_screenNode[i]->setScale(math::vector3d(2, 2, 1.55));
 				m_screenNode[i]->setVisible(false);
@@ -352,11 +361,35 @@ namespace AugTel
 				}
 			}
 
+			{
+				const std::list<IObjectComponent* >& lst= ent->GetComponentsList();
+				std::list<IObjectComponent*>::const_iterator it = lst.begin();
+				for (; it != lst.end(); ++it)
+				{
+					IObjectComponent* o = *it;
+					AugTel::FingerTipComponent* c = dynamic_cast<FingerTipComponent*>(o);
+					if (c)
+					{
+						if (c->GetIsLeftHand())
+						{
+							m_leftFingers.push_back(c);
+						}
+						else
+							m_rightFingers.push_back(c);
+					}
+				}
+
+			}
+
 			 if (eyesComponent)
 			{
+
+				scene::ISceneNode* handRoot = context->entManager->GetSceneManager()->createSceneNode();
+				handRoot->setPosition(math::vector3d(0, 0.08, 0));
+				context->headNode->addChild(handRoot);
 				 eyesComponent->GetNode()->addChild(context->headNode);
 				 context->headNode->setPosition(eyesComponent->GetOffset());
-				 m_handController->SetTransform(context->headNode);
+				 m_handController->SetTransform(handRoot);
 				eyesComponent->MountCamera(context->headNode, 0);
 			}
 
@@ -422,11 +455,43 @@ namespace AugTel
 			if (!enabled)
 				return;
 			Leap::Frame frame = m_controller->GetController()->frame();
-			frame.hand(0).confidence();
 
 			m_handController->Update(dt);
 
 			m_handsImpl->Update();
+
+			bool enable = false;
+			if (m_handController->GetleftHand()->GetHand().isValid())
+			{
+				enable = true;
+			}
+			for (int i = 0; i < m_leftFingers.size(); ++i)
+				m_leftFingers[i]->SetEnabled(enable);
+			enable = false;
+			if (m_handController->GetRightHand()->GetHand().isValid())
+			{
+				enable = true;
+			}
+			for (int i = 0; i < m_rightFingers.size(); ++i)
+				m_rightFingers[i]->SetEnabled(enable);
+
+			if (gAppData.inputMngr->getKeyboard()->getKeyState(KEY_F12) )
+			{
+				if (!m_screenShot)
+				{
+					m_screenShot = true;
+					int secs = gEngine.getTimer()->getMilliseconds();
+					core::string fname = gFileSystem.getAppPath() + "/Screenshots/HandsOriginal_" + core::StringConverter::toString(secs) + ".png";
+					gTextureResourceManager.writeResourceToDist(images[0]->GetCapturedTexture(), fname);
+					fname = gFileSystem.getAppPath() + "/Screenshots/HandsCorrect_" + core::StringConverter::toString(secs) + ".png";
+					gTextureResourceManager.writeResourceToDist(images[0]-> GetResult(), fname);
+
+				}
+			}
+			else
+			{
+				m_screenShot = false;
+			}
 		}
 	};
 

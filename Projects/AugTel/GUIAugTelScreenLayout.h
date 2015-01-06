@@ -5,6 +5,7 @@
 #include "GUINavigationElement.h"
 #include "GUIPanel.h"
 #include "GUIScenarioElement.h"
+#include "GUIStaticText.h"
 #include "GUITypingTextBox.h"
 namespace mray{
 

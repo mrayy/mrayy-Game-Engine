@@ -27,7 +27,7 @@ void LeapMotionController::Init()
 	flags |= Leap::Controller::POLICY_IMAGES;
 
 	m_LeapHMDModeWasOn = (flags & Leap::Controller::POLICY_OPTIMIZE_HMD) != 0;
-	if (!m_LeapHMDModeWasOn) 
+	//if (!m_LeapHMDModeWasOn) 
 	{
 		flags |= Leap::Controller::POLICY_OPTIMIZE_HMD;
 	}

@@ -52,7 +52,7 @@ void LoadingScreen::Start()
 	m_video->SetVisible(true);
 
 	//m_screenLayout->SetInfo("");
-	m_screenLayout->SetInfo("Location: Shenzhen Exhibition Center");
+	m_screenLayout->SetInfo("Location: Living Lab Tokyo");
 	m_screenLayout->SetText("Connecting Robot", true);
 	math::vector2d pos = m_screenLayout->Status->GetPosition();
 	pos.x = 100;
@@ -104,7 +104,7 @@ void LoadingScreen::End()
 bool LoadingScreen::IsDone()
 {
 	float dt = gEngine.getTimer()->getSeconds() - m_startTime;
-	return true;
+	//return true;
 	return m_done || m_video->IsDone() || dt>4000;
 }
 

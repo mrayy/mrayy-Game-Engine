@@ -40,10 +40,22 @@ LeapFinger* LeapHand::GetFinger(ELeapFinger finger)
 void LeapHand::SetHand(Leap::Hand  h)
 {
 	m_hand = h;
-	Leap::FingerList fingers= m_hand.fingers();
-	for (int i = 0; i < fingers.count(); ++i)
+	if (m_hand.isValid())
 	{
-		m_fingers[i]->SetFinger(fingers[i]);
+
+		Leap::FingerList fingers = m_hand.fingers();
+		for (int i = 0; i < fingers.count(); ++i)
+		{
+			m_fingers[i]->SetFinger(fingers[i]);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < (int)ELeapFinger::Count; ++i)
+		{
+			m_fingers[i]->SetFinger(Leap::Finger());
+		}
+
 	}
 	/*for (int i = 0; i < (int)ELeapFinger::Count; ++i)
 	{

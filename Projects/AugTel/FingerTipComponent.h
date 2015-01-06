@@ -39,6 +39,7 @@ protected:
 	DECLARE_PROPERTY_TYPE(NormalAxis, math::vector3d, );
 	DECLARE_PROPERTY_TYPE(Channel, int, );
 	DECLARE_PROPERTY_TYPE(GGDriverName, core::string, );
+	DECLARE_PROPERTY_TYPE(IsLeftHand, bool, );
 
 	VT::GGComponent* m_ggDriver;
 
@@ -47,6 +48,9 @@ protected:
 	int m_channel;
 	math::vector3d m_normalAxis;
 	core::string m_GGDriverName;
+	bool m_isLeftHand;
+
+	bool m_wasEnabled;
 
 	math::vector3d m_projPos;
 	math::vector2di m_depthSpace;
@@ -56,6 +60,7 @@ protected:
 
 	math::vector3d m_force;
 	float m_time;
+	void _sendForceToGG();
 	bool _calculateForce(float dt);
 public:
 	FingerTipComponent(game::GameEntityManager*m);
@@ -64,6 +69,7 @@ public:
 	DECLARE_SETGET_PROP(NormalAxis, math::vector3d);
 	DECLARE_SETGET_PROP(Channel, int);
 	DECLARE_SETGET_PROP(GGDriverName, core::string);
+	DECLARE_SETGET_PROP(IsLeftHand, bool);
 
 	virtual bool InitComponent();
 

@@ -224,7 +224,8 @@ bool AugCameraRenderState::OnEvent(Event* e, const math::rectf& rc)
 				m_robotConnector->GetHeadController()->Recalibrate();
 				m_robotConnector->GetRobotController()->Recalibrate();
 				ok = true;
-			}else if ( evt->key == KEY_F12 && evt->ctrl)
+			}
+			else if (evt->key == KEY_F12 || evt->key == 71/*&& evt->ctrl*/)
 			{
 				m_takeScreenShot = true;
 
@@ -255,7 +256,7 @@ bool AugCameraRenderState::OnEvent(Event* e, const math::rectf& rc)
 				_EnableMic(!_IsMicEnabled());
 				ok = true;
 			}
-			else if (evt->key == KEY_N && evt->ctrl || evt->key==71)//show/hide navigation
+			else if (evt->key == KEY_N && evt->ctrl )//show/hide navigation  //
 			{
 				m_screenLayout->NavElem->SetVisible(!m_screenLayout->NavElem->IsVisible());
 				ok = true;
@@ -475,6 +476,7 @@ void AugCameraRenderState::InitState()
 			cam[i]->setPosition(math::vector3d(0.03 - 0.06*i, 0.07, 0));
 			m_camera[i] = cam[i];
 
+			m_context->cameras[i] = cam[i];
 		}
 
 		hm->SetOculus(gAppData.oculusDevice);
@@ -953,7 +955,7 @@ void AugCameraRenderState::_UpdateStarted(float dt)
 	}
 	controllers::IKeyboardController* kb = gAppData.inputMngr->getKeyboard();
 
-	if (!kb->getKeyState(KEY_LCONTROL))
+	if (kb->getKeyState(KEY_LSHIFT))
 	{
 		math::vector2d s = m_openNiHandler->GetScale();
 		s.x += (kb->getKeyState(KEY_K) - kb->getKeyState(KEY_J))*dt*0.5f;

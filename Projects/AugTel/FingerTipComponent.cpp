@@ -17,7 +17,8 @@ namespace AugTel
 {
 	IMPLEMENT_SETGET_PROP(FingerTipComponent, NormalAxis, math::vector3d, m_normalAxis, math::vector3d::YAxis, core::StringConverter::toVector3d, core::StringConverter::toString);
 	IMPLEMENT_SETGET_PROP(FingerTipComponent, Channel, int, m_channel, 0, core::StringConverter::toInt, core::StringConverter::toString);
-	IMPLEMENT_SETGET_PROP(FingerTipComponent, GGDriverName, core::string, m_GGDriverName, "", ,);
+	IMPLEMENT_SETGET_PROP(FingerTipComponent, GGDriverName, core::string, m_GGDriverName, "", , );
+	IMPLEMENT_SETGET_PROP(FingerTipComponent, IsLeftHand, bool, m_isLeftHand, false, core::StringConverter::toBool, core::StringConverter::toString );
 
 	IMPLEMENT_RTTI(FingerTipComponent, MountableComponent);
 
@@ -34,9 +35,11 @@ FingerTipComponent::FingerTipComponent(game::GameEntityManager*m)
 	{
 		dic->addPropertie(&PropertyTypeNormalAxis::instance);
 		dic->addPropertie(&PropertyTypeChannel::instance);
+		dic->addPropertie(&PropertyTypeIsLeftHand::instance);
+		dic->addPropertie(&PropertyTypeGGDriverName::instance);
 	}
 	m_channel= 0;
-
+	m_isLeftHand = false;
 	m_index = s_fingerindex++;
 }
 FingerTipComponent::~FingerTipComponent()
@@ -120,6 +123,13 @@ bool FingerTipComponent::_calculateForce(float dt)
 		m_force.z = 0;
 		m_force.x = 0;
 	}
+	_sendForceToGG();
+	return true;
+}
+
+void FingerTipComponent::_sendForceToGG()
+{
+
 	if (m_ggDriver)
 	{
 		const bool threeType = false; // true if using shearing forces
@@ -131,25 +141,36 @@ bool FingerTipComponent::_calculateForce(float dt)
 		}
 		else
 		{
-			m_ggDriver->SetChannelValue(m_channel , abs(m_force.z));//shearing force
+			m_ggDriver->SetChannelValue(m_channel, abs(m_force.z));//shearing force
 		}
 	}
-	return true;
 }
 
 void FingerTipComponent::Update(float dt)
 {
+	if (!m_enabled)
+	{
+		if (m_wasEnabled)
+		{
+			m_wasEnabled = false;
+			m_force = 0;
+			_sendForceToGG();
+		}
+		return;
+	}
+	m_wasEnabled = true;
 	VT::MountableComponent::Update(dt);
 
 	//calculate finger position in camera space
 	if ( !ATAppGlobal::Instance()->headObject)
 		return;
-
 	_calculateForce(dt);
 }
 
 void FingerTipComponent::DebugRender(scene::IDebugDrawManager* renderer)
 {
+// 	if (!m_enabled)
+// 		return;
 	IGameComponent::DebugRender(renderer);
 	if (!AppData::Instance()->IsDebugging)
 		return;
@@ -169,6 +190,8 @@ void FingerTipComponent::DebugRender(scene::IDebugDrawManager* renderer)
 }
 void FingerTipComponent::OnGUIRender(GUI::IGUIRenderer* renderer, const math::rectf& vp)
 {
+	if (!m_enabled)
+		return;
 	VT::MountableComponent::OnGUIRender(renderer,vp);
 	math::vector2d p;
 	p.x = vp.ULPoint.x+m_projPos.x*vp.getWidth();

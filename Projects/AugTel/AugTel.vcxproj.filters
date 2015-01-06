@@ -192,9 +192,6 @@
     <ClInclude Include="RefractionSceneEffect.h">
       <Filter>Source Files\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="LoadingScreen.h">
-      <Filter>Source Files\Effects</Filter>
-    </ClInclude>
     <ClInclude Include="VideoRenderElement.h">
       <Filter>Source Files\GUI</Filter>
     </ClInclude>
@@ -271,6 +268,9 @@
       <Filter>Source Files\GUI\Elements</Filter>
     </ClInclude>
     <ClInclude Include="GUIScenarioElement.h">
+      <Filter>Source Files\GUI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadingScreen.h">
       <Filter>Source Files\GUI\Elements</Filter>
     </ClInclude>
   </ItemGroup>
@@ -386,9 +386,6 @@
     <ClCompile Include="RefractionSceneEffect.cpp">
       <Filter>Source Files\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="LoadingScreen.cpp">
-      <Filter>Source Files\Effects</Filter>
-    </ClCompile>
     <ClCompile Include="VideoRenderElement.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
@@ -444,6 +441,9 @@
       <Filter>Source Files\GUI\Elements</Filter>
     </ClCompile>
     <ClCompile Include="GUIScenarioElement.cpp">
+      <Filter>Source Files\GUI\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadingScreen.cpp">
       <Filter>Source Files\GUI\Elements</Filter>
     </ClCompile>
   </ItemGroup>

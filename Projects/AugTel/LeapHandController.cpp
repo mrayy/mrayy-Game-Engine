@@ -34,11 +34,15 @@ void LeapHandController::Update(float dt)
 		toRemove.insert(it->first);
 	}
 
+	m_leftHand->SetHand(Leap::Hand());
+	m_rightHand->SetHand(Leap::Hand());
 	
 	Leap::HandList leapHands = frame.hands();
 	for (int i = 0; i < leapHands.count(); ++i)
 	{
 		Leap::Hand hand = leapHands[i];
+// 		if (hand.confidence() < 0.4)
+// 			continue;
 		toRemove.erase(hand.id());
 		HandsMap::iterator it = m_hands.find(hand.id());
 		LeapHand* h = 0;

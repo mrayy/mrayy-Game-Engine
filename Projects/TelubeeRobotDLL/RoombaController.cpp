@@ -823,11 +823,14 @@ void RoombaController::Drive(const math::vector2di& speed, int rotationSpeed)
 	}
 	//if (totalW > 0.1)
 	//	antiVec2 /= totalW;
-	if (totalW>0.2)
+
+	float minW = 0.4;
+	float maxW = 0.8;
+	if (totalW>minW)
 	{
-		if (totalW < 0.5)
+		if (totalW < maxW)
 		{
-			antiVec2 = frontVec*(totalW + 0.5);
+			antiVec2 = frontVec*(totalW + 1-maxW);
 		}
 		else
 		{
