@@ -54,6 +54,8 @@ class ITelubeeRobotListener
 {
 public:
 
+	virtual void OnRotationArrived(float x,float y,float z){}
+
 	virtual void OnCollisionData(float left, float right){}
 };
 

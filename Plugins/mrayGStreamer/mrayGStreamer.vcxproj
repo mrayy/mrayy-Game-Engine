@@ -110,6 +110,7 @@
     <ClInclude Include="CMySrc.h" />
     <ClInclude Include="CMyUDPSink.h" />
     <ClInclude Include="CMyUDPSrc.h" />
+    <ClInclude Include="GstCustomVideoStreamer.h" />
     <ClInclude Include="GstNetworkAudioPlayer.h" />
     <ClInclude Include="GstNetworkAudioStreamer.h" />
     <ClInclude Include="GstNetworkVideoStreamer.h" />
@@ -135,6 +136,7 @@
     <ClCompile Include="CMySrc.cpp" />
     <ClCompile Include="CMyUDPSink.cpp" />
     <ClCompile Include="CMyUDPSrc.cpp" />
+    <ClCompile Include="GstCustomVideoStreamer.cpp" />
     <ClCompile Include="GstNetworkAudioPlayer.cpp" />
     <ClCompile Include="GstNetworkAudioStreamer.cpp" />
     <ClCompile Include="GstNetworkVideoStreamer.cpp" />

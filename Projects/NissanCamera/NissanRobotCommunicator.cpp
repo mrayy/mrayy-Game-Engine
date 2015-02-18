@@ -11,20 +11,112 @@ namespace mray
 {
 namespace NCam
 {
+	
+	class CQuatAverageWindow
+	{
+		std::vector<math::vector3d> values;
+		int maxLen;
+	public:
 
-class NissanRobotCommunicatorImpl
+		CQuatAverageWindow()
+		{
+			maxLen = 1;
+		}
+		void SetLength(int len)
+		{
+			maxLen = len;
+		}
+
+		math::vector3d AddValue(math::vector3d q)
+		{
+			values.push_back(q);
+			if (values.size() > maxLen)
+				values.erase(values.begin());
+
+			math::vector3d res;
+			for (int i = 0; i < values.size(); ++i)
+				res += values[i];
+			return res / (float)values.size();
+		}
+
+	};
+	class CDebugRobot
+	{
+
+		OS::IStreamPtr m_targetFile;
+		OS::StreamWriter m_targetWrtr;
+
+		math::vector3d targetValue;
+		math::vector3d currentValue;
+	public:
+
+		CDebugRobot()
+		{
+			m_targetFile = gFileSystem.createTextFileWriter("TargetAngles.xls");
+
+			m_targetWrtr.setStream(m_targetFile);
+		}
+
+		~CDebugRobot()
+		{
+			m_targetFile->close();
+		}
+
+		void Output()
+		{
+			std::stringstream ss;
+			float t = gEngine.getTimer()->getSeconds();
+			ss << t << "\t" << targetValue.x << "\t" << targetValue.y << "\t" << targetValue.z 
+				<< "\t" << currentValue.x << "\t" << currentValue.y << "\t" << currentValue.z << "\n";;
+			m_targetWrtr.writeString(ss.str());
+		}
+
+		void TargetAngles(math::vector3d a)
+		{
+			targetValue = a;
+			Output();
+		}
+
+		void CurrentAngles(math::vector3d a)
+		{
+			currentValue = a;
+			Output();
+		}
+	};
+
+class NissanRobotCommunicatorImpl:public ITelubeeRobotListener
 {
 protected:
 	CNissanRobotDLL* m_robot;
 	RobotStatus m_robotStatus;
+
+	typedef std::map<core::string, core::string> DataMap;
+	DataMap m_recvData;
+
+	CQuatAverageWindow m_headRotation;
+
+
+	CDebugRobot m_debugger;
+
 public:
 	NissanRobotCommunicatorImpl()
 	{
 		m_robot = new CNissanRobotDLL();
+		m_robot->GetRobotController()->SetListener(this);
+
 	}
 	virtual~NissanRobotCommunicatorImpl()
 	{
 		delete m_robot;
+	}
+
+	virtual void OnRotationArrived(float z, float y, float x)
+	{
+		math::vector3d a=m_headRotation.AddValue(math::vector3d(x,-y,-z));
+		//printf("c: %s\n", core::StringConverter::toString(m_headRotation).c_str());
+
+		m_debugger.CurrentAngles(a);
+		m_recvData["HeadRotation"] = core::StringConverter::toString(a);
 	}
 
 	bool IsHoming()
@@ -68,6 +160,16 @@ public:
 	virtual void LoadFromXml(xml::XMLElement* e)
 	{
 	}
+
+	core::string GetData(const core::string& key)
+	{
+		DataMap::iterator it= m_recvData.find(key);
+		if (it == m_recvData.end())
+			return "";
+		return it->second;
+	}
+
+
 	void SetData(const core::string &name, const core::string &value, bool statusData)
 	{
 		std::vector<core::string> vals;
@@ -91,6 +193,9 @@ public:
 
 			math::vector3d angles;
 			q.toEulerAngles(angles);
+
+
+			m_debugger.TargetAngles(angles);
 
 			m_robotStatus.tilt = angles.x;
 			m_robotStatus.yaw = angles.y;
@@ -189,6 +294,10 @@ void NissanRobotCommunicator::LoadFromXml(xml::XMLElement* e)
 	m_impl->LoadFromXml(e);
 }
 
+core::string NissanRobotCommunicator::GetData(const core::string& key)
+{
+	return m_impl->GetData(key);
+}
 
 void NissanRobotCommunicator::SetData(const core::string &key, const core::string &value, bool statusData)
 {

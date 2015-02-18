@@ -11,10 +11,33 @@
 #include "BrushDrawer.h"
 
 #include <windows.h>
+#include "CVCalibration.h"
+#include "CVWrappers.h"
+
 
 namespace mray
 {
 
+
+	class CVData
+	{
+	public:
+
+		GCPtr<video::CVCalibration> cvCalib;
+		cv::Mat prev;
+		cv::Mat diff;
+
+		float lastTime;
+		bool reset;
+		int lastBuffer;
+
+		CVData()
+		{
+			lastBuffer = 0;
+			reset = false;
+			lastTime = 0;
+		}
+	};
 
 Application::Application()
 {
@@ -76,6 +99,27 @@ void Application::init(const OptionContainer &extraOptions)
 
 	if (!m_optiProvider->IsConnected())
 		printf("Failed to connect with OptiTrack!\n");
+
+
+	m_cvData = new CVData();
+
+	m_cvData->cvCalib = new video::CVCalibration();
+
+
+	m_cam = new video::DirectShowVideoGrabber();
+	m_videoGrabber = new video::VideoGrabberTexture();
+
+	m_cam->InitDevice(0, 640,480, 25);
+	m_cam->Start();
+	m_videoGrabber->Set(m_cam, 0);
+
+
+	m_cvData->cvCalib->setPatternSize(7, 10);
+	m_cvData->cvCalib->setSquareSize(2.5);
+	m_cvData->cvCalib->setPatternType(video::CHESSBOARD);
+
+	video::allocate(m_cvData->prev, 640, 480, video::getCvImageType(video::EPixel_B8G8R8));
+	video::allocate(m_cvData->diff, 640, 480, video::getCvImageType(video::EPixel_B8G8R8));
 }
 
 
@@ -90,7 +134,13 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 	getDevice()->set2DMode();
 	m_lineDrawer->Draw(m_mainVP->getAbsRenderingViewPort());
 
-	tu.SetTexture(gTextureResourceManager.loadTexture2D("FPV.png"));
+// 	tu.SetTexture(gTextureResourceManager.loadTexture2D("FPV.png"));
+// 	getDevice()->useTexture(0, &tu);
+// 	getDevice()->draw2DImage(math::rectf(0, 100), 1);
+
+	m_videoGrabber->Blit();
+
+	tu.SetTexture(m_videoGrabber->GetTexture());
 	getDevice()->useTexture(0, &tu);
 	getDevice()->draw2DImage(math::rectf(0, 100), 1);
 	/*
@@ -107,8 +157,33 @@ void Application::update(float dt)
 {
 	CMRayApplication::update(dt);
 	m_lineDrawer->Update(dt);
-
 	//Sleep(10);
+
+	if (m_cam->GetBufferID() != m_cvData->lastBuffer && (gEngine.getTimer()->getSeconds() - m_cvData->lastTime)>1)
+	{
+		m_cvData->lastBuffer = m_cam->GetBufferID();
+		cv::Mat cam= video::toCv(m_cam->GetLastFrame());
+		cv::Mat prevMat = video::toCv(m_cvData->prev);
+		cv::Mat diffMat = video::toCv(m_cvData->diff);
+		video::absdiff(prevMat, cam, diffMat);
+		cam.copyTo(m_cvData->prev);
+
+		cv::Scalar m = cv::mean(diffMat);
+		float diffMean = cv::mean(Mat(m))[0];
+		printf("%f\n", diffMean);
+		if (diffMean <1.5 )
+		{
+			if (!m_cvData->reset && m_cvData->cvCalib->add(cam))
+			{
+				m_cvData->reset = true;
+				m_cvData->cvCalib->calibrate();
+				printf("Calibrate\n");
+				m_cvData->lastTime = gEngine.getTimer()->getSeconds();
+			}
+		}
+		else
+			m_cvData->reset = false;
+	}
 }
 
 void Application::onDone()

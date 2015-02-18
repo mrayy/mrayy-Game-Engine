@@ -46,6 +46,8 @@ void GUITransitionBars::Start(const video::SColor& targetColor)
 	{
 		m_color = m_targetColor;
 		m_targetColor = targetColor;
+		m_targetColor.A = GetAlpha();
+		m_color.A = GetAlpha();
 	}
 	m_time = 0;
 	m_angle = (math::Randomizer::rand() % (360 / 45)) * 45.0f;
@@ -70,7 +72,6 @@ void GUITransitionBars::Draw(const math::rectf*vp)
 	math::rectf rc = GetDefaultRegion()->GetClippedRect();
 	math::rectf oldScissor = gEngine.getDevice()->getScissorRect();
 
-	GetCreator()->GetDevice()->draw2DRectangle(rc, m_color);
 	
 	if (m_status == EPlaying)
 	{
@@ -103,6 +104,12 @@ void GUITransitionBars::Draw(const math::rectf*vp)
 			GetCreator()->GetDevice()->draw2DRectangle(r,m_targetColor);
 		}
 	}
+	else{
+
+		video::SColor c = m_color;
+		c.A = GetAlpha();
+		GetCreator()->GetDevice()->draw2DRectangle(rc, c);
+	}
 }
 
 
@@ -130,6 +137,7 @@ void GUITransitionBars::Update(float dt)
 		{
 			m_status = EIdle;
 			m_color = m_targetColor;
+			m_color.A = GetAlpha();
 		}
 	
 		/*for (int i = 0; i < m_bars.size(); ++i)

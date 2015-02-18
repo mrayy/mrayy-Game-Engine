@@ -22,6 +22,7 @@ IGUIStaticImage(creator),m_texCoords(0,0,1,1)
 	m_stretchMode = EImage_Stretch;
 	m_textureUnit=new video::TextureUnit();
 	fillProperties();
+	m_angle = 0;
 }
 
 GUIStaticImage::~GUIStaticImage()
@@ -107,9 +108,10 @@ void GUIStaticImage::SetStretchMode(EImageStretchMode m)
 	case mray::GUI::EImage_Stretch:
 	case mray::GUI::EImage_Center:
 	case mray::GUI::EImage_Zoom:
-		m_textureUnit->setTextureClamp(video::ETW_WrapT, video::ETC_CLAMP_TO_EDGE);
-		m_textureUnit->setTextureClamp(video::ETW_WrapS, video::ETC_CLAMP_TO_EDGE);
-		m_textureUnit->setTextureClamp(video::ETW_WrapR, video::ETC_CLAMP_TO_EDGE);
+	case mray::GUI::EImage_Fit:
+		m_textureUnit->setTextureClamp(video::ETW_WrapT, video::ETC_CLAMP_TO_BORDER);
+		m_textureUnit->setTextureClamp(video::ETW_WrapS, video::ETC_CLAMP_TO_BORDER);
+		m_textureUnit->setTextureClamp(video::ETW_WrapR, video::ETC_CLAMP_TO_BORDER);
 		break;
 		break;
 	case mray::GUI::EImage_Tile:
@@ -171,23 +173,76 @@ void GUIStaticImage::Draw(const math::rectf*vp)
 		case mray::GUI::EImage_Stretch:
 			break;
 		case mray::GUI::EImage_Center:
+		{
+ 			float r1 = texSz.x / texSz.y;
+			float r2 = clip.getWidth() / clip.getHeight();
+			tc.ULPoint = m_texCoords.ULPoint;
+			if(texSz.x<texSz.y)
+			{
+				tc.BRPoint.y = 1;
+				tc.BRPoint.x = r2 / r1;
+				tc.ULPoint.x = m_texCoords.ULPoint.x + (1 - tc.BRPoint.x) *0.5f;
+			}
+			else
+			{
+				tc.BRPoint.x = 1;
+				tc.BRPoint.y = r1 / r2;
+				tc.ULPoint.y = m_texCoords.ULPoint.y + (1 - tc.BRPoint.y) *0.5f;
+			}
+		}
 			break;
 		case mray::GUI::EImage_Zoom:
 		{
-			float min = math::Min(clip.getWidth(), clip.getHeight());
+ 			float r1 = texSz.x / texSz.y;
+			float r2 = clip.getWidth() / clip.getHeight();
 			tc.ULPoint = m_texCoords.ULPoint;
-			tc.BRPoint.x =  m_texCoords.ULPoint.x + m_texCoords.getWidth() * clip.getWidth()/min;
-			tc.BRPoint.y =  m_texCoords.ULPoint.y + m_texCoords.getHeight() * clip.getHeight() / min;
+			if(texSz.x<texSz.y)
+			{
+				tc.BRPoint.x = 1;
+				tc.BRPoint.y = r1 / r2;
+				tc.ULPoint.y = m_texCoords.ULPoint.y + (1 - tc.BRPoint.y) *0.5f;
+			}
+			else
+			{
+				tc.BRPoint.y = 1;
+				tc.BRPoint.x = r2 / r1;
+				tc.ULPoint.x = m_texCoords.ULPoint.x + (1 - tc.BRPoint.x) *0.5f;
+			}
+			// 			float min = math::Min(clip.getWidth(), clip.getHeight());
+// 			tc.ULPoint = m_texCoords.ULPoint;
+// 			tc.BRPoint.x =  m_texCoords.ULPoint.x + m_texCoords.getWidth() * clip.getWidth()/min;
+// 			tc.BRPoint.y =  m_texCoords.ULPoint.y + m_texCoords.getHeight() * clip.getHeight() / min;
+		}break;
+		case mray::GUI::EImage_Fit:
+		{
+ 			float r1 = texSz.x / texSz.y;
+			float r2 = clip.getWidth() / clip.getHeight();
+			tc.ULPoint = m_texCoords.ULPoint;
+			if(texSz.x<texSz.y)
+			{
+				tc.BRPoint.y = 1;
+				tc.BRPoint.x = r2 / r1;
+				tc.ULPoint.x = m_texCoords.ULPoint.x + (1 - tc.BRPoint.x) *0.5f;
+			}
+			else
+			{
+				tc.BRPoint.x = 1;
+				tc.BRPoint.y = r1 / r2;
+				tc.ULPoint.y = m_texCoords.ULPoint.y + (1 - tc.BRPoint.y) *0.5f;
+			}
 		}
 			break;
 		case mray::GUI::EImage_Tile:
+			tc.ULPoint = m_texCoords.ULPoint;
+			tc.BRPoint.x = clip.getWidth() / texSz.x;
+			tc.BRPoint.y = clip.getHeight() / texSz.y;
 			break;
 		default:
 			break;
 		}
 	}
 
-	creator->GetRenderQueue()->AddQuad(m_textureUnit,clip,tc,video::SColor(GetColor().R,GetColor().G,GetColor().B,GetDerivedAlpha()));
+	creator->GetRenderQueue()->AddQuad(m_textureUnit,clip,tc,video::SColor(GetColor().R,GetColor().G,GetColor().B,GetDerivedAlpha()),0,m_angle);
 	creator->GetRenderQueue()->Flush();
 
 	IGUIElement::Draw(vp);
@@ -372,6 +427,8 @@ core::string GUIStaticImage::PropertyTypeStretchMode::toString(CPropertieSet*obj
 		return "Center";
 	case EImage_Zoom:
 		return "Zoom";
+	case EImage_Fit:
+		return "Fit";
 	default:
 		break;
 	}
@@ -390,6 +447,8 @@ bool GUIStaticImage::PropertyTypeStretchMode::parse(CPropertieSet*reciver, const
 		v = EImage_Center;
 	else if (str.equals_ignore_case("Zoom"))
 		v = EImage_Zoom;
+	else if (str.equals_ignore_case("Fit"))
+		v = EImage_Fit;
 	
 	return SetValue(reciver, (EImageStretchMode)v);
 }

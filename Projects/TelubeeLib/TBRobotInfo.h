@@ -33,6 +33,7 @@ public:
 	long ID;
 	core::string name;
 	core::string IP;
+	core::string Location;
 	float lng;
 	float lat;
 

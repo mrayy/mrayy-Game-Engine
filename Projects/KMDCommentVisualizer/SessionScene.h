@@ -22,6 +22,7 @@ namespace mray
 namespace kmd
 {
 	class GenericRenderLayer;
+	class WallpaperLayer;
 class TwitterProviderListener;
 
 
@@ -50,6 +51,7 @@ protected:
 	float m_timerStart;
 
 
+	WallpaperLayer* m_wallpaperLayer;
 	GenericRenderLayer* m_commentsLayer;
 	GenericRenderLayer* m_sceneLayer;
 	GenericRenderLayer* m_statusLayer;

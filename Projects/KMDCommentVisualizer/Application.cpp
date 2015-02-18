@@ -29,6 +29,7 @@
 #include "GUILayersContainer.h"
 #include "GUIProjectStatus.h"
 #include "GUITransitionBars.h"
+#include "GUIPictureWallpaper.h"
 
 
 
@@ -58,8 +59,11 @@ Application::Application()
 }
 Application::~Application()
 {
-	kmd::IDBHandler::getInstance().Close();
-	delete kmd::IDBHandler::getInstancePtr();
+	if (kmd::IDBHandler::isExist())
+	{
+		kmd::IDBHandler::getInstance().Close();
+		delete kmd::IDBHandler::getInstancePtr();
+	}
 
 }
 
@@ -133,7 +137,7 @@ void Application::init(const OptionContainer &extraOptions)
 	{
 
 		gAppData.sessions = new kmd::SessionContainer();
-		gAppData.sessions->LoadFromXML("Sessions.xml");
+		gAppData.sessions->LoadFromXML(gAppData.GetValue("App","Sessions"));// "Sessions.xml");
 	}
 	CMRayApplication::loadResourceFile(mT("Resources.stg"));
 
@@ -185,6 +189,7 @@ void Application::init(const OptionContainer &extraOptions)
 		REGISTER_GUIElement_FACTORY(GUITransitionBars);
 		REGISTER_GUIElement_FACTORY(GUILayersContainer);
 		REGISTER_GUIElement_FACTORY(GUIProjectStatus);
+		REGISTER_GUIElement_FACTORY(GUIPictureWallpaper);
 	}
 
 	m_mainVP = GetRenderWindow()->CreateViewport("MainVP", 0, 0, math::rectf(0, 0, 1, 1), 0);

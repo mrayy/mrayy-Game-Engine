@@ -45,6 +45,9 @@
     <ClCompile Include="GstStreamBin.cpp">
       <Filter>StreamType\Streamer</Filter>
     </ClCompile>
+    <ClCompile Include="GstCustomVideoStreamer.cpp">
+      <Filter>StreamType\Streamer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -101,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="GStreamerFilePlayer.h">
       <Filter>StreamType\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GstCustomVideoStreamer.h">
+      <Filter>StreamType\Streamer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,3 +1,5 @@
+#ifndef __GUIScenePanelLayout__
+#define __GUIScenePanelLayout__
 #include "IGUISchemeBase.h"
 #include "GUIFadingText.h"
 #include "GUIPanel.h"
@@ -36,3 +38,4 @@ public:
 
 };
 }
+#endif

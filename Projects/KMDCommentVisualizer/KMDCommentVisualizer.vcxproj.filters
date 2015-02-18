@@ -261,6 +261,15 @@
     <ClInclude Include="GUITransitionBars.h">
       <Filter>Source Files\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="WallpaperBin.h">
+      <Filter>Source Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="WallpaperLayer.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIPictureWallpaper.h">
+      <Filter>Source Files\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -389,11 +398,21 @@
     <ClCompile Include="GUITransitionBars.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="WallpaperBin.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="WallpaperLayer.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIPictureWallpaper.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Configure.stg">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\..\Bin\Data\KMDPlenary\kmdSettings.cfg" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

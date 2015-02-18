@@ -1,3 +1,5 @@
+#ifndef __GUIScreenLayout__
+#define __GUIScreenLayout__
 #include "IGUISchemeBase.h"
 #include "GUIEditBox.h"
 #include "GUIListBox.h"
@@ -37,3 +39,4 @@ public:
 
 };
 }
+#endif

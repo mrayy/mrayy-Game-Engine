@@ -18,6 +18,8 @@
 
 #include "IRobotController.h"
 
+#include <vector>
+
 	struct RobotStatus;
 	class RobotSerialPortImpl;
 	class ITelubeeRobotListener;
@@ -42,6 +44,8 @@ protected:
 	static DWORD WINAPI timerThreadHead(RobotSerialPort *robot, LPVOID pdata);
 	static DWORD WINAPI timerThreadBase(RobotSerialPort *robot, LPVOID pdata);
 
+	std::vector<char> m_headbBuffer;
+
 public:
 	RobotSerialPort();
 	virtual~RobotSerialPort();
@@ -53,6 +57,11 @@ public:
 	void DisconnectRobot();
 	bool IsConnected();
 	void UpdateRobotStatus( RobotStatus& st);
+
+	RobotSerialPortImpl* GetImpl(){ return m_impl; }
+
+	void HeadDataArrived(char *buffer, int size);
+	void RobotDataArrived(char *buffer, int size);
 
 };
 

@@ -30,12 +30,17 @@
 #include "GUIInterfaceScreenImpl.h"
 #include "GstStreamBin.h"
 
+
 namespace mray
 {
 	namespace TBee
 	{
 		class OpenNIHandler;
 		class DepthVisualizer;
+	}
+	namespace video
+	{
+		class ICameraVideoGrabber;
 	}
 	using namespace TBee;
 namespace AugTel
@@ -109,6 +114,8 @@ protected:
 
 	bool m_showDebug;
 	bool m_showScene;
+
+	video::ICameraVideoGrabber* m_camGrabber;
 
 	std::vector<bool> m_bumpSensor;
 	std::vector<float> m_irSensor;

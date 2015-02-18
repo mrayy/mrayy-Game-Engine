@@ -96,7 +96,7 @@ void RobotViewerState::OnEnter(IRenderingState*prev)
 	m_camVideoSrc->Open();
 	TBee::TBRobotInfo* ifo = AppData::Instance()->robotInfoManager->GetRobotInfo(0);
 	if (ifo)		
-		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
+		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort,  gAppData.TargetHandsVideoPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
 
 	m_robotConnector->SetData("depthSize", "", false);
 }

@@ -8,6 +8,7 @@
 #include "IMutex.h"
 #include "ColorConverter.h"
 #include "ITimer.h"
+#include "Engine.h"
 
 using namespace FlyCapture2;
 
@@ -26,15 +27,33 @@ namespace video
 		{
 			return abs(w-width)+abs(h-height);
 		}
+
+
+		static FlyCapture2::PixelFormat GetFormat(EPixelFormat fmt)
+		{
+			switch (fmt)
+			{
+			case mray::video::EPixel_LUMINANCE8:
+			case mray::video::EPixel_Alpha8:
+				return PIXEL_FORMAT_MONO8;
+			case mray::video::EPixel_LUMINANCE16:
+				return PIXEL_FORMAT_MONO16;
+
+			default:
+				return PIXEL_FORMAT_422YUV8;
+				break;
+			}
+		}
+
 	};
 	const CMode g_modes[]=
 	{
 		VIDEOMODE_320x240YUV422,320,240,
-		VIDEOMODE_640x480Y8,640,480,
-		VIDEOMODE_800x600Y8,800,600,
-		VIDEOMODE_1024x768Y8,1024,768,
-		VIDEOMODE_1280x960Y8,1280,960,
-		VIDEOMODE_1600x1200Y8,1600,1200,
+		VIDEOMODE_640x480YUV422, 640, 480,
+		VIDEOMODE_800x600YUV422, 800, 600,
+		VIDEOMODE_1024x768YUV422, 1024, 768,
+		VIDEOMODE_1280x960YUV422, 1280, 960,
+		VIDEOMODE_1600x1200YUV422, 1600, 1200,
 	};
 
 	CMode GetClosestVideoMode(int w,int h)
@@ -116,25 +135,39 @@ public:
 
 void FlyCameraImageEventCallback( class Image* pImage, const void* pCallbackData )
 {
-	PixelFormat pixFormat;
+	FlyCapture2::PixelFormat pixFormat;
 	unsigned int rows, cols, stride;
 	pImage->GetDimensions( &rows, &cols, &stride, &pixFormat );
 
 	// Create a converted image
 	Image convertedImage;
 
+	EPixelFormat fmt;
+
 	const Image* ptr=pImage;
 	// Convert the raw image
-	if(pixFormat!=PIXEL_FORMAT_RGB8)
+	switch (pixFormat)
 	{
-		pImage->Convert( PIXEL_FORMAT_RGB8, &convertedImage );
-		ptr=&convertedImage;
+	case FlyCapture2::PIXEL_FORMAT_MONO8:
+		ptr = pImage;
+		fmt = video::EPixel_LUMINANCE8;
+		break;
+	default:
+		pImage->Convert(PIXEL_FORMAT_RGB8, &convertedImage);
+		ptr = &convertedImage;
+		fmt = video::EPixel_R8G8B8;
+		break;
 	}
+// 	if(pixFormat!=PIXEL_FORMAT_RGB8)
+// 	{
+// 		pImage->Convert( PIXEL_FORMAT_RGB8, &convertedImage );
+// 		ptr=&convertedImage;
+// 	}
 
 
-	uchar* data= convertedImage.GetData();
+	uchar* data = ptr->GetData();
 	FlyCameraVideoGrabber* g=(FlyCameraVideoGrabber*)pCallbackData;
-	g->BlitImage(data,cols,rows);
+	g->BlitImage(data, cols, rows, fmt);
 
 }
 
@@ -147,6 +180,7 @@ FlyCameraVideoGrabber::FlyCameraVideoGrabber()
 	m_data=new FlyCameraData();
 	FlyCameraManager::instance.AddRef();
 
+	m_bufferId = 0;
 	m_imageMutex=OS::IThreadManager::getInstance().createMutex();
 }
 FlyCameraVideoGrabber::~FlyCameraVideoGrabber()
@@ -236,19 +270,59 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 */
 	CMode mode=GetClosestVideoMode(w,h);
 	CFpsMode fpsMode=GetClosestFps(fps);
-//	CheckError(m_data->cam.SetFormat7Configuration(&fmt7ImageSettings,fmt7PacketInfo.recommendedBytesPerPacket));
-	CheckError(m_data->cam.SetVideoModeAndFrameRate(mode.m,fpsMode.f));
 
-	m_data->cam.GetVideoModeAndFrameRate(&mode.m,&fpsMode.f);
-	const CMode *pmode=GetClosestVideoMode(mode.m);
-	const CFpsMode *pfpsMode=GetClosestFps(fpsMode.f);
-
-	if(pfpsMode)
-		m_fps=pfpsMode->fps;
-	if(pmode && ( m_size.x!=pmode->width || m_size.y!=pmode->height))
+	if (false)
 	{
-		m_size.x=pmode->width;
-		m_size.y=pmode->height;
+		// Query for available Format 7 modes
+		Format7Info fmt7Info;
+		bool supported;
+		fmt7Info.mode = MODE_0;
+		CheckError(m_data->cam.GetFormat7Info(&fmt7Info, &supported));
+
+		bool valid;
+		Format7PacketInfo fmt7PacketInfo;
+		Format7ImageSettings fmt7ImageSettings;
+		fmt7ImageSettings.offsetX = 0;
+		fmt7ImageSettings.offsetY = 0;
+		fmt7ImageSettings.width = mode.width;
+		fmt7ImageSettings.height = mode.height;
+		fmt7ImageSettings.pixelFormat = CMode::GetFormat(m_format);
+
+		// Validate the settings to make sure that they are valid
+		CheckError(m_data->cam.ValidateFormat7Settings(
+			&fmt7ImageSettings,
+			&valid,
+			&fmt7PacketInfo));
+
+
+		CheckError(m_data->cam.GetFormat7Info(&fmt7Info, &supported));
+
+		CheckError(m_data->cam.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket));
+
+
+		Property frmRate;
+		frmRate.type = FRAME_RATE;
+		frmRate.absValue = m_fps;
+		(m_data->cam.SetProperty(&frmRate));
+		(m_data->cam.GetProperty(&frmRate));
+
+	}
+	else
+	{
+		CheckError(m_data->cam.SetVideoModeAndFrameRate(mode.m, fpsMode.f));
+		m_data->cam.GetVideoModeAndFrameRate(&mode.m, &fpsMode.f);
+	}
+
+// 	const CMode *pmode=GetClosestVideoMode(mode.m);
+// 	const CFpsMode *pfpsMode=GetClosestFps(fpsMode.f);
+
+
+//	if (pfpsMode)
+//	m_fps=frmRate.absValue;
+	//if(pmode && ( m_size.x!=pmode->width || m_size.y!=pmode->height))
+	{
+		m_size.x = mode.width;
+		m_size.y = mode.height;
 
 	}
 
@@ -267,6 +341,7 @@ const math::vector2di& FlyCameraVideoGrabber::GetFrameSize()
 
 void FlyCameraVideoGrabber::SetImageFormat(video::EPixelFormat fmt)
 {
+	m_format = fmt;
 }
 video::EPixelFormat FlyCameraVideoGrabber::GetImageFormat()
 {
@@ -281,6 +356,8 @@ bool FlyCameraVideoGrabber::GrabFrame()
 	{
 		m_imageMutex->lock();
 		m_textureImage.setData(m_tempImage.imageData,m_tempImage.Size,m_tempImage.format);
+
+		m_bufferId++;
 
 		m_hasNewFrame=false;
 		m_imageMutex->unlock();
@@ -319,6 +396,8 @@ void FlyCameraVideoGrabber::Start()
 		return;
 	Error e;
 	CheckError_NoRet(m_data->cam.StartCapture(FlyCameraImageEventCallback,this));
+
+
 }
 
 const video::ImageInfo*  FlyCameraVideoGrabber::GetLastFrame()
@@ -327,16 +406,20 @@ const video::ImageInfo*  FlyCameraVideoGrabber::GetLastFrame()
 }
 
 
-void FlyCameraVideoGrabber::BlitImage(const uchar* buf,int rows,int cols)
+void FlyCameraVideoGrabber::BlitImage(const uchar* buf, int rows, int cols, EPixelFormat fmt)
 {
-	float t=gTimer.getSeconds();
-	if(t-m_lastGrabbed<15)
-		return;
+	float t=gEngine.getTimer()->getSeconds();
+// 	if(t-m_lastGrabbed<15)
+// 		return;
 	m_lastGrabbed=t;
 	m_imageMutex->lock();
-	m_tempImage.createData(math::vector3d(rows,cols,1),m_format);
-
-	video::ColorConverter::convert24BitTo24Bit(buf,m_tempImage.imageData,math::vector2d(rows,cols),0,true,0);
+	m_tempImage.createData(math::vector3d(rows, cols, 1), fmt);
+	if (fmt==EPixel_R8G8B8)
+		video::ColorConverter::convert24BitTo24Bit(buf,m_tempImage.imageData,math::vector2d(rows,cols),0,true,0);
+	else if (fmt == EPixel_LUMINANCE8)
+	{
+		m_tempImage.setData(buf, math::vector3d(rows, cols, 1), fmt);
+	}
 
 	m_hasNewFrame=true;
 	m_imageMutex->unlock();

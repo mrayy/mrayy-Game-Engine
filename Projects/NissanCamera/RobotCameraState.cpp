@@ -45,9 +45,10 @@ namespace NCam
 		{
 			float time = gEngine.getTimer()->getSeconds();
 			math::vector3d angles;
-			angles.x = 20 * sin(time*0.001f);
-			angles.y = 30 * sin(time*0.002f);
-			angles.z = 20 * sin(time*0.005f);
+			angles.x = 70 * sin(time*0.002f);// 0 * sin(time*0.001f);
+			angles.y = 0;;// 70 * sin(time*0.002f);
+			angles.z = 0;
+
 			q= math::quaternion(angles);
 			return true;
 		}
@@ -69,9 +70,9 @@ RobotCameraState::RobotCameraState()
 	m_robotComm = new NCam::NissanRobotCommunicator();
 	m_robotConnector->SetCommunicator(m_robotComm);
 
-	m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
+	//m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
 	//m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
-	//m_headController = new TBee::CalibHeadController(new TestController());
+	m_headController = new TBee::CalibHeadController(new TestController());
 
 	m_robotConnector->SetHeadController(m_headController);
 	m_hmdFov = 50;
@@ -435,6 +436,8 @@ void RobotCameraState::InitState()
 	{
 		m_arRoot = m_sceneManager->createSceneNode("AR_Root_Node");
 
+		m_arRoot->setVisible(false);
+
 		m_arManager->SetSceneManager(m_sceneManager, m_arRoot);
 		core::string ip = NCAppGlobals::Instance()->GetValue("ARServer", "IP");
 		uint port = core::StringConverter::toUInt(NCAppGlobals::Instance()->GetValue("ARServer", "Port"));
@@ -731,12 +734,16 @@ void RobotCameraState::Update(float dt)
 	m_videoSource->Blit();
 	m_guimngr->Update(dt);
 	m_robotConnector->UpdateStatus();
-	math::quaternion q = m_robotConnector->GetHeadRotation();
-	math::vector3d pos = m_robotConnector->GetHeadPosition();
+
+	
+
+	math::quaternion q;// = m_robotConnector->GetCurrentHeadRotation();// m_robotConnector->GetHeadRotation();
+	math::vector3d pos =  m_robotConnector->GetHeadPosition();
 
 
 	math::vector3d rot,r ;
-	q.toEulerAngles(r);
+	//q.toEulerAngles(r);
+	r = m_robotConnector->GetCurrentHeadRotation();
 	
 	rot.x = r.y;
 	rot.z = r.x;

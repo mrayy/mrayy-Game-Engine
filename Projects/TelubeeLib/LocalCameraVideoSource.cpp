@@ -4,6 +4,7 @@
 #include "ICameraVideoGrabber.h"
 
 #include "DirectShowVideoGrabber.h"
+#include "FlyCameraVideoGrabber.h"
 
 
 namespace mray
@@ -11,7 +12,11 @@ namespace mray
 namespace TBee
 {
 
+#if 1
 	typedef video::DirectShowVideoGrabber VCameraType;
+#else
+	typedef video::FlyCameraVideoGrabber VCameraType;
+#endif
 	LocalCameraVideoSource::LocalCameraVideoSource(int c1 , int c2)
 {
 	m_cameraResolution.set(640, 480);
@@ -70,12 +75,15 @@ void LocalCameraVideoSource::Init()
 }
 void LocalCameraVideoSource::Open()
 {
+	m_cameraSource[0].id = 0;
 	m_started = true;
 	m_cameraSource[0].camera->InitDevice(m_cameraSource[0].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
+	m_cameraSource[0].camera->Start();
 	if (m_cameraSource[1].camera)
+	{
 		m_cameraSource[1].camera->InitDevice(m_cameraSource[1].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
-
-
+		m_cameraSource[1].camera->Start();
+	}
 
 }
 void LocalCameraVideoSource::Close()

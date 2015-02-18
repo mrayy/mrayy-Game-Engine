@@ -100,6 +100,7 @@
     <ClInclude Include="GUIFacultyListLayout.h" />
     <ClInclude Include="GUIFadingText.h" />
     <ClInclude Include="GUILayersContainer.h" />
+    <ClInclude Include="GUIPictureWallpaper.h" />
     <ClInclude Include="GUIProfilePicture.h" />
     <ClInclude Include="GUIProjectStatus.h" />
     <ClInclude Include="GUIProjectStatusLayout.h" />
@@ -161,6 +162,8 @@
     <ClInclude Include="TwitterProfileListItem.h" />
     <ClInclude Include="KMDComment.h" />
     <ClInclude Include="KMDUser.h" />
+    <ClInclude Include="WallpaperBin.h" />
+    <ClInclude Include="WallpaperLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppData.cpp" />
@@ -173,6 +176,7 @@
     <ClCompile Include="GUIFacultyList.cpp" />
     <ClCompile Include="GUIFadingText.cpp" />
     <ClCompile Include="GUILayersContainer.cpp" />
+    <ClCompile Include="GUIPictureWallpaper.cpp" />
     <ClCompile Include="GUIProfilePicture.cpp" />
     <ClCompile Include="GUIProjectStatus.cpp" />
     <ClCompile Include="GUISceneSpacePanel.cpp" />
@@ -211,6 +215,8 @@
     <ClCompile Include="KMDComment.cpp" />
     <ClCompile Include="KMDUser.cpp" />
     <ClCompile Include="GUIDockedElement.cpp" />
+    <ClCompile Include="WallpaperBin.cpp" />
+    <ClCompile Include="WallpaperLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Overlay Include="..\..\Bin\Data\KMDPlenary\GUI\GUICommentsLayerLayout.gui" />
@@ -218,6 +224,7 @@
     <Overlay Include="..\..\Bin\Data\KMDPlenary\GUI\GUIProjectStatusLayout.gui" />
     <Overlay Include="..\..\Bin\Data\KMDPlenary\GUI\GUIScenePanelLayout.gui">
       <FileType>Document</FileType>
+      <SubType>Designer</SubType>
     </Overlay>
     <Overlay Include="..\..\Bin\Data\KMDPlenary\GUI\GUIScreenLayout.gui">
       <FileType>Document</FileType>
@@ -235,6 +242,7 @@
       <FileType>Document</FileType>
       <SubType>Designer</SubType>
     </Overlay>
+    <None Include="..\..\Bin\Data\KMDPlenary\kmdSettings.cfg" />
     <None Include="Configure.stg" />
     <Overlay Include="..\..\Bin\Data\KMDPlenary\GUI\GUIStatusLayerLayout.gui" />
   </ItemGroup>

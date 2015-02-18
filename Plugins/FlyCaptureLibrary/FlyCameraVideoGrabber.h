@@ -44,7 +44,8 @@ protected:
 
 	float m_lastGrabbed;
 
-	
+	ulong m_bufferId;
+
 public:
 	FlyCameraVideoGrabber();
 	virtual~FlyCameraVideoGrabber();
@@ -65,14 +66,15 @@ public:
 	video::EPixelFormat GetImageFormat();
 
 	bool GrabFrame();
-	bool HasNewFrame();
+	bool HasNewFrame();	
+	ulong GetBufferID(){ return m_bufferId; }
 
 	void Stop();
 	void Start();
 
 	const video::ImageInfo*  GetLastFrame();
 
-	void BlitImage(const uchar* buf,int rows,int cols);
+	void BlitImage(const uchar* buf,int rows,int cols,EPixelFormat fmt);
 	
 };
 

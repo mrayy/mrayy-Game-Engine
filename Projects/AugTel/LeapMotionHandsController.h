@@ -7,6 +7,7 @@
 
 namespace mray
 {
+	class LeapMotionImageRetrival;
 namespace AugTel
 {
 	class LeapMotionHandsControllerImpl;
@@ -40,6 +41,9 @@ public:
 
 	virtual void SetEnabled(bool e);
 	virtual bool IsEnabled() { return m_enabled; }
+
+
+	LeapMotionImageRetrival* GetLeapImage(int i);
 };
 
 }

@@ -15,6 +15,7 @@
 #include "NodeHeadController.h"
 #include "OculusHeadController.h"
 #include "OptiTrackHeadController.h"
+#include "IRobotController.h"
 
 namespace mray
 {
@@ -30,7 +31,9 @@ CRobotConnector::CRobotConnector()
 
 	m_videoPort = -1;
 	m_audioPort = -1;
+	m_handsPort = -1;
 	m_rtcp = false;
+	m_controller = 0;
 }
 CRobotConnector::~CRobotConnector()
 {
@@ -60,18 +63,24 @@ void CRobotConnector::ConnectRobot()
 	core::string addrStr = addr.toString();
 	addrStr += "," + core::StringConverter::toString(m_videoPort);
 	addrStr += "," + core::StringConverter::toString(m_audioPort);
+	addrStr += "," + core::StringConverter::toString(m_handsPort);
 	addrStr += "," + core::StringConverter::toString(m_rtcp);
 	m_communicator->SetData("Connect", addrStr,true);
 
 	addrStr =  core::StringConverter::toString(m_commPort);
 	m_communicator->SetData("CommPort", addrStr, true);
 
+	if (m_controller)
+	{
+		m_controller->ConnectRobot();
+	}
 }
-void CRobotConnector::ConnectRobotIP(const core::string& ip, int videoport, int audioPort, int commPort, bool rtcp)
+void CRobotConnector::ConnectRobotIP(const core::string& ip, int videoport, int audioPort, int handsPort, int commPort, bool rtcp)
 {
 	m_commPort = commPort;
 	m_videoPort = videoport;
 	m_audioPort = audioPort;
+	m_handsPort = handsPort;
 	m_rtcp = rtcp;
 	m_robotIP = ip;
 	ConnectRobot();
@@ -106,6 +115,11 @@ void CRobotConnector::StartUpdate()
 	m_status = true;
 
 	m_communicator->ConnectRobot(true);
+
+}
+math::vector3d CRobotConnector::GetCurrentHeadRotation()
+{
+	return core::StringConverter::toVector3d(m_communicator->GetData("HeadRotation"));
 }
 void CRobotConnector::EndUpdate()
 {
@@ -115,6 +129,11 @@ void CRobotConnector::EndUpdate()
 	m_communicator->SetData("HeadRotation", core::StringConverter::toString(math::quaternion::Identity), false);
 	m_communicator->Update(0);//only once
 	m_communicator->ConnectRobot(false);
+
+	if (m_controller)
+	{
+		m_controller->DisconnectRobot();
+	}
 }
 void CRobotConnector::LoadXML(xml::XMLElement* e)
 {
@@ -172,6 +191,27 @@ void CRobotConnector::UpdateStatus()
 	m_communicator->SetData("HeadPosition", core::StringConverter::toString(m_headPosition), false);
 	m_communicator->SetData("Speed", core::StringConverter::toString(math::vector2d(m_speed.x,m_speed.y)), false);
 	m_communicator->SetData("Rotation", core::StringConverter::toString(m_rotation/3), false);
+
+	if (m_controller)
+	{
+		RobotStatus st;
+		st.connected = m_connected;
+		st.headPos[0] = m_headPosition.x;
+		st.headPos[1] = m_headPosition.y;
+		st.headPos[2] = m_headPosition.z;
+
+		st.headRotation[0] = m_headRotation.w;
+		st.headRotation[1] = m_headRotation.x;
+		st.headRotation[2] = m_headRotation.y;
+		st.headRotation[3] = m_headRotation.z;
+
+		st.rotation = m_rotation / 3.0f;
+
+		st.speed[0] = m_speed.x;
+		st.speed[1] = m_speed.y;
+
+		m_controller->UpdateRobotStatus(st);
+	}
 }
 
 void CRobotConnector::InitController(CRobotConnector* c)

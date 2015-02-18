@@ -32,8 +32,9 @@ namespace GUI{
 		EImage_None,
 		EImage_Stretch,
 		EImage_Tile,
-		EImage_Center,
-		EImage_Zoom
+		EImage_Center,	//ratio is 1, image is centered
+		EImage_Zoom,	// ratio is 1, image is scaled to fit
+		EImage_Fit		// ratio is 1, image is shrinked to fit
 	};
 
 class MRAYGUI_API GUIStaticImage:public IGUIStaticImage
@@ -45,6 +46,8 @@ protected:
 	core::string m_source;
 	EImageStretchMode m_stretchMode;
 	bool m_clipping;
+
+	float m_angle;
 
 	virtual void fillProperties();
 	bool _OnMouseEvent(MouseEvent* e);
@@ -59,7 +62,10 @@ public:
 	GUIStaticImage(IGUIManager* creator);
 	~GUIStaticImage();
 
-	void SetImage(video::ITextureCRef tex);
+	virtual bool SetAngle(float angle){ m_angle = angle; return true; }
+	float GetAngle(){ return m_angle; }
+
+	virtual void SetImage(video::ITextureCRef tex);
 	video::ITextureCRef GetImage();
 
 	video::TextureUnit* GetTextureUnit();
@@ -67,13 +73,13 @@ public:
 	void SetStretchMode(EImageStretchMode m);
 	EImageStretchMode  GetStretchMode(){ return m_stretchMode ; }
 
-	bool SetTargetTexCoords(const math::rectf& rc);
+	virtual bool SetTargetTexCoords(const math::rectf& rc);
 	const math::rectf&  GetTargetTexCoords();
 
-	bool SetSourceImage(const core::string&path);
+	virtual bool SetSourceImage(const core::string&path);
 	const core::string& GetSourceImage();
 
-	bool SetClipping(bool clipping);
+	virtual bool SetClipping(bool clipping);
 	bool GetClipping();
 
 	virtual void Draw(const math::rectf*vp);

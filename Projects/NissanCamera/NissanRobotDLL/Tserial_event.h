@@ -97,8 +97,8 @@ typedef void (*type_myCallBack) (uint32 object, uint32 event);
 
 
 #define SERIAL_SIGNAL_NBR 7         // number of events in the thread
-#define SERIAL_MAX_RX     256       // Input buffer max size
-#define SERIAL_MAX_TX     256       // output buffer max size
+#define SERIAL_MAX_RX     2048       // Input buffer max size
+#define SERIAL_MAX_TX     2048       // output buffer max size
 
 
 /* -------------------------------------------------------------------- */
@@ -159,6 +159,9 @@ public:
     char *        getDataInBuffer  (void);
     void          dataHasBeenRead  (void);
     void          disconnect       (void);
+
+
+	void * userData;
 };
 /* -------------------------------------------------------------------- */
 

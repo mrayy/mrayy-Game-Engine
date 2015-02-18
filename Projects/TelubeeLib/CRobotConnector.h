@@ -16,7 +16,7 @@
 #define __CRobotConnector__
 
 
-
+class IRobotController;
 
 namespace mray
 {
@@ -39,9 +39,12 @@ protected:
 	math::vector2d m_speed;
 	math::quaternion m_headRotation;
 	math::vector3d m_headPosition;
+	IRobotController* m_controller;
+
 	float m_rotation;
 	int m_videoPort;
 	int m_audioPort;
+	int m_handsPort;
 	bool m_rtcp;
 	int m_commPort;
 public:
@@ -58,7 +61,7 @@ public:
 
 	bool IsRobotConnected();
 	void ConnectRobot();
-	void ConnectRobotIP(const core::string& ip, int videport, int audioPort, int commPort, bool rtcp);
+	void ConnectRobotIP(const core::string& ip, int videport, int audioPort, int handsPort, int commPort, bool rtcp);
 	void DisconnectRobot();
 	void StartUpdate();
 	void EndUpdate();
@@ -71,6 +74,11 @@ public:
 	const math::quaternion& GetHeadRotation(){ return m_headRotation; }
 	const math::vector3d& GetHeadPosition(){ return m_headPosition; }
 	float GetRotation(){ return m_rotation; }
+
+	math::vector3d GetCurrentHeadRotation();
+
+	void AttachRobotController(IRobotController* c){ m_controller = c; }
+
 
 	void HandleController();
 	void UpdateStatus();

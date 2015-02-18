@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "LeapMotionImageRetrival.h"
 #include "TextureRTWrap.h"
+#include "IThreadManager.h"
 
 
 namespace mray
@@ -37,10 +38,17 @@ LeapMotionImageRetrival::LeapMotionImageRetrival(int index) :m_index(index), und
 	video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
 	pp->LoadXML(gFileSystem.openFile("leapUndistort.peff"));
 	undistortShader = pp;
+
+	m_bufferID = 0;
+	m_hasNewFrame = false;
+	m_frameSize.set(640, 240);
+
+	m_mutex = OS::IThreadManager::getInstance().createMutex();
 }
 LeapMotionImageRetrival::~LeapMotionImageRetrival()
 {
 	delete undistortShader;
+	m_mutex = 0;
 }
 
 
@@ -48,7 +56,7 @@ LeapMotionImageRetrival::~LeapMotionImageRetrival()
 void LeapMotionImageRetrival::_SetMainTex(int width, int height)
 {
 	mainTexture->createTexture(math::vector3di(width, height, 1), video::EPixel_Alpha8);
-
+	m_frameSize.set(width, height);
 }
 
 void LeapMotionImageRetrival::_SetDistortionTex(int width, int height)
@@ -60,11 +68,12 @@ void LeapMotionImageRetrival::_SetDistortionTex(int width, int height)
 
 void  LeapMotionImageRetrival::_LoadMainTexture(const uchar* data)
 {
-	video::IHardwarePixelBuffer* buff = mainTexture->getSurface(0);
-
-	video::LockedPixelBox bb(buff->getWidth(), buff->getHeight(), 1, video::EPixel_Alpha8, (uchar*)data);
-	buff->blitFromMemory(bb);
-
+	//video::IHardwarePixelBuffer* buff = mainTexture->getSurface(0);
+	//video::LockedPixelBox bb(buff->getWidth(), buff->getHeight(), 1, video::EPixel_Alpha8, (uchar*)data);
+	m_imageInfo.setData(data, mainTexture->getSize(), video::EPixel_Alpha8);
+	//buff->blitFromMemory(bb);
+	const video::ImageInfo *ifo[] = { &m_imageInfo };
+	mainTexture->loadSurfaces(ifo, 1);
 }
 
 void LeapMotionImageRetrival::_EncodeDisortion(Leap::Image &image)
@@ -164,9 +173,66 @@ bool LeapMotionImageRetrival::Capture(Leap::Frame &frame)
 	gEngine.getDevice()->useTexture(1, 0);
 	gEngine.getDevice()->useTexture(2, 0);
 
+	m_hasNewFrame = true;
+
 	return true;
 }
 
+void LeapMotionImageRetrival::SetFrameSize(int w, int h)
+{
+	//m_frameSize.set(w, h);
+}
+
+const math::vector2di& LeapMotionImageRetrival::GetFrameSize()
+{
+	return m_frameSize;
+}
+
+
+void LeapMotionImageRetrival::SetImageFormat(video::EPixelFormat fmt)
+{
+}
+
+video::EPixelFormat LeapMotionImageRetrival::GetImageFormat()
+{
+	return m_imageInfo.format;
+}
+
+
+bool LeapMotionImageRetrival::GrabFrame()
+{
+	if (m_hasNewFrame)
+	{
+		m_hasNewFrame = false;
+		return true;
+	}
+	return false;
+}
+
+bool LeapMotionImageRetrival::HasNewFrame()
+{
+	return m_hasNewFrame;
+}
+
+ulong LeapMotionImageRetrival::GetBufferID()
+{
+	return m_bufferID;
+}
+
+
+
+const video::ImageInfo* LeapMotionImageRetrival::GetLastFrame()
+{
+	return &m_imageInfo;
+}
+void LeapMotionImageRetrival::Lock()
+{
+	m_mutex->lock();
+}
+void LeapMotionImageRetrival::Unlock()
+{
+	m_mutex->unlock();
+}
 
 }
 

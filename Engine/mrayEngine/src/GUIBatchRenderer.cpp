@@ -205,11 +205,14 @@ void GUIBatchRenderer::AddQuad(video::TextureUnit*tex,const math::rectf&pos,cons
 		float cs=math::cosd(angle);
 		float sn=math::sind(angle);
 		float x=0;
+		math::vector2d hsz = pos.ULPoint+ pos.getSize() / 2;
 		for(int i=0;i<4;++i)
 		{
+			m_posPtr[i] -= hsz;
 			x=m_posPtr[i].x;
-			m_posPtr[i].x=cs*x-sn*m_posPtr[i].y;
-			m_posPtr[i].y=sn*x+cs*m_posPtr[i].y;
+			m_posPtr[i].x = cs*x - sn*m_posPtr[i].y;
+			m_posPtr[i].y = sn*x + cs*m_posPtr[i].y;
+			m_posPtr[i] += hsz;
 		}
 	}
 

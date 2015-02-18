@@ -1,3 +1,5 @@
+#ifndef __GUIFacultyListLayout__
+#define __GUIFacultyListLayout__
 #include "IGUISchemeBase.h"
 #include "GUIPanel.h"
 #include "GUIStackPanel.h"
@@ -25,3 +27,4 @@ public:
 
 };
 }
+#endif

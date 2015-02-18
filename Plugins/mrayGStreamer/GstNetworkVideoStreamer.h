@@ -11,6 +11,7 @@ namespace video
 {
 
 class GstNetworkVideoStreamerImpl;
+class IVideoGrabber;
 
 class GstNetworkVideoStreamer :public IGStreamerStreamer
 {
@@ -23,14 +24,8 @@ public:
 	// addr: target address to stream video to
 	// videoport: port for the video stream, video rtcp is allocated as videoPort+1/videoPort+2
 	void BindPorts(const core::string& addr, int videoPort, bool rtcp);
-	void SetResolution(int width, int height);
+	void SetResolution(int width, int height,int fps=30);
 	void SetBitRate(int bitRate);
-
-
-	void EnableVideo(bool v);
-	void EnableAudio(bool v);
-	bool IsAudioEnabled();
-	bool IsVideoEnabled();
 
 	bool CreateStream();
 	void Stream();

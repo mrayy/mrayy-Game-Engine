@@ -70,13 +70,19 @@
 
 #include "VirtualHandsController.h"
 #include "LeapMotionHandsController.h"
+#include "LeapMotionImageRetrival.h"
 #include "JoystickDefinitions.h"
 #include "IInputController.h"
 
 #include "GstNetworkAudioStreamer.h"
 #include "GstNetworkVideoStreamer.h"
+#include "GstCustomVideoStreamer.h"
 
 #include "UI3DRenderNode.h"
+
+#include "PhantomCommunicator.h"
+
+#include "FlyCameraVideoGrabber.h"
 
 
 namespace mray
@@ -107,6 +113,7 @@ namespace AugTel
 	m_depthVisualizer = new DepthVisualizer();
 	m_robotConnector->SetCommunicator(comm);
 
+	//m_robotConnector->AttachRobotController(new PhantomCommunicator());
 	m_viewDepth = false;
 
 	m_enableHands = false;
@@ -556,18 +563,31 @@ void AugCameraRenderState::InitState()
 		m_depthVisualizer->SetDepthFrame(m_openNiHandler->GetNormalCalculator().GetDepthFrame());
 
 	}
+	if (false)
+	{
+		m_camGrabber = new video::FlyCameraVideoGrabber();
+		m_camGrabber->InitDevice(0, 1280, 960, 15);
+	//	m_camGrabber->SetImageFormat(video::EPixel_LUMINANCE8);
 
+	}
 	//if (false)
 	{
 		//init streamers
 		video::GstNetworkAudioStreamer* as = new video::GstNetworkAudioStreamer();
 		m_streamer->AddStream(as, "Audio");
 		video::GstNetworkVideoStreamer* vs = new video::GstNetworkVideoStreamer();
-		vs->SetCameras(0, 0);
+		vs->SetCameras(gAppData.App->GetCamera(0), gAppData.App->GetCamera(0));
 		vs->SetResolution(640, 480);
 		vs->SetBitRate(500);
 		m_streamer->AddStream(vs, "Video");
+
+		video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
+		hs->SetVideoGrabber( ((LeapMotionHandsController*)m_hands[0])->GetLeapImage(0), 0); //m_camGrabber,0);//
+		hs->SetBitRate(3000);
+		m_streamer->AddStream(hs, "Hands");
 	}
+
+
 }
 
 void AugCameraRenderState::OnEnter(IRenderingState*prev)
@@ -598,7 +618,7 @@ void AugCameraRenderState::OnEnter(IRenderingState*prev)
 	}
 	
 	if (ifo)
-		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
+		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetHandsVideoPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
 
 	m_robotConnector->SetData("depthSize", "", false);
 	//m_robotConnector->EndUpdate();
@@ -609,7 +629,7 @@ void AugCameraRenderState::OnEnter(IRenderingState*prev)
 	m_effects->Begin();
 
 	m_status = ENone;
-	m_loadScreen->Start();
+	m_loadScreen->Start(ifo);
 
 	gAppData.App->GetPreviewGUIManager()->GetRootElement()->AddElement(m_interfaceUI);
 	{
@@ -627,6 +647,8 @@ void AugCameraRenderState::OnEnter(IRenderingState*prev)
 		m_streamer->GetStream("Video")->BindPorts(ifo->IP, gAppData.TargetVideoPort, gAppData.RtcpStream);
 		m_streamer->GetStream("Video")->CreateStream();
 
+		m_streamer->GetStream("Hands")->BindPorts(ifo->IP, gAppData.TargetHandsVideoPort, gAppData.RtcpStream);
+		m_streamer->GetStream("Hands")->CreateStream();
 		m_streamer->Stream();
 	}
 //	if (false)
@@ -637,11 +659,15 @@ void AugCameraRenderState::OnEnter(IRenderingState*prev)
 		_EnableVideo(true);
 	}
 
+	//m_camGrabber->Start();
+
 	Parent::OnEnter(prev);
 }
 
 void AugCameraRenderState::OnExit()
 {
+//	m_camGrabber->Stop();
+
 	Parent::OnExit();
 
 	gAppData.optiDataSource->Disconnect();
@@ -1023,7 +1049,7 @@ void AugCameraRenderState::_ChangeState(EStatus st)
 		m_robotConnector->StartUpdate();
 		m_screenLayout->OnConnected();
 
-		m_loadScreen->Start();
+		m_loadScreen->Start(gAppData.selectedRobot);
 		break;
 	case mray::AugTel::AugCameraRenderState::EStarted:
 		break;

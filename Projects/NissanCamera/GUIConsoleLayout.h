@@ -1,3 +1,5 @@
+#ifndef __GUIConsoleLayout__
+#define __GUIConsoleLayout__
 #include "IGUISchemeBase.h"
 #include "GUIEditBox.h"
 #include "GUIListBox.h"
@@ -25,3 +27,4 @@ public:
 
 };
 }
+#endif

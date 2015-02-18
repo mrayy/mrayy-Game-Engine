@@ -1,3 +1,5 @@
+#ifndef __GUICommentsLayerLayout__
+#define __GUICommentsLayerLayout__
 #include "IGUISchemeBase.h"
 #include "GUIPanel.h"
 namespace mray{
@@ -19,3 +21,4 @@ public:
 
 };
 }
+#endif

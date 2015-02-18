@@ -36,6 +36,7 @@
 #include "IGUIRenderer.h"
 #include "IDBHandler.h"
 #include "GenericRenderLayer.h"
+#include "WallpaperLayer.h"
 
 namespace mray
 {
@@ -147,6 +148,7 @@ SessionScene::SessionScene()
 	m_sceneLayer = new GenericRenderLayer();
 	m_commentsLayer = new GenericRenderLayer();
 	m_statusLayer = new GenericRenderLayer();
+	m_wallpaperLayer = new WallpaperLayer();
 	m_isTimeBased = false;
 }
 
@@ -158,6 +160,7 @@ SessionScene::~SessionScene()
 	delete m_statusLayer;
 	delete m_commentsLayer;
 	delete m_sceneLayer;
+	delete m_wallpaperLayer;
 }
 
 
@@ -219,7 +222,9 @@ void SessionScene::Init()
 		m_commentsLayer->InitLayer(m_screenLayout->CommentsPanel);
 		m_sceneLayer->InitLayer(m_screenLayout->ScenePanel);
 		m_statusLayer->InitLayer(m_screenLayout->StatusPanel);
+		m_wallpaperLayer->InitLayer(m_screenLayout->WallpaperLayer);
 
+	//	m_layerOrder.push_front(m_wallpaperLayer);
 		m_layerOrder.push_back(m_statusLayer);
 		m_layerOrder.push_back(m_sceneLayer);
 		m_layerOrder.push_front(m_commentsLayer);
@@ -354,6 +359,7 @@ bool SessionScene::OnEvent(Event* e, const math::rectf& rc)
 			{
 				m_commentsLayer->SetVisible(!m_commentsLayer->IsVisible());
 				MakeLayerTop(m_commentsLayer);
+				RefreshLayerAlpha();
 			}
 			if (evt->key == KEY_3)
 			{
@@ -500,6 +506,7 @@ void SessionScene::Update(float dt)
 	m_statusLayer->UpdateLayer(dt);
 	m_commentsLayer->UpdateLayer(dt);
 	m_sceneLayer->UpdateLayer(dt);
+	m_wallpaperLayer->UpdateLayer(dt);
 
 	core::CTime t = core::CTime::Now();
 	m_screenLayout->SessionDetails->Time->SetText(core::CTime::ToString(t,true));

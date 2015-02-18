@@ -27,7 +27,7 @@ bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v)
 	math::vector3d a;
 	q->toEulerAngles(a);
 
-	if (m_oriAvg.size() < 10)
+	if (m_oriAvg.size() < 20)
 	{
 		m_oriAvg.push_back(a);
 	}
@@ -53,7 +53,7 @@ bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v)
 	if (!p)
 		return false;
 
-	if (m_posAvg.size() < 10)
+	if (m_posAvg.size() < 20)
 	{
 		m_posAvg.push_back(*p);
 	}

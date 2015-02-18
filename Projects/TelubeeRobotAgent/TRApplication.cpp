@@ -27,6 +27,11 @@
 #include "GstNetworkAudioPlayer.h"
 #include "GstNetworkVideoPlayer.h"
 
+#include "TextureRTWrap.h"
+#include "FlyCameraVideoGrabber.h"
+#include "GstCustomVideoStreamer.h"
+
+
 #define COMMUNICATION_PORT 6000
 
 namespace mray
@@ -67,9 +72,9 @@ namespace mray
 		{
 			m_app = app;
 		}
-		virtual void OnUserConnected(RobotCommunicator* sender, const network::NetAddress& address, int videoPort, int audioPort,bool rtcp)
+		virtual void OnUserConnected(RobotCommunicator* sender, const network::NetAddress& address, int videoPort, int audioPort, int handsPort, bool rtcp)
 		{
-			m_app->OnUserConnected(address, videoPort, audioPort, rtcp);
+			m_app->OnUserConnected(address, videoPort, audioPort, handsPort, rtcp);
 		}
 		virtual void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status)
 		{
@@ -118,7 +123,7 @@ TRApplication::TRApplication()
 	m_streamers = new video::GstStreamBin();
 	m_players = new video::GstPlayerBin();
 
-
+	m_handsMonitor = -1;
 	m_debugging = false;
 }
 
@@ -126,7 +131,8 @@ TRApplication::~TRApplication()
 {
 	m_players->ClearPlayers(true);
 	m_streamers->ClearStreams(true);
-	m_openNi->Close();
+	if (m_openNi)
+		m_openNi->Close();
 	m_streamers = 0;
 	m_players = 0;
 	delete m_robotCommunicator;
@@ -235,6 +241,7 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		else if (res == "FullHD")
 			m_resolution.set(1920, 1080);
 
+		m_handsMonitor = core::StringConverter::toInt(extraOptions.GetOptionByName("HandsDisplay")->getValue());
 		m_streamAudio = extraOptions.GetOptionByName("Audio")->getValue() == "Yes";
 		m_isLocal = extraOptions.GetOptionByName("Network")->getValue() == "Local";
 		m_videoPort = core::StringConverter::toInt(extraOptions.GetOptionByName("VideoPort")->getValue() );
@@ -340,14 +347,29 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 	{
 		video::GstNetworkVideoStreamer* streamer;
-		streamer = new video::GstNetworkVideoStreamer();
+		if (false)
+		{
+			streamer = new video::GstNetworkVideoStreamer();
 
-		streamer->SetResolution(m_resolution.x, m_resolution.y);
-		streamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
-		streamer->SetBitRate(bitRate[(int)m_quality]);
+			streamer->SetResolution(m_resolution.x, m_resolution.y);
+			streamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
+			streamer->SetBitRate(bitRate[(int)m_quality]);
 
 
-		m_streamers->AddStream(streamer, "Video");
+			m_streamers->AddStream(streamer, "Video");
+		}
+		else
+		{
+
+			m_camera = new video::FlyCameraVideoGrabber();
+			m_camera->InitDevice(0, 1280, 960, 50);
+			m_camera->Start();
+
+			video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
+			hs->SetVideoGrabber(m_camera, 0);//
+			hs->SetBitRate(3000);
+			m_streamers->AddStream(hs, "Video");
+		}
 	}
 	{
 		video::GstNetworkAudioStreamer* streamer;
@@ -370,6 +392,15 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		m_playerGrabber = new video::VideoGrabberTexture();
 		m_playerGrabber->Set(new video::GstNetworkVideoPlayerGrabber(player), 0);
 	}
+	{
+		video::GstNetworkVideoPlayer* player;
+		player = new video::GstNetworkVideoPlayer();
+
+		m_players->AddPlayer(player, "Hands");
+
+		m_handsGrabber = new video::VideoGrabberTexture();
+		m_handsGrabber->Set(new video::GstNetworkVideoPlayerGrabber(player), 0);
+	}
 	m_robotCommunicator = new RobotCommunicator();
 	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
 	m_robotCommunicator->SetListener(m_communicatorListener);
@@ -381,6 +412,28 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 	m_isStarted = false;
 
+	{
+		m_handsWnd = 0;
+		if (m_handsMonitor>=0)
+		{
+			OptionContainer opt;
+			opt["title"].value = "Hands Window";
+			opt["VSync"].value = "false";
+			opt["top"].value = "0";
+			opt["left"].value = "0";
+			//opt["border"].value = "none";
+			opt["Monitor"].value = core::StringConverter::toString(m_handsMonitor);
+			m_handsWnd = getDevice()->CreateRenderWindow("Hands Window", GetRenderWindow(0)->GetSize(), false, opt, 0);
+			m_handsViewPort= m_handsWnd->CreateViewport(mT("Main"), 0, 0, math::rectf(0, 0, 1, 1), 0);
+			AddRenderWindow(m_handsWnd);
+			m_handsViewPort->AddListener(this);
+
+
+			video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
+			pp->LoadXML(gFileSystem.openFile("ProjectionCorrect.peff"));
+			m_undistortShader = pp;
+		}
+	}
 	return;
 	m_combinedCameras = new CombineVideoGrabber();
 	/*if (m_quality==EStreamingQuality::UltraLow)
@@ -461,6 +514,7 @@ void TRApplication::update(float dt)
 
 			((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->CreateStream();
 			((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->CreateStream();
+			((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Hands"))->CreateStream();
 			m_players->Play();
 			m_isStarted = true;
 
@@ -563,129 +617,163 @@ void TRApplication::onDone()
 }
 
 
-void TRApplication::onRenderDone(scene::ViewPort*vp)
+void TRApplication::_RenderHands(scene::ViewPort*vp)
 {
 	getDevice()->set2DMode();
 	video::TextureUnit tex;
-	m_playerGrabber->Blit();
-	tex.SetTexture(m_playerGrabber->GetTexture());
+
+	m_handsGrabber->Blit();
+	tex.SetTexture(m_handsGrabber->GetTexture());
 	math::vector2d txsz;
-	txsz.x = m_playerGrabber->GetTexture()->getSize().x;
-	txsz.y = m_playerGrabber->GetTexture()->getSize().y;
+	txsz.x = m_handsGrabber->GetTexture()->getSize().x;
+	txsz.y = m_handsGrabber->GetTexture()->getSize().y;
 	float r = (float)vp->GetSize().y / (float)vp->GetSize().x;
-	float w=txsz.x*r;
+	float w = txsz.x*r;
 	float c = txsz.x - w;
-	getDevice()->useTexture(0, &tex);
-	math::rectf texCoords(1,0,0,1);
-	getDevice()->draw2DImage(math::rectf(c/2,0,w,vp->GetSize().y), 1,0,&texCoords);
-/*	*/
 
-	GCPtr<GUI::IFont> font = gFontResourceManager.getDefaultFont();
 
-	if (font)
+	gEngine.getDevice()->useTexture(0, &tex);
+	m_undistortShader->Setup(math::rectf(0, txsz));
+	m_undistortShader->render(&video::TextureRTWrap(m_handsGrabber->GetTexture()));
+	tex.SetTexture(m_undistortShader->getOutput()->GetColorTexture());
+	getDevice()->unuseShader();
+
+	getDevice()->useTexture(0, &tex);/**/
+	math::rectf texCoords(0, 0, 1, 1);
+	getDevice()->draw2DImage(math::rectf(0, vp->GetSize()), 1, 0, &texCoords);
+	/*	*/
+}
+
+void TRApplication::onRenderDone(scene::ViewPort*vp)
+{
+	if (vp == m_handsViewPort)
 	{
-
-		GUI::FontAttributes attr;
-		int batt = core::StringConverter::toInt(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, ""));
-		attr.fontColor = video::SColor(0, 1, 0, 1);
-		if (batt<20)
-			attr.fontColor = video::SColor(1, 0, 0, 1);
-		attr.fontSize = 20;
-		core::string msg;
-		msg = core::string("Battery Level : ") + core::StringConverter::toString(batt) + "%";
-		font->print(math::rectf(20, vp->GetSize().y-40, 10, 10), &attr, 0, msg, m_guiRender);
+		_RenderHands(vp);
 	}
+	if (vp == m_viewPort)
+	{
+		getDevice()->set2DMode();
+		video::TextureUnit tex;
+		m_playerGrabber->Blit();
+		tex.SetTexture(m_playerGrabber->GetTexture());
+		math::vector2d txsz;
+		txsz.x = m_playerGrabber->GetTexture()->getSize().x;
+		txsz.y = m_playerGrabber->GetTexture()->getSize().y;
+		float r = (float)vp->GetSize().y / (float)vp->GetSize().x;
+		float w = txsz.x*r;
+		float c = txsz.x - w;
+		getDevice()->useTexture(0, &tex);
+		math::rectf texCoords(1, 0, 0, 1);
+		getDevice()->draw2DImage(math::rectf(c / 2, 0, w, vp->GetSize().y), 1, 0, &texCoords);
+		/*	*/
 
-	if (font && m_debugging){
-		m_guiRender->Prepare();
+		GCPtr<GUI::IFont> font = gFontResourceManager.getDefaultFont();
 
-		float yoffset = 50;
-
-
-		GUI::FontAttributes attr;
-		attr.fontColor.Set(0.05, 1, 0.5, 1);
-		attr.fontAligment = GUI::EFA_MiddleLeft;
-		attr.fontSize = 24;
-		attr.hasShadow = true;
-		attr.shadowColor.Set(0, 0, 0, 1);
-		attr.shadowOffset = math::vector2d(2);
-		attr.spacing = 2;
-		attr.wrap = 0;
-		attr.RightToLeft = 0;
-
-#define LOG_OUT(msg,x,y)\
-	font->print(math::rectf((x), (y) + yoffset, 10, 10), &attr, 0, msg, m_guiRender);\
-	yoffset += attr.fontSize;
+		if (font)
 		{
-			attr.fontSize = 18;
-			yoffset = 100;
+
+			GUI::FontAttributes attr;
+			int batt = core::StringConverter::toInt(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, ""));
+			attr.fontColor = video::SColor(0, 1, 0, 1);
+			if (batt < 20)
+				attr.fontColor = video::SColor(1, 0, 0, 1);
+			attr.fontSize = 20;
 			core::string msg;
-			msg = core::string("User Status: ") + (m_debugData.userConnected ? "Connected":"Disconnected");
-			LOG_OUT(msg, 50, 50);
-			if (m_debugData.userConnected)
-			{
-				msg = "Address: " + m_debugData.userAddress.toString();
-				LOG_OUT(msg, 100, 50);
-			}
-			{
-				msg = core::string("Robot Status: ") + (m_debugData.robotData.connected ? "Connected" : "Disconnected");
-				LOG_OUT(msg, 50, 100);
-				msg = core::string("Controlling: ") + (m_robotCommunicator->IsLocalControl() ? "Local" : "Remote");
-				LOG_OUT(msg, 50, 100);
-				msg = core::string("Sensors : ") + core::StringConverter::toString(math::vector2d(m_debugData.collision));
-				LOG_OUT(msg, 50, 100);
-				if (m_debugData.robotData.connected || m_robotCommunicator->IsLocalControl())
-				{
-					msg = core::string("Speed: ") + core::StringConverter::toString(math::vector2d(m_debugData.robotData.speed[0], m_debugData.robotData.speed[1]));
-					LOG_OUT(msg, 100, 100);
-
-					msg = core::string("Rotation: ") + core::StringConverter::toString(m_debugData.robotData.rotation);
-					LOG_OUT(msg, 100, 100);
-
-					math::vector3d angles;
-					math::quaternion q(m_debugData.robotData.headRotation[0], m_debugData.robotData.headRotation[1],
-						m_debugData.robotData.headRotation[2], m_debugData.robotData.headRotation[3]);
-					q.toEulerAngles(angles);
-					msg = core::string("Head Rotation: ") + core::StringConverter::toString(angles);
-					LOG_OUT(msg, 100, 100);
-
-					msg = core::string("Head Position: ") + core::StringConverter::toString(math::vector3d(m_debugData.robotData.headPos[0], m_debugData.robotData.headPos[1], m_debugData.robotData.headPos[2]));
-					LOG_OUT(msg, 100, 100);
-
-				}
-
-				msg = "Robot Started: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
-				LOG_OUT(msg, 100, 100);
-				msg = "Bump Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "0");
-				LOG_OUT(msg, 100, 100);
-				msg = "Bump Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "1");
-				LOG_OUT(msg, 100, 100);
-				msg = "Sensor Light Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "2");
-				LOG_OUT(msg, 100, 100);
-				msg = "Sensor Light Front Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "3");
-				LOG_OUT(msg, 100, 100);
-				msg = "Sensor Light Center Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "4");
-				LOG_OUT(msg, 100, 100);
-				msg = "Sensor Light Center Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "5");
-				LOG_OUT(msg, 100, 100);
-				msg = "Sensor Light Front Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "6");
-				LOG_OUT(msg, 100, 100);
-				msg = "Sensor Light Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "7");
-				LOG_OUT(msg, 100, 100);
-				msg = "Battery Level: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, "");
-				LOG_OUT(msg, 100, 100);
-				msg = "Battery Status: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryCharge, "");
-				LOG_OUT(msg, 100, 100);
-			}
+			msg = core::string("Battery Level : ") + core::StringConverter::toString(batt) + "%";
+			font->print(math::rectf(20, vp->GetSize().y - 40, 10, 10), &attr, 0, msg, m_guiRender);
 		}
 
+		if (font && m_debugging){
+			m_guiRender->Prepare();
 
+			float yoffset = 50;
+
+
+			GUI::FontAttributes attr;
+			attr.fontColor.Set(0.05, 1, 0.5, 1);
+			attr.fontAligment = GUI::EFA_MiddleLeft;
+			attr.fontSize = 24;
+			attr.hasShadow = true;
+			attr.shadowColor.Set(0, 0, 0, 1);
+			attr.shadowOffset = math::vector2d(2);
+			attr.spacing = 2;
+			attr.wrap = 0;
+			attr.RightToLeft = 0;
+
+#define LOG_OUT(msg,x,y)\
+	font->print(math::rectf((x), (y)+yoffset, 10, 10), &attr, 0, msg, m_guiRender); \
+	yoffset += attr.fontSize;
+			{
+				attr.fontSize = 18;
+				yoffset = 100;
+				core::string msg;
+				msg = core::string("User Status: ") + (m_debugData.userConnected ? "Connected" : "Disconnected");
+				LOG_OUT(msg, 50, 50);
+				if (m_debugData.userConnected)
+				{
+					msg = "Address: " + m_debugData.userAddress.toString();
+					LOG_OUT(msg, 100, 50);
+				}
+				{
+					msg = core::string("Robot Status: ") + (m_debugData.robotData.connected ? "Connected" : "Disconnected");
+					LOG_OUT(msg, 50, 100);
+					msg = core::string("Controlling: ") + (m_robotCommunicator->IsLocalControl() ? "Local" : "Remote");
+					LOG_OUT(msg, 50, 100);
+					msg = core::string("Sensors : ") + core::StringConverter::toString(math::vector2d(m_debugData.collision));
+					LOG_OUT(msg, 50, 100);
+					if (m_debugData.robotData.connected || m_robotCommunicator->IsLocalControl())
+					{
+						msg = core::string("Speed: ") + core::StringConverter::toString(math::vector2d(m_debugData.robotData.speed[0], m_debugData.robotData.speed[1]));
+						LOG_OUT(msg, 100, 100);
+
+						msg = core::string("Rotation: ") + core::StringConverter::toString(m_debugData.robotData.rotation);
+						LOG_OUT(msg, 100, 100);
+
+						math::vector3d angles;
+						math::quaternion q(m_debugData.robotData.headRotation[0], m_debugData.robotData.headRotation[1],
+							m_debugData.robotData.headRotation[2], m_debugData.robotData.headRotation[3]);
+						q.toEulerAngles(angles);
+						msg = core::string("Head Rotation: ") + core::StringConverter::toString(angles);
+						LOG_OUT(msg, 100, 100);
+
+						msg = core::string("Head Position: ") + core::StringConverter::toString(math::vector3d(m_debugData.robotData.headPos[0], m_debugData.robotData.headPos[1], m_debugData.robotData.headPos[2]));
+						LOG_OUT(msg, 100, 100);
+
+					}
+
+					msg = "Robot Started: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
+					LOG_OUT(msg, 100, 100);
+					msg = "Bump Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "0");
+					LOG_OUT(msg, 100, 100);
+					msg = "Bump Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "1");
+					LOG_OUT(msg, 100, 100);
+					msg = "Sensor Light Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "2");
+					LOG_OUT(msg, 100, 100);
+					msg = "Sensor Light Front Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "3");
+					LOG_OUT(msg, 100, 100);
+					msg = "Sensor Light Center Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "4");
+					LOG_OUT(msg, 100, 100);
+					msg = "Sensor Light Center Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "5");
+					LOG_OUT(msg, 100, 100);
+					msg = "Sensor Light Front Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "6");
+					LOG_OUT(msg, 100, 100);
+					msg = "Sensor Light Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "7");
+					LOG_OUT(msg, 100, 100);
+					msg = "Battery Level: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, "");
+					LOG_OUT(msg, 100, 100);
+					msg = "Battery Status: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryCharge, "");
+					LOG_OUT(msg, 100, 100);
+				}
+			}
+
+
+		}
+
+		m_guiRender->Flush();
+		getDevice()->useShader(0);
 	}
-
-	m_guiRender->Flush();
-	getDevice()->useShader(0);
 }
-void TRApplication::OnUserConnected(const network::NetAddress& address, int videoPort, int audioPort, bool rtcp)
+void TRApplication::OnUserConnected(const network::NetAddress& address, int videoPort, int audioPort, int handsPort, bool rtcp)
 {
 	if (m_remoteAddr.address != address.address)
 		printf("User Connected : %s\n", address.toString().c_str());
@@ -702,6 +790,7 @@ void TRApplication::OnUserConnected(const network::NetAddress& address, int vide
 
 	((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->SetIPAddress(ipaddr, audioPort, rtcp);
 	((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->SetIPAddress(ipaddr, videoPort, rtcp);
+	((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Hands"))->SetIPAddress(ipaddr, handsPort, rtcp);
 
 	m_debugData.userAddress = address;
 	m_debugData.userConnected = true;

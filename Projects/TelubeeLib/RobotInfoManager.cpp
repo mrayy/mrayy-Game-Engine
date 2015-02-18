@@ -68,6 +68,7 @@ void RobotInfoManager::LoadRobots(const core::string& path)
 		TBRobotInfo ifo;
 		ifo.IP = e->getValueString("IP");
 		ifo.name = e->getValueString("Name");
+		ifo.Location = e->getValueString("Location");
 		AddRobotInfo(ifo);
 		e = e->nextSiblingElement("Robot");
 	}

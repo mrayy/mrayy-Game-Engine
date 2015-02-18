@@ -187,6 +187,10 @@ namespace AugTel
 			m_handController = new LeapHandController(m_controller);
 			m_handController->AddListener(this);
 
+			Leap::Frame frame= m_controller->GetController()->frame();
+			images[0]->Capture(frame);
+			images[1]->Capture(frame);
+
 			m_handsImpl = new VirtualHandsLightImpl();
 
 			m_screenShot = false;
@@ -293,7 +297,7 @@ namespace AugTel
 				m_screenNode[i]->AttachNode(rnode);
 				context->headNode -> addChild(m_screenNode[i]);
 				m_screenNode[i]->setPosition(math::vector3d(0, 0, 1));
-				m_screenNode[i]->setScale(math::vector3d(2, 2, 1.55));
+				m_screenNode[i]->setScale(math::vector3d(1.6, 1.5, 1.55));
 				m_screenNode[i]->setVisible(false);
 				m_screenNode[i]->setCullingType(scene::SCT_NONE);
 			}
@@ -493,6 +497,12 @@ namespace AugTel
 				m_screenShot = false;
 			}
 		}
+
+		LeapMotionImageRetrival* GetLeapImage(int i){
+			if (i<0 || i>1)
+				return 0;
+			return images[i];
+		}
 	};
 
 LeapMotionHandsController::LeapMotionHandsController()
@@ -643,6 +653,12 @@ void LeapMotionHandsController::SetEnabled(bool e)
 	m_enabled = e;
 	m_data->setEnabled(e);
 }
+
+LeapMotionImageRetrival* LeapMotionHandsController::GetLeapImage(int i)
+{
+	return m_data->GetLeapImage(i);
+}
+
 
 }
 }

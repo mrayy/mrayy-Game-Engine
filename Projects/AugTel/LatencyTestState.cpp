@@ -80,7 +80,7 @@ void LatencyTestState::OnEnter(IRenderingState*prev)
 
 	TBee::TBRobotInfo* ifo = gAppData.selectedRobot;
 	if (ifo)
-		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
+		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetHandsVideoPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
 	//m_robotConnector->EndUpdate();
 	m_robotConnector->ConnectRobot();
 

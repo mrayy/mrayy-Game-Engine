@@ -1,3 +1,5 @@
+#ifndef __GUICommentDetailsPanelLayout__
+#define __GUICommentDetailsPanelLayout__
 #include "IGUISchemeBase.h"
 #include "GUIPanel.h"
 #include "GUIProfilePicture.h"
@@ -31,3 +33,4 @@ public:
 
 };
 }
+#endif

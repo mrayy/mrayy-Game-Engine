@@ -1,3 +1,5 @@
+#ifndef __GUIProjectStatusLayout__
+#define __GUIProjectStatusLayout__
 #include "IGUISchemeBase.h"
 #include "GUIPanel.h"
 #include "GUIProfilePicture.h"
@@ -31,3 +33,4 @@ public:
 
 };
 }
+#endif

@@ -1,3 +1,5 @@
+#ifndef __GUISessionSidePanelLayout__
+#define __GUISessionSidePanelLayout__
 #include "IGUISchemeBase.h"
 #include "GUIPanel.h"
 #include "GUIStaticText.h"
@@ -20,3 +22,4 @@ public:
 
 };
 }
+#endif

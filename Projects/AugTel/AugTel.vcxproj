@@ -69,7 +69,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);$(GST_SDK_PATH)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mrayGLDevice.lib;TelubeeLib.lib;mrayOIS.lib;mrayOpenNI.lib;mrayPhysx.lib;VTLib.lib;VTSharedMem.lib;fglove.lib;vld.lib;vldmt.lib;mrayOptiTrack.lib;mrayEngine.lib;mrayGUI.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayGameLayer.lib;mrayNet.lib;mySqlDBConnection.lib;ws2_32.lib;mraySound.lib;mrayFSM.lib;mrayTheora.lib;berkelium.lib;mrayBerkelium.lib;DirectShowVideo.lib;mrayOculusVR.lib;mrayGStreamer.lib;WiimoteController.lib;TelubeeRobotDLL.lib;leap.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FlyCapturelibrary.lib;mrayGLDevice.lib;TelubeeLib.lib;mrayOIS.lib;mrayOpenNI.lib;mrayPhysx.lib;VTLib.lib;VTSharedMem.lib;fglove.lib;vld.lib;vldmt.lib;mrayOptiTrack.lib;mrayEngine.lib;mrayGUI.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayGameLayer.lib;mrayNet.lib;mySqlDBConnection.lib;ws2_32.lib;mraySound.lib;mrayFSM.lib;mrayTheora.lib;berkelium.lib;mrayBerkelium.lib;DirectShowVideo.lib;mrayOculusVR.lib;mrayGStreamer.lib;WiimoteController.lib;TelubeeRobotDLL.lib;leap.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>atlthunk.lib;libcmt.lib;libcd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -90,7 +90,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);$(GST_SDK_PATH)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>leap.lib;TelubeeRobotDLL.lib;TelubeeLib.lib;TelubeeRobotDLL.lib;mrayOIS.lib;VTSharedMem.lib;mrayOpenNI.lib;mrayPhysx.lib;VTLib.lib;fglove.lib;mrayOptiTrack.lib;mrayEngine.lib;mrayGUI.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayGameLayer.lib;mrayNet.lib;mySqlDBConnection.lib;ws2_32.lib;mraySound.lib;mrayFSM.lib;mrayTheora.lib;berkelium.lib;mrayBerkelium.lib;DirectShowVideo.lib;mrayOculusVR.lib;mrayGStreamer.lib;regex.lib;WiimoteController.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FlyCaptureLibrary.lib;leap.lib;TelubeeRobotDLL.lib;TelubeeLib.lib;TelubeeRobotDLL.lib;mrayOIS.lib;VTSharedMem.lib;mrayOpenNI.lib;mrayPhysx.lib;VTLib.lib;fglove.lib;mrayOptiTrack.lib;mrayEngine.lib;mrayGUI.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayGameLayer.lib;mrayNet.lib;mySqlDBConnection.lib;ws2_32.lib;mraySound.lib;mrayFSM.lib;mrayTheora.lib;berkelium.lib;mrayBerkelium.lib;DirectShowVideo.lib;mrayOculusVR.lib;mrayGStreamer.lib;regex.lib;WiimoteController.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>atlthunk.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -157,6 +157,7 @@
     <ClInclude Include="LocalRobotCommunicator.h" />
     <ClInclude Include="LoginScreenState.h" />
     <ClInclude Include="PenComponent.h" />
+    <ClInclude Include="PhantomCommunicator.h" />
     <ClInclude Include="RefractionSceneEffect.h" />
     <ClInclude Include="RobotSpaceComponent.h" />
     <ClInclude Include="RobotViewerState.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="PenComponent.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Disabled</Optimization>
     </ClCompile>
+    <ClCompile Include="PhantomCommunicator.cpp" />
     <ClCompile Include="RefractionSceneEffect.cpp" />
     <ClCompile Include="RobotSpaceComponent.cpp" />
     <ClCompile Include="RobotViewerState.cpp" />

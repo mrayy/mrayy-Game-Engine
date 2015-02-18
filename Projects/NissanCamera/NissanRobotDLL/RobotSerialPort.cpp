@@ -88,19 +88,6 @@ class RobotSerialPortImpl
 		}
 };
 
-	void robot_OnDataArrival(int size, char *buffer){
-
-		//todo:handle return
-		//comROBOT->sendData("S", 2);
-
-	}
-
-	void head_OnDataArrival(int size, char *buffer){
-
-		//todo:handle return
-		//comROBOT->sendData("S", 2);
-
-	}
 
 
 	void robot_SerialEventManager(uint32 object, uint32 event){
@@ -117,7 +104,7 @@ class RobotSerialPortImpl
 			case  SERIAL_DATA_ARRIVAL:
 				size = com->getDataInSize();
 				buffer = com->getDataInBuffer();
-				robot_OnDataArrival(size, buffer);
+				((RobotSerialPort*)com->userData)->RobotDataArrived(buffer, size);
 				com->dataHasBeenRead();
 				break;
 			}
@@ -140,7 +127,7 @@ class RobotSerialPortImpl
 			case  SERIAL_DATA_ARRIVAL:
 				size = com->getDataInSize();
 				buffer = com->getDataInBuffer();
-				head_OnDataArrival(size, buffer);
+				((RobotSerialPort*)com->userData)->HeadDataArrived(buffer, size);
 				com->dataHasBeenRead();
 				break;
 			}
@@ -184,11 +171,12 @@ void RobotSerialPort::ConnectRobot()
 	m_impl->comROBOT = new Tserial_event();
 	m_impl->comHEAD = new Tserial_event();
 	if (m_impl->comROBOT != 0){
+		m_impl->comROBOT->userData = this;
 		m_impl->comROBOT->setManager(robot_SerialEventManager);
 		ret = m_impl->comROBOT->connect(robotCOM, robot_baudRate, SERIAL_PARITY_NONE, 8, FALSE, FALSE);
 		if (!ret){
 			printf("Robot Connected!\n", ret);
-			m_impl->comROBOT->setRxSize(15);
+			m_impl->comROBOT->setRxSize(50);
 			IAI_Initialize();		// initialize IAI robot
 		}
 		else{
@@ -201,11 +189,22 @@ void RobotSerialPort::ConnectRobot()
 	}
 
 	if (m_impl->comHEAD != 0){
+		m_impl->comHEAD->userData = this;
+
 		m_impl->comHEAD->setManager(head_SerialEventManager);
 		ret = m_impl->comHEAD->connect(headCOM, head_baudRate, SERIAL_PARITY_NONE, 8, FALSE, FALSE);
 		if (!ret){
 			printf("Head Connected!\n", ret);
-			m_impl->comHEAD->setRxSize(15);
+			m_impl->comHEAD->setRxSize(21);
+
+
+			int packet_size;
+			char sCommand[128];
+			
+			sprintf_s(sCommand, 128, "d\r\n");
+
+			packet_size = strlen(sCommand);
+	//		m_impl->comHEAD->sendData(sCommand, packet_size);
 		}
 		else{
 			printf("Head not connected (%ld)\n", ret);
@@ -418,6 +417,12 @@ int RobotSerialPort::head_control(float pan, float tilt, float roll){
 
 	packet_size = strlen(sCommand);
 	m_impl->comHEAD->sendData(sCommand, packet_size);
+
+	//request head values
+	sprintf_s(sCommand, 128, "g\r\n");
+
+	packet_size = strlen(sCommand);
+	//m_impl->comHEAD->sendData(sCommand, packet_size);
 	//printf(sCommand);
 
 	return true;
@@ -494,6 +499,80 @@ void RobotSerialPort::UpdateRobotStatus(RobotStatus& st)
 
 }
 
+void RobotSerialPort::RobotDataArrived(char *buffer, int size){
+
+	//todo:handle return
+	//comROBOT->sendData("S", 2);
+
+	buffer[size] = 0;
+
+	//printf("%s\n", buffer);
+}
+
+void RobotSerialPort::HeadDataArrived(char *inBuff, int size){
+
+	//todo:handle return
+	//comROBOT->sendData("S", 2);
+
+	inBuff[size] = 0;
+
+	float cx, cy, cz;
+	float tx, ty, tz;
+
+	char* ptr = inBuff;
+	/*
+	while (*ptr != 0 && *ptr != '#')
+	++ptr;
+
+	if (*ptr == 0)
+	return;
+	sscanf(ptr, "#%f,%f,%f", &cx, &cy, &cz);
+	*/
+
+	for (int i = 0; i < size; ++i)
+	{
+		m_headbBuffer.push_back(inBuff[i]);
+	}
+
+	int Start = -1;
+	int End = -1;
+
+	char buffer[128];
+	for (int i = m_headbBuffer.size()-1; i >=0; --i)
+	{
+		if (m_headbBuffer[i] == '$')
+		{
+			End = i;
+			break;
+		}
+	}
+	if (End == -1)
+		return;
+
+	ptr = buffer;
+	for (int i = End - 1; i >= 0; --i)
+	{
+		if (m_headbBuffer[i] == '$')
+		{
+			Start = i;
+			break;
+		}
+	}
+	if (Start == -1)
+		return;
+
+	for (int i = Start + 1; i < End; ++i)
+		*ptr++ = m_headbBuffer[i];
+
+	sscanf(buffer, "%f,%f,%f", &tx, &ty, &tz);
+
+	m_headbBuffer.erase(m_headbBuffer.begin(), m_headbBuffer.begin() + (End));
+
+	if (m_impl->listener)
+		m_impl->listener->OnRotationArrived(tx, ty, tz);
+
+	//printf("%f,%f,%f\n", tx,ty,tz);
+}
 
 void RobotSerialPort::SetListener(ITelubeeRobotListener* l)
 {

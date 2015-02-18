@@ -23,6 +23,7 @@ protected:
 
 	int m_cam0, m_cam1;
 	int m_bitRate;
+	int m_fps;
 	bool m_rtcp;
 
 	math::vector2di m_frameSize;
@@ -31,6 +32,7 @@ protected:
 	GstMyUDPSink* m_videoSink;
 	GstMyUDPSink* m_videoRtcpSink;
 	GstMyUDPSrc* m_videoRtcpSrc;
+
 
 public:
 	GstNetworkVideoStreamerImpl()
@@ -41,26 +43,31 @@ public:
 		m_bitRate = 5000;
 		m_cam0 = 0;
 		m_cam1 = 1;
+		m_fps = 30;
 
 		m_videoSink = 0;
 		m_videoRtcpSink = 0;
 		m_videoRtcpSrc = 0;
 		m_frameSize.set(1280, 720);
+
 	}
 
 	virtual ~GstNetworkVideoStreamerImpl()
 	{
 	}
-	void BuildString()
+
+	core::string _buildCamString()
 	{
 		core::string videoStr;
+
 		if (m_cam0 < 0)m_cam0 = 0;
 		if (m_cam1 < 0)m_cam1 = 0;
 		if (m_cam0 == m_cam1)
 		{
 			//ksvideosrc
 			videoStr = "ksvideosrc name=src device-index=" + core::StringConverter::toString(m_cam0) + // device=" + m_cam0.guidPath + "" +//
-				" ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) + ",framerate=30/1 ! videoconvert  ! videoflip method = 4 ";// !videoflip method = 1  ";
+				" ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) +
+				",framerate=" + core::StringConverter::toString(m_fps) + "/1 ! videoconvert  ! videoflip method = 4 ";// !videoflip method = 1  ";
 
 		}
 		else
@@ -72,17 +79,27 @@ public:
 			videoStr += "videotestsrc pattern=\"black\" ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) + " !  mix.sink_0 ";
 
 			//first camera
-			videoStr += "ksvideosrc name=src1 device-index=" + core::StringConverter::toString(m_cam0) + "  ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) + ",framerate=30/1 ! videoconvert ! videoflip method=4 ! videoscale !"
+			videoStr += "ksvideosrc name=src1 device-index=" + core::StringConverter::toString(m_cam0) + "  ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) +
+				",framerate=" + core::StringConverter::toString(m_fps) + "/1 ! videoconvert ! videoflip method=4 ! videoscale !"
 				"video/x-raw,format=I420,width=" + core::StringConverter::toString(halfW) + ",height=" + core::StringConverter::toString(m_frameSize.y) + " ! mix.sink_1 ";
-			
+
 			//second camera
-			videoStr += "ksvideosrc name=src2 device-index=" + core::StringConverter::toString(m_cam1) + "  ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) + ",framerate=30/1 ! videoconvert ! videoflip method=4 ! videoscale ! "
+			videoStr += "ksvideosrc name=src2 device-index=" + core::StringConverter::toString(m_cam1) + "  ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) +
+				",framerate=" + core::StringConverter::toString(m_fps) + "/1 ! videoconvert ! videoflip method=4 ! videoscale ! "
 				"video/x-raw,format=I420,width=" + core::StringConverter::toString(halfW) + ",height=" + core::StringConverter::toString(m_frameSize.y) + "! mix.sink_2 ";
 
 			videoStr += " mix. ";
 
 		}
+		return videoStr;
+	}
 
+
+	void BuildString()
+	{
+		core::string videoStr;
+
+		videoStr=_buildCamString();
 		//encoder string
 		videoStr +="! x264enc name=videoEnc bitrate=" + core::StringConverter::toString(m_bitRate) + " speed-preset=superfast tune=zerolatency sync-lookahead=0  pass=qual ! rtph264pay ";
 		if (m_rtcp)
@@ -120,9 +137,10 @@ public:
 		return m_cam0 != m_cam1;
 	}
 
-	void SetResolution(int width, int height)
+	void SetResolution(int width, int height, int fps)
 	{
 		m_frameSize.set(width, height);
+		m_fps = fps;
 	}
 
 	void _UpdatePorts()
@@ -220,9 +238,9 @@ bool GstNetworkVideoStreamer::IsStreaming()
 	return m_impl->IsStreaming();
 }
 
-void GstNetworkVideoStreamer::SetResolution(int width, int height)
+void GstNetworkVideoStreamer::SetResolution(int width, int height,int fps)
 {
-	m_impl->SetResolution(width, height);
+	m_impl->SetResolution(width, height, fps);
 }
 
 void GstNetworkVideoStreamer::SetBitRate(int bitRate)

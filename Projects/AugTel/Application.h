@@ -48,7 +48,7 @@ namespace AugTel
 
 class ApplicationOculusData;
 
-class Application :public CMRayApplication, public scene::IViewportListener,public ITBeeRendererListener
+class Application :public CMRayApplication, public scene::IViewportListener, public ITBeeRendererListener
 {
 protected:
 	scene::ViewPort* m_mainVP;
@@ -97,6 +97,11 @@ public:
 	virtual void WindowPostRender(video::RenderWindow* wnd);
 	virtual void update(float dt);
 	virtual void onDone();
+
+	int GetCamera(int c)
+	{
+		return c == 0 ? m_cam1 : m_cam2;
+	}
 
 	virtual void onRenderDone(scene::ViewPort*vp);
 

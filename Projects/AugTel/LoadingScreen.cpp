@@ -7,6 +7,7 @@
 #include "GUIThemeManager.h"
 #include "GUIOverlayManager.h"
 #include "GUIOverlay.h"
+#include "TBRobotInfo.h"
 
 namespace mray
 {
@@ -46,13 +47,13 @@ void LoadingScreen::Init()
 }
 
 
-void LoadingScreen::Start()
+void LoadingScreen::Start(TBee::TBRobotInfo* robot)
 {
 	m_video->Start();
 	m_video->SetVisible(true);
 
 	//m_screenLayout->SetInfo("");
-	m_screenLayout->SetInfo("Location: Living Lab Tokyo");
+	m_screenLayout->SetInfo("Location: " + robot->Location);
 	m_screenLayout->SetText("Connecting Robot", true);
 	math::vector2d pos = m_screenLayout->Status->GetPosition();
 	pos.x = 100;

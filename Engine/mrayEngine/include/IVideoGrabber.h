@@ -41,6 +41,9 @@ public:
 
 
 	virtual const ImageInfo* GetLastFrame()=0;
+
+	virtual void Lock(){}
+	virtual void Unlock(){}
 	
 };
 

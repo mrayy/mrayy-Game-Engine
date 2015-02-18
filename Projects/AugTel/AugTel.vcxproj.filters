@@ -49,6 +49,9 @@
     <Filter Include="Source Files\Controllers">
       <UniqueIdentifier>{b6ecb1f5-52ed-4e2d-b4c1-a3f189cd4a7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Robot">
+      <UniqueIdentifier>{5bca46bb-ed4c-4c22-ae02-fa596448ec76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -273,6 +276,9 @@
     <ClInclude Include="LoadingScreen.h">
       <Filter>Source Files\GUI\Elements</Filter>
     </ClInclude>
+    <ClInclude Include="PhantomCommunicator.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -445,6 +451,9 @@
     </ClCompile>
     <ClCompile Include="LoadingScreen.cpp">
       <Filter>Source Files\GUI\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="PhantomCommunicator.cpp">
+      <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

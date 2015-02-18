@@ -9,6 +9,10 @@
 
 namespace mray
 {
+	namespace TBee
+	{
+		class TBRobotInfo;
+	}
 namespace AugTel
 {
 	class VideoRenderElement;
@@ -28,7 +32,7 @@ public:
 
 	void Init();
 
-	void Start();
+	void Start(TBee::TBRobotInfo* robot);
 
 	void Draw(const math::rectf& rc);
 

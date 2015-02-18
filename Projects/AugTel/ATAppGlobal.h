@@ -69,6 +69,7 @@ public:
 
 		TargetVideoPort = 7000;
 		TargetAudioPort = 7005;
+		TargetHandsVideoPort = 7010;
 		TargetCommunicationPort = 6000;
 
 		RtcpStream = false;
@@ -81,6 +82,7 @@ public:
 	uint TargetVideoPort;
 	uint TargetAudioPort;
 	uint TargetCommunicationPort;
+	uint TargetHandsVideoPort;
 
 
 	core::string DVIPort;

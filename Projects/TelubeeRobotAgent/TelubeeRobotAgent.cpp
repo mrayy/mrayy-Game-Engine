@@ -64,6 +64,12 @@ EntryPoint
 		op.valueSet.clear();
 	}
 	{
+		op.name = "HandsDisplay";
+		op.value = "-1";
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+	{
 		op.name = "StreamResolution";
 		op.value = "HD";
 		op.valueSet.insert("HD");
@@ -138,7 +144,7 @@ EntryPoint
 	}
 	//VLDEnable();
 	app->loadResourceFile(mT("tbdataPath.stg"));
-	if (app->startup(mT("TELUBee Robot Agent 1.00"), vector2di(800, 600), false, extraOptions, resFileName, 0, true, true, true))
+	if (app->startup(mT("TELUBee Robot Agent 1.00"), vector2di(800, 600), false, extraOptions, resFileName, 0, true, false, true))
 	{
 		app->run();
 	}

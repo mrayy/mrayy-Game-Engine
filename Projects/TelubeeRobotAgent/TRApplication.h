@@ -29,6 +29,8 @@
 #include "CameraProfile.h"
 #include "GstStreamBin.h"
 #include "GstPlayerBin.h"
+#include "RenderWindow.h"
+#include "ParsedShaderPP.h"
 
 namespace mray
 {
@@ -64,6 +66,7 @@ protected:
 
 	EController m_controller;
 	scene::ViewPort* m_viewPort;
+	scene::ViewPort* m_handsViewPort;
 
 	GCPtr<GUI::GUIBatchRenderer> m_guiRender;
 
@@ -75,11 +78,12 @@ protected:
 
 	video::VideoGrabberTexture m_cameraTextures[3];
 	video::VideoGrabberTexture* m_playerGrabber;
+	video::VideoGrabberTexture* m_handsGrabber;
 
 	video::ITexturePtr m_rtTexture;
 	video::IRenderTargetPtr m_renderTarget;;
 
-
+	GCPtr<video::ParsedShaderPP> m_undistortShader;
 
 	RobotCommunicator* m_robotCommunicator;
 
@@ -111,6 +115,8 @@ protected:
 
 	core::string m_ip;
 
+	GCPtr<video::ICameraVideoGrabber> m_camera;
+
 	struct _CameraInfo
 	{
 		CameraInfo ifo;
@@ -119,6 +125,7 @@ protected:
 
 	EStreamingQuality m_quality;
 	bool m_enableStream;
+	int m_handsMonitor;
 
 	struct DebugData
 	{
@@ -134,9 +141,12 @@ protected:
 		bool debug;
 	}m_debugData;
 
+	video::RenderWindow* m_handsWnd;
 	void _InitResources();
 
 	bool m_startVideo;
+
+	void _RenderHands(scene::ViewPort*vp);
 public:
 	TRApplication();
 	virtual~TRApplication();
@@ -153,7 +163,7 @@ public:
 
 	virtual void onRenderDone(scene::ViewPort*vp);
 
-	void OnUserConnected(const network::NetAddress& address, int videoPort, int audioPort, bool rtcp);
+	void OnUserConnected(const network::NetAddress& address, int videoPort, int audioPort, int handsPort, bool rtcp);
 	void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status);
 	void OnCollisionData(RobotCommunicator* sender, float left, float right);
 	void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address);

@@ -171,7 +171,7 @@ void LocalCameraRenderingState::OnEnter(IRenderingState*prev)
 	TBRobotInfo* ifo = AppData::Instance()->robotInfoManager->GetRobotInfo(0);
 	if (ifo)
 	{
-		m_robotConnector->ConnectRobotIP(ifo->IP, 5000, 5002,5003,5000);
+//		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetHandsVideoPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
 	}
 
 }
