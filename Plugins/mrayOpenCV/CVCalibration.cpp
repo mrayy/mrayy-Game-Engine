@@ -110,7 +110,7 @@ void CVCalibration::save(core::string filename, bool absolute) const {
 	fs << "reprojectionError" << reprojectionError;
 	fs << "features" << "[";
 	for (int i = 0; i < (int)imagePoints.size(); i++) {
-		fs << "[:" << imagePoints[i].getMat() << "]";
+		fs << "[:" << imagePoints[i] << "]";
 	}
 	fs << "]";
 }
@@ -171,10 +171,10 @@ void CVCalibration::setSubpixelSize(int subpixelSize) {
 	subpixelSize = MAX(subpixelSize, 2);
 	this->subpixelSize = cv::Size(subpixelSize, subpixelSize);
 }
-bool CVCalibration::add( Mat& img) {
+bool CVCalibration::add( Mat img) {
 	addedImageSize = img.size();
 
-	_OutputArray pointBuf;
+	vector<Point2f> pointBuf;
 
 	// find corners
 	bool found = findBoard(img, pointBuf);
@@ -185,12 +185,11 @@ bool CVCalibration::add( Mat& img) {
 // 		gLogManager.log( "CVCalibration::add() failed, maybe your patternSize is wrong or the image has poor lighting?",ELL_WARNING);
 	return found;
 }
-bool CVCalibration::findBoard(Mat& img, OutputArray pointBuf, bool refine) {
-	bool found = false;+
+bool CVCalibration::findBoard(Mat img, vector<Point2f>& pointBuf, bool refine) {
+	bool found = false;
 	if (patternType == CHESSBOARD) {
 		// no CV_CALIB_CB_FAST_CHECK, because it breaks on dark images (e.g., dark IR images from kinect)
-		int chessFlags = CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE;// ;
-
+		int chessFlags = CV_CALIB_CB_ADAPTIVE_THRESH ;// ;
 		found = findChessboardCorners(img, patternSize, pointBuf, chessFlags);
 
 		// improve corner accuracy
@@ -442,7 +441,7 @@ void CVCalibration::updateReprojectionError() {
 
 	for (int i = 0; i < (int)objectPoints.size(); i++) {
 		projectPoints(Mat(objectPoints[i]), boardRotations[i], boardTranslations[i], distortedIntrinsics.getCameraMatrix(), distCoeffs, imagePoints2);
-		double err = norm(imagePoints[i].getMat(), Mat(imagePoints2), CV_L2);
+		double err = norm(Mat(imagePoints[i]), Mat(imagePoints2), CV_L2);
 		int n = objectPoints[i].size();
 		perViewErrors[i] = sqrt(err * err / n);
 		totalErr += err * err;

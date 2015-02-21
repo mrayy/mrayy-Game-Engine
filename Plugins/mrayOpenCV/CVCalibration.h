@@ -64,11 +64,11 @@ namespace video
 		/// set this to the pixel size of your smallest square. default is 11
 		void setSubpixelSize(int subpixelSize);
 
-		bool add( Mat& img);
+		bool add( Mat img);
 		bool clean(float minReprojectionError = 2.f);
 		bool calibrate();
 		bool calibrateFromDirectory(core::string directory);
-		bool findBoard(Mat& img, OutputArray  pointBuf, bool refine = true);
+		bool findBoard(Mat img, vector<Point2f>&  pointBuf, bool refine = true);
 		void setIntrinsics(Intrinsics& distortedIntrinsics, Mat& distortionCoefficients);
 
 		void undistort( Mat& img, int interpolationMode = INTER_NEAREST);
@@ -100,7 +100,7 @@ namespace video
 		void draw3d(int i) const;
 
 		bool isReady();
-		std::vector<_OutputArray > imagePoints;
+		std::vector<vector<Point2f> > imagePoints;
 
 	protected:
 		CalibrationPattern patternType;

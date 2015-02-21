@@ -179,6 +179,7 @@ FlyCameraVideoGrabber::FlyCameraVideoGrabber()
 	m_fps=30;
 	m_data=new FlyCameraData();
 	FlyCameraManager::instance.AddRef();
+	m_hasNewFrame = false;
 
 	m_bufferId = 0;
 	m_imageMutex=OS::IThreadManager::getInstance().createMutex();
@@ -271,7 +272,7 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	CMode mode=GetClosestVideoMode(w,h);
 	CFpsMode fpsMode=GetClosestFps(fps);
 
-	if (false)
+	if (true)
 	{
 		// Query for available Format 7 modes
 		Format7Info fmt7Info;

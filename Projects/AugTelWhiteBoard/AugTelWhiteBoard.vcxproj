@@ -60,13 +60,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>..\VirtualTelesar\VTSharedMem;..\..\Engine\mrayEngine\include;..\..\Engine\mrayWinApp\;..\..\Engine\mrayMath;..\..\Engine\mrayGUI;..\..\Plugins\mraySound;..\..\Engine\regex;..\..\Engine\mrayNet;..\..\Dependencies\include;..\..\plugins\mrayOptiTrack;..\..\Engine\mrayOIS;..\..\plugins\WiimoteController;..\..\plugins\mrayOpenCV;..\..\plugins\DirectShowVideo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\VirtualTelesar\VTSharedMem;..\..\Engine\mrayEngine\include;..\..\Engine\mrayWinApp\;..\..\Engine\mrayMath;..\..\Engine\mrayGUI;..\..\Plugins\mraySound;..\..\Engine\regex;..\..\Engine\mrayNet;..\..\Dependencies\include;..\..\plugins\mrayOptiTrack;..\..\Engine\mrayOIS;..\..\plugins\WiimoteController;..\..\plugins\mrayOpenCV;..\..\plugins\DirectShowVideo;..\..\plugins\FlyCaptureLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);$(GST_SDK_PATH)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>TelubeeLib.lib;mrayOIS.lib;mrayPhysx.lib;mrayOptiTrack.lib;mrayEngine.lib;mrayGUI.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayNet.lib;ws2_32.lib;mraySound.lib;regex_d.lib;mrayOpenCV.lib;DirectShowVideo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FlyCaptureLibrary.lib;TelubeeLib.lib;mrayOIS.lib;mrayPhysx.lib;mrayOptiTrack.lib;mrayEngine.lib;mrayGUI.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayNet.lib;ws2_32.lib;mraySound.lib;regex_d.lib;mrayOpenCV.lib;DirectShowVideo.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -81,6 +81,17 @@ namespace mray {
 		return true;
 	}
 
+	void fromCV(Mat mat, ImageInfo* pixels, bool refOnly) {
+		if (!refOnly)
+			pixels->setData(mat.ptr<uchar>(), math::vector3di(mat.cols, mat.rows, 1), getGlImageType(mat.type()));
+		else
+		{
+			pixels->autoDel = false;
+			pixels->Size = math::vector3di(mat.cols, mat.rows, 1);
+			pixels->format = getGlImageType(mat.type());
+			pixels->imageData = mat.ptr<uchar>();
+		}
+	}
 	float getMaxVal(int cvDepth) {
 		switch(cvDepth) {
 			case CV_8U: return numeric_limits<uint8_t>::max();

@@ -411,6 +411,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AugTel", "Projects\AugTel\A
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AugTelWhiteBoard", "Projects\AugTelWhiteBoard\AugTelWhiteBoard.vcxproj", "{D2CAE252-6673-4EC1-9429-8352BC728A08}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8982AC73-C125-435F-AF1D-DB756BD5C84B} = {8982AC73-C125-435F-AF1D-DB756BD5C84B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NissanCamera", "Projects\NissanCamera\NissanCamera.vcxproj", "{665FDF8F-AFF3-4C10-92EE-608B75C4DD3C}"
 	ProjectSection(ProjectDependencies) = postProject

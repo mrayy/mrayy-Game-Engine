@@ -263,9 +263,6 @@ namespace video {
 	math::rectf fromCV(cv::Rect rect);
 	bool fromCV(const Mat& src, math::matrix4x4& dst);
 
-	template <class T>
-	void fromCV(Mat mat, ImageInfo* pixels) {
-		pixels->setData(mat.ptr<T>(), math::vector3di(mat.cols, mat.rows, 1), getGlImageType(mat.channels()));
-	}
+	void fromCV(Mat mat, ImageInfo* pixels,bool refOnly=false);
 }
 }

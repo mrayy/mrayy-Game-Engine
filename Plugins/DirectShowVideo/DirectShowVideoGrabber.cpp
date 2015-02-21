@@ -25,6 +25,7 @@ DirectShowVideoGrabber::DirectShowVideoGrabber()
 	{
 		s_videoInput=new videoInput();
 		s_videoInput->setVerbose(true);
+		s_videoInput->setComMultiThreaded(true);
 		s_videoInput->setUseCallback(true);
 	}
 	m_textureImage.autoDel=true;
@@ -55,8 +56,9 @@ core::string DirectShowVideoGrabber::GetDeviceName(int id)
 core::string DirectShowVideoGrabber::GetDevicePath(int id)
 {
 	core::string str;
-	char* d = s_videoInput->getDevicePath(id);
-	core::char_to_string(d, str);
+//	char* d = s_videoInput->getDevicePath(id);
+	//core::char_to_string(d, str);
+	str = s_videoInput->getDeviceName(id);
 	return str;
 }
 void DirectShowVideoGrabber::SetDevice(int id)
@@ -84,7 +86,8 @@ bool DirectShowVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	//int format = VI_NTSC_M;
 	//s_videoInput->setFormat(device, format);
 		
-	s_videoInput->setIdealFramerate(device,fps);
+	//s_videoInput->setRequestedMediaSubType(VI_MEDIASUBTYPE_YUYV);
+	s_videoInput->setIdealFramerate(device, fps);
 	if(!s_videoInput->setupDevice(device,w,h))
 	{
 		m_inited=false;

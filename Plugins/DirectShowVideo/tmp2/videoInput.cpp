@@ -790,13 +790,20 @@ bool videoInput::setFormat(int deviceNumber, int format){
 // Must call listDevices first.
 //
 // ----------------------------------------------------------------------
-char videoInput::deviceNames[VI_MAX_CAMERAS][255]={{0}};
+char videoInput::deviceNames[VI_MAX_CAMERAS][255] = { { 0 } };
+char videoInput::devicePaths[VI_MAX_CAMERAS][255] = { { 0 } };
 
 char * videoInput::getDeviceName(int deviceID){
 	if( deviceID >= VI_MAX_CAMERAS ){
 		return NULL;
 	}
 	return deviceNames[deviceID];
+}
+char * videoInput::getDevicePath(int deviceID){
+	if (deviceID >= VI_MAX_CAMERAS){
+		return NULL;
+	}
+	return devicePaths[deviceID];
 }
 
 
