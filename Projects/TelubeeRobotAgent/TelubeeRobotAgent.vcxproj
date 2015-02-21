@@ -72,7 +72,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>mraySound.lib;winmm.lib;ws2_32.lib;mrayEngine.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayNet.lib;mraySound.lib;DirectShowVideo.lib;mrayGStreamer.lib;TelubeeLib.lib;mrayOpenNI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FlyCaptureLibrary.lib;mraySound.lib;winmm.lib;ws2_32.lib;mrayEngine.lib;mrayMath.lib;mrayWinApp.lib;mrayWin32.lib;mrayNet.lib;mraySound.lib;DirectShowVideo.lib;mrayGStreamer.lib;TelubeeLib.lib;mrayOpenNI.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);$(GST_SDK_PATH)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

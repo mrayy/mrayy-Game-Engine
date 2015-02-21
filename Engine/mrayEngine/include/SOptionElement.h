@@ -69,6 +69,7 @@ public:
 		return value;
 	}
 
+
 	core::string name;
 	core::string value;
 	typedef std::set<core::string> ValueSet;

@@ -223,7 +223,8 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 		m_enableStream = extraOptions.GetOptionByName("Stream")->getValue() == "Yes";
 		
-		m_controller = extraOptions.GetOptionByName("Controller")->getValue() == "XBox"? EController::XBox : EController::Logicool;
+		m_controller = extraOptions.GetOptionByName("Controller")->getValue() == "XBox" ? EController::XBox : EController::Logicool;
+		m_cameraType = extraOptions.GetOptionByName("CameraConnection")->getValue() == "Webcam" ? ECameraType::Webcam : ECameraType::PointGrey;
 
 		m_cameraProfile = extraOptions.GetOptionValue("CameraProfile");
 
@@ -284,6 +285,59 @@ void TRApplication::init(const OptionContainer &extraOptions)
 	}else
 		this->GetRenderWindow(0)->Hide();
 
+	uint bitRate[] =
+	{
+		1000,
+		2000,
+		4000,
+		5000,
+		7000
+	};
+
+	{
+		video::GstNetworkVideoStreamer* streamer;
+		if (m_cameraType==ECameraType::Webcam)
+		{
+			streamer = new video::GstNetworkVideoStreamer();
+
+			streamer->SetResolution(m_resolution.x, m_resolution.y);
+			streamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
+			streamer->SetBitRate(bitRate[(int)m_quality]);
+
+
+			m_streamers->AddStream(streamer, "Video");
+
+			for (int i = 0; i < 2; ++i)
+			{
+				m_cameraIfo[i].camera = new video::DirectShowVideoGrabber();
+				if (m_cameraIfo[i].ifo.index >= 0)
+				{
+					m_cameraIfo[i].camera->InitDevice(m_cameraIfo[i].ifo.index, m_cameraIfo[i].w, m_cameraIfo[i].h, m_cameraIfo[i].fps);//1280, 720
+					m_cameraIfo[i].ifo.guidPath = m_cameraIfo[i].camera->GetDeviceName(m_cameraIfo[i].ifo.index);
+					m_cameraIfo[i].camera->SetParameter(video::ICameraVideoGrabber::Param_Focus, "0");
+				}
+			}
+
+		}
+		else
+		{
+
+			m_cameraIfo[0].camera = new video::FlyCameraVideoGrabber();
+			m_cameraIfo[0].camera->InitDevice(m_cameraIfo[0].ifo.index, 1024, 768, 50);
+			m_cameraIfo[0].camera->Start();
+
+			m_cameraIfo[1].camera = new video::FlyCameraVideoGrabber();
+			m_cameraIfo[1].camera->InitDevice(m_cameraIfo[1].ifo.index, 1024, 768, 50);
+			m_cameraIfo[1].camera->Start();
+
+			video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
+			hs->SetVideoGrabber(m_cameraIfo[0].camera, m_cameraIfo[1].camera);//
+			hs->SetBitRate(3000);
+			m_streamers->AddStream(hs, "Video");
+		}
+	}
+
+
 	{
 		core::string camParams[] = {
 			video::ICameraVideoGrabber::Param_Brightness,
@@ -304,73 +358,29 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		CameraProfile* prof = m_cameraProfileManager->GetProfile(m_cameraProfile);
 		{
 			for (int i = 0; i < 2; ++i)
-
 			{
-				video::DirectShowVideoGrabber * grabber = new video::DirectShowVideoGrabber();
-				m_cameras[i] = grabber;
 
-				if (m_cameraIfo[i].ifo.index >= 0)
-				{
-					grabber->InitDevice(m_cameraIfo[i].ifo.index, m_cameraIfo[i].w, m_cameraIfo[i].h, m_cameraIfo[i].fps);//1280, 720
-					m_cameraIfo[i].ifo.guidPath = grabber->GetDevicePath(m_cameraIfo[i].ifo.index);
-					grabber->SetParameter(video::ICameraVideoGrabber::Param_Focus, "0");
-				}
-
-					
 				if (prof && false)
 				{
 					for (int j = 0; j < count; ++j)
 					{
 						core::string v;
 						if (prof->GetValue(camParams[j], v))
-							grabber->SetParameter(camParams[j], v);
+							m_cameraIfo[i].camera->SetParameter(camParams[j], v);
 					}
 				}
 				//	if (!m_debugData.debug)
+				if (m_cameraType==ECameraType::Webcam)
 				{
-					m_cameras[i]->Stop();
+					m_cameraIfo[i].camera->Stop();
 				}
-				m_cameraTextures[i].Set(m_cameras[i], getDevice()->createEmptyTexture2D(true));
+				m_cameraTextures[i].Set(m_cameraIfo[i].camera, getDevice()->createEmptyTexture2D(true));
 
 			}
 		}
 	}
 
-	uint bitRate[] =
-	{
-		1000,
-		2000,
-		4000,
-		5000,
-		7000
-	};
 
-	{
-		video::GstNetworkVideoStreamer* streamer;
-		if (false)
-		{
-			streamer = new video::GstNetworkVideoStreamer();
-
-			streamer->SetResolution(m_resolution.x, m_resolution.y);
-			streamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
-			streamer->SetBitRate(bitRate[(int)m_quality]);
-
-
-			m_streamers->AddStream(streamer, "Video");
-		}
-		else
-		{
-
-			m_camera = new video::FlyCameraVideoGrabber();
-			m_camera->InitDevice(0, 1280, 960, 50);
-			m_camera->Start();
-
-			video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
-			hs->SetVideoGrabber(m_camera, 0);//
-			hs->SetBitRate(3000);
-			m_streamers->AddStream(hs, "Video");
-		}
-	}
 	{
 		video::GstNetworkAudioStreamer* streamer;
 		streamer = new video::GstNetworkAudioStreamer();
@@ -446,7 +456,7 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		m_combinedCameras->SetFrameSize(1024, 576);
 	else if (m_quality == EStreamingQuality::UltraHigh)*/
 	m_combinedCameras->SetFrameSize(m_resolution.x, m_resolution.y);
-	((CombineVideoGrabber*)m_combinedCameras.pointer())->SetGrabbers(m_cameras[0], m_cameras[1]);
+	((CombineVideoGrabber*)m_combinedCameras.pointer())->SetGrabbers(m_cameraIfo[0].camera, m_cameraIfo[1].camera);
  	m_cameraTextures[2].Set(m_combinedCameras, getDevice()->createEmptyTexture2D(true));
 // 	m_videoGrabber = new GstVideoGrabberImpl(m_combinedCameras);
 // 
@@ -529,8 +539,8 @@ void TRApplication::update(float dt)
 		m_players->CloseAll();
 		if (!m_debugData.debug)
 		{
-			m_cameras[0]->Stop();
-			m_cameras[1]->Stop();
+			m_cameraIfo[0].camera->Stop();
+			m_cameraIfo[1].camera->Stop();
 		}
 	}
 

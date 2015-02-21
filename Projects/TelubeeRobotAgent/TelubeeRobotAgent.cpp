@@ -7,6 +7,7 @@
 #include "TRApplication.h"
 #include "GCCollector.h"
 #include "DirectShowVideoGrabber.h"
+#include "FlyCameraManager.h"
 #include <windows.h>
 // #include <vld.h>
 // #include <vldapi.h>
@@ -29,6 +30,7 @@ EntryPoint
 #endif
 
 	gLogManager.setVerbosLevel(EVL_Heavy);
+	
 
 	std::vector<SOptionElement> extraOptions;
 	SOptionElement op;
@@ -42,6 +44,14 @@ EntryPoint
 		{
 			op.valueSet.insert(core::StringConverter::toString(i)+" - " +ds.GetDeviceName(i));
 		}
+
+		 camsCount = video::FlyCameraManager::instance.GetCamerasCount();
+		for (int i = 0; i<camsCount; ++i)
+		{
+			uint sp;
+			video::FlyCameraManager::instance.GetCameraSerialNumber(i, sp);
+			op.valueSet.insert(core::StringConverter::toString(i) + " - FC_" + core::StringConverter::toString(sp));
+		}
 		if (op.valueSet.size()>0)
 		{
 			op.value = *op.valueSet.begin();
@@ -54,6 +64,14 @@ EntryPoint
 		op.value = "No";
 		op.valueSet.insert("Yes");
 		op.valueSet.insert("No");
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+	{
+		op.name = "CameraConnection";
+		op.value = "Webcam";
+		op.valueSet.insert("Webcam");
+		op.valueSet.insert("Pointgrey");
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}

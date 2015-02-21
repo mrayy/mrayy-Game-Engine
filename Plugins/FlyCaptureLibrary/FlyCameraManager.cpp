@@ -60,6 +60,17 @@ bool FlyCameraManager::GetCamera(int index,FlyCapture2::PGRGuid& out)
 	return true;
 
 }
+bool FlyCameraManager::GetCameraSerialNumber(int index, unsigned int& pSerialNumber)
+{
+	FlyCapture2::Error e = m_busManager.GetCameraSerialNumberFromIndex(index, &pSerialNumber);
+	if (e != FlyCapture2::PGRERROR_OK)
+	{
+		LogError(e);
+		return false;
+	}
+	return true;
+
+}
 
 
 void FlyCameraManager::LogError(FlyCapture2::Error e)

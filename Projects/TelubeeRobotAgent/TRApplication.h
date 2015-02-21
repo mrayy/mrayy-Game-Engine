@@ -62,15 +62,22 @@ protected:
 		BatteryLevel = 9,
 	};
 
+	enum class ECameraType
+	{
+		Webcam,
+		PointGrey
+	};
+
 	bool m_robotInited;
 
 	EController m_controller;
 	scene::ViewPort* m_viewPort;
 	scene::ViewPort* m_handsViewPort;
 
+	ECameraType m_cameraType;
+
 	GCPtr<GUI::GUIBatchRenderer> m_guiRender;
 
-	GCPtr<video::ICameraVideoGrabber> m_cameras[2];
 	GCPtr<video::IVideoGrabber> m_combinedCameras;
 	GCPtr<video::GstStreamBin> m_streamers;
 	GCPtr<video::GstPlayerBin> m_players;
@@ -115,12 +122,12 @@ protected:
 
 	core::string m_ip;
 
-	GCPtr<video::ICameraVideoGrabber> m_camera;
 
 	struct _CameraInfo
 	{
 		CameraInfo ifo;
 		int w, h, fps;
+		GCPtr<video::ICameraVideoGrabber> camera;
 	}m_cameraIfo[2];
 
 	EStreamingQuality m_quality;

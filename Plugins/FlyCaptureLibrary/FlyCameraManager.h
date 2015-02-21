@@ -39,7 +39,8 @@ public:
 	void SubRef();
 
 	int GetCamerasCount();
-	bool GetCamera(int index,FlyCapture2::PGRGuid& out);
+	bool GetCamera(int index, FlyCapture2::PGRGuid& out);
+	bool GetCameraSerialNumber(int index, unsigned int& pSerialNumber);
 
 
 	void LogError(FlyCapture2::Error e);

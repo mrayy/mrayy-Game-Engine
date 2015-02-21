@@ -87,7 +87,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>TelubeeRobotDLL.lib;mrayOculusVR-DK2.lib;WiimoteController.lib</AdditionalDependencies>
+      <AdditionalDependencies>mrayOculusVR-DK2.lib;WiimoteController.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\lib\$(Configuration);</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
