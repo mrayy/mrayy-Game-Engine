@@ -43,6 +43,9 @@ public:
 
 	virtual void Update(float dt);
 
+	virtual core::string GetData(const core::string& key) { return ""; }
+
+
 	void SetData(const core::string &key, const core::string &value, bool statusData);
 	void RemoveData(const core::string &key);
 	void ClearData(bool statusValues);

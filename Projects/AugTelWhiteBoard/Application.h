@@ -23,6 +23,7 @@
 #include "ViewPort.h"
 #include "LineDrawer.h"
 #include "DirectShowVideoGrabber.h"
+#include "FlyCameraVideoGrabber.h"
 #include "VideoGrabberTexture.h"
 
 namespace mray
@@ -47,10 +48,11 @@ protected:
 
 	CVData* m_cvData;
 	
-	GCPtr<video::DirectShowVideoGrabber> m_cam;
+	GCPtr<video::FlyCameraVideoGrabber> m_cam;
 
 	GCPtr<video::VideoGrabberTexture> m_videoGrabber;
 
+	GUI::GUIBatchRendererPtr m_guiRenderer;
 public:
 	Application();
 	virtual~Application();
