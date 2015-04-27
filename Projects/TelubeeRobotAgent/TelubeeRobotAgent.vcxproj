@@ -107,6 +107,7 @@
     <ClInclude Include="CombineVideoGrabber.h" />
     <ClInclude Include="CMySink.h" />
     <ClInclude Include="GstVideoProvider.h" />
+    <ClInclude Include="HandsWindow.h" />
     <ClInclude Include="RobotCommunicator.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -119,6 +120,7 @@
     <ClCompile Include="CombineVideoGrabber.cpp" />
     <ClCompile Include="CMySink.cpp" />
     <ClCompile Include="GstVideoProvider.cpp" />
+    <ClCompile Include="HandsWindow.cpp" />
     <ClCompile Include="RobotCommunicator.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

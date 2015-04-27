@@ -737,6 +737,10 @@ void AugCameraRenderState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
 	video::IVideoDevice* dev = Engine::getInstance().getDevice();
 	AppData* app = AppData::Instance();
 
+#define PRINT_LOG(txt)\
+	msg = txt; \
+	font->print(r, &attr, 0, msg, m_guiRenderer);\
+	r.ULPoint.y += attr.fontSize + attr.fontSize;
 
 	if (font)
 	{
@@ -753,12 +757,10 @@ void AugCameraRenderState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
 		math::rectf r = rc;
 		r.ULPoint = pos;
 
-		core::string msg = mT("Depth Center:") + core::StringConverter::toString(m_openNiHandler->GetCenter());
-		font->print(r, &attr, 0, msg, m_guiRenderer);
-		r.ULPoint.y += attr.fontSize + 5;
-		msg = mT("Depth Center:") + core::StringConverter::toString(m_openNiHandler->GetScale());
-		font->print(r, &attr, 0, msg, m_guiRenderer);
-		r.ULPoint.y += attr.fontSize + 5;
+		core::string msg;
+
+		PRINT_LOG( (mT("Depth Center:") + core::StringConverter::toString(m_openNiHandler->GetCenter())));
+		PRINT_LOG( (mT("Depth Scale:") + core::StringConverter::toString(m_openNiHandler->GetScale())));
 		
 
 		if (m_robotConnector->GetHeadController())
@@ -766,7 +768,7 @@ void AugCameraRenderState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
 			math::vector3d head;
 			math::quaternion q, q2(m_robotConnector->GetHeadRotation());
 			q = q2;
-			q.x = q2.z;
+			q.x =  q2.z;
 			q.y = q2.x;
 			q.z = q2.y;
 			q.toEulerAngles(head);
@@ -783,21 +785,15 @@ void AugCameraRenderState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
 			r.ULPoint.y += attr.fontSize + 5;
 			*/
 
-			core::string msg = mT("Head Rotation: ") + core::StringConverter::toString(head);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(mT("Head Rotation: ") + core::StringConverter::toString((math::vector3di)head));
 
 			head = m_robotConnector->GetHeadPosition();
-			msg = mT("Head Position: ") + core::StringConverter::toString(head);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(mT("Head Position: ") + core::StringConverter::toString(head));
 
 		}
 		else
 		{
-			core::string msg = mT("Head: Non");
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(mT("Head: Non"));
 		}
 		if (m_robotConnector->GetRobotController())
 		{
@@ -806,20 +802,14 @@ void AugCameraRenderState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
 			float rot;
 			speed = m_robotConnector->GetSpeed();
 			rot = m_robotConnector->GetRotation();
-			core::string msg = mT("Robot Speed: ") + core::StringConverter::toString(speed);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
-			msg = mT("Robot Rotation: ") + core::StringConverter::toString(rot);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(mT("Robot Speed: ") + core::StringConverter::toString(speed));
+			PRINT_LOG(mT("Robot Rotation: ") + core::StringConverter::toString(rot));
 		}
 		for (int i = 0; i < m_irSensor.size(); ++i)
 		{
 			std::stringstream ss;
 			ss << mT("Sensor[") << i << "]: " << m_irSensor[i];
-			msg = ss.str();
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(ss.str());
 		}
 		m_guiRenderer->Flush();
 	}

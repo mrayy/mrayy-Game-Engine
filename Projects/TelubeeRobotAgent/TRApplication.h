@@ -31,6 +31,7 @@
 #include "GstPlayerBin.h"
 #include "RenderWindow.h"
 #include "ParsedShaderPP.h"
+#include "HandsWindow.h"
 
 namespace mray
 {
@@ -39,6 +40,8 @@ class RobotCommunicator;
 class GstVideoGrabberImpl;
 class IRobotCommunicatorListener;
 class IMessageSink;
+
+
 class TRApplication :public CMRayApplication, public scene::IViewportListener
 {
 protected:
@@ -72,7 +75,6 @@ protected:
 
 	EController m_controller;
 	scene::ViewPort* m_viewPort;
-	scene::ViewPort* m_handsViewPort;
 
 	ECameraType m_cameraType;
 
@@ -81,16 +83,16 @@ protected:
 	GCPtr<video::IVideoGrabber> m_combinedCameras;
 	GCPtr<video::GstStreamBin> m_streamers;
 	GCPtr<video::GstPlayerBin> m_players;
+	GCPtr<HandsWindow> m_handsWindow;
+
 	//GCPtr<video::GstNetworkVideoStreamer> m_streamer;
 
 	video::VideoGrabberTexture m_cameraTextures[3];
 	video::VideoGrabberTexture* m_playerGrabber;
-	video::VideoGrabberTexture* m_handsGrabber;
 
 	video::ITexturePtr m_rtTexture;
 	video::IRenderTargetPtr m_renderTarget;;
 
-	GCPtr<video::ParsedShaderPP> m_undistortShader;
 
 	RobotCommunicator* m_robotCommunicator;
 
@@ -132,7 +134,6 @@ protected:
 
 	EStreamingQuality m_quality;
 	bool m_enableStream;
-	int m_handsMonitor;
 
 	struct DebugData
 	{
@@ -148,12 +149,10 @@ protected:
 		bool debug;
 	}m_debugData;
 
-	video::RenderWindow* m_handsWnd;
 	void _InitResources();
 
 	bool m_startVideo;
 
-	void _RenderHands(scene::ViewPort*vp);
 public:
 	TRApplication();
 	virtual~TRApplication();
@@ -181,6 +180,9 @@ public:
 
 	CameraProfileManager* LoadCameraProfiles(const core::string& path);
 	CameraProfileManager* GetCameraProfileManager(){ return m_cameraProfileManager; }
+
+	GCPtr<video::GstPlayerBin> GetPlayers(){ return m_players; }
+
 };
 
 }

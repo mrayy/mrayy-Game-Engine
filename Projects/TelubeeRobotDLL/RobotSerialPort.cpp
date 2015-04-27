@@ -451,15 +451,18 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 //	robotX = m_impl->mvRobot[BASE][0]->getNext(st.X * 1000);
 //	robotY = m_impl->mvRobot[BASE][1]->getNext(st.Z * 1000);
 
-	mray::math::Point3d<double> angles;
-	mray::math::quaternion q(st.headRotation[0], st.headRotation[1], st.headRotation[2], st.headRotation[3]);
-	Matrix rotMat;
-	qtomatrix(rotMat, q);
-	MatrixtoXYZ((double*)rotMat, &angles.x, &angles.y, &angles.z);
+	//mray::math::Point3d<double> angles;
+	mray::math::quaternion q2(st.headRotation[0], st.headRotation[1], st.headRotation[2], st.headRotation[3]);
+	mray::math::quaternion q(q2.w,q2.z,q2.x,q2.y);
+	//Matrix rotMat;
+	//qtomatrix(rotMat, q);
+	//MatrixtoXYZ((double*)rotMat, &angles.x, &angles.y, &angles.z);
+	math::vector3d angles;
+	q.toEulerAngles(angles);
 
-	tilt = m_impl->mvRobot[HEAD][1]->getNext(angles.x);
-	pan = m_impl->mvRobot[HEAD][0]->getNext(angles.y);
-	roll = m_impl->mvRobot[HEAD][2]->getNext(angles.z);
+	tilt = m_impl->mvRobot[HEAD][1]->getNext(-angles.y);
+	pan = m_impl->mvRobot[HEAD][0]->getNext(-angles.z);
+	roll = m_impl->mvRobot[HEAD][2]->getNext(-angles.x);
 
 	baseConnected = st.connected;
 

@@ -15,7 +15,7 @@
 #ifndef ___FlyCameraManager___
 #define ___FlyCameraManager___
 
-#include "FlyCapture2.h"
+#include <FlyCapture2/FlyCapture2.h>
 
 
 namespace mray
