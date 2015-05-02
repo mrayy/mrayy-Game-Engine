@@ -36,6 +36,7 @@ void AwesomiumWebView::LoadURL(const core::string& url)
 void AwesomiumWebView::LoadFile(const core::string& path)
 {
 
+	m_view->LoadURL(WebURL(AwesomiumHelpers::ToString("file:///"+path)));
 }
 
 }

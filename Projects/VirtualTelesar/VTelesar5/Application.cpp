@@ -67,7 +67,7 @@ void Application::_InitResources()
 	GUI::GUIThemeManager::getInstance().setActiveTheme(mT("VistaCG_Dark"));
 
 	//load font
-	GCPtr<GUI::DynamicFontGenerator> font = new GUI::DynamicFontGenerator();
+	GCPtr<GUI::DynamicFontGenerator> font = new GUI::DynamicFontGenerator("Arial24");
 	font->SetFontName(L"Arial");
 	font->SetTextureSize(1024);
 	font->SetFontResolution(24);

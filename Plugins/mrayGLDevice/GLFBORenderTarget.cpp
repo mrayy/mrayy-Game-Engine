@@ -304,7 +304,7 @@ void GLFBORenderTarget::refreshAttachment(uint index)
 	//if(target!=0)
 	m_size.set(glTex->getSize().x,glTex->getSize().y);
 
-	if (!m_sharedDepthBuffer)
+	if (!m_sharedDepthBuffer && !m_depthBuffer.isNull())
 	{
 		((GLRenderBuffer*)m_depthBuffer.pointer())->Resize(m_size.x, m_size.y);
 		((GLRenderBuffer*)m_depthBuffer.pointer())->bindToFrameBuffer(GL_DEPTH_ATTACHMENT_EXT, 0);

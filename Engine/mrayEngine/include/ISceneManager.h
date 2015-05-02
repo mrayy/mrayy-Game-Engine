@@ -75,7 +75,7 @@ public:
 	virtual void removeSceneNode(ISceneNode* node)=0;
 	virtual ISceneNode* getNodeByID(uint id)=0;
 	virtual void clearSceneNodes()=0;
-	//virtual const SceneNodeMap& GetChildren()=0;
+	virtual const SceneNodeMap& GetSceneNodes()= 0;
 
 	virtual CameraNode* getActiveCamera()=0;
 	virtual void setActiveCamera(CameraNode* camera)=0;

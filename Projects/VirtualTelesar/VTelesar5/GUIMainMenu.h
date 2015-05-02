@@ -1,3 +1,5 @@
+#ifndef __GUIMainMenu__
+#define __GUIMainMenu__
 #include "IGUISchemeBase.h"
 #include "GUIButton.h"
 #include "GUIPanel.h"
@@ -24,3 +26,4 @@ public:
 
 };
 }
+#endif

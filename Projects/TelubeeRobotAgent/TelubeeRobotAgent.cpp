@@ -90,6 +90,7 @@ EntryPoint
 	{
 		op.name = "StreamResolution";
 		op.value = "HD";
+		op.valueSet.insert("VGA");
 		op.valueSet.insert("HD");
 		op.valueSet.insert("FullHD");
 		extraOptions.push_back(op);

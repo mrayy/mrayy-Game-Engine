@@ -243,6 +243,8 @@ void TRApplication::init(const OptionContainer &extraOptions)
 			m_resolution.set(1280, 720);
 		else if (res == "FullHD")
 			m_resolution.set(1920, 1080);
+		else if (res == "VGA")
+			m_resolution.set(640, 480);
 
 		m_streamAudio = extraOptions.GetOptionByName("Audio")->getValue() == "Yes";
 		m_isLocal = extraOptions.GetOptionByName("Network")->getValue() == "Local";
@@ -499,7 +501,8 @@ void TRApplication::update(float dt)
 
 			((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->CreateStream();
 			((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->CreateStream();
-			((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Hands"))->CreateStream();
+			if (m_handsWindow->IsActive())
+				m_handsWindow->OnEnable();
 			m_players->Play();
 			m_isStarted = true;
 
@@ -746,7 +749,11 @@ void TRApplication::OnUserConnected(const network::NetAddress& address, int vide
 
 	((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->SetIPAddress(ipaddr, audioPort, rtcp);
 	((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->SetIPAddress(ipaddr, videoPort, rtcp);
-	((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Hands"))->SetIPAddress(ipaddr, handsPort, rtcp);
+
+	if (m_handsWindow->IsActive())
+	{
+		m_handsWindow->OnConnected(ipaddr,handsPort,rtcp);
+	}
 
 	m_debugData.userAddress = address;
 	m_debugData.userConnected = true;

@@ -51,8 +51,8 @@ void AwesomiumSurface::Paint(unsigned char* src_buffer,
 
 	
 	video::LockedPixelBox lockedBox(
-		math::box3d(src_rect.x, src_rect.y, 0,
-		src_rect.width, src_rect.height, 1), video::EPixel_B8G8R8A8, (void*)src_buffer);
+		math::box3d(dest_rect.x, dest_rect.y, 0,
+		dest_rect.x + src_rect.width, dest_rect.y + src_rect.height, 1), video::EPixel_B8G8R8A8, (void*)src_buffer);
 
 	surface->blitFromMemory(lockedBox);
 

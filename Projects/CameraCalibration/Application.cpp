@@ -5,12 +5,8 @@
 #include "ImageSetResourceManager.h"
 #include "GUIThemeManager.h"
 #include "FontResourceManager.h"
-#include "win32NetInterface.h"
 #include "TextureResourceManager.h"
 #include "DynamicFontGenerator.h"
-#include "AwesomiumManager.h"
-#include "AwesomiumHelpers.h"
-#include "WebScene.h"
 
 #include <windows.h>
 
@@ -62,18 +58,10 @@ void Application::init(const OptionContainer &extraOptions)
 	}
 	m_mainVP = GetRenderWindow()->CreateViewport("MainVP", 0, 0, math::rectf(0, 0, 1, 1), 0);
 	m_mainVP->SetClearColor(video::DefaultColors::White);
-	network::createWin32Network();
-
+	
 	m_guiRenderer = new GUI::GUIBatchRenderer();
 	m_guiRenderer->SetDevice(getDevice());
 
-	web::AwesomiumManager* m=new web::AwesomiumManager();
-	Awesomium::WebConfig conf;
-	conf.plugin_path = web::AwesomiumHelpers::ToString(gFileSystem.getAppPath() + "Plugins\\");
-	m->Init(conf);
-
-	m_scene = new WebScene();
-	m_scene->OnInit();
 }
 
 
@@ -85,9 +73,7 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 {
 	video::TextureUnit tu;
 	//getDevice()->setRenderTarget(m_rt);
-	web::AwesomiumManager::getInstance().Update();
 
-	m_scene->OnRender(math::rectf(0, wnd->GetSize()));
 	getDevice()->set2DMode();
 
 	GCPtr<GUI::IFont> font = gFontResourceManager.getDefaultFont();

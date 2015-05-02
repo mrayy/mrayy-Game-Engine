@@ -22,7 +22,7 @@ WebScene::~WebScene()
 void WebScene::OnInit()
 {
 	m_webview = web::AwesomiumManager::getInstance().CreateView();
-	m_webview->LoadURL("https://www.youtube.com/watch?v=wxd4bY_o_4k");
+	m_webview->LoadURL("https://www.youtube.com/html5");
 	m_webview->GetView()->Resize(1280, 720);
 }
 

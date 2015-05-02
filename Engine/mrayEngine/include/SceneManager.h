@@ -126,7 +126,7 @@ public:
 
 	virtual void OnVisit(ISceneVisitor*visitor);
 
-	//const SceneNodeMap& GetChildren(){return m_Children;}
+	const SceneNodeMap& GetSceneNodes(){return m_Children;}
 };
 
 }

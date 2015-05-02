@@ -35,7 +35,7 @@ bool HandsWindow::OnInit(TRApplication* app)
 		return false;
 	{
 		video::GstNetworkVideoPlayer* player;
-		player = new video::GstNetworkVideoPlayer();
+		m_player=player = new video::GstNetworkVideoPlayer();
 
 		app->GetPlayers()->AddPlayer(player, "Hands");
 
@@ -72,11 +72,16 @@ void HandsWindow::OnClose()
 }
 void HandsWindow::OnEnable()
 {
-
+	m_player->CreateStream();
 }
 void HandsWindow::OnDisable()
 {
 
+}
+
+void HandsWindow::OnConnected(const core::string &ipaddr, int handsPort, bool rtcp)
+{
+	m_player->SetIPAddress(ipaddr, handsPort, rtcp);
 }
 
 void HandsWindow::OnUpdate(float dt)

@@ -350,7 +350,7 @@ void VTelesarRenderingState::LoadEnvironment(const core::string& path)
 
 	}
 	{
-		const scene::ISceneManager::SceneNodeMap& nodes= m_sceneManager->GetChildren();
+		const scene::ISceneManager::SceneNodeMap& nodes= m_sceneManager->GetSceneNodes();
 		scene::ISceneManager::SceneNodeMap::const_iterator it= nodes.begin();
 		for(;it!=nodes.end();++it)
 		{
@@ -600,7 +600,7 @@ void VTelesarRenderingState::InitState()
 		m_3rdVP->setAbsViewPort(math::rectf(10,10,150,150));
 
 	}
-	if(1)
+	if(0)
 	{
 		/*
 		if(VTAppGlobals::FlipCameras==false)
