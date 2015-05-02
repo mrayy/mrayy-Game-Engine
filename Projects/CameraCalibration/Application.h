@@ -26,12 +26,15 @@
 namespace mray
 {
 
+	class ApplicationImpl;
 class Application :public CMRayApplication, public scene::IViewportListener,public ISingleton<Application>
 {
 protected:
 	scene::ViewPort* m_mainVP;
 
 	GUI::GUIBatchRendererPtr m_guiRenderer;
+
+	ApplicationImpl* m_impl;
 public:
 	Application();
 	virtual~Application();

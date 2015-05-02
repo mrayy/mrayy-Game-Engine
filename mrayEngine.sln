@@ -459,6 +459,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Playground", "Tests\Playground\Playground.vcxproj", "{C9D0B9D6-FED7-430B-9E11-814C2FC77BB8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CameraCalibration", "Projects\CameraCalibration\CameraCalibration.vcxproj", "{3F89F481-35F9-42FE-A6BB-BF6EDF9E1407}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8982AC73-C125-435F-AF1D-DB756BD5C84B} = {8982AC73-C125-435F-AF1D-DB756BD5C84B}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KMDYoutubeGrabber", "Projects\KMDYoutubeGrabber\KMDYoutubeGrabber.csproj", "{73872942-8DDF-481C-96DC-6D7341F2F76C}"
 EndProject

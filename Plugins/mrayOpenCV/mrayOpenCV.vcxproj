@@ -60,7 +60,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opencv_calib3d2410d.lib;opencv_contrib2410d.lib;opencv_core2410d.lib;opencv_features2d2410d.lib;opencv_flann2410d.lib;opencv_gpu2410d.lib;opencv_highgui2410d.lib;opencv_imgproc2410d.lib;opencv_legacy2410d.lib;opencv_ml2410d.lib;opencv_objdetect2410d.lib;opencv_video2410d.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_calib3d2411d.lib;opencv_contrib2411d.lib;opencv_core2411d.lib;opencv_features2d2411d.lib;opencv_flann2411d.lib;opencv_gpu2411d.lib;opencv_highgui2411d.lib;opencv_imgproc2411d.lib;opencv_legacy2411d.lib;opencv_ml2411d.lib;opencv_objdetect2411d.lib;opencv_video2411d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>..\..\Dependencies\lib\opencv;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -100,6 +100,7 @@
     <ClInclude Include="CLD\imatrix.h" />
     <ClInclude Include="CLD\myvec.h" />
     <ClInclude Include="CVCalibration.h" />
+    <ClInclude Include="CVChessBoard.h" />
     <ClInclude Include="CVImage.h" />
     <ClInclude Include="CVRunningBackground.h" />
     <ClInclude Include="CVTracker.h" />
@@ -116,6 +117,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="CVCalibration.cpp" />
+    <ClCompile Include="CVChessBoard.cpp" />
     <ClCompile Include="CVRunningBackground.cpp" />
     <ClCompile Include="CVTracker.cpp" />
     <ClCompile Include="CVUtilities.cpp" />

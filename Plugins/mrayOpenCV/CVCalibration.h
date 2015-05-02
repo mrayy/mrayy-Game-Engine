@@ -58,6 +58,24 @@ namespace video
 		void load(core::string filename, bool absolute = false);
 		void reset();
 
+		void resetBoards() {
+			objectPoints.clear();
+			imagePoints.clear();
+			boardRotations.clear();
+			boardTranslations.clear();
+		}
+		void remove(int index){
+			objectPoints.erase(objectPoints.begin() + index);
+			imagePoints.erase(imagePoints.begin() + index);
+			boardRotations.erase(boardRotations.begin() + index);
+			boardTranslations.erase(boardTranslations.begin() + index);
+		}
+		cv::Size getPatternSize() { return patternSize; }
+		vector<cv::Mat> & getBoardRotations() { return boardRotations; }
+		vector<cv::Mat> & getBoardTranslations() { return boardTranslations; }
+		vector<vector<cv::Point3f> > & getObjectPoints() { return objectPoints; }
+
+
 		void setPatternType(CalibrationPattern patternType);
 		void setPatternSize(int xCount, int yCount);
 		void setSquareSize(float squareSize);
