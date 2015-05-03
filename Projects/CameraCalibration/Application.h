@@ -35,6 +35,9 @@ protected:
 	GUI::GUIBatchRendererPtr m_guiRenderer;
 
 	ApplicationImpl* m_impl;
+
+	void _RenderCV(video::RenderWindow* wnd);
+	void _RenderMain(video::RenderWindow* wnd);
 public:
 	Application();
 	virtual~Application();

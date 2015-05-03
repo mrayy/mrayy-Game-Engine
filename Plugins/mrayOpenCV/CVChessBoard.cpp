@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CVChessBoard.h"
 #include "CVUtilities.h"
+#include "Engine.h"
 
 
 namespace mray
@@ -20,6 +21,23 @@ CVChessBoard::~CVChessBoard()
 }
 void CVChessBoard::Draw(const math::rectf& rc)
 {
+	video::IVideoDevice* dev = gEngine.getDevice();
+
+	int idx = 0;
+
+	math::vector2d squareSize= rc.getSize() / (m_squares+1);
+
+	for (int i = 0; i <= m_squares.x; i++)
+	for (int j = 0; j <= m_squares.y; j++)
+	{
+		float color = (i % 2 == j % 2) ? 0 : 1;
+
+		math::rectf s;
+		s.ULPoint = rc.ULPoint + math::vector2d(i, j)*squareSize;
+		s.BRPoint = s.ULPoint + squareSize;
+
+		dev->draw2DRectangle(s, video::SColor(color, color, color, 1));
+	}
 	
 }
 

@@ -69,6 +69,18 @@
     <ClInclude Include="CVChessBoard.h">
       <Filter>Source Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="CVCameraProjectorCalib.h">
+      <Filter>Source Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CVCameraCalib.h">
+      <Filter>Source Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CVProjectorCalib.h">
+      <Filter>Source Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CVPatternTracker.h">
+      <Filter>Source Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -96,6 +108,18 @@
       <Filter>Source Files\Util</Filter>
     </ClCompile>
     <ClCompile Include="CVChessBoard.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CVProjectorCalib.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CVCameraCalib.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CVCameraProjectorCalib.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CVPatternTracker.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
   </ItemGroup>

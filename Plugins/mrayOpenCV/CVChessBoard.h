@@ -25,6 +25,7 @@ public:
 		m_squares = squares; 
 		m_squareSize = squaresize;
 	}
+	const math::vector2di& GetSquares(){ return m_squares; }
 
 	void Draw(const math::rectf& rc);
 	void GetProjectionPoints(std::vector<math::vector2d>& outList);
