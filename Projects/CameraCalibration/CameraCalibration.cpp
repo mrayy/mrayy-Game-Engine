@@ -45,6 +45,12 @@ EntryPoint
 	extraOptions.push_back(op);
 	op.valueSet.clear();
 
+	{
+		op.name = "CVDisplay";
+		op.value = "1";
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
 
 	//VLDEnable();
 	app->loadResourceFile(mT("atdataPath.stg"));

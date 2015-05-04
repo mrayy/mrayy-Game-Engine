@@ -155,7 +155,7 @@ bool DirectShowVideoGrabber::GrabFrame()
 	{
 		m_bufferId++;
 		m_hasNewFrame=true;
-		unsigned char * viPixels = s_videoInput->getPixels(m_device, false,false);
+		unsigned char * viPixels = s_videoInput->getPixels(m_device, false,true);
 
 
 		m_textureImage.setData(viPixels,math::vector3d(m_size.x,m_size.y,1),m_format);

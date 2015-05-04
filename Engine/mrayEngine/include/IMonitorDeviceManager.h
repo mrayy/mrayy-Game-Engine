@@ -23,7 +23,7 @@ namespace video
 {
 	class IMonitorDevice;
 
-class IMonitorDeviceManager:public ISingleton<IMonitorDeviceManager>
+class MRAY_DLL IMonitorDeviceManager:public ISingleton<IMonitorDeviceManager>
 {
 protected:
 

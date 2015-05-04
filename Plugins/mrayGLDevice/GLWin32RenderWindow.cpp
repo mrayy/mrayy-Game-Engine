@@ -213,6 +213,10 @@ void GLWin32RenderWindow::Create(const math::vector2di& size,bool fullScreen,con
 				screenW=monitor->GetSize().x;
 				screenH=monitor->GetSize().y;
 			}
+			if (dwstyle & WS_POPUP)
+			{
+				outerSz = m_size;
+			}else
 			if(outerSz==0)
 			{
 				RECT rc={0,0,m_size.x,m_size.y};

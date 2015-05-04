@@ -26,6 +26,8 @@ protected:
 	video::GstNetworkVideoPlayer* m_player;
 
 	TRApplication* m_app;
+
+	math::rectf m_projectionRect;
 public:
 	HandsWindow();
 	virtual ~HandsWindow();

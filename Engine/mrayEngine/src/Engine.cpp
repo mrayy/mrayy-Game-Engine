@@ -16,6 +16,8 @@
 #include "ScriptResourceManager.h"
 #include "MeshAnimatorManager.h"
 
+#include "IMonitorDeviceManager.h"//just for linking
+
 
 #include "MeshFileCreatorManager.h"
 

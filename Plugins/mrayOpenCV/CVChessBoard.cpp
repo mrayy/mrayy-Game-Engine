@@ -38,7 +38,11 @@ void CVChessBoard::Draw(const math::rectf& rc)
 
 		dev->draw2DRectangle(s, video::SColor(color, color, color, 1));
 	}
-	
+	dev->draw2DRectangle(math::rectf(rc.ULPoint.x, rc.ULPoint.y, rc.ULPoint.x + squareSize.x / 2, rc.BRPoint.y), 1);
+	dev->draw2DRectangle(math::rectf(rc.ULPoint.x, rc.ULPoint.y, rc.BRPoint.x, rc.ULPoint.y + squareSize.y / 2), 1);
+	dev->draw2DRectangle(math::rectf(rc.ULPoint.x, rc.BRPoint.y - squareSize.y / 2, rc.BRPoint.x, rc.BRPoint.y), 1);
+	dev->draw2DRectangle(math::rectf(rc.BRPoint.x - squareSize.x / 2, rc.ULPoint.y, rc.BRPoint.x, rc.BRPoint.y), 1);
+
 }
 
 void CVChessBoard::GetProjectionPoints(std::vector<math::vector2d>& outList)
@@ -51,7 +55,7 @@ void CVChessBoard::GetProjectionPoints(std::vector<math::vector2d>& outList)
 bool CVChessBoard::FindInImage(const video::ImageInfo* src, std::vector<math::vector2d>& outList)
 {
 
-	int chessFlags = CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK;// ;
+	int chessFlags = CV_CALIB_CB_FAST_CHECK;// CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE;// ;
 	cv::Mat img = toCv(src);
 	bool found = findChessboardCorners(img, cv::Size(m_squares.x , m_squares.y ), *(vector<Point2f>*)&outList, chessFlags);
 

@@ -7,13 +7,15 @@
 #include "FontResourceManager.h"
 #include "TextureResourceManager.h"
 #include "DynamicFontGenerator.h"
-
+#include "StreamReader.h"
 
 #include "DirectShowVideoGrabber.h"
 #include "CVChessBoard.h"
 #include "CVCalibration.h"
 #include "CVUtilities.h"
 #include "CVWrappers.h"
+#include "IMonitorDeviceManager.h"
+#include "IMonitorDevice.h"
 
 #include <windows.h>
 
@@ -34,6 +36,7 @@ namespace mray
 
 		float _lastTime;
 		math::rectf chessBB;
+		bool _found;
 
 		video::RenderWindow *CVWindow;
 		scene::ViewPort* CVVP;
@@ -42,6 +45,7 @@ namespace mray
 		ApplicationImpl()
 		{
 			_lastTime = gEngine.getTimer()->getSeconds();
+			_found = false;
 		}
 
 		bool IsDiff(float threshold,float dt)
@@ -84,6 +88,18 @@ Application::~Application()
 void Application::onEvent(Event* event)
 {
 	CMRayApplication::onEvent(event);
+
+	if (event->getType() == ET_Keyboard)
+	{
+		KeyboardEvent* e = (KeyboardEvent*)event;
+		if (e->press)
+		{
+			if (e->key == KEY_R)
+			{
+				m_impl->_found = false;
+			}
+		}
+	}
 }
 
 
@@ -121,7 +137,7 @@ void Application::init(const OptionContainer &extraOptions)
 
 
 	m_impl->camera = new video::DirectShowVideoGrabber();
-	m_impl->camera->InitDevice(0, 640, 480, 30);
+	m_impl->camera->InitDevice(0, 1280,720, 30);
 	m_impl->grabber = new video::VideoGrabberTexture();
 	m_impl->grabber->Set(m_impl->camera, 0);
 	m_impl->chessboard.Setup(math::vector2di(8, 5),2.5);
@@ -131,15 +147,36 @@ void Application::init(const OptionContainer &extraOptions)
 	video::allocate(m_impl->diffMat, m_impl->camera->GetFrameSize().x, m_impl->camera->GetFrameSize().y, CV_MAKETYPE(CV_8U, 3));
 
 	{
+		OS::IStreamPtr s = gFileSystem.openFile(gFileSystem.getAppPath() + "ProjectionSettings.txt", OS::TXT_READ);
+		if (!s.isNull())
 		{
+			OS::StreamReader rdr(s);
+			core::string l = rdr.readLine();
+			core::StringConverter::parse(l, m_impl->chessBB);
+			s->close();
+			m_impl->_found = true;
+
+		}
+	}
+
+	{
+		{
+			int targetMonitor = 2;
+			targetMonitor = core::StringConverter::toInt(extraOptions.GetOptionByName("CVDisplay")->getValue());
 			OptionContainer opt;
 			opt["title"].value = "Hands Window";
 			opt["VSync"].value = "false";
 			opt["top"].value = "0";
 			opt["left"].value = "0";
-			//opt["border"].value = "none";
-			opt["Monitor"].value = core::StringConverter::toString(2);
-			m_impl->CVWindow = gEngine.getDevice()->CreateRenderWindow("CV Window", GetRenderWindow(0)->GetSize(), false, opt, 0);
+			opt["border"].value = "none";
+			video::IMonitorDevice* monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(targetMonitor);
+			if (!monitor)
+			{
+				targetMonitor = 0;
+				monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(targetMonitor);
+			}
+			opt["Monitor"].value = core::StringConverter::toString(targetMonitor);
+			m_impl->CVWindow = gEngine.getDevice()->CreateRenderWindow("CV Window", monitor->GetSize(), false, opt, 0);
 			m_impl->CVVP = m_impl->CVWindow->CreateViewport(mT("Main"), 0, 0, math::rectf(0, 0, 1, 1), 0);
 			AddRenderWindow(m_impl->CVWindow);
 			m_impl->CVVP->AddListener(this);
@@ -161,11 +198,16 @@ void Application::_RenderMain(video::RenderWindow* wnd)
 	getDevice()->useTexture(0, &tu);
 	getDevice()->draw2DImage(math::rectf(0,wnd->GetSize()),1);
 
+	getDevice()->setLineWidth(1);
+	math::rectf rc = m_impl->chessBB;
+	rc.ULPoint *= wnd->GetSize();
+	rc.BRPoint *= wnd->GetSize();
+	getDevice()->draw2DRectangle(rc, video::SColor(1, 0, 0, 1), false);
 	getDevice()->setLineWidth(3);
-	getDevice()->draw2DRectangle(m_impl->chessBB, video::SColor(1, 0, 0, 1), false);
 	for (int i = 0; i < m_impl->calibPoints.size(); ++i)
 	{
-		getDevice()->draw2DRectangle(math::rectf(m_impl->calibPoints[i] - 5, m_impl->calibPoints[i] + 5), video::SColor((float)i / (float)m_impl->calibPoints.size(), 0, 0, 1));
+		math::vector2d pt = m_impl->calibPoints[i] * wnd->GetSize();
+		getDevice()->draw2DRectangle(math::rectf(pt - 5, pt + 5), video::SColor((float)i / (float)m_impl->calibPoints.size(), 0, 0, 1));
 	}
 
 
@@ -204,24 +246,22 @@ void Application::_RenderCV(video::RenderWindow* wnd)
 {
 	//getDevice()->setRenderTarget(m_rt);
 
-	bool found = false;
-
 	std::vector<math::vector2d> points;
 
 	if (m_impl->grabber->Blit())
 	{
-		if (m_impl->IsDiff(10, 0.5))
+		if (!m_impl->_found && m_impl->IsDiff(5, 0.5))
 		{
 			if (m_impl->chessboard.FindInImage(m_impl->camera->GetLastFrame(), points))
 			{
 				m_impl->calibPoints.resize(points.size());
-				m_impl->chessBB.reset(m_impl->calibPoints[0] = m_impl->ToScreenSpace(points[0], wnd->GetSize()));
+				m_impl->chessBB.reset(m_impl->calibPoints[0] = m_impl->ToScreenSpace(points[0], 1));
 				for (int i = 1; i < points.size(); ++i)
 				{
-					m_impl->calibPoints[i] = m_impl->ToScreenSpace(points[i], wnd->GetSize());
+					m_impl->calibPoints[i] = m_impl->ToScreenSpace(points[i], 1);
 					m_impl->chessBB.addPoint(m_impl->calibPoints[i]);
 				}
-				found = true;
+				m_impl->_found = true;
 				printf("Found\n");
 
 				math::vector2d squareSize = m_impl->chessBB.getSize() / m_impl->chessboard.GetSquares();
@@ -233,7 +273,6 @@ void Application::_RenderCV(video::RenderWindow* wnd)
 				wrtr.writeLine(core::StringConverter::toString(m_impl->chessBB));
 				wrtr.writeLine(core::StringConverter::toString(wnd->GetSize()));
 				stream->close();
-
 			}
 		}
 	}
