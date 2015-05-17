@@ -76,6 +76,9 @@
 #include "LeapMotionController.h"
 
 
+//#define FULL_RES_PREVIEW
+
+
 namespace mray
 {
 namespace AugTel
@@ -516,23 +519,38 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 		math::rectf rc(0, wnd->GetSize());
 		video::TextureUnit tex;
 
-		if (m_previewRT->GetSize() != wnd->GetSize())
+#ifdef FULL_RES_PREVIEW
 		{
-			m_previewRT->GetColorTexture()->createTexture(math::vector3d(wnd->GetSize().x, wnd->GetSize().y, 1), video::EPixel_R8G8B8);
+			if (m_previewRT->GetSize() != wnd->GetSize())
+			{
+				m_previewRT->GetColorTexture()->createTexture(math::vector3d(wnd->GetSize().x, wnd->GetSize().y, 1), video::EPixel_R8G8B8);
+			}
+			m_appStateManager->Draw(rc, m_previewRT, TBee::Eye_Right);
+
 		}
-		m_appStateManager->Draw(rc, m_previewRT, TBee::Eye_Right);
+#endif
 		getDevice()->useShader(0);
+
+#ifndef FULL_RES_PREVIEW
+		tex.SetTexture(m_tbRenderer->GetEyeImage(0)->GetColorTexture());
+		getDevice()->useTexture(0, &tex);
+		getDevice()->draw2DImage(math::rectf(0,0,rc.getWidth()/2,rc.getHeight()), 1);
+		tex.SetTexture(m_tbRenderer->GetEyeImage(1)->GetColorTexture());
+		getDevice()->useTexture(0, &tex);		
+		getDevice()->draw2DImage(math::rectf(rc.getWidth() / 2, 0, rc.getWidth() , rc.getHeight()), 1);
+
+#endif
 		RenderUI(rc);
 
 		m_previewGUI->DrawAll(&rc);
+#ifdef FULL_RES_PREVIEW
 
 		getDevice()->setRenderTarget(0);
 		//	tex.SetTexture(m_tbRenderer->GetEyeImage(0)->GetColorTexture());
 		tex.SetTexture(m_previewRT->GetColorTexture());
 		getDevice()->useTexture(0, &tex);
-
-		math::rectf trc;
 		getDevice()->draw2DImage(rc, 1);
+#endif
 
 		if (m_screenShotEnabled && m_screenShotTimer>1)
 		{

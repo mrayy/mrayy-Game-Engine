@@ -641,22 +641,22 @@ void AugCameraRenderState::OnEnter(IRenderingState*prev)
 	}
 	if (true)
 	{
-		m_streamer->GetStream("Audio")->BindPorts(ifo->IP, gAppData.TargetAudioPort, gAppData.RtcpStream);
-		m_streamer->GetStream("Audio")->CreateStream();
+		//	m_streamer->GetStream("Audio")->BindPorts(ifo->IP, gAppData.TargetAudioPort, gAppData.RtcpStream);
+		//	m_streamer->GetStream("Audio")->CreateStream();
 
-		m_streamer->GetStream("Video")->BindPorts(ifo->IP, gAppData.TargetVideoPort, gAppData.RtcpStream);
-		m_streamer->GetStream("Video")->CreateStream();
+	//	m_streamer->GetStream("Video")->BindPorts(ifo->IP, gAppData.TargetVideoPort, gAppData.RtcpStream);
+	//	m_streamer->GetStream("Video")->CreateStream();
 
 		m_streamer->GetStream("Hands")->BindPorts(ifo->IP, gAppData.TargetHandsVideoPort, gAppData.RtcpStream);
 		m_streamer->GetStream("Hands")->CreateStream();
 		m_streamer->Stream();
 	}
-//	if (false)
+	//if (false)
 	{
 		//enable hands,video and mic
 		_EnableHands(true);
-		_EnableMic(true);
-		_EnableVideo(true);
+	//	_EnableMic(true);
+	//	_EnableVideo(true);
 	}
 
 	//m_camGrabber->Start();

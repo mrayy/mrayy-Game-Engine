@@ -23,6 +23,7 @@ LeapHandController:: ~LeapHandController()
 
 void LeapHandController::Update(float dt)
 {
+
 	if (!m_controller->GetController()->isConnected())
 		return;
 	Leap::Frame frame = m_controller->GetController()->frame();
