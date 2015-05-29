@@ -12,7 +12,7 @@ namespace mray
 namespace TBee
 {
 
-#if 1
+#if 0
 	typedef video::DirectShowVideoGrabber VCameraType;
 #else
 	typedef video::FlyCameraVideoGrabber VCameraType;

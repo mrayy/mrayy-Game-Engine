@@ -4,6 +4,7 @@
 #include "DirectShowVideoGrabber.h"
 #include "videoInput.h"
 #include "Engine.h"
+#include "ITimer.h"
 #include "IVideoDevice.h"
 
 namespace mray
@@ -31,6 +32,7 @@ DirectShowVideoGrabber::DirectShowVideoGrabber()
 	m_textureImage.autoDel=true;
 	m_hasNewFrame = false;
 	m_bufferId = 0;
+	m_timeAcc = 0;
 }
 DirectShowVideoGrabber::~DirectShowVideoGrabber()
 {
@@ -86,7 +88,7 @@ bool DirectShowVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	//int format = VI_NTSC_M;
 	//s_videoInput->setFormat(device, format);
 		
-	//s_videoInput->setRequestedMediaSubType(VI_MEDIASUBTYPE_YUYV);
+	s_videoInput->setRequestedMediaSubType(VI_MEDIASUBTYPE_YUYV);
 	s_videoInput->setIdealFramerate(device, fps);
 	if(!s_videoInput->setupDevice(device,w,h))
 	{
@@ -95,6 +97,10 @@ bool DirectShowVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	}
 	m_inited=true;
 
+	m_frameCount = 0;
+	m_timeAcc = 0;
+	m_lastT = 0;
+	m_captureFPS = 0;
 
 // 	s_videoInput->setVideoSettingCameraPct(device,s_videoInput->propExposure,0.1,2);
 // 	s_videoInput->setVideoSettingFilterPct(device,s_videoInput->propWhiteBalance,0.1,2);
@@ -153,10 +159,25 @@ bool DirectShowVideoGrabber::GrabFrame()
 		return false;
 	if(s_videoInput->isFrameNew(m_device))
 	{
+		m_frameCount++;
+
+		float t = gEngine.getTimer()->getSeconds();
+		m_timeAcc += (t - m_lastT)*0.001f;
+
+		if (m_timeAcc > 1)
+		{
+			m_captureFPS = m_frameCount;
+			m_frameCount = 0;
+			m_timeAcc = m_timeAcc - (int)m_timeAcc;
+
+		//	printf("Capture FPS: %d\n", m_captureFPS);
+		}
+
+		m_lastT = t;
+
 		m_bufferId++;
 		m_hasNewFrame=true;
 		unsigned char * viPixels = s_videoInput->getPixels(m_device, false,true);
-
 
 		m_textureImage.setData(viPixels,math::vector3d(m_size.x,m_size.y,1),m_format);
 

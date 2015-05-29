@@ -37,6 +37,11 @@ protected:
 	int m_fps;
 	int m_device;
 
+	int m_captureFPS;
+	int m_frameCount;
+	float m_timeAcc;
+	float m_lastT;
+
 	bool m_inited;
 	ulong m_bufferId;
 
@@ -59,6 +64,8 @@ public:
 
 	void SetImageFormat(video::EPixelFormat fmt);
 	video::EPixelFormat GetImageFormat();
+
+	int GetCaptureFPS(){ return m_captureFPS; }
 
 	ulong GetBufferID(){ return m_bufferId; }
 

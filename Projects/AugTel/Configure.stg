@@ -1,7 +1,7 @@
 Settings{
 	Bits	"24"
-	Camera0	"0 - Logicool HD Webcam C615"
-	Camera1	"1 - Logicool HD Webcam C615"
+	Camera0	"0 - FC_12071163"
+	Camera1	"1 - FC_12012432"
 	CameraSource	"Local"
 	Controller	"Logicool"
 	Debugging	"No"
@@ -9,9 +9,9 @@ Settings{
 	HeadController	"Oculus"
 	Monitor	"1"
 	Multisample	"0"
-	Preview	"Yes"
+	Preview	"No"
 	Resolution	"1920,1080"
 	Robot	"Joystick"
-	Stereoscopic	"Oculus"
+	Stereoscopic	"None"
 	VSync	"False"
 }

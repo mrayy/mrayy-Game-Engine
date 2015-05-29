@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "GCCollector.h"
 #include "DirectShowVideoGrabber.h"
+#include "FlyCameraManager.h"
 #include <windows.h>
 
 //#define ENABLE_VLD
@@ -65,6 +66,17 @@ EntryPoint
 		for (int i = 0; i<camsCount; ++i)
 		{
 			op.valueSet.insert(core::StringConverter::toString(i) + " - " + ds.GetDeviceName(i));
+		}
+		if (op.valueSet.size()>0)
+		{
+			op.value = *op.valueSet.begin();
+		}
+		camsCount = video::FlyCameraManager::instance.GetCamerasCount();
+		for (int i = 0; i<camsCount; ++i)
+		{
+			uint sp;
+			video::FlyCameraManager::instance.GetCameraSerialNumber(i, sp);
+			op.valueSet.insert(core::StringConverter::toString(i) + " - FC_" + core::StringConverter::toString(sp));
 		}
 		if (op.valueSet.size()>0)
 		{

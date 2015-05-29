@@ -912,6 +912,7 @@ void AugCameraRenderState::_RenderStarted(const math::rectf& rc, ETargetEye eye)
 }
 video::IRenderTarget* AugCameraRenderState::Render(const math::rectf& rc, ETargetEye eye)
 {
+
 	video::IVideoDevice* device = Engine::getInstance().getDevice();
 	int index = GetEyeIndex(eye);
 	Parent::Render(rc, eye);

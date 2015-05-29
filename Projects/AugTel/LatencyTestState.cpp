@@ -97,6 +97,7 @@ void LatencyTestState::OnExit()
 video::IRenderTarget* LatencyTestState::Render(const math::rectf& rc, TBee::ETargetEye eye)
 {
 
+
 	video::IRenderTarget* rt = IRenderingState::Render(rc, eye);
 	video::TextureUnit tex;
 	m_camVideoSrc->Blit();
