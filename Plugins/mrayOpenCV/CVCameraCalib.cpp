@@ -9,6 +9,14 @@ namespace mray
 namespace video
 {
 
+	CVCameraCalib::CVCameraCalib()
+	{
+
+	}
+	CVCameraCalib::~CVCameraCalib()
+	{
+
+	}
 
 void CVCameraCalib::setupCandidateObjectPoints(){
 	candidateObjectPts.clear();

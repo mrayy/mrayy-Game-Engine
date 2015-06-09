@@ -12,7 +12,7 @@ namespace mray
 namespace TBee
 {
 
-#if 0
+#if 1
 	typedef video::DirectShowVideoGrabber VCameraType;
 #else
 	typedef video::FlyCameraVideoGrabber VCameraType;
@@ -40,7 +40,12 @@ LocalCameraVideoSource::~LocalCameraVideoSource()
 	delete m_cameraSource[0].videoGrabber;
 	delete m_cameraSource[1].videoGrabber;
 }
-
+float LocalCameraVideoSource::GetCaptureFrameRate(int i)
+{
+	if (m_cameraSource[i].camera)
+		return m_cameraSource[i].camera->GetCaptureFrameRate();
+	return 0;
+}
 void LocalCameraVideoSource::SetCameraResolution(const math::vector2d& res, int fps)
 {
 	m_cameraResolution = res;
@@ -75,7 +80,7 @@ void LocalCameraVideoSource::Init()
 }
 void LocalCameraVideoSource::Open()
 {
-	m_cameraSource[0].id = 0;
+//	m_cameraSource[0].id = 0;
 	m_started = true;
 	m_cameraSource[0].camera->InitDevice(m_cameraSource[0].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
 	m_cameraSource[0].camera->Start();

@@ -62,6 +62,7 @@ public:
 	virtual bool HasNewFrame();
 	virtual ulong GetBufferID();// incremented once per frame
 
+	virtual float GetCaptureFrameRate(){ return 30; }
 
 	virtual const video::ImageInfo* GetLastFrame();
 	virtual void Lock();

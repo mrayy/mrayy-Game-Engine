@@ -38,6 +38,7 @@ public:
 	virtual bool GrabFrame()=0;
 	virtual bool HasNewFrame()=0;
 	virtual ulong GetBufferID() = 0;// incremented once per frame
+	virtual float GetCaptureFrameRate() = 0;
 
 
 	virtual const ImageInfo* GetLastFrame()=0;

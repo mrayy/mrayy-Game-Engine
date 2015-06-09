@@ -234,6 +234,9 @@
     <ClInclude Include="CameraTextureSource.h">
       <Filter>Source Files\DataSource</Filter>
     </ClInclude>
+    <ClInclude Include="GstLocalCameraVideoSource.h">
+      <Filter>Source Files\VideoSource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -361,6 +364,9 @@
     </ClCompile>
     <ClCompile Include="IRobotController.cpp">
       <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="GstLocalCameraVideoSource.cpp">
+      <Filter>Source Files\VideoSource</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -24,8 +24,9 @@ protected:
 	int m_aport;
 	bool m_rtcp;
 	bool m_isStereo;
+	bool m_useAudio;
 public:
-	GstStreamerVideoSource(const core::string& ip , int videoport , int audioport,bool rtcp );
+	GstStreamerVideoSource(const core::string& ip, int videoport, int audioport, bool rtcp, bool useAudio=true);
 	virtual ~GstStreamerVideoSource();
 
 	void SetIP(const core::string& ip, int videoport, int audioport, bool rtcp){ m_ip = ip; m_vport = videoport; m_aport = audioport; m_rtcp = rtcp; }
@@ -39,6 +40,7 @@ public:
 	virtual math::vector2d GetEyeResolution(int i);
 	virtual video::ITexturePtr GetEyeTexture(int i);
 	virtual math::rectf GetEyeTexCoords(int i);
+	virtual float GetCaptureFrameRate(int i) ;
 
 	virtual bool IsLocal(){ return false; }
 	virtual void SetIsStereo(bool stereo);

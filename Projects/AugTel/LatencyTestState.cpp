@@ -8,6 +8,8 @@
 #include "RemoteRobotCommunicator.h"
 #include "IFileSystem.h"
 #include "StreamWriter.h"
+#include "GUIBatchRenderer.h"
+#include "FontResourceManager.h"
 
 
 namespace mray
@@ -41,6 +43,9 @@ void LatencyTestState::InitState()
 	IRenderingState::InitState();
 	m_camVideoSrc->Init();
 
+	GUI::GUIBatchRenderer*r = new GUI::GUIBatchRenderer();
+	r->SetDevice(Engine::getInstance().getDevice());
+	m_guiRenderer = r;
 }
 bool LatencyTestState::OnEvent(Event* e, const math::rectf& rc)
 {
@@ -168,6 +173,34 @@ video::IRenderTarget* LatencyTestState::Render(const math::rectf& rc, TBee::ETar
 		Engine::getInstance().getDevice()->draw2DLine(&points[0],points.size(),1);
 	}
 
+	GUI::IFont* font = gFontResourceManager.getDefaultFont();
+	GUI::FontAttributes attr;
+	video::IVideoDevice* dev = Engine::getInstance().getDevice();
+	dev->set2DMode();
+	if (font)
+	{
+#define PRINT_LOG(txt)\
+	msg = txt; \
+	font->print(r, &attr, 0, msg, m_guiRenderer); \
+	r.ULPoint.y += attr.fontSize + attr.fontSize;
+
+		attr.fontColor.Set(1, 1, 1, 1);
+		attr.fontAligment = GUI::EFA_MiddleLeft;
+		attr.fontSize = 18;
+		attr.hasShadow = true;
+		attr.shadowColor.Set(0, 0, 0, 1);
+		attr.shadowOffset = math::vector2d(2);
+		attr.spacing = 2;
+		attr.wrap = 0;
+		attr.RightToLeft = 0;
+		core::string msg;
+		math::rectf r = rc;
+		r.ULPoint = math::vector2d(250,100);
+
+		PRINT_LOG((mT("Capture Frame Rate:") + core::StringConverter::toString(m_camVideoSrc->GetCaptureFrameRate(0))));
+
+	}
+	m_guiRenderer->Flush();
 	return rt;
 }
 void LatencyTestState::Update(float dt)

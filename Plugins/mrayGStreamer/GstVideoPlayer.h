@@ -79,6 +79,7 @@ public:
 	virtual bool HasNewFrame() ;
 	virtual ulong GetBufferID() ;// incremented once per frame
 
+	virtual float GetCaptureFrameRate();
 
 	virtual const ImageInfo* GetLastFrame();
 

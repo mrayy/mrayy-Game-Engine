@@ -55,13 +55,14 @@ public:
 
 	}
 
-	void _BuildPipeline()
+	void _BuildPipelineH264()
 	{
 		core::string videoStr =
 			//video rtp
-			"myudpsrc "
-			"name=videoSrc "
-			"caps=application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264 ";
+			//"myudpsrc "
+			//"name=videoSrc "
+			"udpsrc port=7000 !"
+			"application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264 ";
 		if (m_rtcp)
 		{
 			m_pipeLineString =
@@ -80,7 +81,41 @@ public:
 		else
 		{
 			m_pipeLineString = videoStr + "!"
+				"rtpjitterbuffer ! "
 				"rtph264depay !  avdec_h264 ! "
+				"videoconvert ! video/x-raw,format=RGB  !"
+				" appsink name=videoSink ";
+
+		}
+	}
+
+
+	void _BuildPipelineMJPEG()
+	{
+		core::string videoStr =
+			//video rtp
+			"udpsrc "
+			"name=videoSrc "
+			"caps=application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)JPEG ";
+		if (m_rtcp)
+		{
+			m_pipeLineString =
+				"rtpbin "
+				"name=rtpbin "
+				+ videoStr +
+				"! rtpbin.recv_rtp_sink_0 "
+				"rtpbin. ! rtpjpegdepay !  jpegdec ! "
+				"videoconvert ! video/x-raw,format=RGB  !"
+				" appsink name=videoSink "
+
+				//video rtcp
+				"myudpsrc name=videoRtcpSrc ! rtpbin.recv_rtcp_sink_0 "
+				"rtpbin.send_rtcp_src_0 !  myudpsink name=videoRtcpSink sync=false async=false ";
+		}
+		else
+		{
+			m_pipeLineString = videoStr + "!"
+				"rtpjpegdepay !  jpegdec ! "
 				"videoconvert ! video/x-raw,format=RGB  !"
 				" appsink name=videoSink ";
 
@@ -113,7 +148,7 @@ public:
 	{
 		if (m_Loaded)
 			return true;
-		_BuildPipeline();
+		_BuildPipelineH264();
 
 		GError *err = 0;
 		m_gstPipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
@@ -193,6 +228,8 @@ public:
 	virtual bool GrabFrame(){ return m_videoHandler.GrabFrame(); }
 	virtual bool HasNewFrame(){ return m_videoHandler.isFrameNew(); }
 	virtual ulong GetBufferID(){ return m_videoHandler.GetFrameID(); }
+
+	virtual float GetCaptureFrameRate(){ return m_videoHandler.GetCaptureFrameRate(); }
 
 	virtual const ImageInfo* GetLastFrame(){ return m_videoHandler.getPixelsRef(); }
 };
@@ -276,6 +313,10 @@ ulong GstNetworkVideoPlayer::GetBufferID()
 	return m_impl->GetBufferID();
 }
 
+float GstNetworkVideoPlayer::GetCaptureFrameRate()
+{
+	return m_impl->GetCaptureFrameRate();
+}
 
 const ImageInfo* GstNetworkVideoPlayer::GetLastFrame()
 {

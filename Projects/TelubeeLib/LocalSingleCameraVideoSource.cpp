@@ -49,6 +49,10 @@ void LocalSingleCameraVideoSource::Open()
 	}
 
 }
+float LocalSingleCameraVideoSource::GetCaptureFrameRate(int i)
+{
+	return m_cameraSource.camera->GetCaptureFrameRate();
+}
 void LocalSingleCameraVideoSource::Close()
 {
 	m_cameraSource.camera->Stop();

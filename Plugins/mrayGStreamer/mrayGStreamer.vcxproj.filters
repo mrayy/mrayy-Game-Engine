@@ -48,6 +48,9 @@
     <ClCompile Include="GstCustomVideoStreamer.cpp">
       <Filter>StreamType\Streamer</Filter>
     </ClCompile>
+    <ClCompile Include="GstLocalVideoPlayer.cpp">
+      <Filter>StreamType\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -107,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="GstCustomVideoStreamer.h">
       <Filter>StreamType\Streamer</Filter>
+    </ClInclude>
+    <ClInclude Include="GstLocalVideoPlayer.h">
+      <Filter>StreamType\Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

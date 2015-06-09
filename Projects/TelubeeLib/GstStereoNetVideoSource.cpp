@@ -33,6 +33,10 @@ void GstStereoNetVideoSource::Init()
 void GstStereoNetVideoSource::Open()
 {
 	m_providers->ConnectToCameras(m_ip, 5000, 5002, 5001);
+	m_frameCount = 0;
+	m_timeAcc = 0;
+	m_lastT = 0;
+	m_captureFPS = 0;
 }
 void GstStereoNetVideoSource::Close()
 {
@@ -52,6 +56,19 @@ bool GstStereoNetVideoSource::Blit(int eye)
 		m_remoteTex->createTexture(math::vector3d(image->Size.x, image->Size.y, 1), image->format);
 		video::LockedPixelBox box(math::box3d(0, image->Size), image->format, image->imageData);
 		m_remoteTex->getSurface(0)->blitFromMemory(box);
+		float t = gEngine.getTimer()->getSeconds();
+		m_timeAcc += (t - m_lastT)*0.001f;
+
+		if (m_timeAcc > 1)
+		{
+			m_captureFPS = m_frameCount;
+			m_frameCount = 0;
+			m_timeAcc = m_timeAcc - (int)m_timeAcc;
+
+			//	printf("Capture FPS: %d\n", m_captureFPS);
+		}
+
+		m_lastT = t;
 	}
 	if (dirty)
 		return true;

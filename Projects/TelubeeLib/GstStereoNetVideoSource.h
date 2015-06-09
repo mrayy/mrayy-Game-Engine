@@ -34,6 +34,11 @@ protected:
 	video::ITexturePtr m_remoteTex;
 	core::string m_ip;
 	bool m_isStereo;
+	int m_captureFPS;
+	int m_frameCount;
+	float m_timeAcc;
+	float m_lastT;
+
 public:
 	GstStereoNetVideoSource(const core::string& ip = "127.0.0.1");
 	virtual~GstStereoNetVideoSource();
@@ -49,6 +54,7 @@ public:
 	virtual math::vector2d GetEyeResolution(int i);
 	virtual video::ITexturePtr GetEyeTexture(int i);
 	virtual math::rectf GetEyeTexCoords(int i);
+	virtual float GetCaptureFrameRate(int i) { return m_captureFPS; }
 
 	virtual bool IsLocal(){ return false; }
 	virtual void SetIsStereo(bool stereo);

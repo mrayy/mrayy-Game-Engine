@@ -68,6 +68,22 @@ EntryPoint
 		op.valueSet.clear();
 	}
 	{
+		op.name = "EnablePlayers";
+		op.value = "No";
+		op.valueSet.insert("Yes");
+		op.valueSet.insert("No");
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+	{
+		op.name = "EnableStreams";
+		op.value = "Yes";
+		op.valueSet.insert("Yes");
+		op.valueSet.insert("No");
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+	{
 		op.name = "CameraConnection";
 		op.value = "Webcam";
 		op.valueSet.insert("Webcam");
@@ -150,14 +166,6 @@ EntryPoint
 		op.valueSet.insert("Medium");
 		op.valueSet.insert("High");
 		op.valueSet.insert("Ultra High");
-		extraOptions.push_back(op);
-		op.valueSet.clear();
-	}
-	{
-		op.name = "Stream";
-		op.value = "Yes";
-		op.valueSet.insert("Yes");
-		op.valueSet.insert("No");
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}

@@ -67,6 +67,7 @@ public:
 	virtual video::ITexturePtr GetEyeTexture(int i);
 	virtual math::rectf GetEyeTexCoords(int i) { return math::rectf(0, 0, 1, 1); }
 
+	virtual float GetCaptureFrameRate(int i);
 	virtual bool IsLocal(){ return true; }
 
 	bool Blit(int eye);

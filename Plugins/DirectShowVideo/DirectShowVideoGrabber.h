@@ -65,7 +65,7 @@ public:
 	void SetImageFormat(video::EPixelFormat fmt);
 	video::EPixelFormat GetImageFormat();
 
-	int GetCaptureFPS(){ return m_captureFPS; }
+	float GetCaptureFrameRate(){ return m_captureFPS; }
 
 	ulong GetBufferID(){ return m_bufferId; }
 

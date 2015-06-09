@@ -31,6 +31,7 @@ protected:
 
 	OS::IStreamPtr m_outValues;
 
+	GUI::IGUIRenderer* m_guiRenderer;
 
 public:
 	LatencyTestState(const core::string& name, TBee::ICameraVideoSource* src);

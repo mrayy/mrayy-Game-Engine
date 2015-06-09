@@ -14,6 +14,7 @@
 #include "CVCalibration.h"
 #include "CVUtilities.h"
 #include "CVWrappers.h"
+#include "CVCameraCalib.h"
 #include "IMonitorDeviceManager.h"
 #include "IMonitorDevice.h"
 
@@ -29,6 +30,7 @@ namespace mray
 
 		GCPtr<video::ICameraVideoGrabber> camera;
 		GCPtr<video::VideoGrabberTexture> grabber;
+		video::CVCameraCalib cameraCalib;
 		video::CVChessBoard chessboard;
 
 		cv::Mat lastImage;
@@ -37,6 +39,9 @@ namespace mray
 		float _lastTime;
 		math::rectf chessBB;
 		bool _found;
+		bool _calibrated;
+
+		float _minProjError;
 
 		video::RenderWindow *CVWindow;
 		scene::ViewPort* CVVP;
@@ -46,6 +51,16 @@ namespace mray
 		{
 			_lastTime = gEngine.getTimer()->getSeconds();
 			_found = false;
+			reset();
+
+		}
+
+		void reset()
+		{
+			_calibrated = false;
+			_found = false;
+			cameraCalib.reset();
+			_minProjError = 100;
 		}
 
 		bool IsDiff(float threshold,float dt)
@@ -96,7 +111,7 @@ void Application::onEvent(Event* event)
 		{
 			if (e->key == KEY_R)
 			{
-				m_impl->_found = false;
+				m_impl->reset();
 			}
 		}
 	}
@@ -137,11 +152,12 @@ void Application::init(const OptionContainer &extraOptions)
 
 
 	m_impl->camera = new video::DirectShowVideoGrabber();
-	m_impl->camera->InitDevice(0, 1280,720, 30);
+	m_impl->camera->InitDevice(0, 640,480, 30);
 	m_impl->grabber = new video::VideoGrabberTexture();
 	m_impl->grabber->Set(m_impl->camera, 0);
-	m_impl->chessboard.Setup(math::vector2di(8, 5),2.5);
-
+	m_impl->chessboard.Setup(math::vector2di(10, 7),2.3);
+	m_impl->cameraCalib.setPatternSize(10, 7);
+	m_impl->cameraCalib.setPatternType(video::CHESSBOARD);
 
 	video::allocate(m_impl->lastImage, m_impl->camera->GetFrameSize().x, m_impl->camera->GetFrameSize().y, CV_MAKETYPE(CV_8U, 3));
 	video::allocate(m_impl->diffMat, m_impl->camera->GetFrameSize().x, m_impl->camera->GetFrameSize().y, CV_MAKETYPE(CV_8U, 3));
@@ -158,7 +174,7 @@ void Application::init(const OptionContainer &extraOptions)
 
 		}
 	}
-
+	if (false)
 	{
 		{
 			int targetMonitor = 2;
@@ -194,9 +210,60 @@ void Application::_RenderMain(video::RenderWindow* wnd)
 {
 	video::TextureUnit tu;
 
+	if (m_impl->grabber->Blit())
+	{
+		if (!m_impl->_calibrated && m_impl->IsDiff(5, 500))
+		{
+			if (m_impl->cameraCalib.add(toCv(m_impl->grabber->GetGrabber()->GetLastFrame())))
+			{
+				printf("Added new frame\n");
+				if (m_impl->cameraCalib.size() > 10)
+				{
+					if (m_impl->cameraCalib.calibrate())
+					{
+						printf("Camera calibrated\n");
+						printf("Projection error: %f\n",m_impl->cameraCalib.getReprojectionError());
+						if (m_impl->cameraCalib.getReprojectionError() < m_impl->_minProjError)
+						{
+							m_impl->_minProjError = m_impl->cameraCalib.getReprojectionError();
+							m_impl->_calibrated = true;
+
+							OS::IStreamPtr stream = gFileSystem.openFile(gFileSystem.getAppPath() + "CameraCalibration.txt", OS::TXT_WRITE);
+							OS::StreamWriter wrtr(stream);
+							std::stringstream ss;
+
+							cv::Mat distCoeff=m_impl->cameraCalib.getDistCoeffs();
+							video::Intrinsics intr = m_impl->cameraCalib.getDistortedIntrinsics();
+
+							ss << intr.getFov() << "\n"
+								<< intr.getFocalLength() << "\n"
+								<< intr.getCameraMatrix()<<"\n"
+								<< distCoeff << "\n";
+
+
+							wrtr.writeLine(ss.str());
+							stream->close();
+
+						}
+					}
+				}
+			}
+		}
+	}
+	if (!m_impl->_calibrated)
+	{
+	}
+	else
+	{
+		const video::ImageInfo* ifo = m_impl->grabber->GetGrabber()->GetLastFrame();
+		m_impl->cameraCalib.undistort(toCv(ifo));
+
+		video::LockedPixelBox box(math::box3d(0, ifo->Size), ifo->format, ifo->imageData);
+		m_impl->grabber->GetTexture()->getSurface(0)->blitFromMemory(box);
+	}
 	tu.SetTexture(m_impl->grabber->GetTexture());
 	getDevice()->useTexture(0, &tu);
-	getDevice()->draw2DImage(math::rectf(0,wnd->GetSize()),1);
+	getDevice()->draw2DImage(math::rectf(0, wnd->GetSize()), 1);
 
 	getDevice()->setLineWidth(1);
 	math::rectf rc = m_impl->chessBB;

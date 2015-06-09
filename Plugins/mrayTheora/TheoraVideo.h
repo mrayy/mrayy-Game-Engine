@@ -41,6 +41,12 @@ protected:
 	bool m_hasNewFrame;
 	ulong m_bufferID;
 
+	int m_captureFPS;
+	int m_frameCount;
+	float m_timeAcc;
+	float m_lastT;
+
+
 protected:
 	virtual uint calcSizeInternal();
 public:
@@ -69,6 +75,7 @@ public:
 	virtual bool isLoop();
 	virtual bool isDone();
 	virtual float getDuration();
+	virtual float GetCaptureFrameRate() ;
 
 
 	virtual void setSpeedFactor(float speed);

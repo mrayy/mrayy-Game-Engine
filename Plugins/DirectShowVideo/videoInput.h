@@ -335,6 +335,7 @@ class videoInput{
 		int  getWidth(int deviceID);
 		int  getHeight(int deviceID);
 		int  getSize(int deviceID);
+		int  getFramerate(int deviceID);
 
 		//completely stops and frees a device
 		void stopDevice(int deviceID);

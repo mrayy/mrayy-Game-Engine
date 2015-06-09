@@ -51,6 +51,7 @@
 #include "LocalSingleCameraVideoSource.h"
 #include "GstStereoNetVideoSource.h"
 #include "GstStreamerVideoSource.h"
+#include "GstLocalCameraVideoSource.h"
 #include "GstSingleNetVideoSource.h"
 #include "DataCommunicator.h"
 
@@ -237,6 +238,7 @@ void Application::_initStates()
 	TBee::TBRobotInfo* ifo = AppData::Instance()->robotInfoManager->GetRobotInfo(0);
 	core::string ip = "127.0.0.1";
 	if (ifo)
+
 		ip = ifo->IP;
 
 	if (m_remoteCamera)
@@ -254,7 +256,7 @@ void Application::_initStates()
 	LatencyTestState* latency = 0;
 
 	if (m_remoteCamera)
-		latency=new LatencyTestState("Latency", new TBee::GstStreamerVideoSource(ip, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.RtcpStream));
+		latency=new LatencyTestState("Latency", new TBee::GstStreamerVideoSource(ip, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.RtcpStream,false));
 	else latency = new LatencyTestState("Latency", new TBee::LocalCameraVideoSource(m_cam1, m_cam2));
 	m_renderingState->AddState(latency);
 
@@ -540,7 +542,7 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 		getDevice()->draw2DImage(math::rectf(rc.getWidth() / 2, 0, rc.getWidth() , rc.getHeight()), 1);
 
 #endif
-		RenderUI(rc);
+	//	RenderUI(rc);
 
 		m_previewGUI->DrawAll(&rc);
 #ifdef FULL_RES_PREVIEW
@@ -570,10 +572,12 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 			getDevice()->draw2DRectangle(math::rectf(0,0,20,20), video::SColor(1,0,0,1));
 
 		}
-		return;
 	}
-	getDevice()->setViewport(m_mainVP);
-	m_tbRenderer->Render(m_mainVP);
+	else //the main window renderer
+	{
+		getDevice()->setViewport(m_mainVP);
+		m_tbRenderer->Render(m_mainVP);
+	}
 }
 void Application::update(float dt)
 {
@@ -587,7 +591,7 @@ void Application::update(float dt)
 	m_appStateManager->Update(dt);
 	m_tbRenderer->Update(dt);
 
-	m_wiiManager->PollEvents();
+//	m_wiiManager->PollEvents();
 
 	m_previewGUI->Update(dt);
 

@@ -340,8 +340,8 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 	//tc.ULPoint=targetRect.ULPoint/rc.getSize();
 	//tc.BRPoint=targetRect.BRPoint/rc.getSize();
 	
-	tc.ULPoint.y = 1 - tc.ULPoint.y;
-	tc.BRPoint.y = 1 - tc.BRPoint.y;
+// 	tc.ULPoint.y = 1 - tc.ULPoint.y;
+// 	tc.BRPoint.y = 1 - tc.BRPoint.y;
 
 // 	tc.ULPoint.y = 1 - tc.ULPoint.y;
 // 	tc.BRPoint.y = 1 - tc.BRPoint.y;

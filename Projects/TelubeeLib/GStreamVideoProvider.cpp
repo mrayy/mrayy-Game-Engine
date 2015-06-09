@@ -14,8 +14,9 @@ namespace TBee
 
 GStreamVideoProvider::GStreamVideoProvider()
 {
-	m_playBack = new video::GstVideoPlayer();
-	m_playBack->SetFrameSize(1280, 800);
+	m_playBack = 0;
+	//m_playBack = new video::GstVideoPlayer();
+	//m_playBack->SetFrameSize(1280, 800);
 	//m_playBack->Connect("192.168.10.170",170,5000);
 
 }

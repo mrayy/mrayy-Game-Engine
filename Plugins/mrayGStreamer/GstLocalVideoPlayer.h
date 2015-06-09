@@ -1,8 +1,7 @@
 
 
-#ifndef GstNetworkVideoPlayer_h__
-#define GstNetworkVideoPlayer_h__
-
+#ifndef __GSTLOCALVIDEOPLAYER__
+#define __GSTLOCALVIDEOPLAYER__
 
 #include "IGStreamerPlayer.h"
 #include "IVideoGrabber.h"
@@ -12,56 +11,55 @@ namespace mray
 namespace video
 {
 
-class GstNetworkVideoPlayerImpl;
+class GstLocalVideoPlayerImpl;
 
-class GstNetworkVideoPlayer :public IGStreamerPlayer
+class GstLocalVideoPlayer :public IGStreamerPlayer
 {
 protected:
-	GstNetworkVideoPlayerImpl* m_impl;
+	GstLocalVideoPlayerImpl* m_impl;
 public:
-	GstNetworkVideoPlayer();
-	virtual ~GstNetworkVideoPlayer();
+	GstLocalVideoPlayer();
+	virtual ~GstLocalVideoPlayer();
 
-	//set ip address for the target host
-	// videoport: port for the video stream, video rtcp is allocated as videoPort+1 and videoPort+2
-	void SetIPAddress(const core::string& ip, int videoPort,bool rtcp);
+	void SetCameras(int cam0, int cam1);
+	void SetResolution(int width, int height, int fps = 30);
 	bool CreateStream();
 
-	virtual bool IsStream() ;
+	virtual bool IsStream();
 
 	void SetVolume(float vol);
 
-	virtual void Play() ;
+	virtual void Play();
 	virtual void Pause();
 	virtual void Stop();
-	virtual bool IsLoaded() ;
+	virtual bool IsLoaded();
 	virtual bool IsPlaying();
-	virtual void Close() ;
+	virtual void Close();
 
 	//defined by the source video stream
 	virtual void SetFrameSize(int w, int h) {}
-	virtual const math::vector2di& GetFrameSize() ;
+	virtual const math::vector2di& GetFrameSize();
 
 	virtual float GetCaptureFrameRate();
 
 
 	//defined by the source video stream
 	virtual void SetImageFormat(video::EPixelFormat fmt){}
-	virtual video::EPixelFormat GetImageFormat() ;
+	virtual video::EPixelFormat GetImageFormat();
 
-	virtual bool GrabFrame() ;
-	virtual bool HasNewFrame() ;
-	virtual ulong GetBufferID() ;// incremented once per frame
+	virtual bool GrabFrame();
+	virtual bool HasNewFrame();
+	virtual ulong GetBufferID();// incremented once per frame
 
-	virtual const ImageInfo* GetLastFrame() ;
+	virtual const ImageInfo* GetLastFrame();
 
 };
 
-class GstNetworkVideoPlayerGrabber :public IVideoGrabber
+class GstLocalVideoPlayerGrabber :public IVideoGrabber
 {
-	GstNetworkVideoPlayer* m_player;
+	GstLocalVideoPlayer* m_player;
 public:
-	GstNetworkVideoPlayerGrabber(GstNetworkVideoPlayer * p)
+	GstLocalVideoPlayerGrabber(GstLocalVideoPlayer * p)
 	{
 		m_player = p;
 	}
@@ -82,4 +80,5 @@ public:
 }
 }
 
-#endif // GstNetworkVideoPlayer_h__
+
+#endif

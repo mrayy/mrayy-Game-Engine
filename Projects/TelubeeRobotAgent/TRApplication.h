@@ -120,6 +120,8 @@ protected:
 	math::vector2di m_resolution;
 
 	bool m_debugging;
+	bool m_enablePlayers;
+	bool m_enableStream;
 
 
 	core::string m_ip;
@@ -133,7 +135,6 @@ protected:
 	}m_cameraIfo[2];
 
 	EStreamingQuality m_quality;
-	bool m_enableStream;
 
 	struct DebugData
 	{

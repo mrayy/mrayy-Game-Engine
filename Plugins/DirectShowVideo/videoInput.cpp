@@ -969,6 +969,15 @@ int videoInput::getSize(int id){
 	return 0;
 
 }
+int  videoInput::getFramerate(int id)
+{
+	if (isDeviceSetup(id))
+	{
+		return VDList[id]-> requestedFrameTime/10000000;
+	}
+
+	return 0;
+}
 
 
 // ----------------------------------------------------------------------

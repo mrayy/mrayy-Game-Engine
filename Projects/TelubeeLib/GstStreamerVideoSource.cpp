@@ -14,15 +14,20 @@ namespace mray
 namespace TBee
 {
 
-GstStreamerVideoSource::GstStreamerVideoSource(const core::string& ip, int videoport, int audioport, bool rtcp)
+GstStreamerVideoSource::GstStreamerVideoSource(const core::string& ip, int videoport, int audioport, bool rtcp, bool useAudio)
 {
+	m_useAudio = useAudio;
 	m_player = new video::GstPlayerBin();
 
 	video::GstNetworkVideoPlayer*vp = new video::GstNetworkVideoPlayer();
-	video::GstNetworkAudioPlayer*ap = new video::GstNetworkAudioPlayer();
-
 	m_player->AddPlayer(vp, "Video");
-	m_player->AddPlayer(ap, "Audio");
+
+	if (m_useAudio)
+	{
+		video::GstNetworkAudioPlayer*ap = new video::GstNetworkAudioPlayer();
+		m_player->AddPlayer(ap, "Audio");
+	}
+
 
 
 	m_playerGrabber = new video::VideoGrabberTexture();
@@ -43,11 +48,13 @@ void GstStreamerVideoSource::Init()
 void GstStreamerVideoSource::Open()
 {
 	((video::GstNetworkVideoPlayer*)m_player->GetPlayer("Video"))->SetIPAddress(m_ip, m_vport, m_rtcp);
-	((video::GstNetworkAudioPlayer*)m_player->GetPlayer("Audio"))->SetIPAddress(m_ip, m_aport,m_rtcp);
-
 	((video::GstNetworkVideoPlayer*)m_player->GetPlayer("Video"))->CreateStream();
-	((video::GstNetworkAudioPlayer*)m_player->GetPlayer("Audio"))->CreateStream();
 
+	if (m_useAudio)
+	{
+		((video::GstNetworkAudioPlayer*)m_player->GetPlayer("Audio"))->SetIPAddress(m_ip, m_aport, m_rtcp);
+		((video::GstNetworkAudioPlayer*)m_player->GetPlayer("Audio"))->CreateStream();
+	}
 
 	m_player->Play();
 }
@@ -60,7 +67,10 @@ bool GstStreamerVideoSource::Blit(int eye)
 {
 	return m_playerGrabber->Blit();
 }
-
+float GstStreamerVideoSource::GetCaptureFrameRate(int i)
+{
+	return m_playerGrabber->GetGrabber()->GetCaptureFrameRate();
+}
 math::vector2d GstStreamerVideoSource::GetEyeScalingFactor(int i)
 {
 	return math::vector2d(m_isStereo ? 1 : 1, 1);

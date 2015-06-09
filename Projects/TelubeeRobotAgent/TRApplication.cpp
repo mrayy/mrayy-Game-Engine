@@ -31,6 +31,7 @@
 #include "FlyCameraVideoGrabber.h"
 #include "GstCustomVideoStreamer.h"
 
+#include <conio.h>
 
 #define COMMUNICATION_PORT 6000
 
@@ -124,6 +125,8 @@ TRApplication::TRApplication()
 	m_players = new video::GstPlayerBin();
 
 	m_debugging = false;
+	m_enablePlayers = false;
+	m_enableStream = true;
 
 	m_handsWindow = new HandsWindow();
 }
@@ -218,12 +221,13 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 		m_cameraIfo[0].w = m_cameraIfo[1].w = 1280;
 		m_cameraIfo[0].h = m_cameraIfo[1].h = 720;
-		m_cameraIfo[0].fps = m_cameraIfo[1].fps = 25;
+		m_cameraIfo[0].fps = m_cameraIfo[1].fps = 45;
 
 		m_debugData.debug = extraOptions.GetOptionByName("Debugging")->getValue() == "Yes";
 		m_depthSend = extraOptions.GetOptionByName("DepthStream")->getValue() == "Yes";
 
-		m_enableStream = extraOptions.GetOptionByName("Stream")->getValue() == "Yes";
+		m_enablePlayers = extraOptions.GetOptionByName("EnablePlayers")->getValue() == "Yes";
+		m_enableStream = extraOptions.GetOptionByName("EnableStreams")->getValue() == "Yes";
 		
 		m_controller = extraOptions.GetOptionByName("Controller")->getValue() == "XBox" ? EController::XBox : EController::Logicool;
 		m_cameraType = extraOptions.GetOptionByName("CameraConnection")->getValue() == "Webcam" ? ECameraType::Webcam : ECameraType::PointGrey;
@@ -299,19 +303,11 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		7000
 	};
 
+	if (m_enableStream)
 	{
 		video::GstNetworkVideoStreamer* streamer;
 		if (m_cameraType==ECameraType::Webcam)
 		{
-			streamer = new video::GstNetworkVideoStreamer();
-
-			streamer->SetResolution(m_resolution.x, m_resolution.y);
-			streamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
-			streamer->SetBitRate(bitRate[(int)m_quality]);
-
-
-			m_streamers->AddStream(streamer, "Video");
-
 			for (int i = 0; i < 2; ++i)
 			{
 				m_cameraIfo[i].camera = new video::DirectShowVideoGrabber();
@@ -321,6 +317,32 @@ void TRApplication::init(const OptionContainer &extraOptions)
 					m_cameraIfo[i].ifo.guidPath = m_cameraIfo[i].camera->GetDeviceName(m_cameraIfo[i].ifo.index);
 					m_cameraIfo[i].camera->SetParameter(video::ICameraVideoGrabber::Param_Focus, "0");
 				}
+			}
+			if (false)
+			{
+				streamer = new video::GstNetworkVideoStreamer();
+
+				streamer->SetResolution(m_resolution.x, m_resolution.y);
+				streamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
+				streamer->SetBitRate(bitRate[(int)m_quality]);
+
+
+				m_streamers->AddStream(streamer, "Video");
+
+			}
+			else
+			{
+				m_cameraIfo[0].camera->Start();
+				m_cameraIfo[1].camera->Start();
+
+
+				video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
+				if (m_cameraIfo[0].ifo.index == m_cameraIfo[1].ifo.index)
+					hs->SetVideoGrabber(m_cameraIfo[0].camera, 0);//
+				else
+					hs->SetVideoGrabber(m_cameraIfo[0].camera, m_cameraIfo[1].camera);//
+				hs->SetBitRate(bitRate[(int)m_quality]);
+				m_streamers->AddStream(hs, "Video");
 			}
 
 		}
@@ -377,7 +399,7 @@ void TRApplication::init(const OptionContainer &extraOptions)
 				//	if (!m_debugData.debug)
 				if (m_cameraType==ECameraType::Webcam)
 				{
-					m_cameraIfo[i].camera->Stop();
+				//	m_cameraIfo[i].camera->Stop();
 				}
 				m_cameraTextures[i].Set(m_cameraIfo[i].camera, getDevice()->createEmptyTexture2D(true));
 
@@ -385,27 +407,31 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		}
 	}
 
-
+	if (m_enableStream)
 	{
 		video::GstNetworkAudioStreamer* streamer;
 		streamer = new video::GstNetworkAudioStreamer();
 
 		m_streamers->AddStream(streamer, "Audio");
 	}
-	{
-		video::GstNetworkAudioPlayer* player;
-		player = new video::GstNetworkAudioPlayer();
 
-		m_players->AddPlayer(player, "Audio");
-	}
+	m_playerGrabber = new video::VideoGrabberTexture();
+	if (m_enablePlayers)
 	{
+		{
+			video::GstNetworkAudioPlayer* player;
+			player = new video::GstNetworkAudioPlayer();
+
+			m_players->AddPlayer(player, "Audio");
+		}
+		{
 		video::GstNetworkVideoPlayer* player;
 		player = new video::GstNetworkVideoPlayer();
 
 		m_players->AddPlayer(player, "Video");
 
-		m_playerGrabber = new video::VideoGrabberTexture();
 		m_playerGrabber->Set(new video::GstNetworkVideoPlayerGrabber(player), 0);
+	}
 	}
 
 	m_handsWindow->OnInit(this);
@@ -421,8 +447,26 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 	m_isStarted = false;
 
+	printf("Press [space] to ignore remote connection. (5 seconds timeout)\n");
+	float t0 = gEngine.getTimer()->getSeconds();
+	float t1;
+	do
+	{
+		t1 = gEngine.getTimer()->getSeconds();
+		if (kbhit())
+		{
+			uchar c = getch();
+			if (c == ' '){
+				m_debugData.userConnected = true;
+				m_startVideo = true;
+				printf("Force starting robot connection ignoring remote side.\n");
+				break;
+			}
+		}
+	} while (t1-t0<5000);
+
 	return;
-	m_combinedCameras = new CombineVideoGrabber();
+	//m_combinedCameras = new CombineVideoGrabber();
 	/*if (m_quality==EStreamingQuality::UltraLow)
 		m_combinedCameras->SetFrameSize(640, 360);
 	else if (m_quality == EStreamingQuality::Low)
@@ -495,15 +539,19 @@ void TRApplication::update(float dt)
 						grabber->InitDevice(m_cameraIfo[i].id, m_cameraIfo[i].w, m_cameraIfo[i].h, m_cameraIfo[i].fps);//1280, 720
 				}
 				}*/	
+
 			m_streamers->GetStream("Video")->CreateStream();
 			m_streamers->GetStream("Audio")->CreateStream();
 			m_streamers->Stream();
 
-			((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->CreateStream();
-			((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->CreateStream();
+			if (m_enablePlayers)
+			{
+				((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->CreateStream();
+				((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->CreateStream();
+				m_players->Play();
+			}
 			if (m_handsWindow->IsActive())
 				m_handsWindow->OnEnable();
-			m_players->Play();
 			m_isStarted = true;
 
 			//m_openNi->Start(320,240);
@@ -514,8 +562,11 @@ void TRApplication::update(float dt)
 		//m_openNi->Close();
 		m_isStarted = false;
 		m_streamers->CloseAll();
-		m_players->CloseAll();
-		if (!m_debugData.debug)
+		if (m_enablePlayers)
+		{
+			m_players->CloseAll();
+		}
+		if (!m_debugData.debug && m_enableStream)
 		{
 			m_cameraIfo[0].camera->Stop();
 			m_cameraIfo[1].camera->Stop();
@@ -612,17 +663,20 @@ void TRApplication::onRenderDone(scene::ViewPort*vp)
 	{
 		getDevice()->set2DMode();
 		video::TextureUnit tex;
-		m_playerGrabber->Blit();
-		tex.SetTexture(m_playerGrabber->GetTexture());
 		math::vector2d txsz;
-		txsz.x = m_playerGrabber->GetTexture()->getSize().x;
-		txsz.y = m_playerGrabber->GetTexture()->getSize().y;
-		float r = (float)vp->GetSize().y / (float)vp->GetSize().x;
-		float w = txsz.x*r;
-		float c = txsz.x - w;
-		getDevice()->useTexture(0, &tex);
-		math::rectf texCoords(1, 0, 0, 1);
-		getDevice()->draw2DImage(math::rectf(c / 2, 0, w, vp->GetSize().y), 1, 0, &texCoords);
+		if (m_enablePlayers)
+		{
+			m_playerGrabber->Blit();
+			tex.SetTexture(m_playerGrabber->GetTexture());
+			txsz.x = m_playerGrabber->GetTexture()->getSize().x;
+			txsz.y = m_playerGrabber->GetTexture()->getSize().y;
+			float r = (float)vp->GetSize().y / (float)vp->GetSize().x;
+			float w = txsz.x*r;
+			float c = txsz.x - w;
+			getDevice()->useTexture(0, &tex);
+			math::rectf texCoords(1, 0, 0, 1);
+			getDevice()->draw2DImage(math::rectf(c / 2, 0, w, vp->GetSize().y), 1, 0, &texCoords);
+		}
 		/*	*/
 
 		GCPtr<GUI::IFont> font = gFontResourceManager.getDefaultFont();
@@ -744,12 +798,17 @@ void TRApplication::OnUserConnected(const network::NetAddress& address, int vide
 		core::StringConverter::toString(ip[1]) + "." +
 		core::StringConverter::toString(ip[2]) + "." +
 		core::StringConverter::toString(ip[3]);
-	m_streamers->GetStream("Video")->BindPorts(ipaddr, videoPort, rtcp);
-	m_streamers->GetStream("Audio")->BindPorts(ipaddr, audioPort, rtcp);
 
-	((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->SetIPAddress(ipaddr, audioPort, rtcp);
-	((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->SetIPAddress(ipaddr, videoPort, rtcp);
-
+	if (m_enableStream)
+	{
+		m_streamers->GetStream("Video")->BindPorts(ipaddr, videoPort, rtcp);
+		m_streamers->GetStream("Audio")->BindPorts(ipaddr, audioPort, rtcp);
+	}
+	if (m_enablePlayers)
+	{
+		((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->SetIPAddress(ipaddr, audioPort, rtcp);
+		((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->SetIPAddress(ipaddr, videoPort, rtcp);
+	}
 	if (m_handsWindow->IsActive())
 	{
 		m_handsWindow->OnConnected(ipaddr,handsPort,rtcp);
@@ -765,6 +824,7 @@ void TRApplication::OnUserConnected(const network::NetAddress& address, int vide
 	//tell the client if we are sending stereo or single video images
 	OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 	OS::StreamWriter wrtr(&stream);
+	if (m_enableStream)
 	{
 		int reply = (int)EMessages::IsStereo;
 		int len = stream.write(&reply, sizeof(reply));

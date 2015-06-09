@@ -137,7 +137,6 @@ public:
 
 		bool mixer = false;
 		int halfW = m_frameSize.x / 2;
-
 		if (m_grabber[0] != 0 && m_grabber[1] != 0)
 		{
 			mixer = true;
@@ -154,13 +153,17 @@ public:
 
 				if (mixer)
 				{
-					videoStr += "videoscale ! "
+					videoStr += "! videoscale ! "
 						"video/x-raw,format=" + GetFormatStr(m_grabber[0]->GetImageFormat()) + ",width=" + core::StringConverter::toString(halfW) +
 						",height=" + core::StringConverter::toString(m_frameSize.y) + "! mix.sink_"+core::StringConverter::toString(i+1)+" ";
 				}
 			}
 		}
 
+		if (mixer)
+		{
+			videoStr += " mix. ";
+		}
 		//encoder string
 		videoStr += "! x264enc name=videoEnc bitrate=" + core::StringConverter::toString(m_bitRate) + 
 			" speed-preset=superfast tune=zerolatency sync-lookahead=0  pass=qual ! rtph264pay ";

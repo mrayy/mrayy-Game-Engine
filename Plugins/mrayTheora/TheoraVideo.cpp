@@ -6,6 +6,8 @@
 
 #include "IFileSystem.h"
 #include "PixelUtil.h"
+#include "Engine.h"
+#include "ITimer.h"
 
 
 namespace mray{
@@ -97,6 +99,10 @@ void TheoraVideo::createVideoBuffers()
 
 void TheoraVideo::play(){
 	m_clip->play();
+	m_frameCount = 0;
+	m_timeAcc = 0;
+	m_lastT = 0;
+	m_captureFPS = 0;
 }
 void TheoraVideo::stop()
 {
@@ -155,7 +161,10 @@ bool TheoraVideo::isDone(){
 float TheoraVideo::getDuration(){
 	return m_clip->getDuration();
 }
-
+float TheoraVideo::GetCaptureFrameRate()
+{
+	return m_captureFPS;
+}
 void TheoraVideo::setSpeedFactor(float speed){
 	m_clip->setPlaybackSpeed(speed);
 }
@@ -177,6 +186,21 @@ bool TheoraVideo::GrabFrame(){
 	int pixelsCount=video::PixelUtil::getPixelDescription(m_imageData.format).elemSizeB;
 	mraySystem::memCopy(m_imageData.imageData,f->getBuffer(),f->getHeight()*f->getWidth()*pixelsCount);
 	m_clip->popFrame();
+
+	float t = gEngine.getTimer()->getSeconds();
+	m_timeAcc += (t - m_lastT)*0.001f;
+
+	if (m_timeAcc > 1)
+	{
+		m_captureFPS = m_frameCount;
+		m_frameCount = 0;
+		m_timeAcc = m_timeAcc - (int)m_timeAcc;
+
+		//	printf("Capture FPS: %d\n", m_captureFPS);
+	}
+
+	m_lastT = t;
+
 	return true;
 }
 bool TheoraVideo::HasNewFrame()

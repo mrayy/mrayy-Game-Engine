@@ -45,6 +45,11 @@ protected:
 	float m_lastGrabbed;
 
 	ulong m_bufferId;
+	int m_captureFPS;
+	int m_frameCount;
+	float m_timeAcc;
+	float m_lastT;
+
 
 public:
 	FlyCameraVideoGrabber();
@@ -68,6 +73,7 @@ public:
 	bool GrabFrame();
 	bool HasNewFrame();	
 	ulong GetBufferID(){ return m_bufferId; }
+	float GetCaptureFrameRate(){ return m_captureFPS; }
 
 	void Stop();
 	void Start();

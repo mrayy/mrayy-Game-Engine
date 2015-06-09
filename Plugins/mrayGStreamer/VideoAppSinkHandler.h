@@ -37,6 +37,11 @@ protected:
 	OS::IMutex*			m_mutex;
 	math::vector2di m_frameSize;
 
+	int m_captureFPS;
+	int m_frameCount;
+	float m_timeAcc;
+	float m_lastT;
+
 	uint m_frameID;
 
 	DECLARE_FIRE_METHOD(OnStreamPrepared, (VideoAppSinkHandler*v), (v));
@@ -54,6 +59,8 @@ public:
 	bool GrabFrame();
 	uint GetFrameID(){ return m_frameID; }
 	virtual const math::vector2di& GetFrameSize(){ return m_frameSize; }
+
+	float GetCaptureFrameRate();
 
 	virtual GstFlowReturn process_sample(std::shared_ptr<GstSample> sample);
 	virtual GstFlowReturn preroll_cb(std::shared_ptr<GstSample> buffer);

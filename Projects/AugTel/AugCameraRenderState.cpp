@@ -761,7 +761,9 @@ void AugCameraRenderState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
 
 		PRINT_LOG( (mT("Depth Center:") + core::StringConverter::toString(m_openNiHandler->GetCenter())));
 		PRINT_LOG( (mT("Depth Scale:") + core::StringConverter::toString(m_openNiHandler->GetScale())));
-		
+	
+		PRINT_LOG((mT("Capture FPS:") + core::StringConverter::toString(m_videoSource->GetCaptureFrameRate(0)) + " - " + core::StringConverter::toString(m_videoSource->GetCaptureFrameRate(1))));
+
 
 		if (m_robotConnector->GetHeadController())
 		{
@@ -837,7 +839,6 @@ void AugCameraRenderState::_RenderStarted(const math::rectf& rc, ETargetEye eye)
 		}
 
 	}
-	m_depthVisualizer->Update();
 
 	//m_camVideoSrc->Blit();
 
@@ -869,6 +870,7 @@ void AugCameraRenderState::_RenderStarted(const math::rectf& rc, ETargetEye eye)
 
 	if (/*m_openNiHandler->IsStarted() &&*/ m_viewDepth)
 	{
+		m_depthVisualizer->Update();
 		tex.SetTexture(m_depthVisualizer->GetNormalsTexture());
 		device->useTexture(0, &tex);
 		math::rectf r(m_openNiHandler->GetCenter() - m_openNiHandler->GetScale()*0.5, m_openNiHandler->GetCenter() + m_openNiHandler->GetScale()*0.5);
@@ -915,18 +917,20 @@ video::IRenderTarget* AugCameraRenderState::Render(const math::rectf& rc, ETarge
 
 	video::IVideoDevice* device = Engine::getInstance().getDevice();
 	int index = GetEyeIndex(eye);
-	Parent::Render(rc, eye);
 	switch (m_status)
 	{
 	case mray::AugTel::AugCameraRenderState::ENone:
+		Parent::Render(rc, eye);
 		break;
 	case mray::AugTel::AugCameraRenderState::EWaitStart:
 	{
+		Parent::Render(rc, eye);
 		math::rectf vp(0, m_renderTarget[index]->GetSize());
 		m_guiManager->DrawAll(&vp);
 	}break;
 	case mray::AugTel::AugCameraRenderState::EConnectingRobot:
-			m_loadScreen->Draw(rc);
+		Parent::Render(rc, eye);
+		m_loadScreen->Draw(rc);
 		break;
 	case mray::AugTel::AugCameraRenderState::EStarted:
 		_RenderStarted(rc, eye);
@@ -951,6 +955,7 @@ video::IRenderTarget* AugCameraRenderState::Render(const math::rectf& rc, ETarge
 
 void AugCameraRenderState::_UpdateStarted(float dt)
 {
+
 	m_sceneManager->update(dt);
 	m_gameManager->Update(dt);
 	//m_guiManager->Update(dt);
