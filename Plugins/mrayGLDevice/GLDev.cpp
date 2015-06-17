@@ -1776,6 +1776,15 @@ void GLDev::useRenderPass(video::RenderPass* mtrl)
 			s=m_RenderStates[(RenderStates)i];
 		setRenderState((RenderStates)i,s);
 	}
+	if (mtrl->getRenderState(RS_Points) == ES_Use)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+	}
+
+	if (mtrl->getRenderState(RS_Wireframe) == ES_Use)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
 	_SetFrontFace(mtrl->GetCullFaceDirection()==ECFM_CW ? GL_CW : GL_CCW);
 
 	setLineWidth(mtrl->GetThickness());

@@ -34,6 +34,9 @@
     <Filter Include="Source Files\Commands">
       <UniqueIdentifier>{24e118ec-941b-47b4-a312-81fa94baa563}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\CameraView">
+      <UniqueIdentifier>{cd55d6e4-c484-4fd0-b89c-8aafce5e34d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -87,6 +90,12 @@
     <ClInclude Include="ARCommands.h">
       <Filter>Source Files\Commands</Filter>
     </ClInclude>
+    <ClInclude Include="CameraPlaneRenderer.h">
+      <Filter>Source Files\CameraView</Filter>
+    </ClInclude>
+    <ClInclude Include="LensDistortion.h">
+      <Filter>Source Files\CameraView</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -124,6 +133,12 @@
     </ClCompile>
     <ClCompile Include="ARCommands.cpp">
       <Filter>Source Files\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraPlaneRenderer.cpp">
+      <Filter>Source Files\CameraView</Filter>
+    </ClCompile>
+    <ClCompile Include="LensDistortion.cpp">
+      <Filter>Source Files\CameraView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

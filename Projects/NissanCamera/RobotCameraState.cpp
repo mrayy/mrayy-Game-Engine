@@ -22,6 +22,7 @@
 #include "ConsoleLogDevice.h"
 #include "ICameraVideoGrabber.h"
 #include "MeshResourceManager.h"
+#include "TextureRTWrap.h"
 
 #include "NCAppGlobals.h"
 #include "Application.h"
@@ -59,43 +60,45 @@ namespace NCam
 		}
 	};
 
+
+	enum class ERobotCameraKeyMap
+	{
+		Unkown = 0,
+		Connect = 50,
+		LockX,
+		LockY,
+		LockZ,
+		Calibrate,
+		Homing,
+		Console,
+		ARVisibility
+	};
+
+
 RobotCameraState::RobotCameraState()
 	:Parent("RobotState")
 {
 	m_exitCode = 0;
-	m_surface[0] = m_surface[1]= 0;
 
 	m_robotConnector = new TBee::CRobotConnector();
-	m_videoSource = new TBee::LocalCameraVideoSource();
 	m_robotComm = new NCam::NissanRobotCommunicator();
 	m_robotConnector->SetCommunicator(m_robotComm);
+	m_cameraRenderer = new CameraPlaneRenderer();
 
 	//m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
-	//m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
-	m_headController = new TBee::CalibHeadController(new TestController());
+	m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
+	//m_headController = new TBee::CalibHeadController(new TestController());
 
 	m_robotConnector->SetHeadController(m_headController);
-	m_hmdFov = 50;
 //	SetVideoSource(m_videoSource);
 
+	m_lockAxis[0] = false;
+	m_lockAxis[1] = false;
+	m_lockAxis[2] = false;
 
 	GUI::GUIBatchRenderer*r = new GUI::GUIBatchRenderer();
 	r->SetDevice(Engine::getInstance().getDevice());
 	m_guiRenderer = r;
-	m_lockAxis[0] = false;
-	m_lockAxis[1] = false;
-	m_lockAxis[2] = false;
-	m_camConfigDirty = true;
-	m_useLensCorrection = false;
-	m_cameraConfiguration = 0;
-
-	m_cameraFPS = 85;
-	m_cameraResolution.set(1280, 720);
-
-	m_cameraOffsets.z = 1.6f;		//camera offset from user eye
-	m_cameraOffsets.x = -0.6;		// camera offset from center of screen
-	m_cameraOffsets.y = -0.1;		// camera offset from center of screen
-
 	m_arServiceProvider = new ARServiceProvider();
 	m_arServiceProvider->AddListener(this);
 	m_arManager = new ARGroupManager();
@@ -118,267 +121,25 @@ RobotCameraState::RobotCameraState()
 RobotCameraState::~RobotCameraState()
 {
 //	delete m_videoSource;
+	m_robotConnector->DisconnectRobot();
+	delete m_robotConnector;
 	delete m_arServiceProvider;
 	delete m_arManager;
+	m_cameraRenderer = 0;
 
 	gLogManager.removeLogDevice(m_consoleLogDevice);
 }
 
 
 
+void RobotCameraState::SetCameraConnection(TBee::EUSBCameraType type)
+{
+	((TBee::LocalCameraVideoSource*)m_cameraRenderer->GetVideoSource())->SetCameraConnectionType(type);
+}
+
 void RobotCameraState::SetCameraInfo(TBee::ETargetEye eye, int id)
 {
-	((TBee::LocalCameraVideoSource*)m_videoSource)->SetCameraID(GetEyeIndex(eye), id);
-}
-
-
-void RobotCameraState::GenerateSurface(bool plane, float hfov, float vfov, int segments,  float cameraScreenDistance)
-{
-	float radius = cameraScreenDistance;
-	m_surfaceParams.plane = plane;
-	m_surfaceParams.hfov = hfov;
-	m_surfaceParams.vfov = vfov;
-	m_surfaceParams.segments = segments;
-	m_surfaceParams.radius = radius;
-	m_surfaceParams.scale[0] = m_surfaceParams.scale[1] = 1;
-	int vertCount = (segments + 1)*(segments + 1);
-	int indCount = 6 * segments*segments;
-
-	for (int i = 0; i < 2; ++i)
-	{
-		if (m_surface[i])
-		{
-			m_screenNode[i]->RemoveNode(m_surface[i]);
-			m_surface[i] = 0;
-		}
-	}
-
-	if (plane)
-	{
-		//Create Screen Node
-		for (int i = 0; i < 2; ++i)
-		{
-			m_screenNode[i] = m_sceneManager->createSceneNode("ScreenNode");
-			scene::MeshRenderableNode* rnode = new scene::MeshRenderableNode(new scene::SMesh());
-			m_surface[i] = rnode;
-
-			scene::MeshBufferData* bdata = rnode->getMesh()->addNewBuffer();
-			scene::IMeshBuffer* buffer = bdata->getMeshBuffer();
-
-			video::IHardwareStreamBuffer* pos = buffer->createStream(0, video::EMST_Position, video::ESDT_Point3f, 4, video::IHardwareBuffer::EUT_WriteOnly, false, false);
-			video::IHardwareStreamBuffer* tc = buffer->createStream(0, video::EMST_Texcoord, video::ESDT_Point2f, 4, video::IHardwareBuffer::EUT_WriteOnly, false, false);
-			video::IHardwareIndexBuffer* idx = buffer->createIndexBuffer(video::IHardwareIndexBuffer::EIT_16Bit, 6, video::IHardwareBuffer::EUT_WriteOnly, false, false);
-
-			math::vector3d posPtr[4] =
-			{
-				math::vector3d(-1, -1, 0),
-				math::vector3d(+1, -1, 0),
-				math::vector3d(+1, +1, 0),
-				math::vector3d(-1, +1, 0)
-			};
-			math::vector2d tcPtr[4] = {
-				math::vector2d(1, 0),
-				math::vector2d(0, 0),
-				math::vector2d(0, 1),
-				math::vector2d(1, 1),
-			};
-
-			math::matrix3x3 rotMat;
-
-
-			if (m_cameraConfiguration->cameraRotation[i] != TBee::TelubeeCameraConfiguration::None)
-			{
-				if (m_cameraConfiguration->cameraRotation[i] == TBee::TelubeeCameraConfiguration::CW)
-					rotMat.setAngle(90);
-				else if (m_cameraConfiguration->cameraRotation[i] == TBee::TelubeeCameraConfiguration::CCW)
-					rotMat.setAngle(-90);
-				else if (m_cameraConfiguration->cameraRotation[i] == TBee::TelubeeCameraConfiguration::Flipped)
-					rotMat.setAngle(180);
-				//     		math::Swap(tc.ULPoint.x, tc.ULPoint.y);
-				//     		math::Swap(tc.BRPoint.x, tc.BRPoint.y);
-
-			}
-			/*
-			if (i == 0)
-			rotMat.setAngle(90);
-			else rotMat.setAngle(-90);
-			*/
-			for (int j = 0; j < 4; ++j)
-				tcPtr[j] = (rotMat*(tcPtr[j] * 2 - 1))*0.5 - 0.5f;
-			ushort idxPtr[6] = { 0, 1, 2, 0, 2, 3 };
-
-			pos->writeData(0, 4 * sizeof(math::vector3d), posPtr, true);
-			tc->writeData(0, 4 * sizeof(math::vector2d), tcPtr, true);
-			idx->writeData(0, 6 * sizeof(ushort), idxPtr, true);
-
-			video::RenderMaterialPtr mtrl = new video::RenderMaterial();
-			m_screenMtrl[i] = mtrl->CreateTechnique("Default")->CreatePass("ScreenPass");
-			bdata->setMaterial(mtrl);
-
-			rnode->SetHasCustomRenderGroup(true);
-			rnode->SetTargetRenderGroup(scene::RGH_Solid - 5);
-
-			m_screenMtrl[i]->setRenderState(video::RS_Lighting, video::ES_DontUse);
-			m_screenMtrl[i]->setRenderState(video::RS_ZWrite, video::ES_DontUse);
-			m_screenMtrl[i]->setRenderState(video::RS_ZTest, video::ES_DontUse);
-			m_screenMtrl[i]->setRenderState(video::RS_CullFace, video::ES_DontUse);
-
-			m_screenNode[i]->AttachNode(rnode);
-			m_camera[i]->addChild(m_screenNode[i]);
-			//m_headNode->addChild(m_screenNode[i]);
-			m_screenNode[i]->setPosition(math::vector3d(0, 0, cameraScreenDistance));
-			m_screenNode[i]->setVisible(false);
-			m_screenNode[i]->setScale(1);
-			m_screenNode[i]->setCullingType(scene::SCT_NONE);
-		}
-
-	}
-	else
-	{
-		float w = 2 * math::PI32*radius*hfov / 360.0f;
-		float h = 2 * math::PI32*radius*vfov / 360.0f;
-		//Create Screen Node
-		for (int i = 0; i < 2; ++i)
-		{
-			m_screenNode[i] = m_sceneManager->createSceneNode("ScreenNode");
-			scene::MeshRenderableNode* rnode = new scene::MeshRenderableNode(new scene::SMesh());
-
-			scene::MeshBufferData* bdata = rnode->getMesh()->addNewBuffer();
-			scene::IMeshBuffer* buffer = bdata->getMeshBuffer();
-
-			m_surface[i] = rnode;
-
-			video::IHardwareStreamBuffer* pos = buffer->createStream(0, video::EMST_Position, video::ESDT_Point3f, vertCount, video::IHardwareBuffer::EUT_WriteOnly, false, false);
-			video::IHardwareStreamBuffer* tc = buffer->createStream(0, video::EMST_Texcoord, video::ESDT_Point2f, vertCount, video::IHardwareBuffer::EUT_WriteOnly, false, false);
-			video::IHardwareIndexBuffer* idx = buffer->createIndexBuffer(video::IHardwareIndexBuffer::EIT_16Bit, indCount, video::IHardwareBuffer::EUT_WriteOnly, false, false);
-
-			math::vector3d* posPtr = (math::vector3d*) pos->lock(0, vertCount, video::IHardwareBuffer::ELO_NoOverwrite);
-			math::vector2d* uvPtr = (math::vector2d*)tc->lock(0, vertCount, video::IHardwareBuffer::ELO_NoOverwrite);
-			ushort* indPtr = (ushort*)idx->lock(0, indCount, video::IHardwareBuffer::ELO_NoOverwrite);
-
-
-			math::matrix3x3 rotMat;
-
-
-			if (m_cameraConfiguration->cameraRotation[i] != TBee::TelubeeCameraConfiguration::None)
-			{
-				if (m_cameraConfiguration->cameraRotation[i] == TBee::TelubeeCameraConfiguration::CW)
-					rotMat.setAngle(90);
-				else if (m_cameraConfiguration->cameraRotation[i] == TBee::TelubeeCameraConfiguration::CCW)
-					rotMat.setAngle(-90);
-				else if (m_cameraConfiguration->cameraRotation[i] == TBee::TelubeeCameraConfiguration::Flipped)
-					rotMat.setAngle(180);
-				//     		math::Swap(tc.ULPoint.x, tc.ULPoint.y);
-				//     		math::Swap(tc.BRPoint.x, tc.BRPoint.y);
-
-			}
-			for (int x = 0; x <= segments; ++x)
-			{
-				float u = ((float)x) / (float)segments;;
-				float a1 = hfov*(x - segments / 2.0f) / (float)segments;
-				for (int y = 0; y <= segments; ++y)
-				{
-					float v = ((float)y) / (float)segments;;
-					float a2 = vfov*(y - segments / 2.0f) / (float)segments ;
-					float xp = radius*math::sind(a1) *math::sind(a2);
-					float yp = radius* radius*math::cosd(a2); //((float)y - segments / 2.0f) / (float)segments;;;//
-					float zp = radius*math::cosd(a1) *math::sind(a2);
-
-
-
-					(*posPtr++).set(xp, yp, zp);
-					(*uvPtr).set(u, v);
-					*uvPtr = (rotMat*(*uvPtr * 2 - 1))*0.5 - 0.5f;
-
-					uvPtr++;
-
-				}
-			}
-
-			for (int x = 0; x < segments; ++x)
-			{
-				for (int y = 0; y < segments; ++y)
-				{
-					*indPtr++ = y*(segments + 1) + x;
-					*indPtr++ = y*(segments + 1) + x + 1;
-					*indPtr++ = (y + 1)*(segments + 1) + (x + 1);
-
-					*indPtr++ = y*(segments + 1) + x;
-					*indPtr++ = (y + 1)*(segments + 1) + (x + 1);
-					*indPtr++ = (y + 1)*(segments + 1) + x;
-				}
-			}
-
-			pos->unlock();
-			tc->unlock();
-			idx->unlock();
-
-
-			video::RenderMaterialPtr mtrl = new video::RenderMaterial();
-			m_screenMtrl[i] = mtrl->CreateTechnique("Default")->CreatePass("Default");
-			bdata->setMaterial(mtrl);
-
-			m_screenMtrl[i]->setRenderState(video::RS_Lighting, video::ES_DontUse);
-			//m_screenMtrl[i]->setRenderState(video::RS_Points, video::ES_Use);
-			m_screenMtrl[i]->setRenderState(video::RS_CullFace, video::ES_DontUse);
-
-			m_screenNode[i]->AttachNode(rnode);
-			m_headNode->addChild(m_screenNode[i]);
-			//m_screenNode[i]->setPosition(math::vector3d(0, 0, cameraScreenDistance));
-			m_screenNode[i]->setVisible(false);
-		}
-	}
-	m_screenNode[GetEyeIndex(TBee::Eye_Left)]->setOrintation(math::quaternion(180, math::vector3d::ZAxis));
-	m_screenNode[GetEyeIndex(TBee::Eye_Right)]->setOrintation(math::quaternion(180, math::vector3d::ZAxis));
-
-}
-
-void RobotCameraState::RescaleMesh(int index,const math::vector3d &scaleFactor)
-{
-	m_surfaceParams.scale[index] = scaleFactor;
-	if (m_surfaceParams.plane)
-	{
-		m_screenNode[index]->setScale(scaleFactor);
-
-	}
-	else
-	{
-		float radius = m_surfaceParams.radius;
-		float hfov = m_surfaceParams.hfov*m_surfaceParams.scale[0].x;
-		float vfov = m_surfaceParams.vfov*m_surfaceParams.scale[1].y;
-		int segments = m_surfaceParams.segments;
-		int vertCount = (segments + 1)*(segments + 1);
-		int indCount = 6 * segments*segments;
-
-		float w = 2 * math::PI32*radius*hfov / 360.0f;
-		float h = 2 * math::PI32*radius*vfov / 360.0f;
-		//Create Screen Node
-		for (int i = 0; i < 2; ++i)
-		{
-
-
-			scene::IMeshBuffer* buffer = m_surface[i]->getMesh()->getBuffer(0) ;
-
-			video::IHardwareStreamBuffer* pos = buffer->getStream(0, video::EMST_Position);
-
-			math::vector3d* posPtr = (math::vector3d*) pos->lock(0, vertCount, video::IHardwareBuffer::ELO_NoOverwrite);
-			for (int x = 0; x <= segments; ++x)
-			{
-				float a1 = hfov*(x - (segments + 1) / 2.0f) / (float)(segments + 1);
-				for (int y = 0; y <= segments; ++y)
-				{
-					float a2 = vfov*(y - (segments + 1) / 2.0f) / (float)(segments + 1) + 90;
-					float xp = radius*math::sind(a1)*math::sind(a2);
-					float yp = radius*math::cosd(a2);
-					float zp = radius*math::cosd(a1)*math::sind(a2);
-
-					(*posPtr++).set(xp, yp, zp);
-
-				}
-			}
-			pos->unlock();
-		}
-	}
+	((TBee::LocalCameraVideoSource*)m_cameraRenderer->GetVideoSource())->SetCameraID(GetEyeIndex(eye), id);
 }
 
 
@@ -422,17 +183,24 @@ void RobotCameraState::InitState()
 		gLogManager.addLogDevice(m_consoleLogDevice);
 	}
 
+	{
+		//register keys
+
+		controllers::InputKeyMap& keys = NCAppGlobals::Instance()->keyMap;
+
+		keys.RegisterKey((uint)ERobotCameraKeyMap::Connect, KEY_SPACE, false, false, "Connect/Disconnect Robot");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::Calibrate, KEY_C, false, false, "Calibrate Head Position");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::Homing, KEY_H, false, false, "Set Robot To Homing State");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::LockX, KEY_X, false, false, "Lock Robot X Axis");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::LockY, KEY_Y, false, false, "Lock Robot Y Axis");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::LockZ, KEY_Z, false, false, "Lock Robot Z Axis");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::Console, KEY_TAB, false, false, "Show/Hide Console");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::ARVisibility, KEY_V, true, false, "Show/Hide AR Objects");
+	}
 
 	{
 		m_sceneManager = new scene::SceneManager(Engine::getInstance().getDevice());
 	}
-	{
-		((TBee::LocalCameraVideoSource*)m_videoSource)->SetCameraResolution(m_cameraResolution, m_cameraFPS);
-		m_videoSource->Init();
-	}
-
-	m_lensCorrectionPP = new video::ParsedShaderPP(Engine::getInstance().getDevice());
-	m_lensCorrectionPP->LoadXML(gFileSystem.openFile("LensCorrection.peff"));
 	{
 		m_arRoot = m_sceneManager->createSceneNode("AR_Root_Node");
 
@@ -470,33 +238,37 @@ void RobotCameraState::InitState()
 			m_viewport[i] = new scene::ViewPort("", cam[i], 0, 0, math::rectf(0, 0, 1, 1), 0);
 			m_viewport[i]->SetClearColor(video::SColor(0,0,0, 1));
 
-			video::ITexturePtr renderTargetTex = Engine::getInstance().getDevice()->createTexture2D(math::vector2d(1, 1), pf, true);
-			renderTargetTex->setBilinearFilter(false);
-			renderTargetTex->setTrilinearFilter(false);
-			renderTargetTex->setMipmapsFilter(false);
+			{
+				video::ITexturePtr renderTargetTex = Engine::getInstance().getDevice()->createTexture2D(math::vector2d(1, 1), pf, true);
+				renderTargetTex->setBilinearFilter(false);
+				renderTargetTex->setTrilinearFilter(false);
+				renderTargetTex->setMipmapsFilter(false);
 
-			video::IRenderTargetPtr rt = Engine::getInstance().getDevice()->createRenderTarget(mT(""), renderTargetTex, video::IHardwareBufferPtr::Null, video::IHardwareBufferPtr::Null, false);
-			m_viewport[i]->setRenderTarget(rt);
-			m_viewport[i]->setOnlyToRenderTarget(true);
-			m_viewport[i]->SetAutoUpdateRTSize(true);
+				video::IRenderTargetPtr rt = Engine::getInstance().getDevice()->createRenderTarget(mT(""), renderTargetTex, video::IHardwareBufferPtr::Null, video::IHardwareBufferPtr::Null, false);
+				m_viewport[i]->setRenderTarget(rt);
+				m_viewport[i]->setOnlyToRenderTarget(true);
+				m_viewport[i]->SetAutoUpdateRTSize(true);
+			}
 			m_viewport[i]->AddListener(this);
 
 			cam[i]->setZNear(0.1);
-			cam[i]->setZFar(100000);
+			cam[i]->setZFar(10000);
 
 			//if (ATAppGlobal::Instance()->oculusDevice)
-			cam[i]->setFovY(m_hmdFov);
+			cam[i]->setFovY(m_cameraRenderer->GetDisplayFov());
 			cam[i]->setAutoUpdateAspect(true);
 			m_camera[i] = cam[i];
 			m_headNode->addChild(cam[i]);
 
 		}
 
-		GenerateSurface(true, 100, 100, 20, m_cameraOffsets.z);
 
 		m_camera[GetEyeIndex(TBee::Eye_Left )]->setPosition(math::vector3d(-0.03, 0, 0));
 		m_camera[GetEyeIndex(TBee::Eye_Right)]->setPosition(math::vector3d(+0.03, 0, 0));
 	}
+
+	//init camera render plane
+	m_cameraRenderer->Init(m_headNode, m_camera[0], m_camera[1]);
 
 	m_console->AddToHistory("System Inited.", video::DefaultColors::Green);
 
@@ -551,7 +323,8 @@ void RobotCameraState::InitState()
 		m_vehicleModel->addChild(m_headNode);
 		//m_vehicleModel->AttachNode(node);
 		{
-			CreateARObject(1000, "", math::vector3d(-47197.953, 100, 61388.07), 0);
+			CreateARObject(1000, "", 0, 0);// math::vector3d(-47197.953, 100, 61388.07), 0);
+			//CreateARObject(1000, "", math::vector3d(-47197.953, 100, 61388.07), 0);
 			ARSceneGroup *g= m_arManager->GetGroupListByID(1000);
 			m_vehicleRef = g->objects.begin()->second;
 		}
@@ -603,14 +376,21 @@ bool RobotCameraState::OnEvent(Event* e, const math::rectf& rc)
 	bool ok = false;
 
 
+	if (m_cameraRenderer->OnEvent(e))
+		return true;
+
 
 	if (e->getType() == ET_Keyboard)
 	{
 		KeyboardEvent* evt = (KeyboardEvent*)e;
 		if (evt->press)
 		{
-			if (evt->key == KEY_SPACE)
+			ERobotCameraKeyMap cmdCode = (ERobotCameraKeyMap) NCAppGlobals::Instance()->keyMap.GetCommand(evt);
+			switch (cmdCode)
 			{
+			case mray::NCam::ERobotCameraKeyMap::Unkown:
+				break;
+			case mray::NCam::ERobotCameraKeyMap::Connect:
 				if (m_robotConnector->IsRobotConnected())
 					m_robotConnector->EndUpdate();
 				else
@@ -620,46 +400,37 @@ bool RobotCameraState::OnEvent(Event* e, const math::rectf& rc)
 					m_robotConnector->StartUpdate();
 				}
 				ok = true;
-			}
-			else if (evt->key == KEY_X)
-			{
+				break;
+			case mray::NCam::ERobotCameraKeyMap::LockX:
 				m_lockAxis[0] = !m_lockAxis[0];
 				ok = true;
-			}
-			else if (evt->key == KEY_Y)
-			{
+				break;
+			case mray::NCam::ERobotCameraKeyMap::LockY:
 				m_lockAxis[1] = !m_lockAxis[1];
 				ok = true;
-			}
-			else if (evt->key == KEY_Z)
-			{
+				break;
+			case mray::NCam::ERobotCameraKeyMap::LockZ:
 				m_lockAxis[2] = !m_lockAxis[2];
 				ok = true;
-			}
-			else if (evt->key == KEY_C)
-			{
+				break;
+			case mray::NCam::ERobotCameraKeyMap::Calibrate:
 				m_headController->Calibrate();
 				ok = true;
-			}
-			else if (evt->key == KEY_H)
-			{
+				break;
+			case mray::NCam::ERobotCameraKeyMap::Homing:
 				m_robotConnector->SetData("Homing", "", false);
 				ok = true;
-			}
-			else if (evt->key == KEY_P)
-			{
-			//	GenerateSurface(!m_surfaceParams.plane, m_surfaceParams.hfov, m_surfaceParams.vfov, m_surfaceParams.segments, m_surfaceParams.radius);
-				ok = true;
-			}
-			else if (evt->key == KEY_TAB)
-			{
+				break;
+			case mray::NCam::ERobotCameraKeyMap::Console:
 				m_console->SetVisible(!m_console->IsVisible());
 				ok = true;
-			}
-			else if (evt->key == KEY_V && evt->ctrl)
-			{
-				m_arRoot->setVisible(!m_arRoot->isVisible(),true);
+				break;
+			case mray::NCam::ERobotCameraKeyMap::ARVisibility:
+				m_arRoot->setVisible(!m_arRoot->isVisible(), true);
 				ok = true;
+				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -668,50 +439,20 @@ bool RobotCameraState::OnEvent(Event* e, const math::rectf& rc)
 void RobotCameraState::OnEnter(TBee::IRenderingState*prev)
 {
 	Parent::OnEnter(prev);
-	m_videoSource->Open();
-	((TBee::LocalCameraVideoSource*)m_videoSource)->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0.0");
 
 	//m_robotConnector->ConnectRobot();
-
+	m_cameraRenderer->Start();
 }
 
 void RobotCameraState::OnExit()
 {
 	Parent::OnExit();
-	m_videoSource->Close();
 	m_robotConnector->DisconnectRobot();
+	m_cameraRenderer->Stop();
 }
 
 void RobotCameraState::SetTransformation( const math::vector3d& pos, const math::vector3d &angles)
 {
-	math::vector3d p;
-	if (true)
-	{
-		math::quaternion q(0, 0, angles.z);
-		p.z = m_cameraOffsets.z;
-		p.x = m_cameraOffsets.x + math::sind(angles.y)*m_cameraOffsets.z;
-		p.y = m_cameraOffsets.y + math::sind(-angles.x)*m_cameraOffsets.z;
-	//	m_headNode->setPosition(pos);
-		m_screenNode[0]->setPosition(p);
-		m_screenNode[1]->setPosition(p);
- 		m_screenNode[0]->setOrintation(q);
- 		m_screenNode[1]->setOrintation(q);
-	}
-#if 0
-	else
-	{
-		p.z = m_cameraOffsets.z;
-		p.x = m_cameraOffsets.x + math::sind(angles.y)*m_cameraOffsets.z;
-		p.y = m_cameraOffsets.y + math::sind(-angles.x)*m_cameraOffsets.z;
-	
-		p = m_camera[0]->getAbsolutePosition() + m_camera[0]->getAbsoluteOrintation()*p;
-
-		math::vector3d proj1 = m_camera[0]->WorldToScreen(p);
-
-		SetContentsPosition(proj1.x, proj1.y);
-		SetContentsRotation(-angles.z);
-	}
-#endif
 	{
 // 		m_headNode->setOrintation(m_headRotationOffset);;// +angles);
 // 		m_headNode->setPosition(m_headPosOffset);// +pos);
@@ -725,16 +466,16 @@ void RobotCameraState::SetTransformation( const math::vector3d& pos, const math:
 		m_headRotationOffset = 0;	
 		m_headPosOffset = 0;
 	}
+	m_cameraRenderer->SetTransformation(pos, angles);
 }
 
 float time = 0;
 void RobotCameraState::Update(float dt)
 {
 	Parent::Update(dt);
-	m_videoSource->Blit();
 	m_guimngr->Update(dt);
 	m_robotConnector->UpdateStatus();
-
+	m_cameraRenderer->Update(dt);
 	
 
 	math::quaternion q;// = m_robotConnector->GetCurrentHeadRotation();// m_robotConnector->GetHeadRotation();
@@ -743,11 +484,24 @@ void RobotCameraState::Update(float dt)
 
 	math::vector3d rot,r ;
 	//q.toEulerAngles(r);
-	r = m_robotConnector->GetCurrentHeadRotation();
-	
-	rot.x = r.y;
-	rot.z = r.x;
-	rot.y = r.z;
+	if (false)
+	{
+		//in the car
+		r = m_robotConnector->GetCurrentHeadRotation();
+		rot.x = r.y;
+		rot.z = r.x;
+		rot.y = r.z;
+	}
+	else
+	{
+		//in the lab
+		if (m_robotConnector->IsRobotConnected())
+			r = m_robotConnector->GetCurrentHeadRotation();
+		else m_robotConnector->GetHeadRotation().toEulerAngles(r);
+		rot.x = -r.y;
+		rot.z = -r.x;
+		rot.y = -r.z;
+	}
 // 	rot.x = -rot.x;
 // 	rot.z = -rot.z;
 	//rot = r;
@@ -793,9 +547,10 @@ void RobotCameraState::_UpdateMovement(float dt)
 		angles.y = kb->getKeyState(KEY_UP) - kb->getKeyState(KEY_DOWN);
 
 		//	m_headNode->rotate(angles*100*dt, scene::TS_Local);
-
-		m_cameraOffsets.x += angles.x*dt*0.1f;
-		m_cameraOffsets.y += angles.y*dt*0.1f;
+		math::vector3d camOff= m_cameraRenderer->GetCameraOffset();
+		camOff.x += angles.x*dt*0.1f;
+		camOff.y += angles.y*dt*0.1f;
+		m_cameraRenderer->SetCameraOffset(camOff);
 	}
 	if (kb->getKeyState(KEY_LCONTROL))
 	{
@@ -841,91 +596,41 @@ void RobotCameraState::_UpdateMovement(float dt)
 }
 
 
-class TextureRenderTarget :public video::IRenderArea
-{
-protected:
-	video::ITexturePtr m_tex;
-public:
-	TextureRenderTarget(video::ITexturePtr tex){ m_tex = tex; }
-	virtual~TextureRenderTarget()
-	{
-	}
-	virtual const video::ITexturePtr& GetColorTexture(int i = 0) { return m_tex; }
-	virtual int GetColorTextureCount() { return 1; }
-	virtual void Resize(int x, int y) {}
-	virtual math::vector2di GetSize()
-	{
-		return math::vector2di(m_tex->getSize().x, m_tex->getSize().y);
-	}
-
-};
-
-
 video::IRenderTarget* RobotCameraState::Render(const math::rectf& rc, TBee::ETargetEye eye)
 {
 	
 	video::IVideoDevice* device = Engine::getInstance().getDevice();
 	int index = GetEyeIndex(eye);
 	Parent::Render(rc, eye);
-
-#if 1
-	video::ITexture* camTex = m_videoSource->GetEyeTexture(index);;//gTextureResourceManager.loadTexture2D("Checker.png");// //
-
-	video::ShaderSemanticTable::getInstance().setRenderPass(0);
-
-	math::vector3d scale;
-	scale.x = (float)camTex->getSize().x / (float)camTex->getSize().y;
-	scale.y = 1;
-	scale.z = 1;
-	if (m_useLensCorrection )
-	{
-		math::vector2d size(rc.getSize());
-		video::ParsedShaderPP::MappedParams* texRect = m_lensCorrectionPP->GetParam("texRect");
-
-		if (texRect)
-		{
-			math::rectf r = m_videoSource->GetEyeTexCoords(index);
-			texRect->SetValue(math::vector4d(r.ULPoint.x, r.ULPoint.y, r.BRPoint.x, r.BRPoint.y));
-		}
-		if (m_camConfigDirty)
-		{
-			video::ParsedShaderPP::MappedParams* OpticalCenter = m_lensCorrectionPP->GetParam("OpticalCenter");
-			video::ParsedShaderPP::MappedParams* FocalCoeff = m_lensCorrectionPP->GetParam("FCoff");
-			video::ParsedShaderPP::MappedParams* KPCoeff = m_lensCorrectionPP->GetParam("KCoff");
-
-			if (OpticalCenter)
-				OpticalCenter->SetValue(m_cameraConfiguration->OpticalCenter);
-			if (FocalCoeff)
-				FocalCoeff->SetValue(m_cameraConfiguration->FocalCoeff);
-			if (KPCoeff)
-				KPCoeff->SetValue(m_cameraConfiguration->KPCoeff);
-		}
-
-		m_lensCorrectionPP->Setup(math::rectf(0, size));
-		m_lensCorrectionPP->render(&TextureRenderTarget(camTex));
-		camTex = m_lensCorrectionPP->getOutput()->GetColorTexture();
-	}
-	if (scale != m_surfaceParams.scale[index])
-	{
-		RescaleMesh(index,scale);
-	}
 	device->set3DMode();
-#endif
-	m_screenNode[index]->setVisible(true);
-	//m_screenNode[index]->setScale(scale);
-	m_screenMtrl[index]->setTexture(camTex, 0);
+
+	m_cameraRenderer->PreRender(rc,index);
+
+
 	m_viewport[index]->setAbsViewPort(rc);
 	m_viewport[index]->draw();
 
 	video::TextureUnit tex;
+	device->set2DMode();
+	{
+		device->setRenderTarget(m_renderTarget[index]);
+		tex.SetTexture(m_viewport[index]->getRenderTarget()->GetColorTexture());
+		device->useTexture(0, &tex);
+		math::rectf tc = math::rectf(0, 0, 1, 1);
+		device->draw2DImage(rc, 1, 0, &tc);
+	}
 
-	device->setRenderTarget(m_renderTarget[index]);
-	tex.SetTexture(m_viewport[index]->getRenderTarget()->GetColorTexture());
+	m_cameraRenderer->PostRender(index);
+
+	/*
+	//debug render camera views
+	tex.SetTexture(camTex1);
 	device->useTexture(0, &tex);
-	math::rectf tc = math::rectf(0, 0, 1, 1);
-	device->draw2DImage(rc, 1, 0, &tc);
-	m_screenNode[index]->setVisible(false);
-
+	device->draw2DImage(math::rectf(0, 0, 200, 200), 1);
+	tex.SetTexture(camTex);
+	device->useTexture(0, &tex);
+	device->draw2DImage(math::rectf(200, 0, 400, 200), 1);
+	*/
 	_RenderUI(rc);
 
 	return m_renderTarget[index];
@@ -951,9 +656,9 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 
 	math::vector3d origin;
 	origin = 0;
-	origin += math::vector3d::XAxis* m_cameraOffsets.x;
-	origin += math::vector3d::YAxis* m_cameraOffsets.y;
-	device->draw3DLine(origin, origin + math::vector3d::ZAxis * m_cameraOffsets.z, video::SColor(1, 0, 0, 1));
+	origin += math::vector3d::XAxis* m_cameraRenderer->GetCameraOffset().x;
+	origin += math::vector3d::YAxis* m_cameraRenderer->GetCameraOffset().y;
+	device->draw3DLine(origin, origin + math::vector3d::ZAxis * m_cameraRenderer->GetCameraOffset().z, video::SColor(1, 0, 0, 1));
 
 
 	int n =30;
@@ -961,23 +666,23 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 	{
 		math::vector3d a;
 		math::vector3d b;
-		a.z = m_cameraOffsets.z;
-		b.z = m_cameraOffsets.z;
+		a.z = m_cameraRenderer->GetCameraOffset().z;
+		b.z = m_cameraRenderer->GetCameraOffset().z;
 		float step = (i - n*0.5f)*0.1f;;
 
-		a.y = -1;
-		b.y = 1;
+		a.y = -1 ;
+		b.y = 1 ;
 		b.x = a.x = step;
 
 		float strength = pow(1 - fabs((float)i - n*0.5f) / (float)(n*0.5f),3);
 
 		device->draw3DLine(a, b, video::SColor( strength, 0, 0, 1));
 
-		a.x = -1;
-		b.x = 1;
+		a.x = -1 ;
+		b.x = 1 ;
 		b.y = a.y = step;
-		a.z = m_cameraOffsets.z;
-		b.z = m_cameraOffsets.z;
+		a.z = m_cameraRenderer->GetCameraOffset().z;
+		b.z = m_cameraRenderer->GetCameraOffset().z;
 		device->draw3DLine(a, b, video::SColor(strength, 0, 0, 1));
 	}
 
@@ -1000,8 +705,15 @@ void RobotCameraState::_RenderUI(const math::rectf& rc)
 
 	if (!TBee::AppData::Instance()->IsDebugging)
 		return;
+
+	m_cameraRenderer->DebugRender(m_guiRenderer);
+
 	if (font)
 	{
+#define PRINT_LOG(msg)\
+	font->print(r, &attr, 0, msg, m_guiRenderer); \
+	r.ULPoint.y += 2*attr.fontSize  ;
+
 		attr.fontColor.Set(1, 1, 1, 1);
 		attr.fontAligment = GUI::EFA_MiddleLeft;
 		attr.fontSize = 18;
@@ -1028,28 +740,24 @@ void RobotCameraState::_RenderUI(const math::rectf& rc)
 				msg += "[Z]";
 			else msg += "Z";
 			attr.fontColor.Set(0, 1, 0, 1);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(msg);
 		}
 		{
 
-			core::string msg = mT("Camera Offset: ") + core::StringConverter::toString(math::vector2d(m_cameraOffsets.x, m_cameraOffsets.y));
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			core::string msg = mT("Camera Offset: ") + core::StringConverter::toString(math::vector2d(m_cameraRenderer->GetCameraOffset().x, m_cameraRenderer->GetCameraOffset().y));
+			PRINT_LOG(msg);
 		}
 		attr.fontColor.Set(1, 1, 1, 1);
 		if (m_robotConnector->GetHeadController())
 		{
 			math::vector3d head;
 			 m_robotConnector->GetHeadRotation().toEulerAngles(head);
-			core::string msg = mT("Head Rotation: ") + core::StringConverter::toString(head);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			 core::string msg = mT("Head Rotation: ") + core::StringConverter::toString((math::vector3di)head);
+			 PRINT_LOG(msg);
 
 			head = m_robotConnector->GetHeadPosition();
-			msg = mT("Head Position: ") + core::StringConverter::toString(head);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			msg = mT("Head Position: ") + core::StringConverter::toString((math::vector3di)head);
+			PRINT_LOG(msg);
 		}
 		else
 		{
@@ -1065,36 +773,36 @@ void RobotCameraState::_RenderUI(const math::rectf& rc)
 			speed = m_robotConnector->GetSpeed();
 			rot = m_robotConnector->GetRotation();
 			core::string msg = mT("Robot Speed: ") + core::StringConverter::toString(speed);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(msg);
 			msg = mT("Robot Rotation: ") + core::StringConverter::toString(rot);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(msg);
 
 
+		}
+		{
+			core::string msg = mT("Capture Rate: ") + core::StringConverter::toString(m_cameraRenderer->GetVideoSource()->GetCaptureFrameRate(0)) + " / "
+				+ core::StringConverter::toString(m_cameraRenderer->GetVideoSource()->GetCaptureFrameRate(1));
+			PRINT_LOG(msg);
 		}
 
 		if (m_arManager->GetVehicle())
 		{
-
+			//Debug Vehicle details (Position and Direction)
 			scene::ISceneNode* v = m_arManager->GetVehicle();
 
 			core::string msg = mT("Car Position: ") + core::StringConverter::toString(v->getPosition());
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(msg);
 			math::vector3d angles;
 			v->getOrintation().toEulerAngles(angles);
 			msg = mT("Car Heading: ") + core::StringConverter::toString(angles);
-			font->print(r, &attr, 0, msg, m_guiRenderer);
-			r.ULPoint.y += attr.fontSize + 5;
+			PRINT_LOG(msg);
 
 
 		}
 
 		core::string msg = mT("Is Homing: ");
 		msg += m_robotComm->IsHoming() ? "Yes" : "No";
-		font->print(r, &attr, 0, msg, m_guiRenderer);
-		r.ULPoint.y += attr.fontSize + 5;
+		PRINT_LOG(msg);
 		m_guiRenderer->Flush();
 	}
 
@@ -1111,32 +819,7 @@ void RobotCameraState::LoadFromXML(xml::XMLElement* e)
 		m_headController->LoadFromXML(c);
 
 
-	xml::XMLAttribute* attr;
-
-
-	attr = e->getAttribute("Size");
-	if (attr)
-	{
-		m_cameraResolution = core::StringConverter::toVector2d(attr->value);
-	}
-	attr = e->getAttribute("FPS");
-	if (attr)
-	{
-		m_cameraFPS = core::StringConverter::toInt(attr->value);
-	}
-
-	core::string camConfigName = e->getValueString("CameraConfiguration");
-
-	m_useLensCorrection = e->getValueBool("UseLensCorrection");
-	math::vector2d proj = core::StringConverter::toVector2d(e->getValueString("CameraProjection"));
-	m_cameraOffsets.x = proj.x;
-	m_cameraOffsets.y = proj.y;
-
-
-	m_cameraConfiguration = NCAppGlobals::Instance()->camConfig->GetCameraConfiguration(camConfigName);
-
-
-	m_camConfigDirty = true;
+	m_cameraRenderer->LoadFromXML(e);
 }
 xml::XMLElement* RobotCameraState::WriteToXML(xml::XMLElement* e)
 {
@@ -1168,7 +851,7 @@ void RobotCameraState::OnDeletedGroup(ARCommandDeleteGroup* cmd)
 	m_arManager->RemoveGroup(cmd->groupID);
 }
 
-void RobotCameraState::CreateARObject(uint id, const core::string& name, const math::vector3d& pos, const math::vector3d& dir)
+void RobotCameraState::CreateARObject(uint id, const core::string& name, const math::vector3d& pos, const math::vector3d& dir,bool isVehicle)
 {
 
 	ARGroup *grp = new ARGroup();
@@ -1176,6 +859,7 @@ void RobotCameraState::CreateARObject(uint id, const core::string& name, const m
 	predef->name =name;
 	predef->pos = pos;
 	predef->dir = dir;
+	predef->isVehicle = isVehicle;
 
 	grp->objects.push_back(predef);
 	grp->groupID = id;
@@ -1191,11 +875,14 @@ void RobotCameraState::UpdateARObject(uint id, const math::vector3d& pos, const 
 		return;
 	if (!g->objects.size())
 		return;
-
-	g->objects.begin()->second->obj->pos = pos;
-	g->objects.begin()->second->obj->dir = dir;
-	g->objects.begin()->second->sceneNode->setPosition(pos);
-	g->objects.begin()->second->sceneNode->setOrintation(dir);
+	ARSceneObject* grp = g->objects.begin()->second;
+	grp->obj->pos = pos;
+	grp->obj->dir = dir;
+	if (!grp->obj->isVehicle)
+	{
+		grp->sceneNode->setPosition(pos);
+		grp->sceneNode->setOrintation(dir);
+	}
 }
 void RobotCameraState::MoveARObject(uint id, const math::vector3d& pos, const math::vector3d& dir)
 {

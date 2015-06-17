@@ -26,6 +26,7 @@ class MRAY_GL_DLL GLTexture:public ITexture
 private:
 protected:
 	uint m_TextureID;
+	uint m_BufferID;
 
 	bool m_TextureChanged;
 

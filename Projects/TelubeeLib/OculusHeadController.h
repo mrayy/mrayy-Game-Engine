@@ -32,8 +32,8 @@ public:
 	OculusHeadController();
 	virtual~OculusHeadController();
 
-	virtual bool GetHeadOrientation(math::quaternion& v);
-	virtual bool GetHeadPosition(math::vector3d& v);
+	virtual bool GetHeadOrientation(math::quaternion& v, bool abs);
+	virtual bool GetHeadPosition(math::vector3d& v, bool abs);
 
 	virtual void Recalibrate();
 };

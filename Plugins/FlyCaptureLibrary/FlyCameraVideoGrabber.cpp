@@ -283,8 +283,8 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 		bool valid;
 		Format7PacketInfo fmt7PacketInfo;
 		Format7ImageSettings fmt7ImageSettings;
-		fmt7ImageSettings.offsetX = 0;
-		fmt7ImageSettings.offsetY = 0;
+		fmt7ImageSettings.offsetX = (fmt7Info.maxWidth - mode.width) / 2;
+		fmt7ImageSettings.offsetY = (fmt7Info.maxHeight - mode.height) / 2;
 		fmt7ImageSettings.width = mode.width;
 		fmt7ImageSettings.height = mode.height;
 		fmt7ImageSettings.pixelFormat = CMode::GetFormat(m_format);
@@ -304,8 +304,8 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 		Property frmRate;
 		frmRate.type = FRAME_RATE;
 		frmRate.absValue = m_fps;
-		(m_data->cam.SetProperty(&frmRate));
-		(m_data->cam.GetProperty(&frmRate));
+	//	(m_data->cam.SetProperty(&frmRate));
+	//	(m_data->cam.GetProperty(&frmRate));
 
 	}
 	else
@@ -369,13 +369,12 @@ bool FlyCameraVideoGrabber::GrabFrame()
 
 		float t = gEngine.getTimer()->getSeconds();
 		m_timeAcc += (t - m_lastT)*0.001f;
-
+		++m_frameCount;
 		if (m_timeAcc > 1)
 		{
 			m_captureFPS = m_frameCount;
-			m_frameCount = 0;
 			m_timeAcc = m_timeAcc - (int)m_timeAcc;
-
+			m_frameCount = 0;
 			//	printf("Capture FPS: %d\n", m_captureFPS);
 		}
 
@@ -429,16 +428,18 @@ void FlyCameraVideoGrabber::BlitImage(const uchar* buf, int rows, int cols, EPix
 	float t=gEngine.getTimer()->getSeconds();
 // 	if(t-m_lastGrabbed<15)
 // 		return;
+
 	m_lastGrabbed=t;
 	m_imageMutex->lock();
-	m_tempImage.createData(math::vector3d(rows, cols, 1), fmt);
-	if (fmt==EPixel_R8G8B8)
-		video::ColorConverter::convert24BitTo24Bit(buf,m_tempImage.imageData,math::vector2d(rows,cols),0,true,0);
-	else if (fmt == EPixel_LUMINANCE8)
 	{
-		m_tempImage.setData(buf, math::vector3d(rows, cols, 1), fmt);
+		m_tempImage.createData(math::vector3d(rows, cols, 1), fmt);
+		if (fmt == EPixel_R8G8B8)
+			video::ColorConverter::convert24BitTo24Bit(buf, m_tempImage.imageData, math::vector2d(rows, cols), 0, true, 0);
+		else if (fmt == EPixel_LUMINANCE8)
+		{
+			m_tempImage.setData(buf, math::vector3d(rows, cols, 1), fmt);
+		}
 	}
-
 	m_hasNewFrame=true;
 	m_imageMutex->unlock();
 

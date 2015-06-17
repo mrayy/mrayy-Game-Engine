@@ -39,6 +39,8 @@ private:
 protected:
 	core::string m_name;
 
+	bool m_enabled;
+
 	ValuesMap m_values;
 
 	SColor m_ambientColor;
@@ -66,7 +68,8 @@ protected:
 
 	RenderTechnique* m_owner;
 public:
-	DECLARE_PROPERTY_TYPE(Name,core::string,MRAY_DLL);
+	DECLARE_PROPERTY_TYPE(Name, core::string, MRAY_DLL);
+	DECLARE_PROPERTY_TYPE(Enabled, bool, MRAY_DLL);
 	DECLARE_PROPERTY_TYPE(Ambient,SColor,MRAY_DLL);
 	DECLARE_PROPERTY_TYPE(Diffuse,SColor,MRAY_DLL);
 	DECLARE_PROPERTY_TYPE(Specular,SColor,MRAY_DLL);
@@ -94,6 +97,8 @@ public:
 	bool SetName(const core::string&name);
 	core::string GetName()const;
 
+	bool IsEnabled()const{ return m_enabled; }
+	bool SetEnabled(bool e){ m_enabled = e; return true; }
 
 	bool SetAmbient(const SColor& clr);
 	const SColor& GetAmbient()const;

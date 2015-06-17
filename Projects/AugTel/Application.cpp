@@ -244,7 +244,7 @@ void Application::_initStates()
 	if (m_remoteCamera)
 		remote = new AugCameraRenderState(new TBee::GstStreamerVideoSource(ip, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.RtcpStream), new TBee::RemoteRobotCommunicator(), "CameraRemote");//GstSingleNetVideoSource,new TBee::GstStereoNetVideoSource(ip),LocalCameraVideoSource(m_cam1,m_cam2)
   	else
-		remote = new AugCameraRenderState(new TBee::LocalCameraVideoSource(m_cam1, m_cam2), new TBee::RemoteRobotCommunicator(), "CameraRemote");//GstSingleNetVideoSource,new TBee::GstStereoNetVideoSource(ip),LocalCameraVideoSource(m_cam1,m_cam2)
+		remote = new AugCameraRenderState(new TBee::LocalCameraVideoSource(m_cam1, m_cam2,m_camType), new TBee::RemoteRobotCommunicator(), "CameraRemote");//GstSingleNetVideoSource,new TBee::GstStereoNetVideoSource(ip),LocalCameraVideoSource(m_cam1,m_cam2)
 	m_renderingState->AddState(remote);
 
 // 	camera = new AugCameraRenderState(new TBee::LocalSingleCameraVideoSource(m_cam1), new TBee::LocalRobotCommunicator(), "AugCam");////
@@ -257,7 +257,7 @@ void Application::_initStates()
 
 	if (m_remoteCamera)
 		latency=new LatencyTestState("Latency", new TBee::GstStreamerVideoSource(ip, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.RtcpStream,false));
-	else latency = new LatencyTestState("Latency", new TBee::LocalCameraVideoSource(m_cam1, m_cam2));
+	else latency = new LatencyTestState("Latency", new TBee::LocalCameraVideoSource(m_cam1, m_cam2, m_camType));
 	m_renderingState->AddState(latency);
 
 // 	vtRs = new VTelesarRenderingState("Telesar");
@@ -340,8 +340,23 @@ void Application::init(const OptionContainer &extraOptions)
 			AppData::Instance()->robotController = ERobotControllerType::Oculus;
 
 
-		m_cam1 = extraOptions.GetOptionByName("Camera0")->getValueIndex();
-		m_cam2 = extraOptions.GetOptionByName("Camera1")->getValueIndex();
+		v = extraOptions.GetOptionValue("CameraType");
+		if (v == "DirectShow")
+			m_camType = TBee::ECam_DirectShow;
+		else
+			m_camType = TBee::ECam_PointGray;
+
+		if (m_camType == TBee::ECam_DirectShow)
+		{
+			// -1 for the None index
+			m_cam1 = extraOptions.GetOptionByName("DS_Camera_Left")->getValueIndex() - 1;
+			m_cam2 = extraOptions.GetOptionByName("DS_Camera_Right")->getValueIndex() - 1;
+		}
+		else
+		{
+			m_cam1 = extraOptions.GetOptionByName("PT_Camera_Left")->getValueIndex() - 1;
+			m_cam2 = extraOptions.GetOptionByName("PT_Camera_Right")->getValueIndex() - 1;
+		}
 	}
 	_InitResources();
 

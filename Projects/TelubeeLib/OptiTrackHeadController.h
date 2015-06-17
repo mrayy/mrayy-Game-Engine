@@ -35,8 +35,8 @@ public:
 	void SetHeadID(int id){ m_headID = id; }
 
 
-	virtual bool GetHeadOrientation(math::quaternion& q);
-	virtual bool GetHeadPosition(math::vector3d& v) ;
+	virtual bool GetHeadOrientation(math::quaternion& q, bool abs);
+	virtual bool GetHeadPosition(math::vector3d& v, bool abs);
 };
 
 }

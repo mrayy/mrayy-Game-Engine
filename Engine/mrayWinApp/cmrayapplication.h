@@ -102,8 +102,8 @@ public:
 
 	void loadResourceFile(const core::string &resFile);
 
-	bool startup(const  mchar*title,math::vector2di size,bool fullscreen,std::vector<SOptionElement> &extraOptions,const core::string &pluginsConfigFile=mT(""),
-		ulong injectionWindow=0,bool showDialogBox=false,bool showSplash=false,bool useInternalResources=true);
+	bool startup(const  mchar*title, math::vector2di size, bool fullscreen, std::vector<SOptionElement> &extraOptions, const core::string &pluginsConfigFile = mT(""), 
+		const core::string &settingsPath=mT("Configure.stg"),ulong injectionWindow=0,bool showDialogBox=false,bool showSplash=false,bool useInternalResources=true);
 
 
 };

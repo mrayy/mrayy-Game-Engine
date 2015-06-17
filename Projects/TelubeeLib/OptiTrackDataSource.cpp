@@ -35,6 +35,7 @@ OptiTrackDataSource::OptiTrackDataSource()
 }
 OptiTrackDataSource::~OptiTrackDataSource()
 {
+	Disconnect();
 	delete m_tracker;
 	delete m_listener;
 }

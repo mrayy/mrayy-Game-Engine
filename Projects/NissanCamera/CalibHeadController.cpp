@@ -39,10 +39,15 @@ CalibHeadController::CalibHeadController(IHeadController* o) :m_otherController(
 	m_lostOri = 0;
 }
 
-bool CalibHeadController::GetHeadOrientation(math::quaternion& v)
+CalibHeadController::~CalibHeadController()
+{
+	delete m_otherController;
+}
+
+bool CalibHeadController::GetHeadOrientation(math::quaternion& v, bool abs)
 {
 	math::quaternion q;
-	if (!m_otherController->GetHeadOrientation(q) )
+	if (!m_otherController->GetHeadOrientation(q,abs) )
 	{
 		m_lostOri = SAMPLES_COUNT;
 		v = m_lastQuaternion*m_calibration.headOrintation.inverse();
@@ -61,15 +66,16 @@ bool CalibHeadController::GetHeadOrientation(math::quaternion& v)
 		m_trackedQuaternion = q;
 	}
 	m_lastQuaternion = v;
-	v = v*m_calibration.headOrintation.inverse();;
+	if (!abs)
+		v = v*m_calibration.headOrintation.inverse();;
 
 	return true;
 }
 
-bool CalibHeadController::GetHeadPosition(math::vector3d& v)
+bool CalibHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 {
 	math::vector3d pos;
-	if (!m_otherController->GetHeadPosition(pos))
+	if (!m_otherController->GetHeadPosition(pos, abs))
 	{
 		m_lostPos = SAMPLES_COUNT;;
 		v = m_lastPos - m_calibration.headPosition - m_calibration.staticHeadOffset;
@@ -87,7 +93,9 @@ bool CalibHeadController::GetHeadPosition(math::vector3d& v)
 		v = pos;
 	}
 	m_lastPos = v;
-	v = v - m_calibration.headPosition - m_calibration.staticHeadOffset;
+
+	if (!abs)
+		v = v - m_calibration.headPosition - m_calibration.staticHeadOffset;
 	return true;
 }
 
@@ -95,8 +103,8 @@ bool CalibHeadController::GetHeadPosition(math::vector3d& v)
 void CalibHeadController::Calibrate()
 {
 	m_calibration.calibrated = true;
-	m_otherController->GetHeadPosition(m_calibration.headPosition);
-	m_otherController->GetHeadOrientation(m_calibration.headOrintation);
+	m_otherController->GetHeadPosition(m_calibration.headPosition,false);
+	m_otherController->GetHeadOrientation(m_calibration.headOrintation, false);
 }
 
 

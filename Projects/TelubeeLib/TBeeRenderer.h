@@ -51,6 +51,9 @@ public:
 
 	void Render(scene::ViewPort* vp);
 
+	//Don't turn on when Oculus is to be used!
+	void SetDirectRender(bool dr);
+
 
 	video::IRenderTargetPtr GetEyeImage(int i);
 

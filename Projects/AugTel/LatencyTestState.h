@@ -24,6 +24,7 @@ protected:
 
 	float m_startTime;
 	float m_autoTesterTimer;
+	float m_lastTime;
 
 	float m_minLatency, m_maxLatency;
 

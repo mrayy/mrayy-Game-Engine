@@ -40,6 +40,7 @@
 #include "DynamicFontGenerator.h"
 #include "GUIElementFactory.h"
 #include "GUIConsole.h"
+#include "AppData.h"
 
 //#include "PythonScriptManager.h"
 
@@ -73,7 +74,7 @@ Application::Application()
 	m_drawUI=false;
 	m_tbRenderer = 0;
 	m_limitFps = true;
-	m_limitFpsCount = 40;
+	m_limitFpsCount = 80;
 
 }
 Application::~Application()
@@ -81,6 +82,7 @@ Application::~Application()
 	delete m_tbRenderer;
 	m_appStateManager=0;
 	m_soundManager=0;
+	delete TBee::AppData::Instance();
 }
 
 void Application::_InitResources()
@@ -164,6 +166,7 @@ void Application::_initStates()
 // 	m_renderingState->AddState(streamerTest);
 
 	cameraState = new RobotCameraState();//TBee::LocalCameraRenderingState();
+	((RobotCameraState*)cameraState)->SetCameraConnection(m_camType);
 	((RobotCameraState*)cameraState)->SetCameraInfo(Eye_Left, m_cameraID[Eye_Left]);
 	((RobotCameraState*)cameraState)->SetCameraInfo(Eye_Right, m_cameraID[Eye_Right]);
 	m_renderingState->AddState(cameraState);
@@ -191,10 +194,23 @@ void Application::init(const OptionContainer &extraOptions)
 			NCAppGlobals::Instance()->IsDebugging = true;
 		else
 			NCAppGlobals::Instance()->IsDebugging=false;
-	
-		m_cameraID[Eye_Left] = extraOptions.GetOptionByName("Camera_Left")->getValueIndex();
-		m_cameraID[Eye_Right] = extraOptions.GetOptionByName("Camera_Right")->getValueIndex();
 
+		v = extraOptions.GetOptionValue("CameraType");
+		if (v == "DirectShow")
+			m_camType = TBee::ECam_DirectShow;
+		else 
+			m_camType = TBee::ECam_PointGray;
+
+		if (m_camType == TBee::ECam_DirectShow)
+		{
+			// -1 for the None index
+			m_cameraID[Eye_Left] = extraOptions.GetOptionByName("DS_Camera_Left")->getValueIndex()-1;
+			m_cameraID[Eye_Right] = extraOptions.GetOptionByName("DS_Camera_Right")->getValueIndex() - 1;
+		}else 
+		{
+			m_cameraID[Eye_Left] = extraOptions.GetOptionByName("PT_Camera_Left")->getValueIndex() - 1;
+			m_cameraID[Eye_Right] = extraOptions.GetOptionByName("PT_Camera_Right")->getValueIndex() - 1;
+		}
 		AppData::Instance()->headController = EHeadControllerType::OptiTrack;
 		AppData::Instance()->robotController = ERobotControllerType::None;
 
@@ -281,6 +297,9 @@ void Application::RenderUI(const math::rectf& rc)
 
 			float yoffset = rc.getHeight() - 200;
 
+#define PRINT_LOG(msg)\
+	font->print(math::rectf(rc.getWidth() - 350, yoffset, 10, 10), &attr, 0, msg, m_guiRender); \
+	yoffset +=  attr.fontSize;
 
 			GUI::FontAttributes attr;
 			attr.fontColor.Set(0.05,1,0.5,1);
@@ -294,16 +313,26 @@ void Application::RenderUI(const math::rectf& rc)
 			attr.RightToLeft=0;
 			core::string msg=mT("FPS= ");
 			msg+=core::StringConverter::toString((int)gEngine.getFPS()->getFPS());
-			font->print(math::rectf(rc.getWidth() - 250,  yoffset, 10, 10), &attr, 0, msg, m_guiRender);
-			yoffset += attr.fontSize;
+			PRINT_LOG(msg);
 			 msg = mT("Draw calls= ");
-			msg += core::StringConverter::toString(gEngine.getDevice()->getBatchDrawnCount());
-			font->print(math::rectf(rc.getWidth() - 250, yoffset, 10, 10), &attr, 0, msg, m_guiRender);
-			yoffset += attr.fontSize;
+			 msg += core::StringConverter::toString(gEngine.getDevice()->getBatchDrawnCount());
+			 PRINT_LOG(msg);
 			msg = mT("Primitives= ");
 			msg += core::StringConverter::toString(gEngine.getDevice()->getPrimitiveDrawnCount());
-			font->print(math::rectf(rc.getWidth() - 250, yoffset, 10, 10), &attr, 0, msg, m_guiRender);
-			yoffset += attr.fontSize;
+			PRINT_LOG(msg);
+
+			attr.fontSize = 18;
+			attr.hasShadow = false;
+			attr.fontColor.Set(1, 1, 1, 1);
+			yoffset = 200;
+
+
+			const controllers::InputKeyMap::CommandList& keys= NCAppGlobals::Instance()->keyMap.GetCommands();
+			for (int i = 0; i < keys.size(); ++i)
+			{
+				PRINT_LOG(((controllers::InputKeyMap::CommandInfo&) keys[i]).ToString(true));
+
+			}
 
 		}
 

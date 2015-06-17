@@ -176,10 +176,12 @@ void RenderingStateManager::OnDraw(const math::rectf& rc,video::IRenderTarget* r
 	if(m_oldState)
 		m_oldState->Render(rc,eye);
 	s->Render(rc,eye);
+	
 	video::IRenderTarget* vrt=s->GetLastFrame(eye);
 	if(vrt)
 		t.SetTexture(vrt->GetColorTexture());
-
+	if (!vrt)
+		return;
 	math::vector2d r=rc.getSize();
 	if(rt)
 	{

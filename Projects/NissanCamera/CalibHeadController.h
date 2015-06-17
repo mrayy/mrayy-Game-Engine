@@ -57,11 +57,11 @@ protected:
 	CalibrationInfo m_calibration;
 public:
 	CalibHeadController(IHeadController* o);
-	virtual~CalibHeadController(){}
+	virtual~CalibHeadController();
 
 
-	virtual bool GetHeadOrientation(math::quaternion& q);
-	virtual bool GetHeadPosition(math::vector3d &v);
+	virtual bool GetHeadOrientation(math::quaternion& q, bool abs);
+	virtual bool GetHeadPosition(math::vector3d &v,bool abs);
 
 	void Calibrate();
 

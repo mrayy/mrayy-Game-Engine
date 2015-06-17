@@ -37,6 +37,7 @@ public:
 
 	int m_vpCount;
 
+	bool m_directRender;
 
 	int m_stereoTVRenderingSwitch;
 
@@ -45,6 +46,7 @@ public:
 		owner = o;
 		m_vpCount = 0;
 		m_stereoTVRenderingSwitch = 0;
+		m_directRender = false;
 	}
 	~TBeeRendererData()
 	{
@@ -52,6 +54,11 @@ public:
 		oculusRenderer[1] = 0;
 		AppData::Instance()->oculusDevice = 0;
 		oculusManager = 0;
+	}
+
+	void SetDirectRender(bool dr)
+	{
+		m_directRender = dr;
 	}
 
 	void Init(video::RenderWindow* rw)
@@ -348,6 +355,10 @@ void TBeeRenderer::Init(video::RenderWindow* rw)
 video::IRenderTargetPtr TBeeRenderer::GetEyeImage(int i)
 {
 	return m_data->m_preFinalRT[i];
+}
+void TBeeRenderer::SetDirectRender(bool dr)
+{
+	m_data->SetDirectRender(dr);
 }
 
 void TBeeRenderer::Render(scene::ViewPort* vp)

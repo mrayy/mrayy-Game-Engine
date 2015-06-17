@@ -170,9 +170,7 @@
     <ClCompile Include="GstStreamerVideoSource.cpp" />
     <ClCompile Include="IRobotController.cpp" />
     <ClCompile Include="KeyboardHeadController.cpp" />
-    <ClCompile Include="CRobotConnector.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Disabled</Optimization>
-    </ClCompile>
+    <ClCompile Include="CRobotConnector.cpp" />
     <ClCompile Include="DepthFrame.cpp" />
     <ClCompile Include="DepthVisualizer.cpp" />
     <ClCompile Include="GeomDepthCalculator.cpp" />

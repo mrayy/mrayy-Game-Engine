@@ -34,6 +34,7 @@ purpose:
 #include "OpenNIManager.h"
 #include "TBeeRenderer.h"
 #include "WiimoteManager.h"
+#include "LocalCameraVideoSource.h"
 
 namespace mray
 {
@@ -66,6 +67,8 @@ protected:
 	GCPtr<controllers::WiimoteManager> m_wiiManager;
 
 	GCPtr<GUI::IGUIManager> m_previewGUI;
+
+	TBee::EUSBCameraType m_camType;
 
 	int m_cam1;
 	int m_cam2;

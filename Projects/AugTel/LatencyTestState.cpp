@@ -81,6 +81,8 @@ void LatencyTestState::OnEnter(IRenderingState*prev)
 	m_latency.clear();
 	m_changed = false;
 
+	
+
 	gAppData.dataCommunicator->Start(gAppData.TargetCommunicationPort);
 
 	TBee::TBRobotInfo* ifo = gAppData.selectedRobot;
@@ -102,15 +104,19 @@ void LatencyTestState::OnExit()
 video::IRenderTarget* LatencyTestState::Render(const math::rectf& rc, TBee::ETargetEye eye)
 {
 
-
 	video::IRenderTarget* rt = IRenderingState::Render(rc, eye);
 	video::TextureUnit tex;
 	m_camVideoSrc->Blit();
 
-	Engine::getInstance().getDevice()->setRenderTarget(rt,1,1,1);
+	Engine::getInstance().getDevice()->setRenderTarget(rt,0,1,1);
 	if (m_showColor)
 	{
 		Engine::getInstance().getDevice()->draw2DRectangle(rc, video::SColor(1, 0, 0, 1));
+
+	}
+	else
+	{
+		Engine::getInstance().getDevice()->draw2DRectangle(rc, video::SColor(0, 1, 1, 1));
 
 	}
 
@@ -134,7 +140,7 @@ video::IRenderTarget* LatencyTestState::Render(const math::rectf& rc, TBee::ETar
 
 	if (m_showColor && !m_changed)
 	{
-		if (clr.R > 0.8 && clr.G < 0.6 && clr.B < 0.6)
+		if (clr.R > 0.5 && clr.G < 0.6 && clr.B < 0.6)
 		{
 			m_changed = true;
 			float latency = gEngine.getTimer()->getSeconds() - m_startTime;
@@ -173,6 +179,10 @@ video::IRenderTarget* LatencyTestState::Render(const math::rectf& rc, TBee::ETar
 		Engine::getInstance().getDevice()->draw2DLine(&points[0],points.size(),1);
 	}
 
+	float t = gEngine.getTimer()->getSeconds();
+	float dt = t - m_lastTime;
+	m_lastTime = t;
+
 	GUI::IFont* font = gFontResourceManager.getDefaultFont();
 	GUI::FontAttributes attr;
 	video::IVideoDevice* dev = Engine::getInstance().getDevice();
@@ -198,6 +208,7 @@ video::IRenderTarget* LatencyTestState::Render(const math::rectf& rc, TBee::ETar
 		r.ULPoint = math::vector2d(250,100);
 
 		PRINT_LOG((mT("Capture Frame Rate:") + core::StringConverter::toString(m_camVideoSrc->GetCaptureFrameRate(0))));
+		PRINT_LOG((mT("Update Latency:") + core::StringConverter::toString(dt)));
 
 	}
 	m_guiRenderer->Flush();

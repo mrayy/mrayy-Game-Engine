@@ -104,12 +104,14 @@
     <ClInclude Include="ARGroupManager.h" />
     <ClInclude Include="ARServiceProvider.h" />
     <ClInclude Include="CalibHeadController.h" />
+    <ClInclude Include="CameraPlaneRenderer.h" />
     <ClInclude Include="ConsoleLogDevice.h" />
     <ClInclude Include="dispObjSM.h" />
     <ClInclude Include="dispObjSMParser.h" />
     <ClInclude Include="ARDataTypes.h" />
     <ClInclude Include="GUIConsole.h" />
     <ClInclude Include="GUIConsoleLayout.h" />
+    <ClInclude Include="LensDistortion.h" />
     <ClInclude Include="NissanRobotCommunicator.h" />
     <ClInclude Include="NCAppGlobals.h" />
     <ClInclude Include="RobotCameraState.h" />
@@ -122,9 +124,11 @@
     <ClCompile Include="ARGroupManager.cpp" />
     <ClCompile Include="ARServiceProvider.cpp" />
     <ClCompile Include="CalibHeadController.cpp" />
+    <ClCompile Include="CameraPlaneRenderer.cpp" />
     <ClCompile Include="ConsoleLogDevice.cpp" />
     <ClCompile Include="dispObjSMParser.cpp" />
     <ClCompile Include="GUIConsole.cpp" />
+    <ClCompile Include="LensDistortion.cpp" />
     <ClCompile Include="NissanRobotCommunicator.cpp" />
     <ClCompile Include="NissanCamera.cpp" />
     <ClCompile Include="RobotCameraState.cpp" />

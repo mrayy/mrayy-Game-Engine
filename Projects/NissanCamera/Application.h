@@ -31,6 +31,7 @@ purpose:
 
 #include "ApplicationStateManager.h"
 #include "TBeeRenderer.h"
+#include "LocalCameraVideoSource.h"
 
 namespace mray
 {
@@ -59,6 +60,7 @@ protected:
 
 
 	TBeeRenderer* m_tbRenderer;
+	TBee::EUSBCameraType m_camType;
 
 	int m_cameraID[2];
 

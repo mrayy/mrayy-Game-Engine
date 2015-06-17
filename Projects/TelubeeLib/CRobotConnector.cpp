@@ -176,11 +176,11 @@ void CRobotConnector::UpdateStatus()
 	HandleController();
 	if (m_headController)
 	{
-		if (!m_headController->GetHeadOrientation(m_headRotation))
+		if (!m_headController->GetHeadOrientation(m_headRotation, false))
 			m_headRotation = math::quaternion::Identity;
 // 		m_headRotation.y = -m_headRotation.y;// REMOVE
 // 		math::Swap(m_headRotation.x, m_headRotation.y); // REMOVE
-		if (!m_headController->GetHeadPosition(m_headPosition))
+		if (!m_headController->GetHeadPosition(m_headPosition,false))
 			m_headPosition = math::vector3d::Zero;
 	}
 	if (!m_communicator)

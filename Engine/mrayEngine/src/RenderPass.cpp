@@ -17,7 +17,8 @@ namespace video
 		m_owner=t;
 		//matRenderType=MRT_SOLID;
 
-		m_ambientColor=PropertyTypeAmbient::instance.GetDefaultValue();
+		m_enabled = PropertyTypeEnabled::instance.GetDefaultValue();
+		m_ambientColor = PropertyTypeAmbient::instance.GetDefaultValue();
 		m_diffuseColor=PropertyTypeDiffuse::instance.GetDefaultValue();
 		m_emissiveColor=PropertyTypeEmissive::instance.GetDefaultValue();
 		m_specularColor=PropertyTypeSpecular::instance.GetDefaultValue();
@@ -58,6 +59,7 @@ namespace video
 			PropertyTypeCullFaceDir::instance.SetEnum(EnumManager::getInstance().getEnumInfo(mT("ECullFaceMode")));
 
 
+			dic->addPropertie(&PropertyTypeEnabled::instance);
 			dic->addPropertie(&PropertyTypeName::instance);
 			dic->addPropertie(&PropertyTypeAmbient::instance);
 			dic->addPropertie(&PropertyTypeDiffuse::instance);
@@ -557,6 +559,11 @@ namespace video
 
 	IMPLEMENT_PROPERTY_TYPE_HEADER(Name,RenderPass,string,mT("Name"),EPBT_Basic,mT("Pass Name"),mT(""));
 	IMPLEMENT_PROPERTY_TYPE_GENERIC(Name,RenderPass,core::string,SetName,GetName,,,false)
+
+		//////////////////////////////////////////////////////////////////////////
+
+		IMPLEMENT_PROPERTY_TYPE_HEADER(Enabled, RenderPass, bool, mT("Enabled"), EPBT_Basic, mT("Enable/Disable Pass"), true);
+	IMPLEMENT_PROPERTY_TYPE_GENERIC(Enabled, RenderPass, bool, SetEnabled, IsEnabled, core::StringConverter::toString, core::StringConverter::toBool, false)
 
 
 		//////////////////////////////////////////////////////////////////////////

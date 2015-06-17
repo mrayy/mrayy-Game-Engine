@@ -77,7 +77,8 @@ namespace NCam
 		math::vector3d scale;
 		math::vector3d dir;
 		EARCoordinates coordinates;
-		IARObject(EARObjectType type) :objectType(type), scale(1)
+		bool isVehicle;
+		IARObject(EARObjectType type) :objectType(type), scale(1), isVehicle(false)
 		{}
 	};
 	class ARMesh :public IARObject

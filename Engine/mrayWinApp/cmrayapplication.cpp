@@ -68,7 +68,7 @@ CMRayApplication::CMRayApplication(const core::string&logFile)
 
 
 bool CMRayApplication::startup(const  mchar*title,math::vector2di size,bool fullscreen,std::vector<SOptionElement> &extraOptions,
-							   const core::string &pluginsConfigFile,ulong  injectionWindow,bool showDialogBox,bool showSplash,bool useInternalResources)
+	const core::string &pluginsConfigFile, const core::string &settingsPath, ulong  injectionWindow, bool showDialogBox, bool showSplash, bool useInternalResources)
 {
 
 	traceFunction(eEngine);
@@ -80,7 +80,7 @@ bool CMRayApplication::startup(const  mchar*title,math::vector2di size,bool full
 	core::string deviceType=mT("OpenGL");
 	video::IDeviceFactoryCreater* creator= video::DeviceFactory::getInstance().getCreater(deviceType);
 
-	core::string settingsPath=mT("Configure.stg");
+	//core::string settingsPath=mT("Configure.stg");
 
 	GCPtr<OS::IStream> stream=gFileSystem.createTextFileReader(settingsPath.c_str());
 	script::CSettingsFile settings;

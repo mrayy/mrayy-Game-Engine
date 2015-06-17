@@ -178,12 +178,12 @@ bool VideoAppSinkHandler::GrabFrame(){
 		float t = gEngine.getTimer()->getSeconds();
 		m_timeAcc += (t - m_lastT)*0.001f;
 
+		++m_frameCount;
 		if (m_timeAcc > 1)
 		{
 			m_captureFPS = m_frameCount;
-			m_frameCount = 0;
 			m_timeAcc = m_timeAcc - (int)m_timeAcc;
-
+			m_frameCount = 0;
 			//	printf("Capture FPS: %d\n", m_captureFPS);
 		}
 

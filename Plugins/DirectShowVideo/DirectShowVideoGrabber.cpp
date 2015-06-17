@@ -159,11 +159,10 @@ bool DirectShowVideoGrabber::GrabFrame()
 		return false;
 	if(s_videoInput->isFrameNew(m_device))
 	{
-		m_frameCount++;
-
 		float t = gEngine.getTimer()->getSeconds();
 		m_timeAcc += (t - m_lastT)*0.001f;
 
+		m_frameCount++;
 		if (m_timeAcc > 1)
 		{
 			m_captureFPS = m_frameCount;

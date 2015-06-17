@@ -10,6 +10,7 @@
 #include "StreamReader.h"
 
 #include "DirectShowVideoGrabber.h"
+#include "FlyCameraVideoGrabber.h"
 #include "CVChessBoard.h"
 #include "CVCalibration.h"
 #include "CVUtilities.h"
@@ -32,6 +33,10 @@ namespace mray
 		GCPtr<video::VideoGrabberTexture> grabber;
 		video::CVCameraCalib cameraCalib;
 		video::CVChessBoard chessboard;
+
+		GCPtr<video::ITexture> correctedTex;
+
+		bool captureNext;
 
 		cv::Mat lastImage;
 		cv::Mat diffMat;
@@ -61,6 +66,7 @@ namespace mray
 			_found = false;
 			cameraCalib.reset();
 			_minProjError = 100;
+			captureNext = false;
 		}
 
 		bool IsDiff(float threshold,float dt)
@@ -113,6 +119,14 @@ void Application::onEvent(Event* event)
 			{
 				m_impl->reset();
 			}
+			if (e->key == KEY_SPACE)
+			{
+				m_impl->captureNext = true;
+			}
+			if (e->key == KEY_C)
+			{
+				_Calibrate();
+			}
 		}
 	}
 }
@@ -152,12 +166,17 @@ void Application::init(const OptionContainer &extraOptions)
 
 
 	m_impl->camera = new video::DirectShowVideoGrabber();
-	m_impl->camera->InitDevice(0, 640,480, 30);
+	//m_impl->camera = new video::FlyCameraVideoGrabber();
+	m_impl->camera->InitDevice(0, 1280,720, 30);
 	m_impl->grabber = new video::VideoGrabberTexture();
 	m_impl->grabber->Set(m_impl->camera, 0);
 	m_impl->chessboard.Setup(math::vector2di(10, 7),2.3);
 	m_impl->cameraCalib.setPatternSize(10, 7);
 	m_impl->cameraCalib.setPatternType(video::CHESSBOARD);
+	m_impl->camera->Start();
+	m_impl->correctedTex = getDevice()->createEmptyTexture2D(false);
+	m_impl->correctedTex->setMipmapsFilter(false);
+	m_impl->correctedTex->createTexture(math::vector3di(m_impl->camera->GetFrameSize().x, m_impl->camera->GetFrameSize().y,1),video::EPixel_R8G8B8);
 
 	video::allocate(m_impl->lastImage, m_impl->camera->GetFrameSize().x, m_impl->camera->GetFrameSize().y, CV_MAKETYPE(CV_8U, 3));
 	video::allocate(m_impl->diffMat, m_impl->camera->GetFrameSize().x, m_impl->camera->GetFrameSize().y, CV_MAKETYPE(CV_8U, 3));
@@ -206,52 +225,66 @@ void Application::draw(scene::ViewPort* vp)
 {
 }
 
+void Application::_Calibrate()
+{
+
+	{
+		if (m_impl->cameraCalib.calibrate())
+		{
+			printf("Camera calibrated\n");
+			printf("Projection error: %f\n", m_impl->cameraCalib.getReprojectionError());
+			if (m_impl->cameraCalib.getReprojectionError() < m_impl->_minProjError)
+			{
+				m_impl->_minProjError = m_impl->cameraCalib.getReprojectionError();
+				m_impl->_calibrated = true;
+
+				OS::IStreamPtr stream = gFileSystem.openFile(gFileSystem.getAppPath() + "CameraCalibration.txt", OS::TXT_WRITE);
+				OS::StreamWriter wrtr(stream);
+				std::stringstream ss;
+
+				cv::Mat distCoeff = m_impl->cameraCalib.getDistCoeffs();
+				video::Intrinsics intr = m_impl->cameraCalib.getDistortedIntrinsics();
+
+				math::vector2d center;
+				math::vector2d focalXY;
+				center.x = intr.getCameraMatrix().at<double>(2) / m_impl->camera->GetFrameSize().x;
+				center.y = intr.getCameraMatrix().at<double>(5) / m_impl->camera->GetFrameSize().y;
+				focalXY.x = intr.getCameraMatrix().at<double>(0) / m_impl->camera->GetFrameSize().x;
+				focalXY.y = intr.getCameraMatrix().at<double>(4) / m_impl->camera->GetFrameSize().y;
+
+				math::vector4df coeff(distCoeff.at<double>(0), distCoeff.at<double>(1), distCoeff.at<double>(2), distCoeff.at<double>(3));
+				ss << intr.getFov() << "\n"
+					<< intr.getFocalLength() << "\n"
+					<< core::StringConverter::toString(center) << "\n"
+					<< core::StringConverter::toString(focalXY) << "\n"
+					<< core::StringConverter::toString(coeff) << "\n";
+
+
+				wrtr.writeLine(ss.str());
+				stream->close();
+
+			}
+		}
+	}
+}
 void Application::_RenderMain(video::RenderWindow* wnd)
 {
 	video::TextureUnit tu;
 
 	if (m_impl->grabber->Blit())
 	{
-		if (!m_impl->_calibrated && m_impl->IsDiff(5, 500))
+		if (m_impl->captureNext && !m_impl->_calibrated && m_impl->IsDiff(5, 500))
 		{
 			if (m_impl->cameraCalib.add(toCv(m_impl->grabber->GetGrabber()->GetLastFrame())))
 			{
+				m_impl->captureNext = false;
 				printf("Added new frame\n");
-				if (m_impl->cameraCalib.size() > 10)
-				{
-					if (m_impl->cameraCalib.calibrate())
-					{
-						printf("Camera calibrated\n");
-						printf("Projection error: %f\n",m_impl->cameraCalib.getReprojectionError());
-						if (m_impl->cameraCalib.getReprojectionError() < m_impl->_minProjError)
-						{
-							m_impl->_minProjError = m_impl->cameraCalib.getReprojectionError();
-							m_impl->_calibrated = true;
-
-							OS::IStreamPtr stream = gFileSystem.openFile(gFileSystem.getAppPath() + "CameraCalibration.txt", OS::TXT_WRITE);
-							OS::StreamWriter wrtr(stream);
-							std::stringstream ss;
-
-							cv::Mat distCoeff=m_impl->cameraCalib.getDistCoeffs();
-							video::Intrinsics intr = m_impl->cameraCalib.getDistortedIntrinsics();
-
-							ss << intr.getFov() << "\n"
-								<< intr.getFocalLength() << "\n"
-								<< intr.getCameraMatrix()<<"\n"
-								<< distCoeff << "\n";
-
-
-							wrtr.writeLine(ss.str());
-							stream->close();
-
-						}
-					}
-				}
 			}
 		}
 	}
 	if (!m_impl->_calibrated)
 	{
+	tu.SetTexture(m_impl->grabber->GetTexture());
 	}
 	else
 	{
@@ -259,9 +292,9 @@ void Application::_RenderMain(video::RenderWindow* wnd)
 		m_impl->cameraCalib.undistort(toCv(ifo));
 
 		video::LockedPixelBox box(math::box3d(0, ifo->Size), ifo->format, ifo->imageData);
-		m_impl->grabber->GetTexture()->getSurface(0)->blitFromMemory(box);
+		m_impl->correctedTex->getSurface(0)->blitFromMemory(box);
+		tu.SetTexture(m_impl->correctedTex);
 	}
-	tu.SetTexture(m_impl->grabber->GetTexture());
 	getDevice()->useTexture(0, &tu);
 	getDevice()->draw2DImage(math::rectf(0, wnd->GetSize()), 1);
 
@@ -303,6 +336,7 @@ void Application::_RenderMain(video::RenderWindow* wnd)
 
 		LOG_OUT(core::string(mT("FPS= ") + core::StringConverter::toString(gEngine.getFPS()->getFPS())), wnd->GetSize().x - 250, wnd->GetSize().y - 150);
 
+		LOG_OUT(core::string(mT("Count= ") + core::StringConverter::toString(m_impl->cameraCalib.size())), 100,100);
 
 	//	LOG_OUT(core::string(mT("Found= ") + core::StringConverter::toString(found)), 100, 10);
 

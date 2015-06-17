@@ -2330,6 +2330,9 @@
     <ClInclude Include="include\UI3DRenderNode.h">
       <Filter>Source Files\scene\Nodes</Filter>
     </ClInclude>
+    <ClInclude Include="include\InputKeyMap.h">
+      <Filter>Source Files\controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\RTTI_OBJECTS.cpp">
@@ -3654,6 +3657,9 @@
     </ClCompile>
     <ClCompile Include="UI3DRenderNode.cpp">
       <Filter>Source Files\scene\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputKeyMap.cpp">
+      <Filter>Source Files\Base\Events</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

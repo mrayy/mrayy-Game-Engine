@@ -8,7 +8,7 @@
 namespace mray{
 namespace video{
 
-GLTextureBuffer::GLTextureBuffer(ETextureType texType,uint texId,int face,int level,EUsageType usage,bool softwareMipmaps)
+GLTextureBuffer::GLTextureBuffer(ETextureType texType,uint texId,uint bufID,int face,int level,EUsageType usage,bool softwareMipmaps)
 :GLHardwarePixelBuffer(0,0,0,texType,EPixel_Unkown,usage,texId),m_face(face),m_level(level),
 	m_texID(texId),m_softwareMipmaps(softwareMipmaps)
 {
@@ -17,7 +17,8 @@ GLTextureBuffer::GLTextureBuffer(ETextureType texType,uint texId,int face,int le
 
 	m_target=GLTextureUtil::getTextureTarget(texType);
 
-	glBindTexture(m_target,m_texID);
+	m_BufferID = bufID;
+
 
 	m_targetFace=m_target;
 	if(m_target==GL_TEXTURE_CUBE_MAP)
@@ -88,13 +89,54 @@ void GLTextureBuffer::download(const LockedPixelBox&b)
 }
 void GLTextureBuffer::upload(const LockedPixelBox&b)
 {
-	glBindTexture(m_target,m_texID);
+	glBindTexture(m_target, m_texID);
 
 	if(b.getRowPitchSkip()!=0)
 		glPixelStorei(GL_UNPACK_ROW_LENGTH,b.rowPitch);
 	if(b.box.getWidth()*b.box.getHeight()!=b.slicePitch)
 		glPixelStorei(GL_UNPACK_IMAGE_HEIGHT,b.slicePitch/b.box.getWidth());
 	
+#if 0
+
+	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, m_BufferID);
+	uint pxSz = PixelUtil::getPixelDescription(b.format).elemSizeB;
+	uint dataSize = b.box.getWidth()*b.box.getHeight()*b.box.getDepth()*pxSz;
+	if (((uint)b.box.getWidth()*pxSz) & 3) {
+		// Standard alignment of 4 is not right
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	}
+	switch (m_target)
+	{
+	case GL_TEXTURE_1D:
+		glTexSubImage1D(GL_TEXTURE_1D,0,b.box.MinP.x,b.box.getWidth(),
+			GLTextureUtil::getGLOrginalFormat(b.format),
+			GLTextureUtil::getGLDataType(b.format),0);
+		break;
+	case GL_TEXTURE_2D:
+	case GL_TEXTURE_CUBE_MAP:
+		glTexSubImage2D(m_targetFace,0,b.box.MinP.x,b.box.MinP.y,b.box.getWidth(),b.box.getHeight(),
+			GLTextureUtil::getGLOrginalFormat(b.format),
+			GLTextureUtil::getGLDataType(b.format),0);
+		break;
+	case GL_TEXTURE_3D:
+		glTexSubImage3D(GL_TEXTURE_3D,0,b.box.MinP.x,b.box.MinP.y,b.box.MinP.z,
+			b.box.getWidth(),b.box.getHeight(),b.box.getDepth(),
+			GLTextureUtil::getGLOrginalFormat(b.format),
+			GLTextureUtil::getGLDataType(b.format),0);
+		break;
+	}
+	glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, dataSize, 0, GL_STREAM_DRAW_ARB);
+	{
+		GLubyte* ptr = (GLubyte*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+		if (ptr)
+		{
+			// update data directly on the mapped buffer
+			memcpy(ptr, b.data, dataSize);
+			glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
+		}
+	}
+	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+#else
 	if(m_softwareMipmaps){
 		GLint components=PixelUtil::getPixelDescription(m_format).componentsCount;
 		switch (m_target)
@@ -142,9 +184,12 @@ void GLTextureBuffer::upload(const LockedPixelBox&b)
 			break;
 		}
 	}
+#endif
+
 	glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
 	glPixelStorei(GL_UNPACK_IMAGE_HEIGHT,0);
 	glPixelStorei(GL_UNPACK_ALIGNMENT,4);
+	glBindTexture(m_target, 0);
 
 }
 

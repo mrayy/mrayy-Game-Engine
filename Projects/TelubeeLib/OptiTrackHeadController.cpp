@@ -19,7 +19,7 @@ OptiTrackHeadController::~OptiTrackHeadController()
 }
 
 
-bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v)
+bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v, bool abs)
 {
 	math::quaternion* q= AppData::Instance()->optiDataSource->GetOrientationByID(m_headID);
 	if (!q)
@@ -27,7 +27,7 @@ bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v)
 	math::vector3d a;
 	q->toEulerAngles(a);
 
-	if (m_oriAvg.size() < 20)
+	if (m_oriAvg.size() < 10)
 	{
 		m_oriAvg.push_back(a);
 	}
@@ -43,17 +43,20 @@ bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v)
 		a += *it;
 	}
 	a /= (float)m_oriAvg.size();
-	v= math::quaternion(-a.x,a.y,-a.z);
+	v = math::quaternion(-a.x, a.y, -a.z);
+
+	/////////////////////////////////////
+	v = math::quaternion(a.y, a.x, a.z);	//in the lab
 	
 	return true;
 }
-bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v)
+bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 {
 	math::vector3d* p=AppData::Instance()->optiDataSource->GetPositionByID(m_headID);
 	if (!p)
 		return false;
 
-	if (m_posAvg.size() < 20)
+	if (m_posAvg.size() < 10)
 	{
 		m_posAvg.push_back(*p);
 	}
@@ -69,6 +72,11 @@ bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v)
 		v += *it;
 	}
 	v /= (float)m_posAvg.size();
+
+
+	/////////////////////////////////////
+
+	v.set(v.x, v.z, v.y);
 	return true;
 }
 

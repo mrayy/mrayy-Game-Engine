@@ -310,6 +310,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\3DSLoader.cpp" />
+    <ClCompile Include="src\InputKeyMap.cpp" />
     <ClCompile Include="UI3DRenderNode.cpp" />
     <ClInclude Include="..\..\Dependencies\include\huffman\huffman.h" />
     <ClInclude Include="HuffmanCompression.h" />
@@ -335,6 +336,7 @@
     <ClInclude Include="include\IGUIElementCreator.h" />
     <ClInclude Include="include\IGUIElementRT.h" />
     <ClInclude Include="include\IGUITreeBox.h" />
+    <ClInclude Include="include\InputKeyMap.h" />
     <ClInclude Include="include\InternetCacheManager.h" />
     <ClInclude Include="include\ISerialPort.h" />
     <ClInclude Include="include\ISQLConnection.h" />

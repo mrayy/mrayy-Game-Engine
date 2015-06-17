@@ -233,6 +233,7 @@ void RobotSerialPort::DisconnectRobot()
 	}
 
 	if (m_impl->comHEAD != 0){
+		m_impl->comHEAD->setManager(0);
 		m_impl->comHEAD->disconnect();
 	}
 	delete m_impl->comROBOT;

@@ -28,6 +28,12 @@ namespace mray
 namespace TBee
 {
 
+	enum EUSBCameraType
+	{
+		ECam_DirectShow,
+		ECam_PointGray
+	};
+
 class LocalCameraVideoSource:public ICameraVideoSource
 {
 protected:
@@ -44,14 +50,17 @@ protected:
 	};
 
 	bool m_started;
-
+	EUSBCameraType m_camConnection;
 	math::vector2d m_cameraResolution;
 	int m_cameraFPS;
+	float m_exposureValue;
 	CameraInfo m_cameraSource[2];
 public:
-	LocalCameraVideoSource(int c1=0,int c2=1);
+	LocalCameraVideoSource(int c1=0,int c2=1,EUSBCameraType camType=ECam_DirectShow);
 	virtual~LocalCameraVideoSource();
 
+	void SetCameraConnectionType(EUSBCameraType cam){ m_camConnection = cam; }
+	EUSBCameraType GetCameraConnectionType(){ return m_camConnection; }
 	void Init();
 	void Open();
 	void Close();

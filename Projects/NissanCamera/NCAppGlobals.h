@@ -18,6 +18,9 @@ purpose:
 
 #include "AppData.h"
 #include "CameraConfigurationManager.h"
+#include "InputKeyMap.h"
+
+
 namespace mray
 {
 namespace NCam
@@ -34,6 +37,8 @@ public:
 		App = 0;
 
 	}
+
+	controllers::InputKeyMap keyMap;
 
 	Application* App;
 	math::vector2d GetStereoScaleRatio(){ return 1; }

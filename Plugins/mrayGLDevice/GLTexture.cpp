@@ -17,6 +17,7 @@ GLTexture::GLTexture(ETextureType type,bool internal)
 :ITexture(type,internal)
 {
 	m_TextureID=0;
+	m_BufferID = 0;
 	m_TextureChanged=0;
 	m_isRenderTarget=0;
 	m_dirty=false;
@@ -48,7 +49,9 @@ void GLTexture::unloadInternal(bool removeTexture)
 	if(removeTexture)
 	{
 		glDeleteTextures(1,&m_TextureID);
+		glDeleteBuffers(1, &m_BufferID);
 		m_TextureID=0;
+		m_BufferID = 0;
 	}
 
 	FIRE_LISTENR_METHOD(OnTextureUnloaded,(this));
@@ -126,6 +129,16 @@ void GLTexture::_innerCreateTexture()
 	glTexParameteri(m_target,GL_TEXTURE_MAX_LEVEL,m_maxMipmaps);
 
 
+	if (m_BufferID == 0)
+	{
+		glGenBuffers(1, &m_BufferID);
+
+		glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, m_BufferID);
+		uint DATA_SIZE = width*height*depth*PixelUtil::getPixelDescription(m_format).elemSizeB;
+		glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, DATA_SIZE, 0, GL_STREAM_DRAW_ARB);
+		glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+	}
+
 	bool hardwareMipmaps=devCaps->isFeatureSupported(EDF_AutoMipmap);
 	bool doSoftwareMipmaps=m_MipmapFilter && m_maxMipmaps>0;// && !hardwareMipmaps;
 
@@ -151,12 +164,13 @@ void GLTexture::_innerCreateTexture()
 
 	for (int i=0;i<surfaces;++i)
 	{
-		IHardwarePixelBuffer* surf=new GLTextureBuffer(m_type,m_TextureID,i,0,IHardwareBuffer::EUT_Dynamic,doSoftwareMipmaps);
+		IHardwarePixelBuffer* surf=new GLTextureBuffer(m_type,m_TextureID,m_BufferID,i,0,IHardwareBuffer::EUT_Dynamic,doSoftwareMipmaps);
 		m_surfaces.push_back(surf);
 	}
 
 
 	glBindTexture(m_target,0);
+
 	m_resourceCreated=true;
 
 	FIRE_LISTENR_METHOD(OnTextureChanged,(this));

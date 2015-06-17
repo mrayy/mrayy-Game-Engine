@@ -54,7 +54,7 @@ EntryPoint
 
 	//VLDEnable();
 	app->loadResourceFile(mT("atdataPath.stg"));
-	if (app->startup(mT("Camera Calibration"), vector2di(800, 600), false, extraOptions, resFileName, 0, true, true, true))
+	if (app->startup(mT("Camera Calibration"), vector2di(800, 600), false, extraOptions, resFileName,"CCalibConfig.stg", 0, true, true, true))
 	{
 		app->run();
 	}

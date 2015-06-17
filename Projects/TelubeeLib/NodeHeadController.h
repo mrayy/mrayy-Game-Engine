@@ -47,8 +47,8 @@ public:
 	void SetInitialOrientation(math::quaternion &init){ m_initialOrientation = init; }
 	virtual void Recalibrate();
 
-	virtual bool GetHeadOrientation(math::quaternion& v);
-	virtual bool GetHeadPosition(math::vector3d& v);
+	virtual bool GetHeadOrientation(math::quaternion& v, bool abs);
+	virtual bool GetHeadPosition(math::vector3d& v, bool abs);
 };
 
 }

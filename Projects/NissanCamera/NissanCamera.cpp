@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "GCCollector.h"
 #include "DirectShowVideoGrabber.h"
+#include "FlyCameraManager.h"
 #include <windows.h>
 // #include <vld.h>
 // #include <vldapi.h>
@@ -47,12 +48,32 @@ EntryPoint
 	string CameraName[2] = { "Camera_Left", "Camera_Right" };
 	for (int c = 0; c < 2;++c)
 	{
-		op.name = CameraName[c]; // "Camera" + core::StringConverter::toString(c);
+		op.name = "DS_"+CameraName[c]; // "Camera" + core::StringConverter::toString(c);
 		video::DirectShowVideoGrabber ds;
 		int camsCount = ds.ListDevices();
+		op.valueSet.insert("0 - None");
 		for (int i = 0; i<camsCount; ++i)
 		{
-			op.valueSet.insert(core::StringConverter::toString(i)+"-"+ds.GetDeviceName(i));
+			op.valueSet.insert(core::StringConverter::toString(i + 1) + "-" + ds.GetDeviceName(i));
+		}
+		if (op.valueSet.size()>0)
+		{
+			op.value = *op.valueSet.begin();
+		}
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+	for (int c = 0; c < 2;++c)
+	{
+		op.name = "PT_"+CameraName[c]; // "Camera" + core::StringConverter::toString(c);
+
+		op.valueSet.insert("0 - None");
+		int camsCount = video::FlyCameraManager::instance.GetCamerasCount();
+		for (int i = 0; i<camsCount; ++i)
+		{
+			uint sp;
+			video::FlyCameraManager::instance.GetCameraSerialNumber(i, sp);
+			op.valueSet.insert(core::StringConverter::toString(i+1) + " - FC_" + core::StringConverter::toString(sp));
 		}
 		if (op.valueSet.size()>0)
 		{
@@ -73,9 +94,18 @@ EntryPoint
 		op.valueSet.clear();
 
 	}
+	{
+		op.name = "CameraType";
+		op.value = "DirectShow";
+		op.valueSet.insert("DirectShow");
+		op.valueSet.insert("PointGray");
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+
+	}
 	//VLDEnable();
 	app->loadResourceFile(mT("ncdataPath.stg"));
-	if (app->startup(mT("Nissan Robot 1.00"), vector2di(800, 600), false, extraOptions, resFileName, 0, true, true, true))
+	if (app->startup(mT("Nissan Robot 1.00"), vector2di(800, 600), false, extraOptions, resFileName,mT("NissanConfig.stg"), 0, true, true, true))
 	{
 		app->run();
 	}

@@ -64,6 +64,8 @@ void RequestToRenderVisitor::_AddRenderableNode(IRenderable*r)
 						for(int i=0;i<lst.size();++i)
 						{
 							video::RenderPass*p=lst[i];
+							if (!p->IsEnabled())
+								continue;
 							if (!r->HasCustomRenderGroup())
 							{
 								if (p->getRenderState(video::RS_Blend))

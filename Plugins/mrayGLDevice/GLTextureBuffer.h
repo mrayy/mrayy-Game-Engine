@@ -27,13 +27,14 @@ protected:
 	GLenum m_target;
 	GLenum m_glFormat;
 	uint m_texID;
+	uint m_BufferID;
 	int m_face;
 	int m_level;
 	GLenum m_targetFace;
 
 	bool m_softwareMipmaps;
 public:
-	GLTextureBuffer(ETextureType texType,uint texId,int face,int level,EUsageType usage,bool softwareMipmaps);
+	GLTextureBuffer(ETextureType texType,uint texId,uint buffID,int face,int level,EUsageType usage,bool softwareMipmaps);
 	virtual~GLTextureBuffer();
 
 	virtual void download(const LockedPixelBox&b);

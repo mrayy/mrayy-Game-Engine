@@ -38,6 +38,8 @@ protected:
 
 	void _RenderCV(video::RenderWindow* wnd);
 	void _RenderMain(video::RenderWindow* wnd);
+
+	void _Calibrate();
 public:
 	Application();
 	virtual~Application();

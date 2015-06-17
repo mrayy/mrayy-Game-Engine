@@ -12,18 +12,21 @@ namespace mray
 namespace TBee
 {
 
-#if 1
-	typedef video::DirectShowVideoGrabber VCameraType;
-#else
-	typedef video::FlyCameraVideoGrabber VCameraType;
-#endif
-	LocalCameraVideoSource::LocalCameraVideoSource(int c1 , int c2)
+// #if 1
+// 	typedef video::DirectShowVideoGrabber VCameraType;
+// #else
+// 	typedef video::FlyCameraVideoGrabber VCameraType;
+	// #endif
+	LocalCameraVideoSource::LocalCameraVideoSource(int c1, int c2, EUSBCameraType camType)
 {
+		m_camConnection = camType;
 	m_cameraResolution.set(640, 480);
 	m_cameraFPS = 25;
 	
 	m_cameraSource[0].id = c1;
 	m_cameraSource[1].id = c2;
+
+	m_exposureValue = 0.6;
 
 	m_cameraSource[0].videoGrabber = new video::VideoGrabberTexture();
 	
@@ -36,7 +39,6 @@ namespace TBee
 }
 LocalCameraVideoSource::~LocalCameraVideoSource()
 {
-
 	delete m_cameraSource[0].videoGrabber;
 	delete m_cameraSource[1].videoGrabber;
 }
@@ -72,7 +74,11 @@ void LocalCameraVideoSource::Init()
 		if (!m_cameraSource[i].videoGrabber)
 			continue;
 		//m_eyes[i].flip90 = true;
-		m_cameraSource[i].camera = new VCameraType();
+		if (m_camConnection==ECam_DirectShow)
+			m_cameraSource[i].camera = new video::DirectShowVideoGrabber();
+		else 
+			m_cameraSource[i].camera = new video::FlyCameraVideoGrabber();
+
 		video::ITexturePtr tex = Engine::getInstance().getDevice()->createEmptyTexture2D(true);
 
 		m_cameraSource[i].videoGrabber->Set(m_cameraSource[i].camera, tex);
@@ -80,14 +86,15 @@ void LocalCameraVideoSource::Init()
 }
 void LocalCameraVideoSource::Open()
 {
-//	m_cameraSource[0].id = 0;
 	m_started = true;
 	m_cameraSource[0].camera->InitDevice(m_cameraSource[0].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
 	m_cameraSource[0].camera->Start();
+	m_cameraSource[0].camera->SetParameter(video::ICameraVideoGrabber::Param_Exposure, core::StringConverter::toString(m_exposureValue));
 	if (m_cameraSource[1].camera)
 	{
 		m_cameraSource[1].camera->InitDevice(m_cameraSource[1].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
 		m_cameraSource[1].camera->Start();
+		m_cameraSource[1].camera->SetParameter(video::ICameraVideoGrabber::Param_Exposure, core::StringConverter::toString(m_exposureValue));
 	}
 
 }
@@ -176,6 +183,11 @@ void LocalCameraVideoSource::LoadFromXML(xml::XMLElement* e)
 		m_cameraFPS = core::StringConverter::toInt(attr->value);
 	}
 
+	attr = e->getAttribute("Exposure");
+	if (attr)
+	{
+		m_exposureValue = core::StringConverter::toFloat(attr->value);
+	}
 }
 
 }
