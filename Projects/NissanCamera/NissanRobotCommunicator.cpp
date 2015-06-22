@@ -20,7 +20,7 @@ namespace NCam
 
 		CQuatAverageWindow()
 		{
-			maxLen = 1;
+			maxLen = 3;
 		}
 		void SetLength(int len)
 		{

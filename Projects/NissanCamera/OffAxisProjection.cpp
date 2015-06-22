@@ -31,13 +31,13 @@ void OffAxisProjection::_UpdateMatrix()
 
 	// Compute an orthonormal basis for the screen
 
-	vu = m_pc - m_pa;
 	vr = m_pb - m_pa;
+	vu = m_pc - m_pa;
 
 	vr.Normalize();
 	vu.Normalize();
 
-	vn = vr.crossProduct(vu);
+	vn = -vr.crossProduct(vu);
 
 	// Compute Screen corner vectors
 	va = m_pa - m_pos;
@@ -55,30 +55,52 @@ void OffAxisProjection::_UpdateMatrix()
 
 	//Set Projection Matrix
 
-	m_projection(0, 0) = 2.0f*m_znear / (r - l);
-	m_projection(0, 1) = 0.0f;
-	m_projection(0, 2) = (r+l)/(r-l);
-	m_projection(0, 3) = 0.0;
+	m_projection.m4x4[0][0] = 2.0f*m_znear / (r - l);
+	m_projection.m4x4[0][1] = 0.0f;
+	m_projection.m4x4[0][2] = (r + l) / (r - l);
+	m_projection.m4x4[0][3] = 0.0;
 
-	m_projection(1, 0) = 0.0;
-	m_projection(1, 1) = 2.0f*m_znear / (t - b);
-	m_projection(1, 2) = (t+b) / (t-b);
-	m_projection(1, 3) = 0.0;
+	m_projection.m4x4[1][0] = 0.0;
+	m_projection.m4x4[1][1] = 2.0f*m_znear / (t - b);
+	m_projection.m4x4[1][2] = (t + b) / (t - b);
+	m_projection.m4x4[1][3] = 0.0;
 
-	m_projection(2, 0) = 0.0;
-	m_projection(2, 1) = 0.0;
-	m_projection(2, 2) = (m_znear + m_zfar) / (m_znear - m_zfar);
-	m_projection(2, 3) = 2.0f*m_znear*m_zfar / (m_znear - m_zfar);
+	m_projection.m4x4[2][0] = 0.0;
+	m_projection.m4x4[2][1] = 0.0;
+	m_projection.m4x4[2][2] = (m_znear + m_zfar) / (m_znear - m_zfar);
+	m_projection.m4x4[2][3] = 2.0f*m_znear*m_zfar / (m_znear - m_zfar);
 
-	m_projection(3, 0) = 0.0;
-	m_projection(3, 1) = 0.0;
-	m_projection(3, 2) = -1.0;
-	m_projection(3, 3) = 0.0;
+	m_projection.m4x4[3][0] = 0.0;
+	m_projection.m4x4[3][1] = 0.0;
+	m_projection.m4x4[3][2] = -1.0;
+	m_projection.m4x4[3][3] = 0.0;
 
 	m_projection.flagNotIdentity();
 
 	math::matrix4x4 rot,tran;
-	rot.setComponent(vr, vu, vn);
+
+	rot.m4x4[0][0] = vr.x;
+	rot.m4x4[0][1] = vr.y;
+	rot.m4x4[0][2] = vr.z;
+	rot.m4x4[0][3] = 0;
+
+	rot.m4x4[1][0] = vu.x;
+	rot.m4x4[1][1] = vu.y;
+	rot.m4x4[1][2] = vu.z;
+	rot.m4x4[1][3] = 0;
+
+	rot.m4x4[2][0] = vn.x;
+	rot.m4x4[2][1] = vn.y;
+	rot.m4x4[2][2] = vn.z;
+	rot.m4x4[2][3] = 0;
+
+	rot.m4x4[3][0] = 0;
+	rot.m4x4[3][1] = 0;
+	rot.m4x4[3][2] = 0;
+	rot.m4x4[3][3] = 1;
+
+	rot.flagNotIdentity();
+	//rot = rot.getTransposed();
 	tran(0, 3) = -m_pos.x;
 	tran(1, 3) = -m_pos.y;
 	tran(2, 3) = -m_pos.z;
@@ -86,6 +108,9 @@ void OffAxisProjection::_UpdateMatrix()
 
 	m_view = rot*tran;
 
+	m_rotation.fromMatrix(math::MathUtil::CreateLookAtMatrix((m_pb + m_pc)*0.5f, m_pos, vu));
+
+	
 	float ba = (m_pb - m_pa).Length();
 	float ca = (m_pc - m_pa).Length();
 	float vlen = va.Length();
@@ -102,11 +127,11 @@ void OffAxisProjection::SetZNearFar(float near, float far)
 	m_zfar = far;
 	m_dirty = true;
 }
-void OffAxisProjection::SetScreenCorners(const math::vector3d& pa, const math::vector3d& pb, const math::vector3d& pc)
+void OffAxisProjection::SetScreenCorners(const math::vector3d& bottomLeft, const math::vector3d& topLeft, const math::vector3d& bottomRight)
 {
-	m_pa = pa;
-	m_pb = pb;
-	m_pc = pc;
+	m_pa = bottomLeft;
+	m_pb = bottomRight;
+	m_pc = topLeft;
 	m_dirty = true;
 }
 
@@ -130,6 +155,11 @@ const math::matrix4x4& OffAxisProjection::GetViewMatrix()
 {
 	_UpdateMatrix();
 	return m_view;
+}
+const math::quaternion& OffAxisProjection::GetRotation()
+{
+	_UpdateMatrix();
+	return m_rotation;
 }
 float OffAxisProjection::GetFoV()
 {

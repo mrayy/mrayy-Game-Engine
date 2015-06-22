@@ -225,7 +225,7 @@ void RobotCameraState::InitState()
 	{
 		scene::CameraNode* cam[2];
 		video::EPixelFormat pf = video::EPixel_R8G8B8A8;//video::EPixel_R8G8B8A8;//
-		m_headNode = m_sceneManager->createSceneNode();
+		m_carObjects.Head = m_sceneManager->createSceneNode();
 
 		scene::LightNode* light= m_sceneManager->createLightNode("Sun");
 		light->setPosition(1000);
@@ -234,8 +234,11 @@ void RobotCameraState::InitState()
 
 		for (int i = 0; i < 2; ++i)
 		{
-			cam[i] = m_sceneManager->createCamera();
-			m_viewport[i] = new scene::ViewPort("", cam[i], 0, 0, math::rectf(0, 0, 1, 1), 0);
+
+			m_carObjects.Eyes[i] = m_sceneManager->createSceneNode(vpName[i]+"_Eye");
+
+			cam[i] = m_sceneManager->createCamera(vpName[i] + "_Cam");
+			m_viewport[i] = new scene::ViewPort(vpName[i] + "_VP", cam[i], 0, 0, math::rectf(0, 0, 1, 1), 0);
 			m_viewport[i]->SetClearColor(video::SColor(0,0,0, 1));
 
 			{
@@ -257,20 +260,23 @@ void RobotCameraState::InitState()
 			//if (ATAppGlobal::Instance()->oculusDevice)
 			cam[i]->setFovY(m_cameraRenderer->GetDisplayFov());
 			cam[i]->setAutoUpdateAspect(true);
-			m_camera[i] = cam[i];
-			m_headNode->addChild(cam[i]);
+			m_carObjects.Camera[i] = cam[i];
+			m_carObjects.Eyes[i]->addChild(m_carObjects.Camera[i]);
 
+			m_carObjects.Head->addChild(m_carObjects.Eyes[i]);
+
+			//cameras are physically shifted 9 cm from the rotation center on the Y axis
+			cam[i]->setPosition(math::vector3d(0, 0.09, 0));
 		}
 
+		//Set eyes distance
+		m_carObjects.Eyes[GetEyeIndex(TBee::Eye_Left)]->setPosition(math::vector3d(-0.03, 0, 0));
+		m_carObjects.Eyes[GetEyeIndex(TBee::Eye_Right)]->setPosition(math::vector3d(+0.03, 0, 0));
 
-		m_camera[GetEyeIndex(TBee::Eye_Left )]->setPosition(math::vector3d(-0.03, 0, 0));
-		m_camera[GetEyeIndex(TBee::Eye_Right)]->setPosition(math::vector3d(+0.03, 0, 0));
+		//Create screen display node
+		m_carObjects.ProjectionPlane = m_sceneManager->createSceneNode("DisplayNode");
 	}
 
-	//init camera render plane
-	m_cameraRenderer->Init(m_headNode, m_camera[0], m_camera[1]);
-
-	m_console->AddToHistory("System Inited.", video::DefaultColors::Green);
 
 
 	if (false)
@@ -318,9 +324,12 @@ void RobotCameraState::InitState()
 	{
 		//scene::SMeshPtr mesh= gMeshResourceManager.loadMesh("van.3ds",true);
 		//scene::MeshRenderableNode* node = new scene::MeshRenderableNode(mesh);
-		m_vehicleModel = m_sceneManager->createSceneNode("VehicleModel");
+		m_carObjects.Vehicle = m_sceneManager->createSceneNode("VehicleModel");
 	//	m_vehicleModel->setPosition(math::vector3d(-47197.953, 100, 61388.07));
-		m_vehicleModel->addChild(m_headNode);
+		m_carObjects.Vehicle->addChild(m_carObjects.Head);
+		m_carObjects.Vehicle->addChild(m_carObjects.ProjectionPlane);
+// 		m_carObjects.Vehicle->addChild(m_carObjects.Camera[0]);
+		// 		m_carObjects.Vehicle->addChild(m_carObjects.Camera[1]);
 		//m_vehicleModel->AttachNode(node);
 		{
 			CreateARObject(1000, "", 0, 0);// math::vector3d(-47197.953, 100, 61388.07), 0);
@@ -366,6 +375,10 @@ void RobotCameraState::InitState()
 	}
 
 	m_commandManager->execCommand("exec initial.cmd");
+	//init camera render plane
+	m_cameraRenderer->Init(&m_carObjects);
+
+	m_console->AddToHistory("System Inited.", video::DefaultColors::Green);
 }
 
 
@@ -461,7 +474,7 @@ void RobotCameraState::SetTransformation( const math::vector3d& pos, const math:
 		m_vehicleRef->sceneNode->setPosition(m_vehicleRef->obj->pos );
 		m_vehicleRef->sceneNode->setOrintation(m_vehicleRef->obj->dir );
 
-		m_headNode->setPosition(pos);
+		m_carObjects.Head->setPosition(pos);
 
 		m_headRotationOffset = 0;	
 		m_headPosOffset = 0;
@@ -499,8 +512,8 @@ void RobotCameraState::Update(float dt)
 			r = m_robotConnector->GetCurrentHeadRotation();
 		else m_robotConnector->GetHeadRotation().toEulerAngles(r);
 		rot.x = -r.y;
+		rot.y = r.z;
 		rot.z = -r.x;
-		rot.y = -r.z;
 	}
 // 	rot.x = -rot.x;
 // 	rot.z = -rot.z;
@@ -527,13 +540,13 @@ void RobotCameraState::_UpdateMovement(float dt)
 	//update car pos
 	if (m_arManager->GetVehicle())
 	{
-		m_vehicleModel->setPosition(m_arManager->GetVehicle()->getAbsolutePosition());
-		m_vehicleModel->setOrintation(m_arManager->GetVehicle()->getAbsoluteOrintation());
+		m_carObjects.Vehicle->setPosition(m_arManager->GetVehicle()->getAbsolutePosition());
+		m_carObjects.Vehicle->setOrintation(m_arManager->GetVehicle()->getAbsoluteOrintation());
 	}
 	else
 	{
-		m_vehicleModel->setPosition(m_vehicleRef->sceneNode->getAbsolutePosition());
-		m_vehicleModel->setOrintation(m_vehicleRef->sceneNode->getAbsoluteOrintation());
+		m_carObjects.Vehicle->setPosition(m_vehicleRef->sceneNode->getAbsolutePosition());
+		m_carObjects.Vehicle->setOrintation(m_vehicleRef->sceneNode->getAbsoluteOrintation());
 	}
 
 	InputManager* mngr = NCAppGlobals::Instance()->App->GetInputManager();
@@ -563,9 +576,9 @@ void RobotCameraState::_UpdateMovement(float dt)
 		math::vector3d pos;
 		//pos = m_headNode->getPosition();
 
-		pos = m_headNode->getOrintation()*math::vector3d::XAxis*speed.x;
-		pos += m_headNode->getOrintation()*math::vector3d::YAxis*speed.y;
-		pos += m_headNode->getOrintation()*math::vector3d::ZAxis*speed.z;
+		pos = m_carObjects.Head->getOrintation()*math::vector3d::XAxis*speed.x;
+		pos += m_carObjects.Head->getOrintation()*math::vector3d::YAxis*speed.y;
+		pos += m_carObjects.Head->getOrintation()*math::vector3d::ZAxis*speed.z;
 		//m_headNode->setPosition(pos);
 
 		m_headPosOffset += pos;
@@ -652,7 +665,7 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 	pass.setRenderState(video::RS_ZTest, video::ES_DontUse);
 	pass.SetThickness(2);
 	device->useRenderPass(&pass);
-	device->setTransformationState(video::TS_WORLD, m_headNode->getAbsoluteTransformation());
+	device->setTransformationState(video::TS_WORLD, m_carObjects.Head->getAbsoluteTransformation());
 
 	math::vector3d origin;
 	origin = 0;
@@ -947,8 +960,8 @@ void RobotCameraState::ListARObjects(std::vector<uint> &ids)
 
 void RobotCameraState::ChangeARFov(float fov)
 {
-	m_camera[0]->setFovY(fov);
-	m_camera[1]->setFovY(fov);
+	m_carObjects.Camera[0]->setFovY(fov);
+	m_carObjects.Camera[1]->setFovY(fov);
 }
 
 

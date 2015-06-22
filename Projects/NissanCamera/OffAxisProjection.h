@@ -27,6 +27,8 @@ protected:
 	math::matrix4x4 m_projection;
 	math::matrix4x4 m_view;
 
+	math::quaternion m_rotation;
+
 
 	void _UpdateMatrix();
 
@@ -40,11 +42,11 @@ public:
 	//pa: Lower Left Corner of the screen 
 	//pb: Top Left Corner of the screen 
 	//pc: Lower Right Corner of the screen 
-	// pa----------------
+	// pc	----------------
 	// |                |
 	// |                |
 	// |                |
-	// pb---------------pc
+	// pb---------------pa
 	void SetScreenCorners(const math::vector3d& bottomLeft, const math::vector3d& topLeft, const math::vector3d& bottomRight);
 	
 	// Calling this function will calculate screen corners
@@ -52,6 +54,7 @@ public:
 
 	const math::matrix4x4& GetProjectionMatrix();
 	const math::matrix4x4& GetViewMatrix();
+	const math::quaternion& GetRotation();
 	float GetFoV();
 };
 

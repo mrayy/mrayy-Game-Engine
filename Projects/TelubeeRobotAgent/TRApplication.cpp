@@ -140,6 +140,11 @@ TRApplication::~TRApplication()
 		m_openNi->Close();
 	m_streamers = 0;
 	m_players = 0;
+
+	if (m_cameraIfo[0].camera)
+		m_cameraIfo[0].camera->Stop();
+	if (m_cameraIfo[1].camera)
+		m_cameraIfo[1].camera->Stop();
 	delete m_robotCommunicator;
 	delete m_communicatorListener;
 	delete m_msgSink;
@@ -216,8 +221,6 @@ void TRApplication::init(const OptionContainer &extraOptions)
 	CMRayApplication::init(extraOptions);
 	{
 		m_ip = extraOptions.GetOptionValue("TargetIP");
-		m_cameraIfo[0].ifo.index = extraOptions.GetOptionByName("Camera0")->getValueIndex();
-		m_cameraIfo[1].ifo.index = extraOptions.GetOptionByName("Camera1")->getValueIndex();
 
 		m_cameraIfo[0].w = m_cameraIfo[1].w = 1280;
 		m_cameraIfo[0].h = m_cameraIfo[1].h = 720;
@@ -255,6 +258,19 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		m_videoPort = core::StringConverter::toInt(extraOptions.GetOptionByName("VideoPort")->getValue() );
 
 		m_handsWindow->Parse(extraOptions);
+
+
+		if (m_cameraType == ECameraType::Webcam)
+		{
+			// -1 for the None index
+			m_cameraIfo[0].ifo.index = extraOptions.GetOptionByName("DS_Camera_Left")->getValueIndex() - 1;
+			m_cameraIfo[1].ifo.index = extraOptions.GetOptionByName("DS_Camera_Right")->getValueIndex() - 1;
+		}
+		else
+		{
+			m_cameraIfo[0].ifo.index = extraOptions.GetOptionByName("PT_Camera_Left")->getValueIndex() - 1;
+			m_cameraIfo[1].ifo.index = extraOptions.GetOptionByName("PT_Camera_Right")->getValueIndex() - 1;
+		}
 	}
 	_InitResources();
 
@@ -296,21 +312,43 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 	uint bitRate[] =
 	{
-		1000,
 		2000,
+		3000,
 		4000,
-		5000,
-		7000
+		6000,
+		8000
+	};
+	uint fpsSet[] =
+	{
+		30,
+		60,
+		60,
+		90,
+		60
+	};
+	math::vector2d resolution[] =
+	{
+		math::vector2d(640, 480),
+		math::vector2d(640, 480),
+		math::vector2d(640, 480),
+		math::vector2d(640, 480),
+		math::vector2d(1280, 720)
 	};
 
 	if (m_enableStream)
 	{
 		video::GstNetworkVideoStreamer* streamer;
+		m_resolution = resolution[(int)m_quality];
+		int fps = fpsSet[(int)m_quality];
+
 		if (m_cameraType==ECameraType::Webcam)
 		{
 			for (int i = 0; i < 2; ++i)
 			{
 				m_cameraIfo[i].camera = new video::DirectShowVideoGrabber();
+				m_cameraIfo[i].fps = fps;
+				m_cameraIfo[i].w = m_resolution.x;
+				m_cameraIfo[i].h = m_resolution.y;
 				if (m_cameraIfo[i].ifo.index >= 0)
 				{
 					m_cameraIfo[i].camera->InitDevice(m_cameraIfo[i].ifo.index, m_cameraIfo[i].w, m_cameraIfo[i].h, m_cameraIfo[i].fps);//1280, 720
@@ -318,6 +356,8 @@ void TRApplication::init(const OptionContainer &extraOptions)
 					m_cameraIfo[i].camera->SetParameter(video::ICameraVideoGrabber::Param_Focus, "0");
 				}
 			}
+
+
 			if (false)
 			{
 				streamer = new video::GstNetworkVideoStreamer();
@@ -350,16 +390,16 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		{
 
 			m_cameraIfo[0].camera = new video::FlyCameraVideoGrabber();
-			m_cameraIfo[0].camera->InitDevice(m_cameraIfo[0].ifo.index, 1024, 768, 50);
+			m_cameraIfo[0].camera->InitDevice(m_cameraIfo[0].ifo.index, m_resolution.x, m_resolution.y, fps);
 			m_cameraIfo[0].camera->Start();
 
 			m_cameraIfo[1].camera = new video::FlyCameraVideoGrabber();
-			m_cameraIfo[1].camera->InitDevice(m_cameraIfo[1].ifo.index, 1024, 768, 50);
+			m_cameraIfo[1].camera->InitDevice(m_cameraIfo[1].ifo.index, m_resolution.x, m_resolution.y, fps);
 			m_cameraIfo[1].camera->Start();
 
 			video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
 			hs->SetVideoGrabber(m_cameraIfo[0].camera, m_cameraIfo[1].camera);//
-			hs->SetBitRate(3000);
+			hs->SetBitRate(bitRate[(int)m_quality]);
 			m_streamers->AddStream(hs, "Video");
 		}
 	}

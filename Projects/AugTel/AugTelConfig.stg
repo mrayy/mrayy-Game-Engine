@@ -1,6 +1,6 @@
 Settings{
 	Bits	"32"
-	CameraSource	"Local"
+	CameraSource	"Remote"
 	CameraType	"DirectShow"
 	Controller	"Logicool"
 	DS_Camera_Left	"1-See3CAM_CU130"
@@ -15,6 +15,6 @@ Settings{
 	Preview	"No"
 	Resolution	"1280,600"
 	Robot	"Oculus"
-	Stereoscopic	"None"
+	Stereoscopic	"Oculus"
 	VSync	""
 }

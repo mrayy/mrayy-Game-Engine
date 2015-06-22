@@ -43,6 +43,26 @@ class NissanRobotCommunicator;
 class ARGroupManager;
 class ConsoleLogDevice;
 
+class CarObjects
+{
+public:
+	// Vehicle
+	// |---HeadNode
+	// |---|---Left Eye
+	// |---|---|---Left Camera
+	// |---|---|---Left Screen Node
+	// |---|---Right Eye
+	// |---|---|---Right Camera
+	// |---|---|---Right Screen Node
+	// |---Projection Plane
+	scene::ISceneNode* Vehicle;
+	scene::ISceneNode* Head;
+	scene::ISceneNode* Eyes[2];
+	scene::CameraNode* Camera[2];
+	scene::ISceneNode* CameraPlane[2];
+	scene::ISceneNode* ProjectionPlane;
+};
+
 class RobotCameraState :public TBee::IRenderingState, public scene::IViewportListener, public IARServiceListener, public IARCommandListener
 {
 	typedef TBee::IRenderingState Parent;
@@ -55,8 +75,9 @@ protected:
 
 	GCPtr<scene::SceneManager> m_sceneManager;
 	GCPtr<scene::ViewPort> m_viewport[2];
-	scene::CameraNode* m_camera[2];
-	scene::ISceneNode* m_headNode;
+
+	CarObjects m_carObjects;
+
 	TBee::CRobotConnector* m_robotConnector;
 	GUI::IGUIRenderer* m_guiRenderer;
 
@@ -68,7 +89,6 @@ protected:
 
 	ConsoleLogDevice* m_consoleLogDevice;
 	GUI::GUIConsole* m_console;
-	scene::ISceneNode* m_vehicleModel;
 	ARSceneObject* m_vehicleRef;
 	scene::ISceneNode* m_arRoot;
 	math::vector3d m_headRotationOffset;

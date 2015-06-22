@@ -16,30 +16,18 @@ namespace mray
 	}
 namespace NCam
 {
-	
+	class CarObjects;
+
 class CameraPlaneRenderer
 {
 protected:
 	struct SurfaceMeshParams
 	{
-		bool plane;
-		float hfov, aspect;
-		int segments;
-		float radius;
-		math::vector3d scale[2];
+		float  aspect;		//Remote Camera Texture Aspect Ratio
+		float fovScaler;	//Render Plane scaler value based on Remote Camera FoV and plane distance
+		float distance;		//Render Plane distance from the camera
 	};
 
-	struct DistortionParams
-	{
-		DistortionParams() :distortionVal(0.5), cylindricalRatio(0.1), yOffset(0)
-		{}
-
-		float distortionVal;
-		float cylindricalRatio;
-		float yOffset;
-	};
-
-	DistortionParams m_distortionParams;
 
 	scene::MeshRenderableNode* m_surface[2];
 	SurfaceMeshParams m_surfaceParams;
@@ -47,21 +35,7 @@ protected:
 
 	video::OffAxisProjection m_offAxisProj[2];
 
-	// Vehicle
-	// |---HeadNode
-	// |---|---Left Eye
-	// |---|---|---Left Camera
-	// |---|---|---Left Screen Node
-	// |---|---Right Eye
-	// |---|---|---Right Camera
-	// |---|---|---Right Screen Node
-	// |---Projection Plane
-
-	scene::ISceneNode* m_headNode;
-	scene::ISceneNode* m_eyeNodes[2];
-	scene::CameraNode* m_camera[2];
-	scene::ISceneNode* m_screenNode[2];
-	scene::ISceneNode* m_projectionPlane;
+	CarObjects* m_car;
 
 	video::RenderPass* m_screenMtrl[2];
 	video::RenderPass* m_wireframePass[2];
@@ -69,32 +43,34 @@ protected:
 
 	TBee::ICameraVideoSource* m_videoSource;
 	float m_displayFov;
-	float m_displayWidth;
+	math::vector2d m_displaySize;
 	float m_screenDistance;
-	bool m_sphericalPlane;
 
 	bool m_useLensCorrection;
 	GCPtr<video::ParsedShaderPP> m_lensCorrectionPP;
 	TBee::TelubeeCameraConfiguration *m_cameraConfiguration;
 	bool m_camConfigDirty;
 
-	void _UpdateCameraProj(const math::vector3d& eyePos);
+	void _UpdateCameraProj();
+	void _UpdateHead(const math::vector3d& pos, const math::vector3d &angles);
+	void _UpdateCameraPlane();
 	float CalcDisplayFoV(float headDistance);
+	void _UpdateCameraPlaneScaler();
+	void _SetCameraPlaneDistance(float d);
 public:
 	CameraPlaneRenderer();
 	virtual ~CameraPlaneRenderer();
 
 	virtual bool OnEvent(Event* e);
 
-	virtual void Init(scene::ISceneNode* headNode, scene::CameraNode* leftCam, scene::CameraNode* rightCam);
+	virtual void Init(CarObjects* car);
 
 	virtual void Start();
 	virtual void Stop();
 
 	virtual void SetTransformation(const math::vector3d& pos, const math::vector3d &angles);
-	virtual void RescaleMesh(int index, const math::vector3d &scaleFactor);
 
-	void GenerateSurface(bool plane, float hfov,float aspectRatio, int segments, float cameraScreenDistance);
+	void GenerateSurface(float aspectRatio, float cameraScreenDistance);
 
 	virtual void Update(float dt);
 
