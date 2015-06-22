@@ -5,6 +5,7 @@
 
 #include "ParsedShaderPP.h"
 #include "TBeeCommon.h"
+#include "OffAxisProjection.h"
 
 namespace mray
 {
@@ -44,10 +45,24 @@ protected:
 	SurfaceMeshParams m_surfaceParams;
 	math::vector3d m_cameraOffsets;
 
+	video::OffAxisProjection m_offAxisProj[2];
+
+	// Vehicle
+	// |---HeadNode
+	// |---|---Left Eye
+	// |---|---|---Left Camera
+	// |---|---|---Left Screen Node
+	// |---|---Right Eye
+	// |---|---|---Right Camera
+	// |---|---|---Right Screen Node
+	// |---Projection Plane
 
 	scene::ISceneNode* m_headNode;
+	scene::ISceneNode* m_eyeNodes[2];
 	scene::CameraNode* m_camera[2];
 	scene::ISceneNode* m_screenNode[2];
+	scene::ISceneNode* m_projectionPlane;
+
 	video::RenderPass* m_screenMtrl[2];
 	video::RenderPass* m_wireframePass[2];
 
@@ -63,6 +78,7 @@ protected:
 	TBee::TelubeeCameraConfiguration *m_cameraConfiguration;
 	bool m_camConfigDirty;
 
+	void _UpdateCameraProj(const math::vector3d& eyePos);
 	float CalcDisplayFoV(float headDistance);
 public:
 	CameraPlaneRenderer();

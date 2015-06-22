@@ -107,6 +107,10 @@ void CameraPlaneRenderer::Init(scene::ISceneNode* headNode, scene::CameraNode* l
 	}
 	m_camera[0]->setFovY(m_displayFov);
 	m_camera[1]->setFovY(m_displayFov);
+
+	//set display screen params
+	m_offAxisProj[0].SetScreenParams(math::vector3d(0.550, 0.050, -0.500), math::vector2d(0.27, 0.14), math::quaternion::Identity);
+	m_offAxisProj[1].SetScreenParams(math::vector3d(0.550, 0.050, -0.500), math::vector2d(0.27, 0.14), math::quaternion::Identity);
 }
 
 void CameraPlaneRenderer::Start()
@@ -397,11 +401,19 @@ float CameraPlaneRenderer::CalcDisplayFoV(float headDistance)
 
 	return fov;
 }
+void CameraPlaneRenderer::_UpdateCameraProj(const math::vector3d& eyePos)
+{
+	m_offAxisProj[0].SetEyePosition(eyePos);
+
+	//m_camera[0]->setProjectionMatrix(m_offAxisProj[0].GetProjectionMatrix());
+	//m_camera[0]->setWorldViewMatrix(m_offAxisProj[0].GetViewMatrix());
+}
 
 void CameraPlaneRenderer::SetTransformation(const math::vector3d& pos, const math::vector3d &angles)
 {
 	math::vector3d p;
-	float fov=CalcDisplayFoV(pos.z + m_screenDistance);
+	//float fov=CalcDisplayFoV(pos.z + m_screenDistance);
+	//_UpdateCameraProj(pos);
 	//m_camera[0]->setFovY(fov);
 	//m_camera[1]->setFovY(fov);
 
@@ -660,7 +672,7 @@ void CameraPlaneRenderer::DebugRender(GUI::IGUIRenderer* renderer)
 		}
 		PRINT_LOG_COLORED(core::string("Sceen Parameters"), video::SColor(1, 0.7, 0.7, 1));
 		PRINT_LOG("Screen Distance: " + core::StringConverter::toString(m_cameraOffsets.z));
-		PRINT_LOG("Screen FoV: " + core::StringConverter::toString(m_displayFov));
+		PRINT_LOG("Screen FoV: " + core::StringConverter::toString(m_offAxisProj[0].GetFoV()));
 
 
 		msg = ("Plane FoV: " + core::StringConverter::toString(m_surfaceParams.hfov) + " / " + core::StringConverter::toString(m_surfaceParams.hfov / m_surfaceParams.aspect));

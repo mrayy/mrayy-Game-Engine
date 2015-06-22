@@ -85,8 +85,8 @@ RobotCameraState::RobotCameraState()
 	m_robotConnector->SetCommunicator(m_robotComm);
 	m_cameraRenderer = new CameraPlaneRenderer();
 
-	//m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
-	m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
+	m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
+	//m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
 	//m_headController = new TBee::CalibHeadController(new TestController());
 
 	m_robotConnector->SetHeadController(m_headController);
@@ -756,7 +756,7 @@ void RobotCameraState::_RenderUI(const math::rectf& rc)
 			 PRINT_LOG(msg);
 
 			head = m_robotConnector->GetHeadPosition();
-			msg = mT("Head Position: ") + core::StringConverter::toString((math::vector3di)head);
+			msg = mT("Head Position: ") + core::StringConverter::toString((math::vector3d)head);
 			PRINT_LOG(msg);
 		}
 		else

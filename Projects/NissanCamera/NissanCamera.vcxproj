@@ -114,6 +114,7 @@
     <ClInclude Include="LensDistortion.h" />
     <ClInclude Include="NissanRobotCommunicator.h" />
     <ClInclude Include="NCAppGlobals.h" />
+    <ClInclude Include="OffAxisProjection.h" />
     <ClInclude Include="RobotCameraState.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -131,6 +132,9 @@
     <ClCompile Include="LensDistortion.cpp" />
     <ClCompile Include="NissanRobotCommunicator.cpp" />
     <ClCompile Include="NissanCamera.cpp" />
+    <ClCompile Include="OffAxisProjection.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Disabled</Optimization>
+    </ClCompile>
     <ClCompile Include="RobotCameraState.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -51,6 +51,9 @@ protected:
 
 	math::Frustum m_viewArea;
 
+	bool m_autoUpdateProjection;
+	bool m_autoUpdateView;
+
 	virtual void calcProjectionMatrix();
 	virtual void calcViewArea();
 
@@ -125,7 +128,10 @@ public:
 	virtual math::vector3d getViewPos()const{return getAbsolutePosition();}
 	virtual const math::Frustum*getViewFrustrum()const;
 
-	virtual void setProjectionMatrix(const math::matrix4x4& m){m_projectionMatrix=m;}
+	virtual void setProjectionMatrix(const math::matrix4x4& m){ m_projectionMatrix = m; m_autoUpdateProjection = false; }
+	virtual void setWorldViewMatrix(const math::matrix4x4& m){ m_viewMatrix = m; m_autoUpdateView = false; }
+	virtual void EnableAutoUpdateProjection(){ m_autoUpdateProjection = true; }
+	virtual void EnableAutoUpdateView(){ m_autoUpdateView = true; }
 
 
 	math::recti getViewPort();

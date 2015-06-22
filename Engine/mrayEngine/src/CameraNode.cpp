@@ -91,6 +91,8 @@ CameraNode::CameraNode(const  core::string&name,int id,ISceneManager* sceneMngr)
 	fillProperties();
 
 	m_normalRP=new NormalRenderPass();
+	m_autoUpdateProjection = true;
+	m_autoUpdateView = true;
 /*
 	if(!g_cameraEventHandlerInited){
 		g_cameraEventHandlerInited=true;
@@ -227,12 +229,14 @@ const math::matrix4x4& CameraNode::getReflectionMatrix()const
 
 void CameraNode::calcViewArea()
 {
-	math::matrix4x4 mat=m_projectionMatrix*m_viewMatrix;
-	m_viewArea.viewPos=getAbsolutePosition();
+	math::matrix4x4 mat = m_projectionMatrix*m_viewMatrix;
+	m_viewArea.viewPos = getAbsolutePosition();
 	m_viewArea.set(mat);
 }
 void CameraNode::calcProjectionMatrix()
 {
+	if (!m_autoUpdateProjection)
+		return;
 	if(m_projectionType==EPT_Perspective)
 		m_projectionMatrix= math::MathUtil::CreateProjectionMatrixPerspectiveFov(math::toRad(m_fovY),m_aspect,m_ZNear,m_ZFar);
 	else{
@@ -301,7 +305,10 @@ void CameraNode::updateView()
 		(dp < 1.0001f && dp > 0.9999f))
 		up.x += 0.5f;
 
-	m_viewMatrix=math::MathUtil::CreateLookAtMatrix(pos,pos+dir,up);
+	if (m_autoUpdateView)
+	{
+		m_viewMatrix = math::MathUtil::CreateLookAtMatrix(pos, pos + dir, up);
+	}
 	//viewMatrix=math::MathUtil::CreateLookAtMatrix(pos,ISceneNode::getOrintation());
 	if(m_reflection)
 		m_viewMatrix=m_viewMatrix*m_reflectionMatrix;
