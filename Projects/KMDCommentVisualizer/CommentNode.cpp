@@ -21,15 +21,19 @@ CommentNode::CommentNode(kmd::SessionDetails* speaker, kmd::KMDComment* t)
 	m_hoverValue = 0;
 	m_targetProject = speaker;
 	m_comment = t;
-	video::ITexturePtr tex = gTextureResourceManager.getResource(m_comment->user->imageUrl);
-	if (tex.isNull())
+	if (!m_comment || !m_comment->user)
 	{
-		tex = gTextureResourceManager.loadTexture2D(m_comment->user->imageUrl);
+		m_texture.SetTexture(gTextureResourceManager.loadTexture2D("Faculty.png"));
 	}
-	m_texture.SetTexture(tex);
-
-	m_alpha = 0;
-	m_sizeScaler = 1;
+	else
+	{
+		video::ITexturePtr tex = gTextureResourceManager.getResource(m_comment->user->imageUrl);
+		if (tex.isNull())
+		{
+			tex = gTextureResourceManager.loadTexture2D(m_comment->user->imageUrl);
+		}
+		m_texture.SetTexture(tex);
+	}
 
 }
 CommentNode::~CommentNode()

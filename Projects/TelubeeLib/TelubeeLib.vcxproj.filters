@@ -237,6 +237,9 @@
     <ClInclude Include="GstLocalCameraVideoSource.h">
       <Filter>Source Files\VideoSource</Filter>
     </ClInclude>
+    <ClInclude Include="GstStreamerMultipleVideoSource.h">
+      <Filter>Source Files\VideoSource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -366,6 +369,9 @@
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
     <ClCompile Include="GstLocalCameraVideoSource.cpp">
+      <Filter>Source Files\VideoSource</Filter>
+    </ClCompile>
+    <ClCompile Include="GstStreamerMultipleVideoSource.cpp">
       <Filter>Source Files\VideoSource</Filter>
     </ClCompile>
   </ItemGroup>

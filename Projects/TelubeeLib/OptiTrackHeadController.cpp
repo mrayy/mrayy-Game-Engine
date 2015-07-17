@@ -9,6 +9,7 @@ namespace mray
 {
 namespace TBee
 {
+#define SAMPLES_SIZE 1
 
 OptiTrackHeadController::OptiTrackHeadController(int headId)
 {
@@ -27,7 +28,7 @@ bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v, bool abs)
 	math::vector3d a;
 	q->toEulerAngles(a);
 
-	if (m_oriAvg.size() < 10)
+	if (m_oriAvg.size() < SAMPLES_SIZE)
 	{
 		m_oriAvg.push_back(a);
 	}
@@ -46,7 +47,7 @@ bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v, bool abs)
 	v = math::quaternion(-a.x, a.y, -a.z);
 
 	/////////////////////////////////////
-	v = math::quaternion(a.y, a.x, a.z);	//in the lab
+	//v = math::quaternion(a.y, a.x, a.z);	//in the lab
 	
 	return true;
 }
@@ -56,7 +57,7 @@ bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 	if (!p)
 		return false;
 
-	if (m_posAvg.size() < 10)
+	if (m_posAvg.size() < SAMPLES_SIZE)
 	{
 		m_posAvg.push_back(*p);
 	}
@@ -76,7 +77,7 @@ bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 
 	/////////////////////////////////////
 
-	v.set(v.x, v.z, v.y);
+	//v.set(v.x, v.z, v.y);
 	return true;
 }
 

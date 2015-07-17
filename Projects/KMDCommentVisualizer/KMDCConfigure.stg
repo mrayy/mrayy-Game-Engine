@@ -1,0 +1,9 @@
+Settings{
+	Bits	"32"
+	Debugging	"No"
+	Fullscreen	"False"
+	Monitor	"0"
+	Multisample	"0"
+	Resolution	"1280,768"
+	VSync	"False"
+}

@@ -43,6 +43,7 @@ namespace AugTel
 		virtual void OnBumpSensor(int count, bool* v){}
 		virtual void OnIRSensor(int count, float* v){}
 		virtual void OnBatteryLevel(int level){}
+		virtual void OnClockSync(ulong clock){}
 	};
 
 class DataCommunicator:public ListenerContainer<IDataCommunicatorListener*>
@@ -60,6 +61,8 @@ protected:
 	DECLARE_FIRE_METHOD(OnReportedMessage, (int code, const core::string& msg), (code, msg));
 	DECLARE_FIRE_METHOD(OnBumpSensor, (int count, bool* v), (count,v));
 	DECLARE_FIRE_METHOD(OnIRSensor, (int count, float* v), (count, v));
+	DECLARE_FIRE_METHOD(OnBatteryLevel, (int level), (level));
+	DECLARE_FIRE_METHOD(OnClockSync, (ulong clock), (clock));
 public:
 	DataCommunicator();
 	virtual~DataCommunicator();

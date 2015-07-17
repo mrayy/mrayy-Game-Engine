@@ -125,7 +125,9 @@
     <ClCompile Include="ARGroupManager.cpp" />
     <ClCompile Include="ARServiceProvider.cpp" />
     <ClCompile Include="CalibHeadController.cpp" />
-    <ClCompile Include="CameraPlaneRenderer.cpp" />
+    <ClCompile Include="CameraPlaneRenderer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
     <ClCompile Include="ConsoleLogDevice.cpp" />
     <ClCompile Include="dispObjSMParser.cpp" />
     <ClCompile Include="GUIConsole.cpp" />

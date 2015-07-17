@@ -127,6 +127,7 @@ class FlyCameraData
 {
 public:
 	Camera cam;
+	FlyCapture2::Image convertedImage;
 };
 
 #define CheckError(x) {e=x;if(e!=PGRERROR_OK){FlyCameraManager::instance.LogError(e);return false;}}
@@ -135,39 +136,8 @@ public:
 
 void FlyCameraImageEventCallback( class Image* pImage, const void* pCallbackData )
 {
-	FlyCapture2::PixelFormat pixFormat;
-	unsigned int rows, cols, stride;
-	pImage->GetDimensions( &rows, &cols, &stride, &pixFormat );
-
-	// Create a converted image
-	Image convertedImage;
-
-	EPixelFormat fmt;
-
-	const Image* ptr=pImage;
-	// Convert the raw image
-	switch (pixFormat)
-	{
-	case FlyCapture2::PIXEL_FORMAT_MONO8:
-		ptr = pImage;
-		fmt = video::EPixel_LUMINANCE8;
-		break;
-	default:
-		pImage->Convert(PIXEL_FORMAT_RGB8, &convertedImage);
-		ptr = &convertedImage;
-		fmt = video::EPixel_R8G8B8;
-		break;
-	}
-// 	if(pixFormat!=PIXEL_FORMAT_RGB8)
-// 	{
-// 		pImage->Convert( PIXEL_FORMAT_RGB8, &convertedImage );
-// 		ptr=&convertedImage;
-// 	}
-
-
-	uchar* data = ptr->GetData();
-	FlyCameraVideoGrabber* g=(FlyCameraVideoGrabber*)pCallbackData;
-	g->BlitImage(data, cols, rows, fmt);
+	FlyCameraVideoGrabber* g = (FlyCameraVideoGrabber*)pCallbackData;
+	g->BlitImage((void*)pImage);
 
 }
 
@@ -269,7 +239,7 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 		&valid,
 		&fmt7PacketInfo );
 */
-	CMode mode=GetClosestVideoMode(w,h);
+	//CMode mode=GetClosestVideoMode(w,h);
 	CFpsMode fpsMode=GetClosestFps(fps);
 
 	if (true)
@@ -277,16 +247,33 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 		// Query for available Format 7 modes
 		Format7Info fmt7Info;
 		bool supported;
-		fmt7Info.mode = MODE_0;
+
+		if (w<656)
+			fmt7Info.mode = MODE_4;
+		else
+			fmt7Info.mode = MODE_0;
 		CheckError(m_data->cam.GetFormat7Info(&fmt7Info, &supported));
 
+		uint packSize;
+		float perce;
 		bool valid;
 		Format7PacketInfo fmt7PacketInfo;
 		Format7ImageSettings fmt7ImageSettings;
-		fmt7ImageSettings.offsetX = (fmt7Info.maxWidth - mode.width) / 2;
-		fmt7ImageSettings.offsetY = (fmt7Info.maxHeight - mode.height) / 2;
-		fmt7ImageSettings.width = mode.width;
-		fmt7ImageSettings.height = mode.height;
+		//CheckError(m_data->cam.GetFormat7Configuration(&fmt7ImageSettings, &packSize,&perce));
+		fmt7ImageSettings.mode = fmt7Info.mode;
+		if (true)
+		{
+			fmt7ImageSettings.offsetX = (fmt7Info.maxWidth - w) / 2;
+			fmt7ImageSettings.offsetY = (fmt7Info.maxHeight - h) / 2;
+			fmt7ImageSettings.width = w;
+			fmt7ImageSettings.height = h;
+		}
+		else
+		{
+			fmt7ImageSettings.offsetX = 0;
+			fmt7ImageSettings.offsetY = 0;
+
+		}
 		fmt7ImageSettings.pixelFormat = CMode::GetFormat(m_format);
 
 		// Validate the settings to make sure that they are valid
@@ -301,17 +288,38 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 		CheckError(m_data->cam.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket));
 
 
-		Property frmRate;
-		frmRate.type = FRAME_RATE;
-		frmRate.absValue = m_fps;
-	//	(m_data->cam.SetProperty(&frmRate));
-	//	(m_data->cam.GetProperty(&frmRate));
+		Property val;
+		val.type = FRAME_RATE;
+		val.present = true;
+		val.absControl = true;
+		val.onePush = false;
+		val.onOff = true;
+		val.autoManualMode = false;
+		val.absValue = m_fps;
+		(m_data->cam.SetProperty(&val));
 
+
+		val.type = GAIN;
+		val.autoManualMode = true;
+		(m_data->cam.SetProperty(&val));
+
+		val.type = AUTO_EXPOSURE;
+		val.autoManualMode = true;
+		(m_data->cam.SetProperty(&val));
+
+		val.type = SHUTTER;
+		val.autoManualMode = true;
+		(m_data->cam.SetProperty(&val));
+
+		val.type = WHITE_BALANCE;
+		val.autoManualMode = true;
+		(m_data->cam.SetProperty(&val));
+		//printf("WB: %f\n", val.absValue);
 	}
 	else
 	{
-		CheckError(m_data->cam.SetVideoModeAndFrameRate(mode.m, fpsMode.f));
-		m_data->cam.GetVideoModeAndFrameRate(&mode.m, &fpsMode.f);
+//		CheckError(m_data->cam.SetVideoModeAndFrameRate(mode.m, fpsMode.f));
+//		m_data->cam.GetVideoModeAndFrameRate(&mode.m, &fpsMode.f);
 	}
 
 // 	const CMode *pmode=GetClosestVideoMode(mode.m);
@@ -322,8 +330,8 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 //	m_fps=frmRate.absValue;
 	//if(pmode && ( m_size.x!=pmode->width || m_size.y!=pmode->height))
 	{
-		m_size.x = mode.width;
-		m_size.y = mode.height;
+		m_size.x = w;
+		m_size.y = h;
 
 	}
 	m_frameCount = 0;
@@ -417,27 +425,76 @@ void FlyCameraVideoGrabber::Start()
 
 }
 
-const video::ImageInfo*  FlyCameraVideoGrabber::GetLastFrame()
+const video::ImageInfo*  FlyCameraVideoGrabber::GetLastFrame(int i)
 {
 	return &m_textureImage;
 }
 
 
-void FlyCameraVideoGrabber::BlitImage(const uchar* buf, int rows, int cols, EPixelFormat fmt)
+void FlyCameraVideoGrabber::BlitImage(const void* img)
 {
 	float t=gEngine.getTimer()->getSeconds();
 // 	if(t-m_lastGrabbed<15)
 // 		return;
 
+	Image* pImage = (Image*)img;
+
+	FlyCapture2::PixelFormat pixFormat;
+	unsigned int rows, cols, stride;
+
+	// Create a converted image
+
+	EPixelFormat fmt;
+
+	const Image* ptr = pImage;
+
+	if (m_format == EPixel_R8G8B8)
+	{
+		pImage->Convert(PIXEL_FORMAT_RGB8, &m_data->convertedImage);
+		ptr = &m_data->convertedImage;
+		fmt = video::EPixel_R8G8B8;
+
+	}
+	ptr->GetDimensions(&rows, &cols, &stride, &pixFormat);
+	// Convert the raw image
+	switch (pixFormat)
+	{
+	case FlyCapture2::PIXEL_FORMAT_MONO8:
+		ptr = pImage;
+		fmt = video::EPixel_LUMINANCE8;
+		break;
+	case FlyCapture2::PIXEL_FORMAT_422YUV8:
+	case FlyCapture2::PIXEL_FORMAT_411YUV8:
+	case FlyCapture2::PIXEL_FORMAT_444YUV8:
+		ptr = pImage;
+		fmt = video::EPixel_YUYV;
+		break;
+	default:
+		break;
+	}
+	// 	if(pixFormat!=PIXEL_FORMAT_RGB8)
+	// 	{
+	// 		pImage->Convert( PIXEL_FORMAT_RGB8, &convertedImage );
+	// 		ptr=&convertedImage;
+	// 	}
+
+
+	uchar* buf= ptr->GetData();
+
 	m_lastGrabbed=t;
 	m_imageMutex->lock();
 	{
-		m_tempImage.createData(math::vector3d(rows, cols, 1), fmt);
+		m_tempImage.createData(math::vector3d(cols, rows, 1), fmt);
 		if (fmt == EPixel_R8G8B8)
-			video::ColorConverter::convert24BitTo24Bit(buf, m_tempImage.imageData, math::vector2d(rows, cols), 0, true, 0);
+		//	video::ColorConverter::convert24BitTo24Bit(buf, m_tempImage.imageData, math::vector2d(rows, cols), 0, false, 0);
+		m_tempImage.setData(buf, math::vector3d(cols, rows, 1), fmt);
 		else if (fmt == EPixel_LUMINANCE8)
 		{
-			m_tempImage.setData(buf, math::vector3d(rows, cols, 1), fmt);
+			m_tempImage.setData(buf, math::vector3d(cols, rows, 1), fmt);
+		}
+		else if (fmt == EPixel_YUYV)
+		{
+			m_tempImage.setData(buf, math::vector3d(cols, rows, 1), fmt);
 		}
 	}
 	m_hasNewFrame=true;

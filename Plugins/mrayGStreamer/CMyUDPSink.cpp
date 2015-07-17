@@ -152,7 +152,8 @@ gst_MyUDPSink_render(GstBaseSink * bsink, GstBuffer * buffer)
 
 	gst_buffer_map(buffer, &map, GST_MAP_READ);
 	unsigned int len = 0;
-	sink->m_client->SendTo(0, (const char*)map.data, map.size, &len);
+	network::NetAddress addr(sink->host, sink->port);
+	sink->m_client->SendTo(&addr, (const char*)map.data, map.size, &len);
 	gst_buffer_unmap(buffer, &map);
 
 	/*

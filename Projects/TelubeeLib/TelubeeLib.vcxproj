@@ -105,6 +105,7 @@
     <ClInclude Include="GstLocalCameraVideoSource.h" />
     <ClInclude Include="GstSingleNetVideoSource.h" />
     <ClInclude Include="GstStereoStreamVideoSource.h" />
+    <ClInclude Include="GstStreamerMultipleVideoSource.h" />
     <ClInclude Include="GstStreamerVideoSource.h" />
     <ClInclude Include="IDepthProvider.h" />
     <ClInclude Include="IRobotController.h" />
@@ -167,6 +168,7 @@
     <ClCompile Include="GstLocalCameraVideoSource.cpp" />
     <ClCompile Include="GstSingleNetVideoSource.cpp" />
     <ClCompile Include="GstStereoStreamVideoSource.cpp" />
+    <ClCompile Include="GstStreamerMultipleVideoSource.cpp" />
     <ClCompile Include="GstStreamerVideoSource.cpp" />
     <ClCompile Include="IRobotController.cpp" />
     <ClCompile Include="KeyboardHeadController.cpp" />

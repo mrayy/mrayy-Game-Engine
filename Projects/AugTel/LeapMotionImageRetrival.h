@@ -64,7 +64,7 @@ public:
 
 	virtual float GetCaptureFrameRate(){ return 30; }
 
-	virtual const video::ImageInfo* GetLastFrame();
+	virtual const video::ImageInfo* GetLastFrame(int i);
 	virtual void Lock();
 	virtual void Unlock();
 };

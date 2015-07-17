@@ -33,7 +33,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	op.valueSet.clear();
 	//VLDEnable();
 	app->loadResourceFile(mT("kmdDataPath.stg"));
-	if (app->startup(mT("KMD Plenary September 2014"), vector2di(800, 600), false, extraOptions, resFileName, 0, true, true, true))
+	if (app->startup(mT("KMD Plenary September 2014"), vector2di(800, 600), false, extraOptions, resFileName,"KMDCConfigure.stg", 0, true, true, true))
 	{
 		app->run();
 	}

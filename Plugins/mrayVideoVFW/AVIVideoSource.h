@@ -95,7 +95,7 @@ public:
 	virtual void SetImageFormat(video::EPixelFormat fmt);
 	virtual video::EPixelFormat GetImageFormat();
 
-	const ImageInfo* GetLastFrame();
+	const ImageInfo* GetLastFrame(int index=0);
 };
 
 }

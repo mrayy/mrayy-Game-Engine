@@ -18,6 +18,7 @@ const core::string ICameraVideoGrabber::Param_Sharpness("Sharpness");
 const core::string ICameraVideoGrabber::Param_ColorEnable("ColorEnable");
 const core::string ICameraVideoGrabber::Param_WhiteBalance("WhiteBalance");
 const core::string ICameraVideoGrabber::Param_Gain("Gain");
+const core::string ICameraVideoGrabber::Param_Gamma("Gamma");
 const core::string ICameraVideoGrabber::Param_BacklightCompensation("BacklightCompensation");
 
 const core::string ICameraVideoGrabber::Param_Pan("Pan");

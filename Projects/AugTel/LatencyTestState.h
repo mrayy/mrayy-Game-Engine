@@ -8,6 +8,8 @@
 #include "CRobotConnector.h"
 
 #include "VideoGrabberTexture.h"
+#include "ParsedShaderPP.h"
+#include "IUDPClient.h"
 
 namespace mray
 {
@@ -26,13 +28,25 @@ protected:
 	float m_autoTesterTimer;
 	float m_lastTime;
 
+	core::string m_targetAddress;
+	uint m_targetPort;
+
 	float m_minLatency, m_maxLatency;
+
+	GCPtr<network::IUDPClient > m_client;
+
+	network::NetAddress m_remoteAddr;
 
 	std::vector<float> m_latency;
 
 	OS::IStreamPtr m_outValues;
 
+	GCPtr<video::ParsedShaderPP> m_I420ToRGB;
+	math::vector3d m_lastColor;
+
 	GUI::IGUIRenderer* m_guiRenderer;
+
+	void _OnChange(bool c);
 
 public:
 	LatencyTestState(const core::string& name, TBee::ICameraVideoSource* src);

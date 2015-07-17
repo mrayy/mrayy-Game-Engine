@@ -36,6 +36,11 @@ bool HandsWindow::OnInit(TRApplication* app)
 	m_app = app;
 	if (m_handsMonitor == -1)
 		return false;
+
+	m_I420ToRGB = new video::ParsedShaderPP(Engine::getInstance().getDevice());
+	m_I420ToRGB->LoadXML(gFileSystem.openFile("I420ToRGB.peff"));
+
+
 	{
 		video::GstNetworkVideoPlayer* player;
 		m_player=player = new video::GstNetworkVideoPlayer();
@@ -105,7 +110,9 @@ void HandsWindow::OnClose()
 }
 void HandsWindow::OnEnable()
 {
+	printf("Hands window enabled\n");
 	m_player->CreateStream();
+	m_player->Play();
 }
 void HandsWindow::OnDisable()
 {
@@ -114,7 +121,7 @@ void HandsWindow::OnDisable()
 
 void HandsWindow::OnConnected(const core::string &ipaddr, int handsPort, bool rtcp)
 {
-	m_player->SetIPAddress(ipaddr, handsPort, rtcp);
+	m_player->SetIPAddress(ipaddr, handsPort, 0, rtcp);
 }
 
 void HandsWindow::OnUpdate(float dt)
@@ -129,9 +136,18 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 
 	m_handsGrabber->Blit();
 	tex.SetTexture(m_handsGrabber->GetTexture());
+
 	math::vector2d txsz;
 	txsz.x = m_handsGrabber->GetTexture()->getSize().x;
 	txsz.y = m_handsGrabber->GetTexture()->getSize().y;
+	{
+		m_I420ToRGB->Setup(math::rectf(0, txsz));
+		m_I420ToRGB->render(&video::TextureRTWrap(tex.GetTexture()));
+		tex.SetTexture(m_I420ToRGB->getOutput()->GetColorTexture());
+
+	}
+
+
 	float r = (float)vp->GetSize().y / (float)vp->GetSize().x;
 	float w = txsz.x*r;
 	float c = txsz.x - w;
@@ -144,9 +160,11 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 	gEngine.getDevice()->unuseShader();
 
 	gEngine.getDevice()->useTexture(0, &tex);/**/
-	math::rectf texCoords(0, 0, 1, 1);
+	math::rectf texCoords(0, 1, 1, 0);
 
 	texCoords = m_projectionRect;
+	texCoords.ULPoint.y = 1 - texCoords.ULPoint.y;
+	texCoords.BRPoint.y = 1 - texCoords.BRPoint.y;
 	gEngine.getDevice()->draw2DImage(math::rectf(0, vp->GetSize()), 1, 0, &texCoords);
 	/*	*/
 }

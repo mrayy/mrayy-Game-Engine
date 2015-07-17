@@ -23,6 +23,7 @@ protected:
 	int m_handsMonitor;
 	video::RenderWindow* m_handsWnd;
 	GCPtr<video::ParsedShaderPP> m_undistortShader;
+	GCPtr<video::ParsedShaderPP> m_I420ToRGB;
 	video::GstNetworkVideoPlayer* m_player;
 
 	TRApplication* m_app;

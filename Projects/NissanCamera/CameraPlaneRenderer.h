@@ -44,7 +44,6 @@ protected:
 	TBee::ICameraVideoSource* m_videoSource;
 	float m_displayFov;
 	math::vector2d m_displaySize;
-	float m_screenDistance;
 
 	bool m_useLensCorrection;
 	GCPtr<video::ParsedShaderPP> m_lensCorrectionPP;

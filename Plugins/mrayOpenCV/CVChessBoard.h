@@ -9,27 +9,23 @@ namespace mray
 {
 namespace video
 {
+	class CVChessBoardImpl;
 	
 class CVChessBoard
 {
 protected:
 
-	float m_squareSize;
-	math::vector2di m_squares;
+	CVChessBoardImpl* m_impl;
 public:
 	CVChessBoard();
 	virtual ~CVChessBoard();
 
-	void Setup(math::vector2di squares, float squaresize)
-	{
-		m_squares = squares; 
-		m_squareSize = squaresize;
-	}
-	const math::vector2di& GetSquares(){ return m_squares; }
+	void Setup(math::vector2di squares, float squaresize);
+	const math::vector2di& GetSquares();
 
 	void Draw(const math::rectf& rc);
 	void GetProjectionPoints(std::vector<math::vector2d>& outList);
-	bool FindInImage(const video::ImageInfo* src,std::vector<math::vector2d>& outList);
+	bool FindInImage(const video::ImageInfo* src, std::vector<math::vector2d>& outList, bool refine=true);
 
 };
 

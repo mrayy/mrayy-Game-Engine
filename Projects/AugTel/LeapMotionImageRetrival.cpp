@@ -221,7 +221,7 @@ ulong LeapMotionImageRetrival::GetBufferID()
 
 
 
-const video::ImageInfo* LeapMotionImageRetrival::GetLastFrame()
+const video::ImageInfo* LeapMotionImageRetrival::GetLastFrame(int i)
 {
 	return &m_imageInfo;
 }

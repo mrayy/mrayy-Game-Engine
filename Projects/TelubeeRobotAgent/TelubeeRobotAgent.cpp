@@ -35,6 +35,16 @@ EntryPoint
 	std::vector<SOptionElement> extraOptions;
 	SOptionElement op;
 	op.valueSet.clear();
+
+	{
+		op.name = "CameraConnection";
+		op.value = "DirectShow";
+		op.valueSet.insert("DirectShow");
+		op.valueSet.insert("PointGray");
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+
 	string CameraName[2] = { "Camera_Left", "Camera_Right" };
 	for (int c = 0; c < 2; ++c)
 	{
@@ -97,20 +107,6 @@ EntryPoint
 		op.valueSet.clear();
 	}
 	{
-		op.name = "CameraConnection";
-		op.value = "Webcam";
-		op.valueSet.insert("Webcam");
-		op.valueSet.insert("Pointgrey");
-		extraOptions.push_back(op);
-		op.valueSet.clear();
-	}
-	{
-		op.name = "VideoPort";
-		op.value = "5000";
-		extraOptions.push_back(op);
-		op.valueSet.clear();
-	}
-	{
 		op.name = "HandsDisplay";
 		op.value = "-1";
 		extraOptions.push_back(op);
@@ -118,10 +114,10 @@ EntryPoint
 	}
 	{
 		op.name = "StreamResolution";
-		op.value = "HD";
-		op.valueSet.insert("VGA");
-		op.valueSet.insert("HD");
-		op.valueSet.insert("FullHD");
+		op.value = "0-VGA";
+		op.valueSet.insert("0-VGA");
+		op.valueSet.insert("1-HD");
+		op.valueSet.insert("2-FullHD");
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
@@ -164,21 +160,13 @@ EntryPoint
 		op.valueSet.clear();
 	}
 	{
-		op.name = "Network";
-		op.value = "Local";
-		op.valueSet.insert("Local");
-		op.valueSet.insert("Global");
-		extraOptions.push_back(op);
-		op.valueSet.clear();
-	}
-	{
 		op.name = "Quality";
 		op.value = "Medium";
-		op.valueSet.insert("Ultra Low");
-		op.valueSet.insert("Low");
-		op.valueSet.insert("Medium");
-		op.valueSet.insert("High");
-		op.valueSet.insert("Ultra High");
+		op.valueSet.insert("0- Ultra Low");
+		op.valueSet.insert("1- Low");
+		op.valueSet.insert("2- Medium");
+		op.valueSet.insert("3- High");
+	//	op.valueSet.insert("Ultra High");
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}

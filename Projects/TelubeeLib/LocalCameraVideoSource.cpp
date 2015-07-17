@@ -26,7 +26,10 @@ namespace TBee
 	m_cameraSource[0].id = c1;
 	m_cameraSource[1].id = c2;
 
-	m_exposureValue = 0.6;
+	m_exposureValue = -1;
+	m_gainValue = 0.1;
+	m_WBValue = -1;
+	m_gammaValue = 0.1;
 
 	m_cameraSource[0].videoGrabber = new video::VideoGrabberTexture();
 	
@@ -87,16 +90,20 @@ void LocalCameraVideoSource::Init()
 void LocalCameraVideoSource::Open()
 {
 	m_started = true;
-	m_cameraSource[0].camera->InitDevice(m_cameraSource[0].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
-	m_cameraSource[0].camera->Start();
-	m_cameraSource[0].camera->SetParameter(video::ICameraVideoGrabber::Param_Exposure, core::StringConverter::toString(m_exposureValue));
-	if (m_cameraSource[1].camera)
+
+	for (int i = 0; i < 2; ++i)
 	{
-		m_cameraSource[1].camera->InitDevice(m_cameraSource[1].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
-		m_cameraSource[1].camera->Start();
-		m_cameraSource[1].camera->SetParameter(video::ICameraVideoGrabber::Param_Exposure, core::StringConverter::toString(m_exposureValue));
+		if (m_cameraSource[i].camera)
+		{
+			m_cameraSource[i].camera->InitDevice(m_cameraSource[i].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
+			m_cameraSource[i].camera->Start();
+		}
 	}
 
+	SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, (m_exposureValue>0 ? core::StringConverter::toString(m_exposureValue) : "auto"));
+	SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, (m_gainValue > 0 ? core::StringConverter::toString(m_gainValue) : "auto"));
+	SetCameraParameterValue(video::ICameraVideoGrabber::Param_WhiteBalance, (m_WBValue > 0 ? core::StringConverter::toString(m_WBValue) : "auto"));
+	SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gamma, (m_gammaValue > 0 ? core::StringConverter::toString(m_gammaValue) : "auto"));
 }
 void LocalCameraVideoSource::Close()
 {
@@ -187,6 +194,21 @@ void LocalCameraVideoSource::LoadFromXML(xml::XMLElement* e)
 	if (attr)
 	{
 		m_exposureValue = core::StringConverter::toFloat(attr->value);
+	}
+	attr = e->getAttribute("Gain");
+	if (attr)
+	{
+		m_gainValue = core::StringConverter::toFloat(attr->value);
+	}
+	attr = e->getAttribute("WB");
+	if (attr)
+	{
+		m_WBValue = core::StringConverter::toFloat(attr->value);
+	}
+	attr = e->getAttribute("Gamma");
+	if (attr)
+	{
+		m_gammaValue = core::StringConverter::toFloat(attr->value);
 	}
 }
 

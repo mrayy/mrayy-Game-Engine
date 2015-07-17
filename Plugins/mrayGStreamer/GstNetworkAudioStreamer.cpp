@@ -23,7 +23,8 @@ class GstNetworkAudioStreamerImpl :public GstPipelineHandler
 {
 protected:
 	core::string m_ipAddr;
-	int m_audioPort;
+	uint m_audioPort;
+	uint m_clockPort;
 
 	core::string m_pipeLineString;
 	GstMyUDPSink* m_audioSink;
@@ -36,11 +37,12 @@ public:
 		m_audioSink = 0;
 		m_audioRtcpSink = 0;
 		m_audioRtcpSrc = 0;
+		m_ipAddr = "127.0.0.1";
+		m_audioPort = 5005;
+		m_clockPort = 5010;
 	}
 	virtual ~GstNetworkAudioStreamerImpl()
 	{
-		m_ipAddr = "127.0.0.1";
-		m_audioPort = 5005;
 	}
 #define VORBIS_ENC
 	void BuildString()
@@ -83,10 +85,10 @@ public:
 	void _UpdatePorts()
 	{
 
-		if (!m_gstPipeline)
+		if (!GetPipeline())
 			return;
-#define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(m_gstPipeline), #name)); if(m_##name){m_##name->SetPort(p);}
-#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(m_gstPipeline), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
+#define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
+#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
 
 
 		SET_SINK(audioSink, m_audioPort);
@@ -97,10 +99,11 @@ public:
 
 	// addr: target address to stream video to
 	// audioport: port for the audio stream , audio rtcp is allocated as audioPort+1 and audioPort+2
-	void BindPorts(const core::string& addr, int audioPort, bool rtcp)
+	void BindPorts(const core::string& addr, uint audioPort,uint clockPort, bool rtcp)
 	{
 		m_ipAddr = addr;
 		m_audioPort = audioPort;
+		m_clockPort = clockPort;
 		m_rtcp = rtcp;
 		_UpdatePorts();
 	}
@@ -109,16 +112,17 @@ public:
 	{
 		GError *err = 0;
 		BuildString();
-		m_gstPipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
+		GstElement* p = gst_parse_launch(m_pipeLineString.c_str(), &err);
 		if (err)
 		{
 			printf("GstAudioNetworkStreamer: Pipeline error: %s", err->message);
 		}
-		if (!m_gstPipeline)
+		if (!p)
 			return false;
+		SetPipeline(p);
 		_UpdatePorts();
 
-		return CreatePipeline();
+		return CreatePipeline(true, "", m_clockPort);
 
 	}
 	void Stream()
@@ -127,7 +131,7 @@ public:
 	}
 	bool IsStreaming()
 	{
-		return !m_paused;
+		return IsPlaying();
 	}
 	virtual void Close()
 	{
@@ -154,11 +158,14 @@ void GstNetworkAudioStreamer::Stop()
 {
 	m_impl->Stop();
 }
-
-
-void GstNetworkAudioStreamer::BindPorts(const core::string& addr, int audioPort, bool rtcp)
+GstPipelineHandler* GstNetworkAudioStreamer::GetPipeline()
 {
-	m_impl->BindPorts(addr, audioPort, rtcp);
+	return m_impl;
+}
+
+void GstNetworkAudioStreamer::BindPorts(const core::string& addr, uint audioPort, uint clockPort, bool rtcp)
+{
+	m_impl->BindPorts(addr, audioPort,clockPort, rtcp);
 }
 
 bool GstNetworkAudioStreamer::CreateStream()

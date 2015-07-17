@@ -17,14 +17,18 @@ class GstNetworkVideoStreamer :public IGStreamerStreamer
 {
 protected:
 	GstNetworkVideoStreamerImpl* m_impl;
+
+	GstPipelineHandler* GetPipeline();
+	friend class GstNetworkVideoStreamerImpl;
 public:
 	GstNetworkVideoStreamer();
 	virtual ~GstNetworkVideoStreamer();
 
 	// addr: target address to stream video to
 	// videoport: port for the video stream, video rtcp is allocated as videoPort+1/videoPort+2
-	void BindPorts(const core::string& addr, int videoPort, bool rtcp);
-	void SetResolution(int width, int height,int fps=30);
+	void BindPorts(const core::string& addr, uint videoPort, uint clockPort, bool rtcp);
+	void SetCameraResolution(int width, int height, int fps = 30);
+	void SetFrameResolution(int width, int height);
 	void SetBitRate(int bitRate);
 
 	bool CreateStream();

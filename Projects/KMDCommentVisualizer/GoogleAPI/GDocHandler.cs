@@ -26,7 +26,6 @@ namespace GoogleAPI
         string uid;
         string pwd;
         string URI;
-        SpreadsheetsService service;
         Thread updateThread;
 
         int m_lastID=0;
@@ -50,7 +49,6 @@ namespace GoogleAPI
                     _updateData();
                 }catch(Exception e)
                 {
-
                 }
                 Thread.Sleep(5000);
             }
@@ -66,12 +64,13 @@ namespace GoogleAPI
         {
 
             ListQuery query = new ListQuery(URI);
+            
             query.OrderByColumn = "";
             query.Reverse = false;
             //query.SpreadsheetQuery = "id>" + m_lastID;
 
             // Set the view with the new feed
-            ListFeed feed = service.Query(query);
+            ListFeed feed = GoogleUser.Instance.Service.Query(query);
             if (feed != null)
             {
                 List<RowComment> comments = new List<RowComment>();
@@ -114,12 +113,12 @@ namespace GoogleAPI
 
         public void Init(string uid, string pwd, string URI)
         {
-            this.uid = uid;
-            this.pwd = pwd;
             this.URI = URI;
-
-            service = new SpreadsheetsService("KMD-comments-system");
-            service.setUserCredentials(uid, pwd);
+            updateThread.Start();
+        }
+        public void Init(string URI)
+        {
+            this.URI = URI;
 
             updateThread.Start();
         }

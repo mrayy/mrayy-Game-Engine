@@ -46,6 +46,9 @@ CMRayApplication::CMRayApplication(const core::string&logFile)
 	m_limitFps=false;
 	m_drawTimeCounter=0;
 
+	m_windowPriorityCounter = 0;
+	m_windowPriority = 10;
+
 //	window=new Win32WindowUtils();
 
 
@@ -284,6 +287,8 @@ void CMRayApplication::drawFrame()
 	m_drawTimeCounter=t;
 	for(int i=0;i<m_renderWindowLst.size();++i)
 	{
+		if (i>0 && m_windowPriorityCounter < m_windowPriority)
+			break;
 		m_renderWindowLst[i]->SetActiveWindow();
 		m_device->begin(m_enableClearClr);
 		//draw();
@@ -291,6 +296,9 @@ void CMRayApplication::drawFrame()
 		m_device->end();
 	}
 
+	m_windowPriorityCounter++;
+	if (m_windowPriorityCounter>m_windowPriority)
+		m_windowPriorityCounter = 0;
 }
 
 void CMRayApplication::run(){

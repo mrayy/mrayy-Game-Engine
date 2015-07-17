@@ -85,7 +85,7 @@ public:
 	virtual bool HasNewFrame();
 	virtual ulong GetBufferID(){ return m_bufferID; }
 
-	virtual const ImageInfo* GetLastFrame(){return &m_imageData;}
+	virtual const ImageInfo* GetLastFrame(int index=0){ return &m_imageData; }
 	void createVideoBuffers();
 
 

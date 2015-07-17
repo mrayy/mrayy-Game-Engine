@@ -25,7 +25,8 @@ namespace video
 class GstNetworkAudioPlayerImpl :public GstPipelineHandler
 {
 	core::string m_ipAddr;
-	int m_audioPort;
+	uint m_audioPort;
+	uint m_clockPort;
 
 	core::string m_pipeLineString;
 
@@ -39,8 +40,8 @@ public:
 	{
 		m_ipAddr = "127.0.0.1";
 		m_audioPort = 5005;
-		m_gstPipeline = 0;
 		m_audioSrc = 0;
+		m_clockPort = 5010;
 		m_audioRtcpSrc = 0;
 		m_audioRtcpSink = 0;
 	}
@@ -114,10 +115,10 @@ public:
 	}
 	void _UpdatePorts()
 	{
-		if (!m_gstPipeline)
+		if (!GetPipeline())
 			return;
-#define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(m_gstPipeline), #name)); if(m_##name){m_##name->SetPort(p);}
-#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(m_gstPipeline), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
+#define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
+#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
 
 
 		SET_SRC(audioSrc, m_audioPort);
@@ -126,10 +127,11 @@ public:
 
 	}
 
-	void SetIPAddress(const core::string& ip, int audioPort, bool rtcp)
+	void SetIPAddress(const core::string& ip, uint audioPort,uint clockPort, bool rtcp)
 	{
 		m_ipAddr = ip;
 		m_audioPort = audioPort;
+		m_clockPort = clockPort;
 		m_rtcp = rtcp;
 
 		//set src and sinks elements
@@ -137,23 +139,24 @@ public:
 	}
 	bool CreateStream()
 	{
-		if (m_Loaded)
+		if (IsLoaded())
 			return true;
 
 		_BuildPipeline();
 
 		GError *err = 0;
-		m_gstPipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
+		GstElement* p = gst_parse_launch(m_pipeLineString.c_str(), &err);
 		if (err)
 		{
 			printf("GstNetworkAudioPlayer: Pipeline error: %s", err->message);
 		}
-		if (!m_gstPipeline)
+		if (!p)
 			return false;
 
+		SetPipeline(p);
 		_UpdatePorts();
 
-		return CreatePipeline();
+		return CreatePipeline(false,m_ipAddr,m_clockPort);
 
 	}
 
@@ -180,7 +183,7 @@ public:
 	}
 	void SetVolume(float vol)
 	{
-		g_object_set(G_OBJECT(m_gstPipeline), "volume", (gdouble)vol, (void*)0);
+		g_object_set(G_OBJECT(GetPipeline()), "volume", (gdouble)vol, (void*)0);
 	}
 
 
@@ -196,9 +199,9 @@ GstNetworkAudioPlayer::~GstNetworkAudioPlayer()
 {
 	delete m_impl;
 }
-void GstNetworkAudioPlayer::SetIPAddress(const core::string& ip, int audioPort,bool rtcp)
+void GstNetworkAudioPlayer::SetIPAddress(const core::string& ip, uint audioPort,uint clockPort,bool rtcp)
 {
-	m_impl->SetIPAddress(ip, audioPort,rtcp);
+	m_impl->SetIPAddress(ip, audioPort, clockPort, rtcp);
 }
 bool GstNetworkAudioPlayer::CreateStream()
 {
@@ -213,6 +216,11 @@ bool GstNetworkAudioPlayer::IsStream()
 {
 	return m_impl->IsStream();
 }
+GstPipelineHandler*GstNetworkAudioPlayer::GetPipeline()
+{
+	return m_impl;
+}
+
 
 void GstNetworkAudioPlayer::Play()
 {

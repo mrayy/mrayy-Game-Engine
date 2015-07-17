@@ -19,13 +19,14 @@ class GstNetworkAudioPlayer :public IGStreamerPlayer
 {
 protected:
 	GstNetworkAudioPlayerImpl* m_impl;
+	GstPipelineHandler* GetPipeline();
 public:
 	GstNetworkAudioPlayer();
 	virtual ~GstNetworkAudioPlayer();
 
 	//set ip address for the target host
 	// audioport: port for the audio stream , audio rtcp is allocated as audioPort+1 and audioPort+2
-	void SetIPAddress(const core::string& ip, int audioPort, bool rtcp);
+	void SetIPAddress(const core::string& ip, uint audioPort,uint clockPort, bool rtcp);
 	bool CreateStream();
 
 	virtual bool IsStream();

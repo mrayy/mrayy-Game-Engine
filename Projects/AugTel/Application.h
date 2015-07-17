@@ -80,6 +80,8 @@ protected:
 	bool m_screenShotEnabled;
 	float m_screenShotTimer;
 
+	bool m_streamAudio;
+
 	video::RenderWindow* m_previewWnd;
 	video::IRenderTargetPtr m_previewRT;
 	void _InitResources();

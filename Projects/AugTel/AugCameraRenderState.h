@@ -167,6 +167,8 @@ public:
 
 	virtual void OnBumpSensor(int count, bool* v);
 	virtual void OnIRSensor(int count, float* v);
+	virtual void OnBatteryLevel(int level);
+	virtual void OnClockSync(ulong clock);
 };
 
 }

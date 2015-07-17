@@ -51,13 +51,24 @@ EntryPoint
 	op.valueSet.insert("No");
 	extraOptions.push_back(op);
 	op.valueSet.clear();
+	{
 
-	op.name = "Preview";
-	op.value = "No";
-	op.valueSet.insert("Yes");
-	op.valueSet.insert("No");
-	extraOptions.push_back(op);
-	op.valueSet.clear();
+		op.name = "Preview";
+		op.value = "No";
+		op.valueSet.insert("Yes");
+		op.valueSet.insert("No");
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+	{
+
+		op.name = "Audio";
+		op.value = "Yes";
+		op.valueSet.insert("Yes");
+		op.valueSet.insert("No");
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
 	string CameraName[2] = { "Camera_Left", "Camera_Right" };
 	for (int c = 0; c < 2; ++c)
 	{

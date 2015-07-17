@@ -409,15 +409,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Configure.stg">
+    <None Include="..\..\Bin\Data\KMDPlenary\kmdSettings.cfg" />
+    <None Include="KMDCConfigure.stg">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\..\Bin\Data\KMDPlenary\kmdSettings.cfg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt">
-      <Filter>Source Files\DB</Filter>
-    </Text>
   </ItemGroup>
   <ItemGroup>
     <Overlay Include="..\..\Bin\Data\KMDPlenary\GUI\GUIFacultyListLayout.gui">
@@ -453,5 +448,8 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Bin\Data\KMDPlenary\Sessions.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
 </Project>

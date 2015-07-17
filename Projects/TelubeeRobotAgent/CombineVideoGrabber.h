@@ -28,30 +28,16 @@ protected:
 	video::IVideoGrabber* m_g2;
 
 	math::vector2di m_targetSize;
-	bool m_newFrame;
 	video::ImageInfo m_lastImage;
-#if USE_GPU
-	video::ITexturePtr m_tex1;
-	video::ITexturePtr m_tex2;
-
-	video::ITexturePtr m_rtTex;
-	video::IRenderTargetPtr m_rt;
-#else
-	video::ImageInfo m_frame1;
-	video::ImageInfo m_frame2;
-
-#endif
-
-	bool m_rotate90;
+	bool m_newFrame;
 	ulong m_bufferID;
-	void _RotateImage(const video::ImageInfo* src, video::ImageInfo* dst, const math::recti &srcRect, bool cw);
+	//void _RotateImage(const video::ImageInfo* src, video::ImageInfo* dst, const math::recti &srcRect, bool cw);
 
 public:
 
-	CombineVideoGrabber();
+	CombineVideoGrabber(video::IVideoGrabber* g1, video::IVideoGrabber* g2);
 
 	void SetGrabbers(video::IVideoGrabber* g1, video::IVideoGrabber* g2);
-	void SetRotate90(bool r){ m_rotate90 = r; }
 
 	virtual void SetFrameSize(int w, int h);
 	virtual const math::vector2di& GetFrameSize();
@@ -61,6 +47,8 @@ public:
 
 	virtual bool GrabFrame();
 	virtual bool HasNewFrame();
+
+	virtual float GetCaptureFrameRate() { return m_g1->GetCaptureFrameRate(); }
 
 	virtual ulong GetBufferID(){ return m_g1->GetBufferID(); }
 	virtual const video::ImageInfo* GetLastFrame();

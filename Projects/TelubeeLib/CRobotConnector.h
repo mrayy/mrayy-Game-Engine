@@ -42,9 +42,10 @@ protected:
 	IRobotController* m_controller;
 
 	float m_rotation;
-	int m_videoPort;
-	int m_audioPort;
-	int m_handsPort;
+	uint m_videoPort;
+	uint m_audioPort;
+	uint m_handsPort;
+	uint m_clockPort;
 	bool m_rtcp;
 	int m_commPort;
 public:
@@ -61,7 +62,7 @@ public:
 
 	bool IsRobotConnected();
 	void ConnectRobot();
-	void ConnectRobotIP(const core::string& ip, int videport, int audioPort, int handsPort, int commPort, bool rtcp);
+	void ConnectRobotIP(const core::string& ip, uint videport, uint audioPort, uint handsPort,uint clockPort, uint commPort, bool rtcp);
 	void DisconnectRobot();
 	void StartUpdate();
 	void EndUpdate();

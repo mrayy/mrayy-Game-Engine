@@ -28,12 +28,13 @@ protected:
 
 	GCPtr<IVideoGrabber> m_grabber;
 	GCPtr<ITexture> m_texture;
+	int m_index ;
 
 public:
 	VideoGrabberTexture();
 	virtual~VideoGrabberTexture();
 	
-	void Set(const GCPtr<IVideoGrabber>& grabber,ITextureCRef tex);
+	void Set(const GCPtr<IVideoGrabber>& grabber,ITextureCRef tex,int index=0);
 
 	const GCPtr<IVideoGrabber>& GetGrabber(){return m_grabber;}
 	ITextureCRef GetTexture(){return m_texture;}

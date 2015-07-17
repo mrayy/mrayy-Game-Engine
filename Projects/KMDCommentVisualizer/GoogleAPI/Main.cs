@@ -45,10 +45,15 @@ namespace GoogleAPI
             gdocHandlerFac = new GDocHandler();
             string url = ConfigurationManager.AppSettings["DocStd"];
             string url2 = ConfigurationManager.AppSettings["DocStaff"];
-            string guser = ConfigurationManager.AppSettings["GUser"];
-            string gpwd = ConfigurationManager.AppSettings["GPWD"];
-            gdocHandlerStd.Init(guser, gpwd, url);
-            gdocHandlerFac.Init(guser, gpwd, url2);
+            string ClientID = ConfigurationManager.AppSettings["ClientID"];
+            string ClientSecret = ConfigurationManager.AppSettings["ClientSecret"];
+            string Redirect  = ConfigurationManager.AppSettings["Redirect"];
+//             gdocHandlerStd.Init(guser, gpwd, url);
+//             gdocHandlerFac.Init(guser, gpwd, url2);
+            gdocHandlerStd.Init(url);
+            gdocHandlerFac.Init(url2);
+
+            GoogleUser.Instance.Setup(ClientID, ClientSecret, Redirect);
 
             gdocHandlerStd.OnDataArrived += gdocHandler_OnDataArrived;
             gdocHandlerFac.OnDataArrived += gdocHandler_OnDataArrived;

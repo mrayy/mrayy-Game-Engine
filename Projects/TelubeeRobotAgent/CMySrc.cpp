@@ -140,7 +140,7 @@ gst_mysrc_create(GstPushSrc * psrc, GstBuffer ** buf)
 	mysrc = GST_MySRC(psrc);
 	if (mysrc->need_buffer)
 	{
-		ret=mysrc->need_buffer(mysrc, mysrc->data, buf);
+		ret = mysrc->need_buffer(mysrc, mysrc->data, buf);
 	}
 	return ret;
 }

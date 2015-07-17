@@ -243,7 +243,10 @@ public:
 		}
 
 	}
-
+	bool IsStereo()
+	{
+		return AppData::Instance()->stereoMode != ERenderStereoMode::None;
+	}
 	
 	void Render(scene::ViewPort* vp)
 	{
@@ -370,6 +373,11 @@ void TBeeRenderer::Update(float dt)
 	m_data->Update(dt);
 
 
+}
+
+bool TBeeRenderer::IsStereo()
+{
+	return m_data->IsStereo();
 }
 
 

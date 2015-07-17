@@ -6,6 +6,7 @@
 #include "Engine.h"
 #include "ITimer.h"
 #include "IVideoDevice.h"
+#include "IThreadManager.h"
 
 namespace mray
 {
@@ -25,7 +26,7 @@ DirectShowVideoGrabber::DirectShowVideoGrabber()
 	if(s_refCount==1)
 	{
 		s_videoInput=new videoInput();
-		s_videoInput->setVerbose(true);
+		s_videoInput->setVerbose(false);
 		s_videoInput->setComMultiThreaded(true);
 		s_videoInput->setUseCallback(true);
 	}
@@ -33,6 +34,8 @@ DirectShowVideoGrabber::DirectShowVideoGrabber()
 	m_hasNewFrame = false;
 	m_bufferId = 0;
 	m_timeAcc = 0;
+
+	m_lock = OS::IThreadManager::getInstance().createMutex();
 }
 DirectShowVideoGrabber::~DirectShowVideoGrabber()
 {
@@ -102,7 +105,7 @@ bool DirectShowVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	m_lastT = 0;
 	m_captureFPS = 0;
 
-// 	s_videoInput->setVideoSettingCameraPct(device,s_videoInput->propExposure,0.1,2);
+// 	s_videoInput->setVideoSettingFilterPct(device,s_videoInput->propExposure,0.1,2);
 // 	s_videoInput->setVideoSettingFilterPct(device,s_videoInput->propWhiteBalance,0.1,2);
 //	s_videoInput->showSettingsWindow(device);
 
@@ -178,12 +181,24 @@ bool DirectShowVideoGrabber::GrabFrame()
 		m_hasNewFrame=true;
 		unsigned char * viPixels = s_videoInput->getPixels(m_device, false,true);
 
+		Lock();
 		m_textureImage.setData(viPixels,math::vector3d(m_size.x,m_size.y,1),m_format);
+		Unlock();
 
 		return true;
 	}
 	return false;
 	
+}
+
+void DirectShowVideoGrabber::Lock()
+{
+	m_lock->lock();
+}
+
+void DirectShowVideoGrabber::Unlock()
+{
+	m_lock->unlock();
 }
 bool DirectShowVideoGrabber::HasNewFrame()
 {
@@ -191,7 +206,7 @@ bool DirectShowVideoGrabber::HasNewFrame()
 }
 
 
-const video::ImageInfo* DirectShowVideoGrabber::GetLastFrame()
+const video::ImageInfo* DirectShowVideoGrabber::GetLastFrame(int i)
 {
 	return &m_textureImage;
 }
@@ -200,56 +215,68 @@ void DirectShowVideoGrabber::SetParameter(const core::string& name,const core::s
 {
 	if (m_device == -1 || !m_inited)
 		return;
-	float v=core::StringConverter::toFloat(value);
+	bool isauto = (value == "auto");
+	float v = 0;
+	if (!isauto)
+		v=core::StringConverter::toFloat(value);
+
+	long flags = 0;
+	if (isauto)
+		flags = 1;
+
 	if(name.equals_ignore_case(Param_Exposure))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propExposure,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propExposure, v, flags);
 	}else if(name.equals_ignore_case(Param_Brightness))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propBrightness,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propBrightness, v, flags);
 	}else  if(name.equals_ignore_case(Param_Contrast))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propContrast,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propContrast, v, flags);
 	}else  if(name.equals_ignore_case(Param_Hue))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propHue,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propHue, v, flags);
 	}else  if(name.equals_ignore_case(Param_Saturation))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propSaturation,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propSaturation, v, flags);
 	}else  if(name.equals_ignore_case(Param_Sharpness))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propSharpness,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propSharpness, v, flags);
 	}else  if(name.equals_ignore_case(Param_ColorEnable))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propColorEnable,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propColorEnable, v, flags);
 	}else  if(name.equals_ignore_case(Param_WhiteBalance))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propWhiteBalance,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propWhiteBalance, v, flags);
 	}else  if(name.equals_ignore_case(Param_BacklightCompensation))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propBacklightCompensation,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propBacklightCompensation, v, flags);
 	}else  if(name.equals_ignore_case(Param_Pan))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propPan,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propPan, v, flags);
 	}else  if(name.equals_ignore_case(Param_Tilt))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propTilt,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propTilt, v, flags);
 	}else  if(name.equals_ignore_case(Param_Roll))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propRoll,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propRoll, v, flags);
 	}else  if(name.equals_ignore_case(Param_Zoom))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propZoom,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propZoom, v, flags);
 	}else  if(name.equals_ignore_case(Param_Iris))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propIris,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propIris, v, flags);
 	}else  if(name.equals_ignore_case(Param_Focus))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device,s_videoInput->propFocus,v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propFocus, v, flags);
 	}
 	else  if (name.equals_ignore_case(Param_Gain))
 	{
-		s_videoInput->setVideoSettingCameraPct(m_device, s_videoInput->propGain, v);
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propGain, v, flags);
+	}
+	else  if (name.equals_ignore_case(Param_Gamma))
+	{
+		s_videoInput->setVideoSettingFilterPct(m_device, s_videoInput->propGamma, v, flags);
 	}
 }
 
@@ -260,49 +287,65 @@ core::string DirectShowVideoGrabber::GetParameter(const core::string& name)
 	long min; long max; long SteppingDelta; long currentValue=0; long flags; long defaultValue;
 	if(name.equals_ignore_case(Param_Exposure))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propExposure,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propExposure,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else if(name.equals_ignore_case(Param_Brightness))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propBrightness,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propBrightness,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Contrast))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propContrast,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propContrast,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Hue))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propHue,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propHue,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Saturation))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propSaturation,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propSaturation,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Sharpness))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propSharpness,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propSharpness,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_ColorEnable))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propColorEnable,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propColorEnable,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_WhiteBalance))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propWhiteBalance,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propWhiteBalance,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_BacklightCompensation))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propBacklightCompensation,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propBacklightCompensation,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Pan))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propPan,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propPan,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Tilt))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propTilt,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propTilt,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Roll))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propRoll,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propRoll,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Zoom))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propZoom,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propZoom,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Iris))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propIris,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propIris,min,max,SteppingDelta,currentValue,flags,defaultValue);
 	}else  if(name.equals_ignore_case(Param_Focus))
 	{
-		s_videoInput->getVideoSettingCamera(m_device,s_videoInput->propFocus,min,max,SteppingDelta,currentValue,flags,defaultValue);
+		s_videoInput->getVideoSettingFilter(m_device,s_videoInput->propFocus,min,max,SteppingDelta,currentValue,flags,defaultValue);
+	}
+	else  if (name.equals_ignore_case(Param_Gamma))
+	{
+		s_videoInput->getVideoSettingFilter(m_device, s_videoInput->propGamma, min, max, SteppingDelta, currentValue, flags, defaultValue);
+	}
+	else  if (name.equals_ignore_case(Param_Gamma))
+	{
+		s_videoInput->getVideoSettingFilter(m_device, s_videoInput->propGamma, min, max, SteppingDelta, currentValue, flags, defaultValue);
+	}
+	else  if (name.equals_ignore_case(Param_Gain))
+	{
+		s_videoInput->getVideoSettingFilter(m_device, s_videoInput->propGain, min, max, SteppingDelta, currentValue, flags, defaultValue);
+	}
+	else  if (name.equals_ignore_case(Param_Gamma))
+	{
+		s_videoInput->getVideoSettingFilter(m_device, s_videoInput->propGamma, min, max, SteppingDelta, currentValue, flags, defaultValue);
 	}
 
 	return core::StringConverter::toString(currentValue);

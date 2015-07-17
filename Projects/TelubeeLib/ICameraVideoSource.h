@@ -33,7 +33,7 @@ public:
 	virtual void Init(){}
 	virtual void Open(){}
 	virtual void Close(){}
-	virtual bool Blit(int eye=-1){ return false; }
+	virtual bool Blit(int eye=0){ return false; }
 	virtual math::vector2d GetEyeScalingFactor(int i) { return math::vector2d(1, 1); }
 	virtual math::vector2d GetEyeResolution(int i) = 0;
 	virtual video::ITexturePtr GetEyeTexture(int i) = 0;

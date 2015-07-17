@@ -14,19 +14,17 @@ namespace GoogleAPI
 {
     public partial class DocFinder : Form
     {
-        SpreadsheetsService service;
         public DocFinder()
         {
             InitializeComponent();
-            service = new SpreadsheetsService("SpreadSheet-finder");
         }
 
         private void DocFinder_Load(object sender, EventArgs e)
         {
-            service.setUserCredentials(@"mrayyamen@gmail.com", @"H0wL0vely!2");
 
             SpreadsheetQuery query = new SpreadsheetQuery();
-            setSpreadsheetListView(service.Query(query));
+            query.Title = "";
+            setSpreadsheetListView(GoogleUser.Instance.Service.Query(query));
 
         }
 
@@ -56,7 +54,7 @@ namespace GoogleAPI
                 // Get the worksheet feed from the selected entry
                 WorksheetQuery query = new WorksheetQuery(listView1.SelectedItems[0].SubItems[1].Text);
                 textBox1.Text = listView1.SelectedItems[0].SubItems[1].Text;
-                SetWorksheetListView(service.Query(query));
+                SetWorksheetListView(GoogleUser.Instance.Service.Query(query));
             }
 
         }
@@ -91,7 +89,7 @@ namespace GoogleAPI
                 textBox1.Text = listView2.SelectedItems[0].SubItems[2].Text;
 
                 CellQuery query = new CellQuery(listView2.SelectedItems[0].SubItems[1].Text);
-                SetCellListView(service.Query(query));
+                SetCellListView(GoogleUser.Instance.Service.Query(query));
             }
         }
 

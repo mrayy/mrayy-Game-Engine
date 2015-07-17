@@ -222,7 +222,7 @@ void SessionScene::Init()
 		m_commentsLayer->InitLayer(m_screenLayout->CommentsPanel);
 		m_sceneLayer->InitLayer(m_screenLayout->ScenePanel);
 		m_statusLayer->InitLayer(m_screenLayout->StatusPanel);
-		m_wallpaperLayer->InitLayer(m_screenLayout->WallpaperLayer);
+//		m_wallpaperLayer->InitLayer(m_screenLayout->WallpaperLayer);
 
 	//	m_layerOrder.push_front(m_wallpaperLayer);
 		m_layerOrder.push_back(m_statusLayer);

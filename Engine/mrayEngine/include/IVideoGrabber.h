@@ -35,13 +35,14 @@ public:
 	virtual void SetImageFormat(video::EPixelFormat fmt)=0;
 	virtual video::EPixelFormat GetImageFormat()=0;
 
+	virtual int GetFramesCount(){ return 1; }
 	virtual bool GrabFrame()=0;
 	virtual bool HasNewFrame()=0;
 	virtual ulong GetBufferID() = 0;// incremented once per frame
 	virtual float GetCaptureFrameRate() = 0;
 
 
-	virtual const ImageInfo* GetLastFrame()=0;
+	virtual const ImageInfo* GetLastFrame(int index=0) = 0;
 
 	virtual void Lock(){}
 	virtual void Unlock(){}

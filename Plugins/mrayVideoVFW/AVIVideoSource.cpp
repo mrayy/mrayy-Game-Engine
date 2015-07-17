@@ -232,7 +232,7 @@ void AVIVideoSource::SetFrameSize(int w,int h)
 
 }
 
-const ImageInfo* AVIVideoSource::GetLastFrame(){
+const ImageInfo* AVIVideoSource::GetLastFrame(int index){
 	return &m_Texture;
 }
 

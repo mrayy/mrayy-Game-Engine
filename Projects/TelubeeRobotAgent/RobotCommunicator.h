@@ -31,13 +31,23 @@ namespace mray
 	};
 
 
+	struct UserConnectionData
+	{
+		network::NetAddress address;
+		uint videoPort;
+		uint audioPort;
+		uint handsPort;
+		uint clockPort;
+		bool rtcp;
+	};
+
 	class RobotCommunicator;
 	class IRobotCommunicatorListener
 	{
 	public:
 
 		virtual void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address){}
-		virtual void OnUserConnected(RobotCommunicator* sender, const network::NetAddress& address, int videoPort, int audioPort, int handsPort, bool rtcp){};
+		virtual void OnUserConnected(RobotCommunicator* sender, const UserConnectionData& data){};
 		virtual void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status){};
 
 		virtual void OnCalibrationDone(RobotCommunicator* sender){};

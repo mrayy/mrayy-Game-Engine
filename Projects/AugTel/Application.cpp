@@ -51,6 +51,7 @@
 #include "LocalSingleCameraVideoSource.h"
 #include "GstStereoNetVideoSource.h"
 #include "GstStreamerVideoSource.h"
+#include "GstStreamerMultipleVideoSource.h"
 #include "GstLocalCameraVideoSource.h"
 #include "GstSingleNetVideoSource.h"
 #include "DataCommunicator.h"
@@ -121,12 +122,16 @@ namespace AugTel
 
 Application::Application()
 {
+	m_streamAudio = true;
 	m_drawUI = false;
 	new ATAppGlobal();
 
 	m_screenShotEnabled = false;
 
 	this->m_limitFps = true;
+	this->m_limitFpsCount = 90;
+
+	m_windowPriority = 5;
 }
 Application::~Application()
 {
@@ -242,7 +247,7 @@ void Application::_initStates()
 		ip = ifo->IP;
 
 	if (m_remoteCamera)
-		remote = new AugCameraRenderState(new TBee::GstStreamerVideoSource(ip, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.RtcpStream), new TBee::RemoteRobotCommunicator(), "CameraRemote");//GstSingleNetVideoSource,new TBee::GstStereoNetVideoSource(ip),LocalCameraVideoSource(m_cam1,m_cam2)
+		remote = new AugCameraRenderState(new TBee::GstStreamerMultipleVideoSource(ip, gAppData.TargetVideoPort,2, gAppData.TargetAudioPort, gAppData.TargetClockPort, gAppData.RtcpStream, m_streamAudio), new TBee::RemoteRobotCommunicator(), "CameraRemote");//GstSingleNetVideoSource,new TBee::GstStereoNetVideoSource(ip),LocalCameraVideoSource(m_cam1,m_cam2)
   	else
 		remote = new AugCameraRenderState(new TBee::LocalCameraVideoSource(m_cam1, m_cam2,m_camType), new TBee::RemoteRobotCommunicator(), "CameraRemote");//GstSingleNetVideoSource,new TBee::GstStereoNetVideoSource(ip),LocalCameraVideoSource(m_cam1,m_cam2)
 	m_renderingState->AddState(remote);
@@ -256,7 +261,7 @@ void Application::_initStates()
 	LatencyTestState* latency = 0;
 
 	if (m_remoteCamera)
-		latency=new LatencyTestState("Latency", new TBee::GstStreamerVideoSource(ip, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.RtcpStream,false));
+		latency = new LatencyTestState("Latency", new TBee::GstStreamerMultipleVideoSource(ip, gAppData.TargetVideoPort, 2, gAppData.TargetAudioPort, gAppData.TargetClockPort, gAppData.RtcpStream, false));
 	else latency = new LatencyTestState("Latency", new TBee::LocalCameraVideoSource(m_cam1, m_cam2, m_camType));
 	m_renderingState->AddState(latency);
 
@@ -288,11 +293,11 @@ void Application::init(const OptionContainer &extraOptions)
 	ATAppGlobal::Instance()->App = this;
 	ATAppGlobal::Instance()->Load("TBSettings.conf");
 	{
+		ATAppGlobal::Instance()->IsDebugging = extraOptions.GetOptionValue("Debugging") == "Yes";
+		m_streamAudio= extraOptions.GetOptionValue("Audio") == "Yes";
+		
 		core::string v = extraOptions.GetOptionValue("Debugging");
-		if (v == "Yes")
-			ATAppGlobal::Instance()->IsDebugging = true;
-		else
-			ATAppGlobal::Instance()->IsDebugging = false;
+
 
 		ATAppGlobal::Instance()->DVIPort = extraOptions.GetOptionValue("DVIPort");
 
@@ -527,6 +532,7 @@ void Application::onRenderDone(scene::ViewPort*vp)
 {
 
 }
+//#define FULL_RES_PREVIEW
 void Application::WindowPostRender(video::RenderWindow* wnd)
 {
 	getDevice()->set2DMode();
@@ -542,19 +548,27 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 			{
 				m_previewRT->GetColorTexture()->createTexture(math::vector3d(wnd->GetSize().x, wnd->GetSize().y, 1), video::EPixel_R8G8B8);
 			}
-			m_appStateManager->Draw(rc, m_previewRT, TBee::Eye_Right);
+			m_appStateManager->Draw(rc, m_previewRT, TBee::Eye_Left);
 
 		}
 #endif
 		getDevice()->useShader(0);
 
 #ifndef FULL_RES_PREVIEW
-		tex.SetTexture(m_tbRenderer->GetEyeImage(0)->GetColorTexture());
-		getDevice()->useTexture(0, &tex);
-		getDevice()->draw2DImage(math::rectf(0,0,rc.getWidth()/2,rc.getHeight()), 1);
-		tex.SetTexture(m_tbRenderer->GetEyeImage(1)->GetColorTexture());
-		getDevice()->useTexture(0, &tex);		
-		getDevice()->draw2DImage(math::rectf(rc.getWidth() / 2, 0, rc.getWidth() , rc.getHeight()), 1);
+		if (m_tbRenderer->IsStereo())
+		{
+			tex.SetTexture(m_tbRenderer->GetEyeImage(0)->GetColorTexture());
+			getDevice()->useTexture(0, &tex);
+			getDevice()->draw2DImage(math::rectf(0, 0, rc.getWidth() / 2, rc.getHeight()), 1);
+			tex.SetTexture(m_tbRenderer->GetEyeImage(1)->GetColorTexture());
+			getDevice()->useTexture(0, &tex);
+			getDevice()->draw2DImage(math::rectf(rc.getWidth() / 2, 0, rc.getWidth(), rc.getHeight()), 1);
+		}else
+		{
+			tex.SetTexture(m_tbRenderer->GetEyeImage(0)->GetColorTexture());
+			getDevice()->useTexture(0, &tex);
+			getDevice()->draw2DImage(rc, 1);
+		}
 
 #endif
 	//	RenderUI(rc);

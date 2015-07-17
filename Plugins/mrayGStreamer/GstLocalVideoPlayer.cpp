@@ -36,7 +36,6 @@ class GstLocalVideoPlayerImpl :public GstPipelineHandler
 public:
 	GstLocalVideoPlayerImpl()
 	{
-		m_gstPipeline = 0;
 		m_cam0 = 0;
 		m_cam1 = 1;
 		m_fps = 30;
@@ -55,7 +54,7 @@ public:
 		std::stringstream ss;
 		if (m_cam0 == m_cam1)
 		{
-			ss << "ksvideosrc device-index=" << m_cam0 << " ! video/x-raw,format=YUY2,width=" << m_frameSize.x << ",height=" << m_frameSize.y;
+			ss << "ksvideosrc device-index=" << m_cam0 << " ! video/x-raw,width=" << m_frameSize.x << ",height=" << m_frameSize.y;
 			ss << "! videorate ! video/x-raw,framerate=" << m_fps << "/1 ";
 
 		}
@@ -68,13 +67,13 @@ public:
 			ss << "videotestsrc pattern=\"black\" ! video/x-raw,format=I420,width=" << m_frameSize.x << ",height=" << m_frameSize.y << " !  mix.sink_0 ";
 
 			//first camera
-			ss << "ksvideosrc name=src1 device-index=" << m_cam0 << "  ! video/x-raw,format=I420,width=" << m_frameSize.x << ",height=" << m_frameSize.y;
+			ss << "ksvideosrc name=src1 device-index=" << m_cam0 << "  ! video/x-raw,width=" << m_frameSize.x << ",height=" << m_frameSize.y;
 			ss << "! videorate ! video/x-raw,framerate=" << m_fps << "/1 ";
 			ss << "! videoscale !"
 				"video/x-raw,format=I420,width=" << halfW << ",height=" << m_frameSize.y << " ! mix.sink_1 ";
 
 			//second camera
-			ss << "ksvideosrc name=src2 device-index=" << m_cam1 << "  ! video/x-raw,format=I420,width=" << m_frameSize.x << ",height=" << m_frameSize.y;
+			ss << "ksvideosrc name=src2 device-index=" << m_cam1 << "  ! video/x-raw,,width=" << m_frameSize.x << ",height=" << m_frameSize.y;
 			ss << "! videorate ! video/x-raw,framerate=" << m_fps << "/1 ";
 			ss << "! videoscale !"
 				"video/x-raw,format=I420,width=" << halfW << ",height=" << m_frameSize.y << " ! mix.sink_2 ";
@@ -83,7 +82,7 @@ public:
 		}
 
 		{
-			ss << "! videoconvert ! video/x-raw,format=RGB ! appsink name=videosink";
+			ss << "! videoconvert ! video/x-raw,format=I420 ! appsink name=videosink";
 
 		}
 		m_pipeLineString = ss.str();
@@ -143,20 +142,22 @@ public:
 
 	bool CreateStream()
 	{
-		if (m_Loaded)
+		if (IsLoaded())
 			return true;
 		_BuildPipelineMJPEG();
 
 		GError *err = 0;
-		m_gstPipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
+		GstElement* p = gst_parse_launch(m_pipeLineString.c_str(), &err);
 		if (err)
 		{
 			printf("GstLocalVideoPlayer: Pipeline error: %s", err->message);
 		}
-		if (!m_gstPipeline)
+		if (!p)
 			return false;
+		SetPipeline(p);
 
-		m_videoSink = GST_APP_SINK(gst_bin_get_by_name(GST_BIN(m_gstPipeline), "videosink"));
+		m_videoSink = GST_APP_SINK(gst_bin_get_by_name(GST_BIN(p), "videosink"));
+
 
 		m_videoHandler.SetSink(m_videoSink);
 
@@ -176,7 +177,7 @@ public:
 		gst_app_sink_set_callbacks(GST_APP_SINK(m_videoSink), &gstCallbacks, &m_videoHandler, NULL);
 
 
-		return CreatePipeline();
+		return CreatePipeline(true);
 
 	}
 
@@ -202,7 +203,7 @@ public:
 	}
 	void SetVolume(float vol)
 	{
-		g_object_set(G_OBJECT(m_gstPipeline), "volume", (gdouble)vol, (void*)0);
+		g_object_set(G_OBJECT(GetPipeline()), "volume", (gdouble)vol, (void*)0);
 	}
 
 
@@ -282,6 +283,12 @@ void GstLocalVideoPlayer::Close()
 	m_impl->Close();
 
 }
+
+GstPipelineHandler*GstLocalVideoPlayer::GetPipeline()
+{
+	return m_impl;
+}
+
 
 const math::vector2di& GstLocalVideoPlayer::GetFrameSize()
 {

@@ -78,9 +78,9 @@ public:
 	void Stop();
 	void Start();
 
-	const video::ImageInfo*  GetLastFrame();
+	const video::ImageInfo*  GetLastFrame(int i);
 
-	void BlitImage(const uchar* buf,int rows,int cols,EPixelFormat fmt);
+	void BlitImage(const void* img);
 	
 };
 

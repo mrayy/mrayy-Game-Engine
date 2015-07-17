@@ -16,15 +16,25 @@
 #define __IGStreamerPlayer__
 
 
+#include "mString.h"
+#include "IStreamListener.h"
+#include "ListenerContainer.h"
+
 
 namespace mray
 {
 namespace video
 {
+	class GstPipelineHandler;
 
-class IGStreamerPlayer
+class IGStreamerPlayer :public ListenerContainer<IGStreamerPlayerListener*>
 {
 protected:
+	DECLARE_FIRE_METHOD(OnPlayerStarted, (IGStreamerPlayer* s), (s));
+	DECLARE_FIRE_METHOD(OnPlayerStopped, (IGStreamerPlayer* s), (s));
+	DECLARE_FIRE_METHOD(OnPlayerReady, (IGStreamerPlayer* s), (s));
+
+	virtual GstPipelineHandler* GetPipeline() = 0;
 public:
 	IGStreamerPlayer(){}
 	virtual~IGStreamerPlayer(){}
@@ -39,6 +49,10 @@ public:
 	virtual bool IsPlaying() = 0;
 	virtual void Close() = 0;
 
+	virtual bool QueryLatency(bool &isLive, ulong& minLatency, ulong& maxLatency);
+
+	virtual void SetClockBase(ulong c);
+	virtual ulong GetClockBase();
 };
 
 }

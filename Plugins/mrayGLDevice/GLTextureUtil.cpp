@@ -71,6 +71,8 @@ GLenum GLTextureUtil::getGLOrginalFormat(EPixelFormat f){
 	case EPixel_DXT5:
 		return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
+	case EPixel_YUYV:
+		return GL_LUMINANCE;
 	default:
 		return GL_NONE;
 	}
@@ -87,6 +89,7 @@ GLenum GLTextureUtil::getGLDataType(EPixelFormat f){
 	case EPixel_X8R8G8B8:
 	case EPixel_B8G8R8A8:
 	case EPixel_X8B8G8R8:
+	case EPixel_YUYV:
 		return GL_UNSIGNED_BYTE;
 
 	case EPixel_R5G6B5:

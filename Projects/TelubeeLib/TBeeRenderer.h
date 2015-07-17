@@ -54,6 +54,8 @@ public:
 	//Don't turn on when Oculus is to be used!
 	void SetDirectRender(bool dr);
 
+	bool IsStereo();
+
 
 	video::IRenderTargetPtr GetEyeImage(int i);
 

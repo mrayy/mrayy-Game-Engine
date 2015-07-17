@@ -15,6 +15,7 @@
 #define ___DirectShowVideoGrabber___
 
 #include "ICameraVideoGrabber.h"
+#include "IMutex.h"
 
 class videoInput;
 
@@ -33,6 +34,8 @@ protected:
 	video::ImageInfo  m_textureImage;
 	bool m_hasNewFrame;
 	video::EPixelFormat m_format;
+
+	GCPtr<OS::IMutex> m_lock;
 
 	int m_fps;
 	int m_device;
@@ -75,11 +78,13 @@ public:
 	void Stop();
 	void Start();
 
-	const video::ImageInfo*  GetLastFrame();
+	const video::ImageInfo*  GetLastFrame(int i);
 
 	void SetParameter(const core::string& name,const core::string& value);
 	core::string GetParameter(const core::string& name);
 
+	virtual void Lock();
+	virtual void Unlock();
 };
 
 }

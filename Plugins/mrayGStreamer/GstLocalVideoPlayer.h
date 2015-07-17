@@ -17,6 +17,9 @@ class GstLocalVideoPlayer :public IGStreamerPlayer
 {
 protected:
 	GstLocalVideoPlayerImpl* m_impl;
+
+	GstPipelineHandler* GetPipeline();
+
 public:
 	GstLocalVideoPlayer();
 	virtual ~GstLocalVideoPlayer();
@@ -74,7 +77,7 @@ public:
 	virtual ulong GetBufferID() { return m_player->GetBufferID(); }
 	virtual float GetCaptureFrameRate() { return m_player->GetCaptureFrameRate(); }
 
-	virtual const ImageInfo* GetLastFrame() { return m_player->GetLastFrame(); }
+	virtual const ImageInfo* GetLastFrame(int i) { return m_player->GetLastFrame(); }
 };
 
 }

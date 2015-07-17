@@ -32,6 +32,7 @@
 #include "RenderWindow.h"
 #include "ParsedShaderPP.h"
 #include "HandsWindow.h"
+#include "IStreamListener.h"
 
 namespace mray
 {
@@ -42,7 +43,7 @@ class IRobotCommunicatorListener;
 class IMessageSink;
 
 
-class TRApplication :public CMRayApplication, public scene::IViewportListener
+class TRApplication :public CMRayApplication, public scene::IViewportListener,public video::IGStreamerStreamerListener
 {
 protected:
 
@@ -63,6 +64,7 @@ protected:
 		IRSensorMessage = 7,
 		BumpSensorMessage = 8,
 		BatteryLevel = 9,
+		ClockSync = 10,
 	};
 
 	enum class ECameraType
@@ -109,13 +111,14 @@ protected:
 	network::NetAddress m_remoteAddr;
 	network::IUDPClient* m_commChannel;
 	GCPtr<OpenNIManager> m_openNIMngr;
-	bool m_isLocal;
 	bool m_streamAudio;
 	bool m_depthSend;
 	bool m_isStarted;
 
-
-	int m_videoPort;
+	float m_exposureValue;
+	float m_gainValue;
+	float m_gammaValue;
+	float m_WBValue;
 
 	math::vector2di m_resolution;
 
@@ -154,6 +157,8 @@ protected:
 
 	bool m_startVideo;
 
+	bool m_isDone;
+
 public:
 	TRApplication();
 	virtual~TRApplication();
@@ -170,7 +175,7 @@ public:
 
 	virtual void onRenderDone(scene::ViewPort*vp);
 
-	void OnUserConnected(const network::NetAddress& address, int videoPort, int audioPort, int handsPort, bool rtcp);
+	void OnUserConnected(const network::NetAddress& address, uint videoPort, uint audioPort, uint handsPort, uint clockPort, bool rtcp);
 	void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status);
 	void OnCollisionData(RobotCommunicator* sender, float left, float right);
 	void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address);
@@ -183,6 +188,13 @@ public:
 	CameraProfileManager* GetCameraProfileManager(){ return m_cameraProfileManager; }
 
 	GCPtr<video::GstPlayerBin> GetPlayers(){ return m_players; }
+
+
+	void OnStreamerReady(video::IGStreamerStreamer* s);
+	void OnStreamerStarted(video::IGStreamerStreamer* s);
+	void OnStreamerStopped(video::IGStreamerStreamer* s);
+
+	void SetCameraParameterValue(const core::string& namne, const core::string& value);
 
 };
 

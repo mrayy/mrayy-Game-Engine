@@ -19,6 +19,7 @@
 
 #include "AppData.h"
 #include "CameraConfigurationManager.h"
+#include "TextureRTWrap.h"
 
 namespace mray
 {
@@ -37,6 +38,9 @@ IEyesRenderingBaseState::IEyesRenderingBaseState(const core::string& name)
 
 	m_lensCorrectionPP = new video::ParsedShaderPP(Engine::getInstance().getDevice());
 	m_lensCorrectionPP->LoadXML(gFileSystem.openFile("LensCorrection.peff"));
+	m_I420ToRGB = new video::ParsedShaderPP(Engine::getInstance().getDevice());
+	m_I420ToRGB->LoadXML(gFileSystem.openFile("I420ToRGB.peff"));
+
 // 
 // 	m_correctionValue[0] = m_lensCorrectionPP->GetValue("final.HMDWrapParams1");
 // 	m_correctionValue[1] = m_lensCorrectionPP->GetValue("final.HMDWrapParams2");
@@ -161,25 +165,6 @@ void IEyesRenderingBaseState::OnExit()
 	//VCameraType* cam=(VCameraType*)m_video->GetGrabber().pointer();
 
 }
-
-class TextureRenderTarget :public video::IRenderArea
-{
-protected:
-	video::ITexturePtr m_tex;
-public:
-	TextureRenderTarget(video::ITexturePtr tex){ m_tex = tex; }
-	virtual~TextureRenderTarget()
-	{
-	}
-	virtual const video::ITexturePtr& GetColorTexture(int i = 0) { return m_tex; }
-	virtual int GetColorTextureCount() { return 1; }
-	virtual void Resize(int x, int y) {}
-	virtual math::vector2di GetSize()
-	{
-		return math::vector2di(m_tex->getSize().x, m_tex->getSize().y);
-	}
-
-};
 void
 qtomatrix(math::matrix4x4& m,const math::quaternion& q)
 /*
@@ -272,10 +257,17 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 		m_videoSource->Blit(index);
 
 	video::ITexturePtr cameraTex = m_videoSource->GetEyeTexture(index);
+	math::vector2d size(cameraTex->getSize().x, cameraTex->getSize().y);
 
+	if (m_videoSource->GetEyeTexture(index)->getImageFormat()==video::EPixel_YUYV)
+	{
+		m_I420ToRGB->Setup(math::rectf(0, size));
+		m_I420ToRGB->render(&video::TextureRTWrap(cameraTex));
+		cameraTex = m_I420ToRGB->getOutput()->GetColorTexture();
+
+	}
 	if (m_useLensCorrection)
 	{
-		math::vector2d size(cameraTex->getSize().x, cameraTex->getSize().y);
 		video::ParsedShaderPP::MappedParams* texRect = m_lensCorrectionPP->GetParam("texRect");
 
 		if (texRect)
@@ -288,6 +280,7 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 			video::ParsedShaderPP::MappedParams* OpticalCenter = m_lensCorrectionPP->GetParam("OpticalCenter");
 			video::ParsedShaderPP::MappedParams* FocalCoeff = m_lensCorrectionPP->GetParam("FCoff");
 			video::ParsedShaderPP::MappedParams* KPCoeff = m_lensCorrectionPP->GetParam("KCoff");
+			video::ParsedShaderPP::MappedParams* texSize = m_lensCorrectionPP->GetParam("texSize");
 
 			if (OpticalCenter)
 				OpticalCenter->SetValue(m_cameraConfiguration->OpticalCenter);
@@ -298,7 +291,7 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 		}
 
 		m_lensCorrectionPP->Setup(math::rectf(0, size));
-		m_lensCorrectionPP->render(&TextureRenderTarget(cameraTex));
+		m_lensCorrectionPP->render(&video::TextureRTWrap(cameraTex));
 		cameraTex = m_lensCorrectionPP->getOutput()->GetColorTexture();
 	}
 	dev->setRenderTarget(m_renderTarget[index],1,1,video::DefaultColors::Black);

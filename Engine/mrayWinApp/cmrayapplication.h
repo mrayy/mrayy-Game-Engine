@@ -55,6 +55,9 @@ protected:
 	float m_drawTimeCounter;
 	bool m_limitFps;
 	float m_limitFpsCount;
+
+	int m_windowPriorityCounter;
+	int m_windowPriority;
 public:
 	CMRayApplication(const core::string&logFile=mT("log.txt"));
 	virtual~CMRayApplication();

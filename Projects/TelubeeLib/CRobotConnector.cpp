@@ -32,6 +32,7 @@ CRobotConnector::CRobotConnector()
 	m_videoPort = -1;
 	m_audioPort = -1;
 	m_handsPort = -1;
+	m_clockPort = -1;
 	m_rtcp = false;
 	m_controller = 0;
 }
@@ -64,6 +65,7 @@ void CRobotConnector::ConnectRobot()
 	addrStr += "," + core::StringConverter::toString(m_videoPort);
 	addrStr += "," + core::StringConverter::toString(m_audioPort);
 	addrStr += "," + core::StringConverter::toString(m_handsPort);
+	addrStr += "," + core::StringConverter::toString(m_clockPort);
 	addrStr += "," + core::StringConverter::toString(m_rtcp);
 	m_communicator->SetData("Connect", addrStr,true);
 
@@ -75,12 +77,13 @@ void CRobotConnector::ConnectRobot()
 		m_controller->ConnectRobot();
 	}
 }
-void CRobotConnector::ConnectRobotIP(const core::string& ip, int videoport, int audioPort, int handsPort, int commPort, bool rtcp)
+void CRobotConnector::ConnectRobotIP(const core::string& ip, uint videoport, uint audioPort, uint handsPort, uint clockPort, uint commPort, bool rtcp)
 {
 	m_commPort = commPort;
 	m_videoPort = videoport;
 	m_audioPort = audioPort;
 	m_handsPort = handsPort;
+	m_clockPort = clockPort;
 	m_rtcp = rtcp;
 	m_robotIP = ip;
 	ConnectRobot();

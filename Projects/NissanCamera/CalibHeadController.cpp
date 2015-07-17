@@ -13,7 +13,7 @@ namespace mray
 namespace TBee
 {
 
-#define  SAMPLES_COUNT 40
+#define  SAMPLES_COUNT 1
 
 void CalibHeadController::CalibrationInfo::LoadFromXML(xml::XMLElement* e)
 {
@@ -84,7 +84,7 @@ bool CalibHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 	}
 	if (m_lostPos > 0)
 	{
-		v = math::lerp(m_trackedPos, pos, (1 - (float)m_lostPos / SAMPLES_COUNT));
+		v = math::lerp(m_trackedPos, pos, (1 - (float)m_lostPos / (float)SAMPLES_COUNT));
 		m_lostPos--;
 	}
 	else

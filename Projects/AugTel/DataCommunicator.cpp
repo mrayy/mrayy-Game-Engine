@@ -29,6 +29,8 @@ namespace AugTel
 		ReportMessage = 6,
 		IRSensorMessage = 7,
 		BumpSensorMessage = 8,
+		BatteryLevel = 9,
+		ClockSync = 10,
 	};
 	class DataCommunicatorThread :public OS::IThreadFunction
 	{
@@ -157,6 +159,18 @@ int DataCommunicator::_Process()
 			v[i] = rdr.binReadFloat();
 		FIRE_LISTENR_METHOD(OnIRSensor, (count, v));
 		delete[] v;
+	}break;
+	case (int)EMessages::BatteryLevel:
+	{
+		OS::StreamReader rdr(&stream);
+		int level = rdr.binReadInt();
+		FIRE_LISTENR_METHOD(OnBatteryLevel, (level));
+	}break;
+	case (int)EMessages::ClockSync:
+	{
+		OS::StreamReader rdr(&stream);
+		int c = rdr.binReadInt();
+		FIRE_LISTENR_METHOD(OnClockSync, (c));
 	}break;
 	default:
 		break;

@@ -194,9 +194,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="NodeRenderer.cpp" />
+    <ClCompile Include="NodeRenderer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
     <ClCompile Include="PhManager.cpp" />
-    <ClCompile Include="PhNode.cpp" />
+    <ClCompile Include="PhNode.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Disabled</Optimization>
+    </ClCompile>
     <ClCompile Include="PhSpring.cpp" />
     <ClCompile Include="PointerNode.cpp" />
     <ClCompile Include="SceneCamera.cpp" />
@@ -243,11 +247,13 @@
       <SubType>Designer</SubType>
     </Overlay>
     <None Include="..\..\Bin\Data\KMDPlenary\kmdSettings.cfg" />
-    <None Include="Configure.stg" />
+    <None Include="KMDCConfigure.stg" />
     <Overlay Include="..\..\Bin\Data\KMDPlenary\GUI\GUIStatusLayerLayout.gui" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\..\Bin\Data\KMDPlenary\Sessions.xml" />
+    <Xml Include="..\..\Bin\Data\KMDPlenary\Sessions.xml">
+      <SubType>Designer</SubType>
+    </Xml>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

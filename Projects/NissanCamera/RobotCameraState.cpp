@@ -42,7 +42,7 @@ namespace NCam
 		virtual~TestController()
 		{}
 
-		virtual bool GetHeadOrientation(math::quaternion& q)
+		virtual bool GetHeadOrientation(math::quaternion& q,bool abs)
 		{
 			float time = gEngine.getTimer()->getSeconds();
 			math::vector3d angles;
@@ -53,7 +53,7 @@ namespace NCam
 			q= math::quaternion(angles);
 			return true;
 		}
-		virtual bool GetHeadPosition(math::vector3d& v)
+		virtual bool GetHeadPosition(math::vector3d& v, bool abs)
 		{
 			v = 0;
 			return 1;
@@ -85,8 +85,8 @@ RobotCameraState::RobotCameraState()
 	m_robotConnector->SetCommunicator(m_robotComm);
 	m_cameraRenderer = new CameraPlaneRenderer();
 
-	m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
-	//m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
+	//m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
+	m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
 	//m_headController = new TBee::CalibHeadController(new TestController());
 
 	m_robotConnector->SetHeadController(m_headController);
@@ -497,13 +497,13 @@ void RobotCameraState::Update(float dt)
 
 	math::vector3d rot,r ;
 	//q.toEulerAngles(r);
-	if (false)
+	if (true)
 	{
 		//in the car
 		r = m_robotConnector->GetCurrentHeadRotation();
 		rot.x = r.y;
-		rot.z = r.x;
-		rot.y = r.z;
+		rot.y = -r.z;
+		rot.z = -r.x;
 	}
 	else
 	{

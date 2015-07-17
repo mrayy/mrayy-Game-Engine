@@ -71,21 +71,25 @@ void NodeRenderer::_renderConnections(SessionRenderer *r, float alpha)
 {
 	m_connRenderer->update(0);
 	Engine::getInstance().getDevice()->useTexture(0, 0);
+	Engine::getInstance().getDevice()->useTexture(1, 0);	
 	Engine::getInstance().getDevice()->unuseShader();
 //	Engine::getInstance().getDevice()->setFragmentShader(m_connectionShader);
-	Engine::getInstance().getDevice()->setLineWidth(2);
+	Engine::getInstance().getDevice()->setLineWidth(3);
 	if(false)
 	{
 		Engine::getInstance().getDevice()->drawSingleMesh(m_connRenderer->getMesh()->getBuffer(0));
 		return;
 	}
+	alpha = 1;
 	video::IVideoDevice* dev = Engine::getInstance().getDevice();
 	math::vector2d points[2];
 	for (int i = 0; i < m_CommentsConn.size(); ++i)
 	{
 		points[0]=(m_CommentsConn[i].a->GetPosition());
 		points[1] = (m_CommentsConn[i].b->GetPosition());
-		dev->draw2DLine(points, 2, video::SColor(1, 1, 1, alpha));
+		float len = points[0].getDist(points[1]);
+		len = 1-math::Min<float>(len, 250) / 250.0f;
+		dev->draw2DLine(points, 2, video::SColor(1, 1, 1, alpha*len*len	));
 	}
 	Engine::getInstance().getDevice()->setLineWidth(5);
 	for (int i = 0; i < m_speakerConn.size(); ++i)
@@ -145,7 +149,7 @@ void NodeRenderer::_renderComments(SessionRenderer *r, float alpha)
 
 		pos = Comment->GetPosition();
 
-		float g = 1-Comment->GetHoverValue();
+		float g = 1 - Comment->GetHoverValue();
 		float a = Comment->GetAlpha()*alpha;
 		m_CommentNodeShader->setConstant("Gray", &g, 1);
 		m_CommentNodeShader->setConstant("Alpha", &a, 1);

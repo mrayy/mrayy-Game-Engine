@@ -37,6 +37,8 @@ void PhSpring::Update(float dt)
 	math::vector2d dv = m_a->GetVelocity() - m_b->GetVelocity();
 	float l = dir.Length();
 	float d = l - m_length;
+	if (l == 0)
+		return;
 	dir /= l;
 	math::vector2d f = -(m_strength*d /*+ m_damp*dv.dotProduct(dir)*/)*dir - m_damp*dv;
 

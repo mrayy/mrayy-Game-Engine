@@ -138,19 +138,27 @@ void RobotCommunicator::HandleData(network::NetAddress* addr,const core::string&
 		m_robotStatus.rotation = atof(vals[0].c_str());
 		m_robotStatus.rotation = math::clamp<float>(m_robotStatus.rotation, -1, 1);
 	}
-	else if (name == "Connect" && vals.size() == 5)
+	else if (name == "Connect" && vals.size() == 6)
 	{
 		int videoPort = atoi(vals[1].c_str());
 		int audioPort = atoi(vals[2].c_str());
 		int handsPort = atoi(vals[3].c_str());
-		bool rtcp = core::StringConverter::toBool(vals[4].c_str());
+		int clockPort = atoi(vals[4].c_str());
+		bool rtcp = core::StringConverter::toBool(vals[5].c_str());
 		network::NetAddress addr = network::NetAddress(vals[0], videoPort);
 		//if (addr.address != m_userStatus.address.address || addr.port!=m_userStatus.address.port)
 		{
 			m_userStatus.address = addr;
 			if (m_listener)
 			{
-				m_listener->OnUserConnected(this, m_userStatus.address, videoPort, audioPort, handsPort, rtcp);
+				UserConnectionData data;
+				data.address = m_userStatus.address;
+				data.videoPort = videoPort;
+				data.audioPort = audioPort;
+				data.handsPort = handsPort;
+				data.clockPort = clockPort;
+				data.rtcp = rtcp;
+				m_listener->OnUserConnected(this, data);
 			}
 		}
 	}

@@ -118,7 +118,7 @@ void Application::init(const OptionContainer &extraOptions)
 	{
 		//Load users
 		xml::XMLTree tree;
-		if (tree.load("KMDUsers.xml"))
+		if (tree.load(gAppData.GetValue("App", "Users")))
 		{
 			xml::XMLElement* e = tree.getSubElement("Users");
 			e = e->getSubElement("User");

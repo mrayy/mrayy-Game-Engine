@@ -54,6 +54,9 @@ protected:
 	math::vector2d m_cameraResolution;
 	int m_cameraFPS;
 	float m_exposureValue;
+	float m_gainValue;
+	float m_gammaValue;
+	float m_WBValue;
 	CameraInfo m_cameraSource[2];
 public:
 	LocalCameraVideoSource(int c1=0,int c2=1,EUSBCameraType camType=ECam_DirectShow);

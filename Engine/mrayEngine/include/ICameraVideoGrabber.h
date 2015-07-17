@@ -32,6 +32,7 @@ public:
 	static const core::string Param_ColorEnable;
 	static const core::string Param_WhiteBalance;
 	static const core::string Param_Gain;
+	static const core::string Param_Gamma;
 	static const core::string Param_BacklightCompensation;
 
 	static const core::string Param_Pan;

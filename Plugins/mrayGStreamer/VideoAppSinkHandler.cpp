@@ -24,6 +24,7 @@ VideoAppSinkHandler::VideoAppSinkHandler()
 	m_BackPixelsChanged = false;
 	m_IsAllocated = false;
 	m_frameID = 0;
+	m_surfaceCount = 1;
 
 	m_mutex = OS::IThreadManager::getInstance().createMutex();
 }
@@ -34,8 +35,11 @@ void VideoAppSinkHandler::Close()
 {
 	m_frameID = 0;
 	m_IsAllocated = false;
-	m_pixels.clear();
-	m_backPixels.clear();
+	for (int i = 0; i < m_surfaceCount; ++i)
+	{
+		m_pixels[i].clear();
+		m_backPixels[i].clear();
+	}
 //	m_eventPixels.clear();
 }
 
@@ -70,6 +74,9 @@ video::EPixelFormat getVideoFormat(GstVideoFormat format){
 	case GST_VIDEO_FORMAT_RGB16:
 		return EPixel_R5G6B5;
 
+	case GST_VIDEO_FORMAT_I420:
+		return EPixel_YUYV;
+
 	default:
 		return EPixel_Unkown;
 	}
@@ -81,28 +88,44 @@ GstFlowReturn VideoAppSinkHandler::process_sample(std::shared_ptr<GstSample> sam
 
 	GstVideoInfo vinfo = getVideoInfo(sample.get());
 	video::EPixelFormat fmt = getVideoFormat(vinfo.finfo->format);
+	m_pixelFormat = fmt;
 	if (fmt == video::EPixel_Unkown)
 	{
 		return GST_FLOW_ERROR;
 	}
-	if (m_pixels.imageData && (m_pixels.Size.x != vinfo.width || m_pixels.Size.y != vinfo.height || m_pixels.format != fmt))
+	bool isI420 = false;;
+
+	int height = vinfo.height;
+	if (fmt == video::EPixel_YUYV)
+	{
+		isI420 = true;
+		//fmt = video::EPixel_LUMINANCE8;
+		height *= 1.5;
+	}
+	if (m_pixels[0].imageData && (m_pixels[0].Size.x != vinfo.width || m_pixels[0].Size.y != height || m_pixels[0].format != fmt))
 	{
 		m_IsAllocated = false;
-		m_pixels.clear();
-		m_backPixels.clear();
+		m_pixels[0].clear();
+		m_backPixels[0].clear();
 	}
 
 	gst_buffer_map(_buffer, &mapinfo, GST_MAP_READ);
 	guint size = mapinfo.size;
-	int pxSize = video::PixelUtil::getPixelDescription(m_pixels.format).elemSizeB;
-	int stride = 0;
-	int dataSize = m_pixels.Size.x*m_pixels.Size.y * pxSize;
+	float pxSize = video::PixelUtil::getPixelDescription(fmt).elemSizeB;
 
-	if (m_pixels.imageData && dataSize != (int)size){
+	int stride = 0;
+	int dataSize = m_pixels[0].Size.x*m_pixels[0].Size.y;
+	if (isI420)
+	{
+	}
+	else
+		dataSize *= pxSize;
+
+	if (m_pixels[0].imageData && dataSize != (int)size){
 		GstVideoInfo vinfo = getVideoInfo(sample.get());
 		stride = vinfo.stride[0];
 
-		if (stride == (m_pixels.Size.x * pxSize)) {
+		if (stride != (m_pixels[0].Size.x * pxSize)) {
 			gst_buffer_unmap(_buffer, &mapinfo);
 			gLogManager.StartLog(ELL_WARNING) << "VideoAppSinkHandler::process_sample(): error on new buffer, buffer size: " << size << "!= init size: " << dataSize;
 			gLogManager.flush();
@@ -112,17 +135,17 @@ GstFlowReturn VideoAppSinkHandler::process_sample(std::shared_ptr<GstSample> sam
 	m_mutex->lock();
 	buffer = sample;
 
-	if (m_pixels.imageData){
+	if (m_pixels[0].imageData){
 		++m_frameID;
 		//if (stride > 0) {
-			m_backPixels.setData(mapinfo.data, m_pixels.Size, m_pixels.format);
+		m_backPixels[0].setData(mapinfo.data, m_pixels[0].Size, m_pixels[0].format);
 // 		}
 // 		else {
-// 			m_backPixels.setData(mapinfo.data, m_pixels.Size, m_pixels.format);
-// 			m_eventPixels.setData(mapinfo.data, m_pixels.Size, m_pixels.format);
+// 			m_backPixels[0].setData(mapinfo.data, m_pixels[0].Size, m_pixels[0].format);
+// 			m_eventPixels.setData(mapinfo.data, m_pixels[0].Size, m_pixels[0].format);
 // 		}
 
-		m_BackPixelsChanged = true;
+			m_BackPixelsChanged = true;
 		m_mutex->unlock();
 		if (stride == 0) {
 		//	ofNotifyEvent(prerollEvent, eventPixels);
@@ -130,7 +153,10 @@ GstFlowReturn VideoAppSinkHandler::process_sample(std::shared_ptr<GstSample> sam
 	}
 	else{
 
-		_Allocate(vinfo.width, vinfo.height, fmt);
+		if (isI420)
+			_Allocate(vinfo.width, vinfo.height*1.5, fmt);
+		else 
+			_Allocate(vinfo.width, vinfo.height, fmt);
 
 		m_mutex->unlock();
 		FIRE_LISTENR_METHOD(OnStreamPrepared, (this));
@@ -147,8 +173,8 @@ bool VideoAppSinkHandler::_Allocate(int width, int height, video::EPixelFormat f
 	m_frameSize.x = width;
 	m_frameSize.y = height;
 
-	m_pixels.createData(math::vector3di(width, height, 1), fmt);
-	m_backPixels.createData(math::vector3di(width, height, 1), fmt);
+	m_pixels[0].createData(math::vector3di(width, height, 1), fmt);
+	m_backPixels[0].createData(math::vector3di(width, height, 1), fmt);
 
 	m_HavePixelsChanged = false;
 	m_BackPixelsChanged = true;
@@ -170,7 +196,7 @@ bool VideoAppSinkHandler::GrabFrame(){
 	m_HavePixelsChanged = m_BackPixelsChanged;
 	if (m_HavePixelsChanged){
 		m_BackPixelsChanged = false;
-		math::Swap(m_pixels.imageData, m_backPixels.imageData);
+		math::Swap(m_pixels[0].imageData, m_backPixels[0].imageData);
 
 		prevBuffer = buffer;
 
@@ -216,6 +242,8 @@ GstFlowReturn VideoAppSinkHandler::preroll_cb(std::shared_ptr<GstSample> sample)
 }
 GstFlowReturn VideoAppSinkHandler::buffer_cb(std::shared_ptr<GstSample> sample)
 {
+
+
 	GstFlowReturn ret = process_sample(sample);
 	if (ret == GST_FLOW_OK){
 		return GST_FLOW_OK;

@@ -30,6 +30,7 @@
 #include "TextureRTWrap.h"
 #include "FlyCameraVideoGrabber.h"
 #include "GstCustomVideoStreamer.h"
+#include "GstCustomMultipleVideoStreamer.h"
 
 #include <conio.h>
 
@@ -73,9 +74,9 @@ namespace mray
 		{
 			m_app = app;
 		}
-		virtual void OnUserConnected(RobotCommunicator* sender, const network::NetAddress& address, int videoPort, int audioPort, int handsPort, bool rtcp)
+		virtual void OnUserConnected(RobotCommunicator* sender, const UserConnectionData& data)
 		{
-			m_app->OnUserConnected(address, videoPort, audioPort, handsPort, rtcp);
+			m_app->OnUserConnected(data.address, data.videoPort, data.audioPort, data.handsPort, data.clockPort, data.rtcp);
 		}
 		virtual void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status)
 		{
@@ -116,7 +117,7 @@ TRApplication::TRApplication()
 	m_commChannel= 0;
 
 	this->m_limitFps = true;
-	this->m_limitFpsCount = 30;
+	this->m_limitFpsCount = 60;
 	m_robotInited = false;
 
 	m_cameraProfileManager = new CameraProfileManager();
@@ -128,11 +129,21 @@ TRApplication::TRApplication()
 	m_enablePlayers = false;
 	m_enableStream = true;
 
+	m_exposureValue = -1;
+	m_gainValue = 0.1;
+	m_WBValue = -1;
+	m_gammaValue = 0.0;
+
 	m_handsWindow = new HandsWindow();
+
+	m_isDone = false;
 }
 
 TRApplication::~TRApplication()
 {
+	m_isDone = true;
+	//wait until threads are done 
+	Sleep(1000);
 	m_handsWindow = 0;
 	m_players->ClearPlayers(true);
 	m_streamers->ClearStreams(true);
@@ -233,29 +244,27 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		m_enableStream = extraOptions.GetOptionByName("EnableStreams")->getValue() == "Yes";
 		
 		m_controller = extraOptions.GetOptionByName("Controller")->getValue() == "XBox" ? EController::XBox : EController::Logicool;
-		m_cameraType = extraOptions.GetOptionByName("CameraConnection")->getValue() == "Webcam" ? ECameraType::Webcam : ECameraType::PointGrey;
+		m_cameraType = extraOptions.GetOptionByName("CameraConnection")->getValue() == "DirectShow" ? ECameraType::Webcam : ECameraType::PointGrey;
 
 		m_cameraProfile = extraOptions.GetOptionValue("CameraProfile");
 
-		core::string quality = extraOptions.GetOptionByName("Quality")->getValue();
-		if (quality == "Ultra Low")m_quality = EStreamingQuality::UltraLow;
-		if (quality == "Low")m_quality = EStreamingQuality::Low;
-		if (quality == "Medium")m_quality = EStreamingQuality::Medium;
-		if (quality == "High")m_quality = EStreamingQuality::High;
-		if (quality == "Ultra High")m_quality = EStreamingQuality::UltraHigh;
+		m_quality = (EStreamingQuality) extraOptions.GetOptionByName("Quality")->getValueIndex();
+// 		if (quality == "Ultra Low")m_quality = EStreamingQuality::UltraLow;
+// 		if (quality == "Low")m_quality = EStreamingQuality::Low;
+// 		if (quality == "Medium")m_quality = EStreamingQuality::Medium;
+// 		if (quality == "High")m_quality = EStreamingQuality::High;
+// 		if (quality == "Ultra High")m_quality = EStreamingQuality::UltraHigh;
 
 		m_resolution.set(1280, 720);
 		core::string res = extraOptions.GetOptionByName("StreamResolution")->getValue();
-		if (res == "HD")
-			m_resolution.set(1280, 720);
-		else if (res == "FullHD")
-			m_resolution.set(1920, 1080);
-		else if (res == "VGA")
-			m_resolution.set(640, 480);
 
+		if (res == "0-VGA")
+			m_resolution.set(640, 480);
+		else if (res == "1-HD")
+			m_resolution.set(1280, 720);
+		else if (res == "2-FullHD")
+			m_resolution.set(1920, 1080);
 		m_streamAudio = extraOptions.GetOptionByName("Audio")->getValue() == "Yes";
-		m_isLocal = extraOptions.GetOptionByName("Network")->getValue() == "Local";
-		m_videoPort = core::StringConverter::toInt(extraOptions.GetOptionByName("VideoPort")->getValue() );
 
 		m_handsWindow->Parse(extraOptions);
 
@@ -312,57 +321,74 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 	uint bitRate[] =
 	{
-		2000,
 		3000,
 		4000,
 		6000,
-		8000
+		8000,
+		4000
 	};
 	uint fpsSet[] =
 	{
 		30,
+		45,
 		60,
-		60,
-		90,
-		60
+		50,
+		30
 	};
 	math::vector2d resolution[] =
 	{
 		math::vector2d(640, 480),
 		math::vector2d(640, 480),
-		math::vector2d(640, 480),
-		math::vector2d(640, 480),
+		math::vector2d(640, 480), 
+		math::vector2d(1280, 720),
 		math::vector2d(1280, 720)
 	};
 
 	if (m_enableStream)
 	{
 		video::GstNetworkVideoStreamer* streamer;
-		m_resolution = resolution[(int)m_quality];
+		math::vector2d capRes=  resolution[(int)m_quality];
 		int fps = fpsSet[(int)m_quality];
 
+		for (int i = 0; i < 2; ++i)
+		{
+			m_cameraIfo[i].fps = fps;
+			m_cameraIfo[i].w = capRes.x;
+			m_cameraIfo[i].h = capRes.y;
+		}
 		if (m_cameraType==ECameraType::Webcam)
 		{
 			for (int i = 0; i < 2; ++i)
 			{
-				m_cameraIfo[i].camera = new video::DirectShowVideoGrabber();
-				m_cameraIfo[i].fps = fps;
-				m_cameraIfo[i].w = m_resolution.x;
-				m_cameraIfo[i].h = m_resolution.y;
 				if (m_cameraIfo[i].ifo.index >= 0)
 				{
+					m_cameraIfo[i].camera = new video::DirectShowVideoGrabber();
 					m_cameraIfo[i].camera->InitDevice(m_cameraIfo[i].ifo.index, m_cameraIfo[i].w, m_cameraIfo[i].h, m_cameraIfo[i].fps);//1280, 720
 					m_cameraIfo[i].ifo.guidPath = m_cameraIfo[i].camera->GetDeviceName(m_cameraIfo[i].ifo.index);
-					m_cameraIfo[i].camera->SetParameter(video::ICameraVideoGrabber::Param_Focus, "0");
+
 				}
 			}
 
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, (m_exposureValue > 0 ? core::StringConverter::toString(m_exposureValue) : "auto"));
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, (m_gainValue > 0 ? core::StringConverter::toString(m_gainValue) : "auto"));
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_WhiteBalance, (m_WBValue > 0 ? core::StringConverter::toString(m_WBValue) : "auto"));
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gamma, (m_gammaValue > 0 ? core::StringConverter::toString(m_gammaValue) : "auto"));
 
-			if (false)
+			// Now close cameras
+			for (int i = 0; i < 2; ++i)
+			{
+				if (m_cameraIfo[i].camera)
+					m_cameraIfo[i].camera->Stop();
+			}
+
+			if (true)
 			{
 				streamer = new video::GstNetworkVideoStreamer();
+				streamer->AddListener(this);
 
-				streamer->SetResolution(m_resolution.x, m_resolution.y);
+				streamer->SetCameraResolution(m_cameraIfo[0].w, m_cameraIfo[0].h, fps);
+				streamer->SetFrameResolution(m_resolution.x, m_resolution.y);
 				streamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
 				streamer->SetBitRate(bitRate[(int)m_quality]);
 
@@ -372,33 +398,47 @@ void TRApplication::init(const OptionContainer &extraOptions)
 			}
 			else
 			{
-				m_cameraIfo[0].camera->Start();
-				m_cameraIfo[1].camera->Start();
+// 				m_cameraIfo[0].camera->Start();
+// 				m_cameraIfo[1].camera->Start();
 
 
 				video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
-				if (m_cameraIfo[0].ifo.index == m_cameraIfo[1].ifo.index)
-					hs->SetVideoGrabber(m_cameraIfo[0].camera, 0);//
-				else
-					hs->SetVideoGrabber(m_cameraIfo[0].camera, m_cameraIfo[1].camera);//
+			
+				hs->AddListener(this);
+				hs->SetVideoGrabber(m_cameraIfo[0].camera, m_cameraIfo[1].camera);//
 				hs->SetBitRate(bitRate[(int)m_quality]);
+				hs->SetResolution(m_resolution.x, m_resolution.y, fps);
 				m_streamers->AddStream(hs, "Video");
 			}
 
 		}
 		else
 		{
+			if (m_cameraIfo[0].ifo.index != -1)
+			{
+				m_cameraIfo[0].camera = new video::FlyCameraVideoGrabber();
+				m_cameraIfo[0].camera->InitDevice(m_cameraIfo[0].ifo.index, m_cameraIfo[0].w, m_cameraIfo[0].h, fps);
+				m_cameraIfo[0].camera->SetImageFormat(video::EPixel_R8G8B8);
+				//	m_cameraIfo[0].camera->Start();
+			}
 
-			m_cameraIfo[0].camera = new video::FlyCameraVideoGrabber();
-			m_cameraIfo[0].camera->InitDevice(m_cameraIfo[0].ifo.index, m_resolution.x, m_resolution.y, fps);
-			m_cameraIfo[0].camera->Start();
+			if (m_cameraIfo[1].ifo.index != -1
+				&& m_cameraIfo[0].ifo.index != m_cameraIfo[1].ifo.index)
+			{
+				m_cameraIfo[1].camera = new video::FlyCameraVideoGrabber();
+				m_cameraIfo[1].camera->InitDevice(m_cameraIfo[1].ifo.index, m_cameraIfo[1].w, m_cameraIfo[1].h, fps);
+				m_cameraIfo[1].camera->SetImageFormat(video::EPixel_R8G8B8);
+				//	m_cameraIfo[1].camera->Start();
+			}
 
-			m_cameraIfo[1].camera = new video::FlyCameraVideoGrabber();
-			m_cameraIfo[1].camera->InitDevice(m_cameraIfo[1].ifo.index, m_resolution.x, m_resolution.y, fps);
-			m_cameraIfo[1].camera->Start();
+			video::GstCustomMultipleVideoStreamer* hs = new video::GstCustomMultipleVideoStreamer();
+			hs->AddListener(this);
 
-			video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
-			hs->SetVideoGrabber(m_cameraIfo[0].camera, m_cameraIfo[1].camera);//
+			std::vector<video::IVideoGrabber*> grabbers;
+			grabbers.push_back(m_cameraIfo[0].camera);
+			grabbers.push_back(m_cameraIfo[1].camera);
+			hs->SetVideoGrabber(grabbers);//
+			hs->SetResolution(m_resolution.x, m_resolution.y, fps,true);
 			hs->SetBitRate(bitRate[(int)m_quality]);
 			m_streamers->AddStream(hs, "Video");
 		}
@@ -447,7 +487,7 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		}
 	}
 
-	if (m_enableStream)
+	if (m_enableStream && m_streamAudio)
 	{
 		video::GstNetworkAudioStreamer* streamer;
 		streamer = new video::GstNetworkAudioStreamer();
@@ -467,7 +507,6 @@ void TRApplication::init(const OptionContainer &extraOptions)
 		{
 		video::GstNetworkVideoPlayer* player;
 		player = new video::GstNetworkVideoPlayer();
-
 		m_players->AddPlayer(player, "Video");
 
 		m_playerGrabber->Set(new video::GstNetworkVideoPlayerGrabber(player), 0);
@@ -487,23 +526,35 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 	m_isStarted = false;
 
-	printf("Press [space] to ignore remote connection. (5 seconds timeout)\n");
-	float t0 = gEngine.getTimer()->getSeconds();
-	float t1;
-	do
+	if (true)
 	{
-		t1 = gEngine.getTimer()->getSeconds();
-		if (kbhit())
+		printf("Press [space] to ignore remote connection. (5 seconds timeout)\n");
+		float t0 = gEngine.getTimer()->getSeconds();
+		float t1;
+		do
 		{
-			uchar c = getch();
-			if (c == ' '){
-				m_debugData.userConnected = true;
-				m_startVideo = true;
-				printf("Force starting robot connection ignoring remote side.\n");
-				break;
+			t1 = gEngine.getTimer()->getSeconds();
+			if (kbhit())
+			{
+				uchar c = getch();
+				if (c == ' '){
+					m_debugData.userConnected = true;
+					m_debugData.userAddress.setIP("127.0.0.1");
+					if (m_enableStream && m_streamers)
+					{
+						m_streamers->GetStream("Video")->BindPorts("127.0.0.1", 7000, 0, 0);
+					}
+					m_startVideo = true;
+					printf("Force starting robot connection ignoring remote side.\n");
+					break;
+				}
 			}
-		}
-	} while (t1-t0<5000);
+		} while (t1 - t0 < 5000);
+	}
+	if (!m_startVideo)
+	{
+		printf("Start listening to incoming connections.\n");
+	}
 
 	return;
 	//m_combinedCameras = new CombineVideoGrabber();
@@ -534,7 +585,18 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 }
 
+void TRApplication::SetCameraParameterValue(const core::string& name, const core::string& value)
+{
+	for (int i = 0; i < 2; ++i)
+	{
+		if (m_cameraIfo[i].camera)
+		{
+			m_cameraIfo[i].camera->SetParameter(name, value);
 
+			printf("Camera [%d] %s value is set to: %s\n", i, name.c_str(), m_cameraIfo[i].camera->GetParameter(name).c_str());
+		}
+	}
+}
 void TRApplication::draw(scene::ViewPort* vp)
 {
 }
@@ -580,8 +642,17 @@ void TRApplication::update(float dt)
 				}
 				}*/	
 
+			if (m_cameraType == ECameraType::PointGrey)
+			{
+				if (m_cameraIfo[0].camera)
+					m_cameraIfo[0].camera->Start();
+
+				if (m_cameraIfo[1].camera)
+					m_cameraIfo[1].camera->Start();
+			}
 			m_streamers->GetStream("Video")->CreateStream();
-			m_streamers->GetStream("Audio")->CreateStream();
+			if (m_streamAudio)
+				m_streamers->GetStream("Audio")->CreateStream();
 			m_streamers->Stream();
 
 			if (m_enablePlayers)
@@ -639,7 +710,7 @@ void TRApplication::update(float dt)
 		}
 	}
 
-	if (m_robotCommunicator->GetRobotController()->IsConnected() && m_debugData.userConnected)
+	if (m_robotCommunicator->GetRobotController() && m_robotCommunicator->GetRobotController()->IsConnected() && m_debugData.userConnected)
 	{
 
 		const int BufferLen = 128;
@@ -794,28 +865,38 @@ void TRApplication::onRenderDone(scene::ViewPort*vp)
 
 					}
 
-					msg = "Robot Started: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
-					LOG_OUT(msg, 100, 100);
-					msg = "Bump Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "0");
-					LOG_OUT(msg, 100, 100);
-					msg = "Bump Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "1");
-					LOG_OUT(msg, 100, 100);
-					msg = "Sensor Light Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "2");
-					LOG_OUT(msg, 100, 100);
-					msg = "Sensor Light Front Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "3");
-					LOG_OUT(msg, 100, 100);
-					msg = "Sensor Light Center Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "4");
-					LOG_OUT(msg, 100, 100);
-					msg = "Sensor Light Center Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "5");
-					LOG_OUT(msg, 100, 100);
-					msg = "Sensor Light Front Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "6");
-					LOG_OUT(msg, 100, 100);
-					msg = "Sensor Light Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "7");
-					LOG_OUT(msg, 100, 100);
-					msg = "Battery Level: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, "");
-					LOG_OUT(msg, 100, 100);
-					msg = "Battery Status: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryCharge, "");
-					LOG_OUT(msg, 100, 100);
+					if (m_cameraIfo[0].camera)
+					{
+
+						msg = "Capture FPS: " + core::StringConverter::toString(m_cameraIfo[0].camera->GetCaptureFrameRate());
+						LOG_OUT(msg, 100, 100);
+					}
+
+					if (m_robotCommunicator->GetRobotController())
+					{
+						msg = "Robot Started: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
+						LOG_OUT(msg, 100, 100);
+						msg = "Bump Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "0");
+						LOG_OUT(msg, 100, 100);
+						msg = "Bump Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "1");
+						LOG_OUT(msg, 100, 100);
+						msg = "Sensor Light Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "2");
+						LOG_OUT(msg, 100, 100);
+						msg = "Sensor Light Front Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "3");
+						LOG_OUT(msg, 100, 100);
+						msg = "Sensor Light Center Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "4");
+						LOG_OUT(msg, 100, 100);
+						msg = "Sensor Light Center Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "5");
+						LOG_OUT(msg, 100, 100);
+						msg = "Sensor Light Front Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "6");
+						LOG_OUT(msg, 100, 100);
+						msg = "Sensor Light Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "7");
+						LOG_OUT(msg, 100, 100);
+						msg = "Battery Level: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, "");
+						LOG_OUT(msg, 100, 100);
+						msg = "Battery Status: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryCharge, "");
+						LOG_OUT(msg, 100, 100);
+					}
 				}
 			}
 
@@ -826,8 +907,10 @@ void TRApplication::onRenderDone(scene::ViewPort*vp)
 		getDevice()->useShader(0);
 	}
 }
-void TRApplication::OnUserConnected(const network::NetAddress& address, int videoPort, int audioPort, int handsPort, bool rtcp)
+void TRApplication::OnUserConnected(const network::NetAddress& address, uint videoPort, uint audioPort, uint handsPort, uint clockPort, bool rtcp)
 {
+	if (m_isDone)
+		return;
 	if (m_remoteAddr.address != address.address)
 		printf("User Connected : %s\n", address.toString().c_str());
 	m_remoteAddr.address = address.address;
@@ -839,17 +922,18 @@ void TRApplication::OnUserConnected(const network::NetAddress& address, int vide
 		core::StringConverter::toString(ip[2]) + "." +
 		core::StringConverter::toString(ip[3]);
 
-	if (m_enableStream)
+	if (m_enableStream && m_streamers)
 	{
-		m_streamers->GetStream("Video")->BindPorts(ipaddr, videoPort, rtcp);
-		m_streamers->GetStream("Audio")->BindPorts(ipaddr, audioPort, rtcp);
+		m_streamers->GetStream("Video")->BindPorts(ipaddr, videoPort, clockPort, rtcp);
+		if (m_streamAudio)
+			m_streamers->GetStream("Audio")->BindPorts(ipaddr, audioPort, clockPort+1, rtcp);
 	}
 	if (m_enablePlayers)
 	{
-		((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->SetIPAddress(ipaddr, audioPort, rtcp);
-		((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->SetIPAddress(ipaddr, videoPort, rtcp);
+		((video::GstNetworkVideoPlayer*)m_players->GetPlayer("Video"))->SetIPAddress(ipaddr, videoPort, clockPort, rtcp);
+		((video::GstNetworkAudioPlayer*)m_players->GetPlayer("Audio"))->SetIPAddress(ipaddr, audioPort, clockPort+1, rtcp);
 	}
-	if (m_handsWindow->IsActive())
+	if (m_handsWindow && m_handsWindow->IsActive())
 	{
 		m_handsWindow->OnConnected(ipaddr,handsPort,rtcp);
 	}
@@ -864,15 +948,26 @@ void TRApplication::OnUserConnected(const network::NetAddress& address, int vide
 	//tell the client if we are sending stereo or single video images
 	OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 	OS::StreamWriter wrtr(&stream);
-	if (m_enableStream)
+	if (m_enableStream && m_streamers)
 	{
 		int reply = (int)EMessages::IsStereo;
 		int len = stream.write(&reply, sizeof(reply));
-		bool stereo = ((video::GstNetworkVideoStreamer*)m_streamers->GetStream("Video"))->IsStereo();
+		bool stereo = m_cameraIfo[0].ifo.index != m_cameraIfo[1].ifo.index && 
+			m_cameraIfo[0].ifo.index != -1 && m_cameraIfo[1].ifo.index!=-1;// ((video::GstNetworkVideoStreamer*)m_streamers->GetStream("Video"))->IsStereo();
 		len += stream.write(&stereo, sizeof(stereo));
 		m_commChannel->SendTo(&m_remoteAddr, (char*)buffer, len);
 	}
 
+	{
+		stream.seek(0, OS::ESeek_Set);
+		int reply = (int)EMessages::ClockSync;
+		int len = stream.write(&reply, sizeof(reply));
+
+		ulong baseClock = m_streamers->GetStream("Video")->GetClockBase();
+
+		len += wrtr.binWriteInt(baseClock);
+		m_commChannel->SendTo(&m_remoteAddr, (char*)buffer, len);
+	}
 
 	{
 		stream.seek(0,OS::ESeek_Set);
@@ -962,6 +1057,37 @@ void TRApplication::OnMessage(network::NetAddress* addr, const core::string& msg
 		m_commChannel->SendTo(&m_remoteAddr, (char*)buffer, len);
 	}
 }
+
+void TRApplication::OnStreamerReady(video::IGStreamerStreamer* s)
+{
+	printf("Stream is Ready\n");
+	const int BufferLen = 128;
+	uchar buffer[BufferLen];
+	OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
+	OS::StreamWriter wrtr(&stream);
+	//Send clock message
+	{
+		stream.seek(0, OS::ESeek_Set);
+		int reply = (int)EMessages::ClockSync;
+		int len = stream.write(&reply, sizeof(reply));
+
+		ulong baseClock = s->GetClockBase();
+
+		len += wrtr.binWriteInt(baseClock);
+		m_commChannel->SendTo(&m_remoteAddr, (char*)buffer, len);
+	}
+
+}
+void TRApplication::OnStreamerStarted(video::IGStreamerStreamer* s)
+{
+	printf("Stream has Started\n");
+}
+void TRApplication::OnStreamerStopped(video::IGStreamerStreamer* s)
+{
+	printf("Stream has Stopped\n");
+}
+
+
 CameraProfileManager* TRApplication::LoadCameraProfiles(const core::string& path)
 {
 	m_cameraProfileManager->LoadFromXML(path);

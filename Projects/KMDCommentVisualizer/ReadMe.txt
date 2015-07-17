@@ -1,40 +1,23 @@
+
+
+1) Required softwares:
+
+
+1-1 Developer:
+
+- Mysql Server
+- Mysql C# Connector
+- Mysql workbench (Optional)
+https://dev.mysql.com/downloads/windows/installer/5.6.html
+
+- Google Client Libraries for C# grabber
+https://developers.google.com/api-client-library/dotnet/get_started
+PM> Install-Package Google.Apis
+
+1-2 Deployment
+
 ========================================================================
-    CONSOLE APPLICATION : TwitterVisualizer Project Overview
+2) Installation:
+
+
 ========================================================================
-
-AppWizard has created this TwitterVisualizer application for you.
-
-This file contains a summary of what you will find in each of the files that
-make up your TwitterVisualizer application.
-
-
-TwitterVisualizer.vcxproj
-    This is the main project file for VC++ projects generated using an Application Wizard.
-    It contains information about the version of Visual C++ that generated the file, and
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
-
-TwitterVisualizer.vcxproj.filters
-    This is the filters file for VC++ projects generated using an Application Wizard. 
-    It contains information about the association between the files in your project 
-    and the filters. This association is used in the IDE to show grouping of files with
-    similar extensions under a specific node (for e.g. ".cpp" files are associated with the
-    "Source Files" filter).
-
-TwitterVisualizer.cpp
-    This is the main application source file.
-
-/////////////////////////////////////////////////////////////////////////////
-Other standard files:
-
-StdAfx.h, StdAfx.cpp
-    These files are used to build a precompiled header (PCH) file
-    named TwitterVisualizer.pch and a precompiled types file named StdAfx.obj.
-
-/////////////////////////////////////////////////////////////////////////////
-Other notes:
-
-AppWizard uses "TODO:" comments to indicate parts of the source code you
-should add to or customize.
-
-/////////////////////////////////////////////////////////////////////////////

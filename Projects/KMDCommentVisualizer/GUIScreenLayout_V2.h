@@ -18,7 +18,6 @@ class GUIScreenLayout_V2:public GUI::IGUISchemeBase
 public:
 	GUIPanel* Root;
 	GUILayersContainer* LayersRoot;
-	GUIPanel* WallpaperLayer;
 	GUISceneSpacePanel* ScenePanel;
 	GUIStatusLayer* StatusPanel;
 	GUICommentsLayer* CommentsPanel;
@@ -28,11 +27,10 @@ public:
 
 public:
 
-	GUIScreenLayout_V2():Root(0),LayersRoot(0),WallpaperLayer(0),ScenePanel(0),StatusPanel(0),CommentsPanel(0),SessionsBar(0),SessionDetails(0),FacultyList(0)
+	GUIScreenLayout_V2():Root(0),LayersRoot(0),ScenePanel(0),StatusPanel(0),CommentsPanel(0),SessionsBar(0),SessionDetails(0),FacultyList(0)
 	{		
 		m_elementsMap["Root"]=(IGUIElement**)&Root;
 		m_elementsMap["LayersRoot"]=(IGUIElement**)&LayersRoot;
-		m_elementsMap["WallpaperLayer"]=(IGUIElement**)&WallpaperLayer;
 		m_elementsMap["ScenePanel"]=(IGUIElement**)&ScenePanel;
 		m_elementsMap["StatusPanel"]=(IGUIElement**)&StatusPanel;
 		m_elementsMap["CommentsPanel"]=(IGUIElement**)&CommentsPanel;

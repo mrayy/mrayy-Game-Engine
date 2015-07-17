@@ -71,6 +71,7 @@ public:
 		TargetAudioPort = 7005;
 		TargetHandsVideoPort = 7010;
 		TargetCommunicationPort = 6000;
+		TargetClockPort = 6005;
 
 		RtcpStream = false;
 	}
@@ -83,7 +84,7 @@ public:
 	uint TargetAudioPort;
 	uint TargetCommunicationPort;
 	uint TargetHandsVideoPort;
-
+	uint TargetClockPort;
 
 	core::string DVIPort;
 	EController m_controller;

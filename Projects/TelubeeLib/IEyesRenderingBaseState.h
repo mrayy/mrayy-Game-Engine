@@ -62,6 +62,7 @@ protected:
 	GUI::IGUIRenderer* m_guiRenderer;
 
 	GCPtr<video::ParsedShaderPP> m_lensCorrectionPP;
+	GCPtr<video::ParsedShaderPP> m_I420ToRGB;
 	ICameraVideoSource* m_videoSource;
 
 	math::vector2d m_contentsPos,m_contentsOrigin;

@@ -62,6 +62,8 @@ void PhManager::_CheckCollision(PhNode*a, PhNode*b)
 	math::vector2d p2 = b->GetPosition();
 	math::vector2d dir = (p1-p2);
 	float len = dir.Length();
+	if (len == 0)
+		len = 1;
 	dir /= len;
 	float r = a->GetRadius() + b->GetRadius();
 	float diff = r - len;
@@ -102,7 +104,7 @@ void PhManager::Update(float dt)
 			(*it)->Update(dt);
 		}
 	}
-	if (true)
+	if (false)
 	{
 		std::list<PhNode*>::iterator it = m_nodes.begin();
 		for (; it != m_nodes.end(); ++it)

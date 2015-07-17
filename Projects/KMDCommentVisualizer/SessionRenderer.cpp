@@ -252,6 +252,7 @@ IKMDNode* SessionRenderer::GetNodeFromPosition(const math::vector2d& pos)
 
 void SessionRenderer::Update(float dt)
 {
+	//if (dt > 0.01)
 	m_dataMutex->lock();
 	m_physics->Update(dt);
 	ProjectMap::iterator  it = m_projects.begin();

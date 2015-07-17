@@ -10,9 +10,6 @@
     <ClCompile Include="CMySrc.cpp">
       <Filter>Elements</Filter>
     </ClCompile>
-    <ClCompile Include="GStreamerCore.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="GstUtils.cpp" />
     <ClCompile Include="GstVideoPlayer.cpp" />
     <ClCompile Include="CMyUDPSink.cpp">
@@ -22,10 +19,10 @@
       <Filter>Elements</Filter>
     </ClCompile>
     <ClCompile Include="VideoAppSinkHandler.cpp">
-      <Filter>Elements\Handlers</Filter>
+      <Filter>Handlers</Filter>
     </ClCompile>
     <ClCompile Include="GstPipelineHandler.cpp">
-      <Filter>Elements\Handlers</Filter>
+      <Filter>Handlers</Filter>
     </ClCompile>
     <ClCompile Include="GstNetworkAudioPlayer.cpp">
       <Filter>StreamType\Player</Filter>
@@ -51,6 +48,19 @@
     <ClCompile Include="GstLocalVideoPlayer.cpp">
       <Filter>StreamType\Player</Filter>
     </ClCompile>
+    <ClCompile Include="GStreamerCore.cpp" />
+    <ClCompile Include="IGStreamerStreamer.cpp">
+      <Filter>StreamType\Streamer</Filter>
+    </ClCompile>
+    <ClCompile Include="IGStreamerPlayer.cpp">
+      <Filter>StreamType\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GstCustomMultipleVideoStreamer.cpp">
+      <Filter>StreamType\Streamer</Filter>
+    </ClCompile>
+    <ClCompile Include="GstNetworkMultipleVideoPlayer.cpp">
+      <Filter>StreamType\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -63,9 +73,6 @@
     <ClInclude Include="CMySrc.h">
       <Filter>Elements</Filter>
     </ClInclude>
-    <ClInclude Include="GStreamerCore.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="IGstAppListener.h" />
     <ClInclude Include="GstUtils.h" />
     <ClInclude Include="GstVideoPlayer.h" />
@@ -76,10 +83,10 @@
       <Filter>Elements</Filter>
     </ClInclude>
     <ClInclude Include="VideoAppSinkHandler.h">
-      <Filter>Elements\Handlers</Filter>
+      <Filter>Handlers</Filter>
     </ClInclude>
     <ClInclude Include="GstPipelineHandler.h">
-      <Filter>Elements\Handlers</Filter>
+      <Filter>Handlers</Filter>
     </ClInclude>
     <ClInclude Include="GstNetworkAudioPlayer.h">
       <Filter>StreamType\Player</Filter>
@@ -114,6 +121,16 @@
     <ClInclude Include="GstLocalVideoPlayer.h">
       <Filter>StreamType\Player</Filter>
     </ClInclude>
+    <ClInclude Include="GStreamerCore.h" />
+    <ClInclude Include="IStreamListener.h">
+      <Filter>StreamType</Filter>
+    </ClInclude>
+    <ClInclude Include="GstCustomMultipleVideoStreamer.h">
+      <Filter>StreamType\Streamer</Filter>
+    </ClInclude>
+    <ClInclude Include="GstNetworkMultipleVideoPlayer.h">
+      <Filter>StreamType\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -131,14 +148,14 @@
     <Filter Include="Pipelines">
       <UniqueIdentifier>{fe5bf891-37c7-4f43-8aa6-0a8831edaa12}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Elements\Handlers">
-      <UniqueIdentifier>{6812035b-b5ea-4dcc-92ea-c3208a262540}</UniqueIdentifier>
-    </Filter>
     <Filter Include="StreamType\Player">
       <UniqueIdentifier>{052e8f82-c9a6-4831-a379-43f02122be35}</UniqueIdentifier>
     </Filter>
     <Filter Include="StreamType\Streamer">
       <UniqueIdentifier>{1b8b5de4-d42d-40fd-9d0d-a6776fc2701d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Handlers">
+      <UniqueIdentifier>{6812035b-b5ea-4dcc-92ea-c3208a262540}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

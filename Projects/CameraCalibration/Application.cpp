@@ -203,7 +203,7 @@ void Application::init(const OptionContainer &extraOptions)
 			opt["VSync"].value = "false";
 			opt["top"].value = "0";
 			opt["left"].value = "0";
-			opt["border"].value = "none";
+			//opt["border"].value = "none";
 			video::IMonitorDevice* monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(targetMonitor);
 			if (!monitor)
 			{
@@ -284,7 +284,7 @@ void Application::_RenderMain(video::RenderWindow* wnd)
 	}
 	if (!m_impl->_calibrated)
 	{
-	tu.SetTexture(m_impl->grabber->GetTexture());
+		tu.SetTexture(m_impl->grabber->GetTexture());
 	}
 	else
 	{
@@ -298,18 +298,21 @@ void Application::_RenderMain(video::RenderWindow* wnd)
 	getDevice()->useTexture(0, &tu);
 	getDevice()->draw2DImage(math::rectf(0, wnd->GetSize()), 1);
 
-	getDevice()->setLineWidth(1);
-	math::rectf rc = m_impl->chessBB;
-	rc.ULPoint *= wnd->GetSize();
-	rc.BRPoint *= wnd->GetSize();
-	getDevice()->draw2DRectangle(rc, video::SColor(1, 0, 0, 1), false);
-	getDevice()->setLineWidth(3);
 	for (int i = 0; i < m_impl->calibPoints.size(); ++i)
 	{
 		math::vector2d pt = m_impl->calibPoints[i] * wnd->GetSize();
 		getDevice()->draw2DRectangle(math::rectf(pt - 5, pt + 5), video::SColor((float)i / (float)m_impl->calibPoints.size(), 0, 0, 1));
 	}
 
+	if (m_impl->_found)
+	{
+		getDevice()->setLineWidth(1);
+		math::rectf rc = m_impl->chessBB;
+		rc.ULPoint *= wnd->GetSize();
+		rc.BRPoint *= wnd->GetSize();
+		getDevice()->draw2DRectangle(rc, video::SColor(1, 0, 0, 1), false);
+		getDevice()->setLineWidth(3);
+	}
 
 	GCPtr<GUI::IFont> font = gFontResourceManager.getDefaultFont();
 	getDevice()->set2DMode();
@@ -349,7 +352,7 @@ void Application::_RenderCV(video::RenderWindow* wnd)
 
 	std::vector<math::vector2d> points;
 
-	if (m_impl->grabber->Blit())
+	//if (m_impl->grabber->Blit())
 	{
 		if (!m_impl->_found && m_impl->IsDiff(5, 0.5))
 		{
@@ -379,14 +382,18 @@ void Application::_RenderCV(video::RenderWindow* wnd)
 	}
 	getDevice()->set2DMode();
 	m_impl->chessboard.Draw(math::rectf(0, wnd->GetSize()));
+
 }
 void Application::WindowPostRender(video::RenderWindow* wnd)
 {
 	if (wnd == m_impl->CVWindow)
 	{
 		_RenderCV(wnd);
-	}else
+	}
+	else
+	{
 		_RenderMain(wnd);
+	}
 
 }
 

@@ -48,10 +48,13 @@ void GUICommentDetailsPanel::SetComment(kmd::KMDComment* t)
 	m_Comment = t;
 	if (m_Comment)
 	{
-		TwitterID->SetText(t->user->name);
+		if (t->user)			
+		{
+			TwitterImage->SetSourceImage(t->user->imageUrl);
+			TwitterID->SetText(t->user->name);
+		}
 		ProjectID->SetText(t->project->GetSessionName());
 		Details->SetText(t->text);
-		TwitterImage->SetSourceImage(t->user->imageUrl);
 		CommentTime->SetText(core::DateTime::ToString(t->date));
 		m_active = true;
 	}

@@ -397,6 +397,7 @@ void AugCameraRenderState::InitState()
 		GUI::GUIOverlay* screenOverlay = GUI::GUIOverlayManager::getInstance().LoadOverlay("GUIAugTelScreenLayout.gui");
 		m_screenLayout = new GUI::GUIAugTelScreen(m_guiManager);
 		screenOverlay->CreateElements(m_guiManager, m_guiroot, 0, m_screenLayout);
+		m_screenLayout->NavElem->SetVisible(false);
 	}
 
 	{
@@ -577,13 +578,14 @@ void AugCameraRenderState::InitState()
 		m_streamer->AddStream(as, "Audio");
 		video::GstNetworkVideoStreamer* vs = new video::GstNetworkVideoStreamer();
 		vs->SetCameras(gAppData.App->GetCamera(0), gAppData.App->GetCamera(0));
-		vs->SetResolution(640, 480);
+		vs->SetCameraResolution(640, 480,30);
+		vs->SetFrameResolution(640, 480);
 		vs->SetBitRate(500);
 		m_streamer->AddStream(vs, "Video");
 
 		video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
 		hs->SetVideoGrabber( ((LeapMotionHandsController*)m_hands[0])->GetLeapImage(0), 0); //m_camGrabber,0);//
-		hs->SetBitRate(3000);
+		hs->SetBitRate(200);
 		m_streamer->AddStream(hs, "Hands");
 	}
 
@@ -612,13 +614,13 @@ void AugCameraRenderState::OnEnter(IRenderingState*prev)
 		TBee::GstStreamerVideoSource* src = dynamic_cast<GstStreamerVideoSource*>(m_videoSource);
 		if (src && ifo)
 		{
-			src->SetIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.RtcpStream);
+			src->SetIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort,gAppData.TargetClockPort, gAppData.RtcpStream);
 		}
 		m_videoSource->Open();
 	}
 	
 	if (ifo)
-		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetHandsVideoPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
+		m_robotConnector->ConnectRobotIP(ifo->IP, gAppData.TargetVideoPort, gAppData.TargetAudioPort, gAppData.TargetHandsVideoPort,gAppData.TargetClockPort, gAppData.TargetCommunicationPort, gAppData.RtcpStream);
 
 	m_robotConnector->SetData("depthSize", "", false);
 	//m_robotConnector->EndUpdate();
@@ -647,7 +649,7 @@ void AugCameraRenderState::OnEnter(IRenderingState*prev)
 	//	m_streamer->GetStream("Video")->BindPorts(ifo->IP, gAppData.TargetVideoPort, gAppData.RtcpStream);
 	//	m_streamer->GetStream("Video")->CreateStream();
 
-		m_streamer->GetStream("Hands")->BindPorts(ifo->IP, gAppData.TargetHandsVideoPort, gAppData.RtcpStream);
+		m_streamer->GetStream("Hands")->BindPorts(ifo->IP, gAppData.TargetHandsVideoPort, 0, gAppData.RtcpStream);
 		m_streamer->GetStream("Hands")->CreateStream();
 		m_streamer->Stream();
 	}
@@ -764,7 +766,6 @@ void AugCameraRenderState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
 	
 		PRINT_LOG((mT("Capture FPS:") + core::StringConverter::toString(m_videoSource->GetCaptureFrameRate(0)) + " - " + core::StringConverter::toString(m_videoSource->GetCaptureFrameRate(1))));
 
-
 		if (m_robotConnector->GetHeadController())
 		{
 			math::vector3d head;
@@ -860,8 +861,6 @@ void AugCameraRenderState::_RenderStarted(const math::rectf& rc, ETargetEye eye)
 			}
 		}
 	}
-
-
 
 	math::rectf vprect = rc;
 	video::TextureUnit tex;
@@ -1086,7 +1085,9 @@ void AugCameraRenderState::Update(float dt)
 void AugCameraRenderState::LoadFromXML(xml::XMLElement* e)
 {
 	IEyesRenderingBaseState::LoadFromXML(e);
-	m_videoSource->LoadFromXML(e);
+	xml::XMLElement* camConf = e->getSubElement("CameraConfigure");
+	if(camConf)
+		m_videoSource->LoadFromXML(camConf);
 	{
 		xml::XMLElement* he = e->getSubElement("Hands");
 		int i = 0;
@@ -1181,6 +1182,20 @@ void AugCameraRenderState::OnIRSensor(int count, float* v)
 	if (m_irSensor.size())
 		m_screenLayout->CollisionElem->SetSensors(m_irSensor.size(), &m_irSensor[0]);
 }
+
+void AugCameraRenderState::OnBatteryLevel(int level)
+{
+
+}
+void AugCameraRenderState::OnClockSync(ulong clock)
+{
+	TBee::GstStreamerVideoSource* src = dynamic_cast<TBee::GstStreamerVideoSource*>( m_videoSource);
+	if (src)
+	{
+		src->GetVideoPlayer()->SetClockBase(clock);
+	}
+}
+
 }
 }
 
