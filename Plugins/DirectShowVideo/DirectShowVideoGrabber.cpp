@@ -137,7 +137,10 @@ void DirectShowVideoGrabber::Start()
 			printf("failed to start device\n");
 	}
 }
-
+bool DirectShowVideoGrabber::IsConnected()
+{
+	return m_inited && s_videoInput->isDeviceSetup(m_device);
+}
 void DirectShowVideoGrabber::SetFrameSize(int w,int h)
 {
 	InitDevice(m_device,w,h,m_fps);
@@ -155,7 +158,7 @@ video::EPixelFormat DirectShowVideoGrabber::GetImageFormat()
 	return m_format;
 }
 
-bool DirectShowVideoGrabber::GrabFrame()
+bool DirectShowVideoGrabber::GrabFrame(int i )
 {
 	m_hasNewFrame=false;
 	if(!m_inited)
@@ -200,7 +203,7 @@ void DirectShowVideoGrabber::Unlock()
 {
 	m_lock->unlock();
 }
-bool DirectShowVideoGrabber::HasNewFrame()
+bool DirectShowVideoGrabber::HasNewFrame(int i)
 {
 	return m_hasNewFrame;
 }

@@ -157,6 +157,8 @@ RobotSerialPort::RobotSerialPort()
 	m_headThread=CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadHead, this, NULL, NULL);
 	m_baseThread=CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadBase, this, NULL, NULL);
 
+	_status = ERobotControllerStatus::EStopped;
+
 	ConnectRobot();
 
 }
@@ -190,7 +192,7 @@ std::string RobotSerialPort::ScanePorts()
 }
 void RobotSerialPort::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 {
-
+	_status = EDisconnected;
 }
 void RobotSerialPort::ConnectRobot()
 {
@@ -199,13 +201,13 @@ void RobotSerialPort::ConnectRobot()
 
 	m_impl->comHEAD = new Tserial_event();
 
-	
+	bool ok = false;
 	ret=m_impl->m_baseController->Connect(robotCOM);
 	if (ret){
 
 		if (debug_print)
 			printf("Robot Connected!\n", ret);
-		
+		ok|=true;
 #ifndef ROOMBA_CONTROLLER	
 		m_impl->m_baseController->GetComEvent()->setRxSize(15);
 #endif
@@ -229,6 +231,7 @@ void RobotSerialPort::ConnectRobot()
 			if (debug_print)
 				printf("Head Connected!\n", ret);
 			m_impl->comHEAD->setRxSize(15);
+			ok |= true;
 		}
 		else{
 
@@ -240,11 +243,8 @@ void RobotSerialPort::ConnectRobot()
 		}
 	}
 
-}
-
-bool RobotSerialPort::IsConnected()
-{
-	return m_impl->comHEAD != 0 || m_impl->m_baseController->IsConnected();
+	if (ok)
+		_status = ERobotControllerStatus::EConnected;
 }
 
 void RobotSerialPort::DisconnectRobot()
@@ -261,6 +261,7 @@ void RobotSerialPort::DisconnectRobot()
 	delete m_impl->comHEAD;
 	m_impl->comHEAD = 0;
 
+	_status = EDisconnected;
 
 
 }
@@ -420,11 +421,11 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 {
 // 	if (!IsConnected())
 // 		return;
-	if (IsConnected() && !st.connected)
+	if (GetRobotStatus()==EConnected && !st.connected)
 	{
 		DisconnectRobot();
 	}
-	else if (!IsConnected() && st.connected)
+	else if (GetRobotStatus() != EConnected && st.connected)
 	{
 		ConnectRobot();
 	}
@@ -434,7 +435,7 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	else
 		threadStart = false;
 
-	if (!IsConnected())
+	if (GetRobotStatus() != EConnected)
 		return;
 
 	//todo: send the data to control the robot
@@ -508,6 +509,20 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 void RobotSerialPort::SetListener(ITelubeeRobotListener* l)
 {
 	m_impl->listener = l;
+}
+ERobotControllerStatus RobotSerialPort::GetRobotStatus()
+{
+	return _status;
+}
+
+void RobotSerialPort::ShutdownRobot()
+{
+
+}
+
+bool RobotSerialPort::GetJointValues(std::vector<float>& values)
+{
+	return false;
 }
 
 std::string RobotSerialPort::ExecCommand(const std::string& cmd, const std::string& args)

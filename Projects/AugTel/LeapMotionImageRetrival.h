@@ -58,11 +58,11 @@ public:
 	virtual void SetImageFormat(video::EPixelFormat fmt);
 	virtual video::EPixelFormat GetImageFormat();
 
-	virtual bool GrabFrame();
-	virtual bool HasNewFrame();
-	virtual ulong GetBufferID();// incremented once per frame
+	virtual bool GrabFrame(int i);
+	virtual bool HasNewFrame(int i);
+	virtual ulong GetBufferID(int i=0);// incremented once per frame
 
-	virtual float GetCaptureFrameRate(){ return 30; }
+	virtual float GetCaptureFrameRate(int i){ return 30; }
 
 	virtual const video::ImageInfo* GetLastFrame(int i);
 	virtual void Lock();

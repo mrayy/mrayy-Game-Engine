@@ -65,6 +65,8 @@ bool RobotSpaceComponent::InitComponent()
 
 void RobotSpaceComponent::Update(float dt)
 {
+
+#ifdef USE_OPTITRACK
 	math::vector3d* pos = ATAppGlobal::Instance()->optiDataSource->GetPositionByID(m_trackID);
 	if (!pos)
 		m_isVisible = false;
@@ -74,6 +76,7 @@ void RobotSpaceComponent::Update(float dt)
 		m_ori = *ATAppGlobal::Instance()->optiDataSource->GetOrientationByID(m_trackID);
 		m_isVisible = true;
 	}
+#endif
 }
 
 void RobotSpaceComponent::DebugRender(scene::IDebugDrawManager* renderer)

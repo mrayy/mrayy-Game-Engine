@@ -21,11 +21,19 @@
 #include "VideoGrabberTexture.h"
 #include "GstVideoProvider.h"
 #include "ViewPort.h"
-#include "TelubeeRobotDLL.h"
+#include "IRobotController.h"
 #include "OpenNIHandler.h"
 #include "GeomDepthRect.h"
 #include "IUDPClient.h"
 #include "OpenNIManager.h"
+#include "CameraProfile.h"
+#include "GstStreamBin.h"
+#include "GstPlayerBin.h"
+#include "RenderWindow.h"
+#include "ParsedShaderPP.h"
+#include "HandsWindow.h"
+#include "IStreamListener.h"
+#include "CommunicationMessages.h"
 
 namespace mray
 {
@@ -34,7 +42,9 @@ class RobotCommunicator;
 class GstVideoGrabberImpl;
 class IRobotCommunicatorListener;
 class IMessageSink;
-class TRApplication :public CMRayApplication, public scene::IViewportListener
+
+
+class TRApplication :public CMRayApplication, public scene::IViewportListener,public video::IGStreamerStreamerListener
 {
 protected:
 
@@ -44,28 +54,35 @@ protected:
 		Logicool
 	};
 
-	enum class EMessages
+
+	enum class ECameraType
 	{
-		DepthData = 1,
-		DepthSize = 2,
+		Webcam,
+		PointGrey
 	};
+
+	bool m_robotInited;
 
 	EController m_controller;
 	scene::ViewPort* m_viewPort;
 
+	ECameraType m_cameraType;
+
 	GCPtr<GUI::GUIBatchRenderer> m_guiRender;
 
-	GCPtr<video::ICameraVideoGrabber> m_cameras[2];
 	GCPtr<video::IVideoGrabber> m_combinedCameras;
+	GCPtr<video::GstStreamBin> m_streamers;
+	GCPtr<video::GstPlayerBin> m_players;
+	GCPtr<HandsWindow> m_handsWindow;
+
+	//GCPtr<video::GstNetworkVideoStreamer> m_streamer;
 
 	video::VideoGrabberTexture m_cameraTextures[3];
+	video::VideoGrabberTexture* m_playerGrabber;
 
 	video::ITexturePtr m_rtTexture;
 	video::IRenderTargetPtr m_renderTarget;;
 
-
-	GstVideoProvider* m_videoProvider;
-	GstVideoGrabberImpl* m_videoGrabber;
 
 	RobotCommunicator* m_robotCommunicator;
 
@@ -76,21 +93,37 @@ protected:
 
 	TBee::GeomDepthRect m_depthRect;
 
+	CameraProfileManager* m_cameraProfileManager;
+	core::string m_cameraProfile;
+
 	network::NetAddress m_remoteAddr;
 	network::IUDPClient* m_commChannel;
 	GCPtr<OpenNIManager> m_openNIMngr;
-	bool m_isLocal;
 	bool m_streamAudio;
 	bool m_depthSend;
+	bool m_isStarted;
 
-	int m_videoPort[2];
+	float m_exposureValue;
+	float m_gainValue;
+	float m_gammaValue;
+	float m_WBValue;
+
+	math::vector2di m_resolution;
+	int m_fps;
+
+	bool m_debugging;
+	bool m_enablePlayers;
+	bool m_enableStream;
+
 
 	core::string m_ip;
 
-	struct CameraInfo
+
+	struct _CameraInfo
 	{
-		int id;
+		CameraInfo ifo;
 		int w, h, fps;
+		GCPtr<video::ICameraVideoGrabber> camera;
 	}m_cameraIfo[2];
 
 	EStreamingQuality m_quality;
@@ -112,6 +145,9 @@ protected:
 	void _InitResources();
 
 	bool m_startVideo;
+
+	bool m_isDone;
+
 public:
 	TRApplication();
 	virtual~TRApplication();
@@ -128,12 +164,26 @@ public:
 
 	virtual void onRenderDone(scene::ViewPort*vp);
 
-	void OnUserConnected(const network::NetAddress& address, int videoPort0, int videoPort1, int audioPort);
+	void OnUserConnected(const network::NetAddress& address, uint videoPort, uint audioPort, uint handsPort, uint clockPort, bool rtcp);
 	void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status);
 	void OnCollisionData(RobotCommunicator* sender, float left, float right);
 	void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address);
+	void OnCalibrationDone(RobotCommunicator* sender);
+	void OnReportMessage(RobotCommunicator* sender, int code, const core::string& msg);
 
-	void OnMessage(network::NetAddress* addr,const core::string& msg, const core::string& value);
+	void OnMessage(network::NetAddress* addr, const core::string& msg, const core::string& value);
+
+	CameraProfileManager* LoadCameraProfiles(const core::string& path);
+	CameraProfileManager* GetCameraProfileManager(){ return m_cameraProfileManager; }
+
+	GCPtr<video::GstPlayerBin> GetPlayers(){ return m_players; }
+
+
+	void OnStreamerReady(video::IGStreamerStreamer* s);
+	void OnStreamerStarted(video::IGStreamerStreamer* s);
+	void OnStreamerStopped(video::IGStreamerStreamer* s);
+
+	void SetCameraParameterValue(const core::string& namne, const core::string& value);
 
 };
 

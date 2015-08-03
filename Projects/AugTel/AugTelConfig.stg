@@ -13,7 +13,7 @@ Settings{
 	Multisample	""
 	PT_Camera_Left	"1 - FC_15090140"
 	PT_Camera_Right	"2 - FC_15090128"
-	Preview	"Yes"
+	Preview	"No"
 	Resolution	"1920,1080"
 	Robot	"Oculus"
 	Stereoscopic	"Oculus"

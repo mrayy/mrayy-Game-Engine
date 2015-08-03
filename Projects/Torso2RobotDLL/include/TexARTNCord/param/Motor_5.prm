@@ -1,0 +1,34 @@
+// Parameters of the Motor_5
+// Motor [Faulhaber : 2232R018SR IE2-256]
+ 
+IDNumber                     = 5
+
+TorqueConstant               = 0.0241      [Nm/A]
+AmpType                      = 10          TexART_NCord system
+AmpFactor                    = 0.000423855 [A/CommandDigital]
+AmpOffset(HEX)               = 0x8000      [CommandDigital]
+AuxType                      = 7           Encoder:-DVA, Potentio:C---
+
+Resolution                   = 256         [ppr]
+CounterCapacity(HEX)         = 0xfffff     20bit
+
+PGain_D                      = 0.006       [Nm/rad]
+IGain_D                      = 0.00001   
+DGain_D                      = 0.0002     [Nm*s/rad]
+
+LimitTorque                  = 0.04        [Nm]
+
+LimitAngularDisplacement_p   =  21.8166    [rad] =  25[deg]/180*pi*(50/1)[GearRatio]
+LimitAngularDisplacement_n   = -21.8166    [rad] = -25[deg]/180*pi*(50/1)[GearRatio]
+DeadendAngularDisplacement_p =  26.1799    [rad] =  30[deg]/180*pi*(50/1)[GearRatio]
+DeadendAngularDisplacement_n = -26.1799    [rad] = -30[deg]/180*pi*(50/1)[GearRatio]
+DeadendPotentioValue_p(HEX)  = 0x9635      [DigitalValue]
+DeadendPotentioValue_n(HEX)  = 0x686C      [DigitalValue]
+
+TerminalNumber_M             = 1
+TerminalNumber_E             = 1
+TerminalNumber_P             = 1
+MotorDRVNumber               = 1
+EncoderCNTNumber             = 1
+PotentioADNumber             = 1
+

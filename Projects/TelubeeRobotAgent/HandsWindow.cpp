@@ -12,6 +12,8 @@
 
 namespace mray
 {
+namespace TBee
+{
 
 
 HandsWindow::HandsWindow()
@@ -19,7 +21,6 @@ HandsWindow::HandsWindow()
 
 	m_handsWnd = 0;
 	m_handsMonitor = -1;
-	m_app = 0;
 }
 HandsWindow::~HandsWindow()
 {
@@ -31,9 +32,8 @@ void HandsWindow::Parse(const OptionContainer& extraOptions)
 	m_handsMonitor = core::StringConverter::toInt(extraOptions.GetOptionByName("HandsDisplay")->getValue());
 }
 
-bool HandsWindow::OnInit(TRApplication* app)
+bool HandsWindow::OnInit(TBeeServiceContext* context)
 {
-	m_app = app;
 	if (m_handsMonitor == -1)
 		return false;
 
@@ -44,8 +44,9 @@ bool HandsWindow::OnInit(TRApplication* app)
 	{
 		video::GstNetworkVideoPlayer* player;
 		m_player=player = new video::GstNetworkVideoPlayer();
-
-		app->GetPlayers()->AddPlayer(player, "Hands");
+#if USE_PLAYERS
+//		app->GetPlayers()->AddPlayer(player, "Hands");
+#endif
 
 		m_handsGrabber = new video::VideoGrabberTexture();
 		m_handsGrabber->Set(new video::GstNetworkVideoPlayerGrabber(player), 0);
@@ -73,54 +74,74 @@ bool HandsWindow::OnInit(TRApplication* app)
 		}
 	}
 	{
+		OptionContainer opt;
+		opt["title"].value = "Hands Window";
+		opt["VSync"].value = "false";
+		opt["top"].value = "0";
+		opt["left"].value = "0";
+		opt["border"].value = "none";
+
+		video::IMonitorDevice* monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(m_handsMonitor);
+		if (!monitor)
 		{
-			OptionContainer opt;
-			opt["title"].value = "Hands Window";
-			opt["VSync"].value = "false";
-			opt["top"].value = "0";
-			opt["left"].value = "0";
-			opt["border"].value = "none";
-
-			video::IMonitorDevice* monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(m_handsMonitor);
-			if (!monitor)
-			{
-				m_handsMonitor = 0;
-				monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(m_handsMonitor);
-			}
-			opt["Monitor"].value = core::StringConverter::toString(m_handsMonitor);
-
-			m_handsWnd = gEngine.getDevice()->CreateRenderWindow("Hands Window", monitor->GetSize(), false, opt, 0);
-			m_handsViewPort = m_handsWnd->CreateViewport(mT("Main"), 0, 0, math::rectf(0, 0, 1, 1), 0);
-			app->AddRenderWindow(m_handsWnd);
-			m_handsViewPort->AddListener(this);
-
-
-			video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
-			pp->LoadXML(gFileSystem.openFile("ProjectionCorrect.peff"));
-			m_undistortShader = pp;
+			m_handsMonitor = 0;
+			monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(m_handsMonitor);
 		}
+		opt["Monitor"].value = core::StringConverter::toString(m_handsMonitor);
+
+		m_handsWnd = gEngine.getDevice()->CreateRenderWindow("Hands Window", monitor->GetSize(), false, opt, 0);
+		m_handsViewPort = m_handsWnd->CreateViewport(mT("Main"), 0, 0, math::rectf(0, 0, 1, 1), 0);
+		context->app->AddRenderWindow(m_handsWnd);
+		m_handsViewPort->AddListener(this);
+
+
+		video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
+		pp->LoadXML(gFileSystem.openFile("ProjectionCorrect.peff"));
+		m_undistortShader = pp;
 	}
 	return true;
 }
 void HandsWindow::OnClose()
 {
+	if (!IsActive())
+		return;
 	if (!m_handsWnd)
 		return;
+	m_handsWnd->Destroy();
+	delete m_handsWnd;
+	m_handsWnd = 0;
+
+	delete m_handsGrabber;
+	m_handsGrabber = 0;
+
+	m_player->Close();
+	delete m_player;
+	m_player = 0;
+
+	m_undistortShader = 0;
+	m_I420ToRGB = 0;
+
 
 }
 void HandsWindow::OnEnable()
 {
+	if (!IsActive())
+		return;
 	printf("Hands window enabled\n");
 	m_player->CreateStream();
 	m_player->Play();
 }
 void HandsWindow::OnDisable()
 {
-
+	if (!IsActive())
+		return;
+	m_player->Stop();
 }
 
 void HandsWindow::OnConnected(const core::string &ipaddr, int handsPort, bool rtcp)
 {
+	if (!IsActive())
+		return;
 	m_player->SetIPAddress(ipaddr, handsPort, 0, rtcp);
 }
 
@@ -131,6 +152,8 @@ void HandsWindow::OnUpdate(float dt)
 
 void HandsWindow::onRenderDone(scene::ViewPort*vp)
 {
+	if (!IsActive())
+		return;
 	gEngine.getDevice()->set2DMode();
 	video::TextureUnit tex;
 
@@ -169,5 +192,6 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 	/*	*/
 }
 
+}
 }
 

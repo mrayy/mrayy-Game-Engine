@@ -19,8 +19,8 @@ GstStreamerMultipleVideoSource::GstStreamerMultipleVideoSource(const core::strin
 	m_useAudio = useAudio;
 	m_player = new video::GstPlayerBin();
 
-	video::GstNetworkMultipleVideoPlayer*vp = new video::GstNetworkMultipleVideoPlayer();
-	m_player->AddPlayer(vp, "Video");
+	m_playerImpl = new video::GstNetworkMultipleVideoPlayer();
+	m_player->AddPlayer(m_playerImpl, "Video");
 
 	if (m_useAudio)
 	{
@@ -55,9 +55,10 @@ video::GstNetworkMultipleVideoPlayer* GstStreamerMultipleVideoSource::GetVideoPl
 
 void GstStreamerMultipleVideoSource::Open()
 {
-	((video::GstNetworkMultipleVideoPlayer*)m_player->GetPlayer("Video"))->SetIPAddress(m_ip, m_vport, m_count,0, m_rtcp);
-	((video::GstNetworkMultipleVideoPlayer*)m_player->GetPlayer("Video"))->CreateStream();
-
+	m_playerImpl->SetIPAddress(m_ip, m_vport, m_count, 0, m_rtcp);
+	m_playerImpl->CreateStream();
+	printf("Open video streams\n"
+		"\tPort base number:%d , Ports Count:%d\n", m_vport, m_count);
 	if (m_useAudio)
 	{
 		((video::GstNetworkAudioPlayer*)m_player->GetPlayer("Audio"))->SetIPAddress(m_ip, m_aport, 0, m_rtcp);
@@ -77,11 +78,11 @@ bool GstStreamerMultipleVideoSource::Blit(int eye)
 }
 float GstStreamerMultipleVideoSource::GetCaptureFrameRate(int i)
 {
-	return m_playerGrabber[i]->GetGrabber()->GetCaptureFrameRate();
+	return m_playerImpl->GetCaptureFrameRate(i);
 }
 math::vector2d GstStreamerMultipleVideoSource::GetEyeScalingFactor(int i)
 {
-	return math::vector2d(m_isStereo ? 1 : 1, 2.0f/3.0f);
+	return math::vector2d(m_isStereo ? 1 : 1, 1);// 2.0f / 3.0f);
 }
 math::vector2d GstStreamerMultipleVideoSource::GetEyeResolution(int i)
 {

@@ -21,6 +21,7 @@ CommentNode::CommentNode(kmd::SessionDetails* speaker, kmd::KMDComment* t)
 	m_hoverValue = 0;
 	m_targetProject = speaker;
 	m_comment = t;
+	m_sizeScaler = 0;
 	if (!m_comment || !m_comment->user)
 	{
 		m_texture.SetTexture(gTextureResourceManager.loadTexture2D("Faculty.png"));

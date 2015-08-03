@@ -142,6 +142,7 @@ void FlyCameraImageEventCallback( class Image* pImage, const void* pCallbackData
 }
 
 
+
 FlyCameraVideoGrabber::FlyCameraVideoGrabber()
 {
 	m_inited=false;
@@ -254,8 +255,8 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 			fmt7Info.mode = MODE_0;
 		CheckError(m_data->cam.GetFormat7Info(&fmt7Info, &supported));
 
-		uint packSize;
-		float perce;
+//		uint packSize;
+//		float perce;
 		bool valid;
 		Format7PacketInfo fmt7PacketInfo;
 		Format7ImageSettings fmt7ImageSettings;
@@ -361,7 +362,7 @@ video::EPixelFormat FlyCameraVideoGrabber::GetImageFormat()
 	return m_format;
 }
 
-bool FlyCameraVideoGrabber::GrabFrame()
+bool FlyCameraVideoGrabber::GrabFrame(int i)
 {
 	if(!m_inited)
 		return false;
@@ -403,7 +404,7 @@ bool FlyCameraVideoGrabber::GrabFrame()
 	}*/
 	return false;
 }
-bool FlyCameraVideoGrabber::HasNewFrame()
+bool FlyCameraVideoGrabber::HasNewFrame(int i)
 {
 	return m_hasNewFrame;
 }
@@ -421,7 +422,12 @@ void FlyCameraVideoGrabber::Start()
 		return;
 	Error e;
 	CheckError_NoRet(m_data->cam.StartCapture(FlyCameraImageEventCallback,this));
-
+}
+bool FlyCameraVideoGrabber::IsConnected()
+{
+	if (!m_inited)
+		return false;
+	return m_data->cam.IsConnected();
 
 }
 

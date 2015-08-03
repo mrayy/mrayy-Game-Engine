@@ -199,7 +199,7 @@ video::EPixelFormat LeapMotionImageRetrival::GetImageFormat()
 }
 
 
-bool LeapMotionImageRetrival::GrabFrame()
+bool LeapMotionImageRetrival::GrabFrame(int i)
 {
 	if (m_hasNewFrame)
 	{
@@ -209,12 +209,12 @@ bool LeapMotionImageRetrival::GrabFrame()
 	return false;
 }
 
-bool LeapMotionImageRetrival::HasNewFrame()
+bool LeapMotionImageRetrival::HasNewFrame(int i)
 {
 	return m_hasNewFrame;
 }
 
-ulong LeapMotionImageRetrival::GetBufferID()
+ulong LeapMotionImageRetrival::GetBufferID(int i)
 {
 	return m_bufferID;
 }

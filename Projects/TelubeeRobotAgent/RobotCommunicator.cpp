@@ -33,6 +33,7 @@ namespace mray
 				{
 					return;
 				}
+				OS::IThreadManager::getInstance().sleep(1);
 			}
 		}
 
@@ -73,6 +74,7 @@ RobotCommunicator::RobotCommunicator()
 RobotCommunicator::~RobotCommunicator()
 {
 	dllFunctionPtr libDestroyPtr;
+	libDestroyPtr = 0;
 	if (m_robotLib)
 	{
 		libDestroyPtr = (dllFunctionPtr)m_robotLib->getSymbolName("DLL_RobotDestroy");
@@ -80,7 +82,8 @@ RobotCommunicator::~RobotCommunicator()
 	StopServer();
 	delete m_client;
 	//delete m_robotController;
-	libDestroyPtr();
+	if (libDestroyPtr)
+		libDestroyPtr();
 	delete m_dataMutex;
 }
 void RobotCommunicator::Initialize()
@@ -190,11 +193,21 @@ void RobotCommunicator::_RobotStatus(const RobotStatus& st)
 {
 	if (!m_robotController)
 		return;
-		if ((st.connected || m_localControl) && !m_robotController->IsConnected())
+	ERobotControllerStatus status=m_robotController->GetRobotStatus();
+	if ((st.connected || m_localControl) && status != ERobotControllerStatus::EConnected)
+	{
+		if (status == ERobotControllerStatus::EStopped)
+			m_robotController->InitializeRobot(this);
 		m_robotController->ConnectRobot();
+	}
 	
-	if ((!st.connected && !m_localControl) && m_robotController->IsConnected())
-		m_robotController->DisconnectRobot();
+	if ((!st.connected && !m_localControl) && status != ERobotControllerStatus::EDisconnected )
+	{
+		if (status != ERobotControllerStatus::EStopped)
+		{
+			m_robotController->DisconnectRobot();
+		}
+	}
 
 	m_robotController->UpdateRobotStatus(st);
 	if (m_listener)
@@ -214,7 +227,7 @@ void RobotCommunicator::ProcessPacket(network::NetAddress* addr,const char* buff
 	}
 	tinyxml2::XMLElement*root = doc.RootElement();
 
-	m_robotStatus.connected  = root->BoolAttribute("Connected");;
+	m_robotStatus.connected  = core::StringConverter::toBool(root->Attribute("Connected"));
 // 	if (!c && !m_robotStatus.connected)
 // 		return;
 // 	if (!m_robotStatus.connected)
@@ -242,6 +255,7 @@ int RobotCommunicator::_Process()
 	if (m_client->RecvFrom(buffer, &len, &src,0) != network::UDP_SOCKET_ERROR_NONE)
 		return 0;//failed to receive the packet
 
+	buffer[len] = 0;
 	ProcessPacket(&src,buffer);
 	return 0;
 }

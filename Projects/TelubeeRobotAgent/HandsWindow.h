@@ -12,7 +12,9 @@
 namespace mray
 {
 
-	class TRApplication;
+namespace TBee
+{
+	class TBeeServiceContext;
 
 class HandsWindow:public scene::IViewportListener
 {
@@ -25,17 +27,17 @@ protected:
 	GCPtr<video::ParsedShaderPP> m_undistortShader;
 	GCPtr<video::ParsedShaderPP> m_I420ToRGB;
 	video::GstNetworkVideoPlayer* m_player;
-
-	TRApplication* m_app;
-
+	
 	math::rectf m_projectionRect;
+
+	TBeeServiceContext* m_context;
 public:
 	HandsWindow();
 	virtual ~HandsWindow();
 
 	void Parse(const OptionContainer& opt);
 
-	bool OnInit(TRApplication* app);
+	bool OnInit(TBeeServiceContext* context);
 	void OnClose();
 	void OnEnable();
 	void OnDisable();
@@ -48,6 +50,7 @@ public:
 	void onRenderDone(scene::ViewPort*vp);
 };
 
+}
 }
 
 #endif

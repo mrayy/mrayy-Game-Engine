@@ -124,9 +124,9 @@ void RemoteCameraRenderingState::Update(float dt)
 	m_timeAcc += dt;
 }
 
-void RemoteCameraRenderingState::_RenderUI(const math::rectf& rc, math::vector2d&pos)
+void RemoteCameraRenderingState::_RenderUI(const math::rectf& rc, math::vector2d&pos,ETargetEye eye)
 {
-	IEyesRenderingBaseState::_RenderUI(rc,pos);
+	IEyesRenderingBaseState::_RenderUI(rc,pos,eye);
 
 	GUI::IFont* font = gFontResourceManager.getDefaultFont();
 	GUI::FontAttributes attr;

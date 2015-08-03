@@ -70,13 +70,14 @@ public:
 	void SetImageFormat(video::EPixelFormat fmt);
 	video::EPixelFormat GetImageFormat();
 
-	bool GrabFrame();
-	bool HasNewFrame();	
-	ulong GetBufferID(){ return m_bufferId; }
-	float GetCaptureFrameRate(){ return m_captureFPS; }
+	bool GrabFrame(int i=0);
+	bool HasNewFrame(int i=0);
+	ulong GetBufferID(int i=0){ return m_bufferId; }
+	float GetCaptureFrameRate(int i){ return m_captureFPS; }
 
 	void Stop();
 	void Start();
+	virtual bool IsConnected();
 
 	const video::ImageInfo*  GetLastFrame(int i);
 

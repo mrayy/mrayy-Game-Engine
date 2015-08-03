@@ -58,6 +58,9 @@
     <Filter Include="Source Files\Configurations">
       <UniqueIdentifier>{1b979eee-35c5-495c-8193-b2141bb07f80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Module">
+      <UniqueIdentifier>{1421f4f8-4bd2-4c50-a7c6-7a530bf44a84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -240,6 +243,12 @@
     <ClInclude Include="GstStreamerMultipleVideoSource.h">
       <Filter>Source Files\VideoSource</Filter>
     </ClInclude>
+    <ClInclude Include="IServiceModule.h">
+      <Filter>Source Files\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceContext.h">
+      <Filter>Source Files\Module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -373,6 +382,9 @@
     </ClCompile>
     <ClCompile Include="GstStreamerMultipleVideoSource.cpp">
       <Filter>Source Files\VideoSource</Filter>
+    </ClCompile>
+    <ClCompile Include="IServiceModule.cpp">
+      <Filter>Source Files\Module</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

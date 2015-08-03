@@ -22,6 +22,8 @@ OptiTrackHeadController::~OptiTrackHeadController()
 
 bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v, bool abs)
 {
+
+#ifdef USE_OPTITRACK
 	math::quaternion* q= AppData::Instance()->optiDataSource->GetOrientationByID(m_headID);
 	if (!q)
 		return false;
@@ -50,9 +52,14 @@ bool OptiTrackHeadController::GetHeadOrientation(math::quaternion& v, bool abs)
 	//v = math::quaternion(a.y, a.x, a.z);	//in the lab
 	
 	return true;
+#else 
+	return false;
+#endif
 }
 bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 {
+
+#ifdef USE_OPTITRACK
 	math::vector3d* p=AppData::Instance()->optiDataSource->GetPositionByID(m_headID);
 	if (!p)
 		return false;
@@ -79,6 +86,9 @@ bool OptiTrackHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 
 	//v.set(v.x, v.z, v.y);
 	return true;
+#else 
+	return false;
+#endif
 }
 
 }

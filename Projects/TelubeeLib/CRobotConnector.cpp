@@ -167,25 +167,30 @@ void CRobotConnector::HandleController()
 	{
 		m_speed = 0;
 		m_rotation = 0;
-		return;
 	}
-	m_speed = m_robotController->GetSpeed();
-	if (m_speed.x < 0)
-		m_speed *= 0.1f;
-	m_rotation = m_robotController->GetRotation();;
-}
-void CRobotConnector::UpdateStatus()
-{
-	HandleController();
+	else
+	{
+		m_speed = m_robotController->GetSpeed();
+		if (m_speed.x < 0)
+			m_speed *= 0.1f;
+		m_rotation = m_robotController->GetRotation();;
+	}
+
+
 	if (m_headController)
 	{
 		if (!m_headController->GetHeadOrientation(m_headRotation, false))
 			m_headRotation = math::quaternion::Identity;
-// 		m_headRotation.y = -m_headRotation.y;// REMOVE
-// 		math::Swap(m_headRotation.x, m_headRotation.y); // REMOVE
-		if (!m_headController->GetHeadPosition(m_headPosition,false))
+		// 		m_headRotation.y = -m_headRotation.y;// REMOVE
+		// 		math::Swap(m_headRotation.x, m_headRotation.y); // REMOVE
+		if (!m_headController->GetHeadPosition(m_headPosition, false))
 			m_headPosition = math::vector3d::Zero;
+
 	}
+}
+void CRobotConnector::UpdateStatus()
+{
+	HandleController();
 	if (!m_communicator)
 		return;
 	if (/*!m_status ||*/ !m_connected)

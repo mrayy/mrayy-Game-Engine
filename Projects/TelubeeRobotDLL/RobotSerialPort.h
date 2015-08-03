@@ -30,6 +30,7 @@ protected:
 	int robot_vx, robot_vy, robot_rot;
 	float pan, tilt, roll;
 	bool baseConnected;
+	ERobotControllerStatus _status;
 
 	HANDLE m_headThread;
 	HANDLE m_baseThread;
@@ -43,7 +44,6 @@ protected:
 	static DWORD WINAPI timerThreadBase(RobotSerialPort *robot, LPVOID pdata);
 
 	std::string ScanePorts();
-
 public:
 	RobotSerialPort();
 	virtual~RobotSerialPort();
@@ -52,8 +52,13 @@ public:
 	virtual void InitializeRobot(IRobotStatusProvider* robotStatusProvider) ;
 	void ConnectRobot();
 	void DisconnectRobot();
-	bool IsConnected();
+	//bool IsConnected();
 	void UpdateRobotStatus(const RobotStatus& st);
+
+	virtual ERobotControllerStatus GetRobotStatus();
+	virtual void ShutdownRobot() ;
+	virtual bool GetJointValues(std::vector<float>& values) ;
+
 
 	virtual std::string ExecCommand(const std::string& cmd, const std::string& args);
 };

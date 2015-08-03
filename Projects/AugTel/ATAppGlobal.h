@@ -21,6 +21,9 @@ purpose:
 #include "IGUIManager.h"
 
 
+//#define USE_OPENNI
+//#define USE_HANDS
+
 namespace mray
 {
 class InputManager;
@@ -34,7 +37,9 @@ class OculusDevice;
 }
 namespace TBee
 {
+#ifdef USE_OPENNI
 	class OpenNIHandler;
+#endif
 	class ICameraVideoSource;
 	class TBRobotInfo;
 	class CRobotConnector;
@@ -100,9 +105,9 @@ public:
 	GUI::IGUIManager* guiManager;
 
 	HeadMount* headObject;
-
+#ifdef USE_OPENNI
 	TBee::OpenNIHandler* depthProvider;
-
+#endif
 	TBee::ICameraVideoSource* cameraProvider;
 	DataCommunicator* dataCommunicator;
 	TBee::CRobotConnector* robotConnector;

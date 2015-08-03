@@ -47,7 +47,7 @@ protected:
 	math::vector2d m_BoxSize;
 	GUI::IGUIRenderer* m_guiRenderer;
 
-	void _RenderUI(const math::rectf& rc,math::vector2d&pos);
+	void _RenderUI(const math::rectf& rc, math::vector2d&pos, ETargetEye eye);
 public:
 	LocalCameraRenderingState(const core::string& name);
 	virtual~LocalCameraRenderingState();

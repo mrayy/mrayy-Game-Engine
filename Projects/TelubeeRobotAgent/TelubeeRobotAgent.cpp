@@ -17,12 +17,24 @@ using namespace mray;
 using namespace core;
 using namespace math;
 
+GCPtr<TRApplication> app;
+
+
+void  HandlerRoutine(void)
+{
+	if (!app.isNull())
+	{
+		app->terminate();
+		Sleep(500);
+		app = 0;
+		GCCollector::shutdown();
+	}
+}
 #define EntryPoint int main()
 EntryPoint
 {
-
-	GCPtr<TRApplication> app = new TRApplication();
-	app->LoadCameraProfiles("CameraProfiles.xml");
+	atexit(HandlerRoutine);
+	app = new TRApplication();
 	core::string resFileName = mT("plugins.stg");
 
 #ifdef UNICODE
@@ -30,12 +42,13 @@ EntryPoint
 #endif
 
 	gLogManager.setVerbosLevel(EVL_Heavy);
-	
+
 
 	std::vector<SOptionElement> extraOptions;
 	SOptionElement op;
 	op.valueSet.clear();
 
+#if USE_POINTGREY && USE_WEBCAMERA
 	{
 		op.name = "CameraConnection";
 		op.value = "DirectShow";
@@ -44,8 +57,11 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#endif
 
 	string CameraName[2] = { "Camera_Left", "Camera_Right" };
+
+#if USE_WEBCAMERA
 	for (int c = 0; c < 2; ++c)
 	{
 		op.name = "DS_" + CameraName[c]; // "Camera" + core::StringConverter::toString(c);
@@ -63,17 +79,19 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#endif
+#if USE_POINTGREY
 	for (int c = 0; c < 2; ++c)
 	{
 		op.name = "PT_" + CameraName[c]; // "Camera" + core::StringConverter::toString(c);
 
-		op.valueSet.insert("0 - None");
+		op.valueSet.insert("None");
 		int camsCount = video::FlyCameraManager::instance.GetCamerasCount();
 		for (int i = 0; i<camsCount; ++i)
 		{
 			uint sp;
 			video::FlyCameraManager::instance.GetCameraSerialNumber(i, sp);
-			op.valueSet.insert(core::StringConverter::toString(i + 1) + " - FC_" + core::StringConverter::toString(sp));
+			op.valueSet.insert(/*core::StringConverter::toString(i + 1) + " - FC_" +*/ core::StringConverter::toString(sp));
 		}
 		if (op.valueSet.size()>0)
 		{
@@ -82,6 +100,7 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#endif
 	{
 		op.name = "Debugging";
 		op.value = "No";
@@ -90,6 +109,7 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#if USE_PLAYERS
 	{
 		op.name = "EnablePlayers";
 		op.value = "No";
@@ -98,6 +118,7 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#endif
 	{
 		op.name = "EnableStreams";
 		op.value = "Yes";
@@ -106,12 +127,14 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#if USE_HANDS
 	{
 		op.name = "HandsDisplay";
 		op.value = "-1";
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#endif
 	{
 		op.name = "StreamResolution";
 		op.value = "0-VGA";
@@ -121,6 +144,13 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+	{
+		op.name = "CameraProfile";
+		op.value = "pointgrey";
+		extraOptions.push_back(op);
+		op.valueSet.clear();
+	}
+#if 0
 	{
 		op.name = "CameraProfile";
 
@@ -135,6 +165,9 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#endif
+
+#if USE_OPENNI
 	{
 		op.name = "DepthStream";
 		op.value = "No";
@@ -143,6 +176,7 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
+#endif
 	{
 		op.name = "Controller";
 		op.value = "Logicool";
@@ -166,7 +200,7 @@ EntryPoint
 		op.valueSet.insert("1- Low");
 		op.valueSet.insert("2- Medium");
 		op.valueSet.insert("3- High");
-	//	op.valueSet.insert("Ultra High");
+		op.valueSet.insert("Ultra High");
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
@@ -180,7 +214,6 @@ EntryPoint
 	//	VLDDisable();
 	app = 0;
 
-	GCCollector::shutdown();
 	return 0;
 }
 

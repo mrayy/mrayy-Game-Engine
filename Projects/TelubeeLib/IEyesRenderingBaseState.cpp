@@ -202,7 +202,7 @@ qtomatrix(math::matrix4x4& m,const math::quaternion& q)
 }
 
 
-void IEyesRenderingBaseState::_RenderUI(const math::rectf& rc, math::vector2d& pos)
+void IEyesRenderingBaseState::_RenderUI(const math::rectf& rc, math::vector2d& pos, ETargetEye eye)
 {
 	if (!AppData::Instance()->IsDebugging)
 		return;
@@ -259,8 +259,10 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 	video::ITexturePtr cameraTex = m_videoSource->GetEyeTexture(index);
 	math::vector2d size(cameraTex->getSize().x, cameraTex->getSize().y);
 
+	bool isI420 = false;
 	if (m_videoSource->GetEyeTexture(index)->getImageFormat()==video::EPixel_YUYV)
 	{
+		isI420 = true;
 		m_I420ToRGB->Setup(math::rectf(0, size));
 		m_I420ToRGB->render(&video::TextureRTWrap(cameraTex));
 		cameraTex = m_I420ToRGB->getOutput()->GetColorTexture();
@@ -306,6 +308,10 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 	tex.SetTexture(cameraTex);
 	//float croppingHeight=1-m_targetAspectRatio/m_cameraSource[index].ratio;
 	math::vector2d frameRes = m_videoSource->GetEyeResolution(index)*m_videoSource->GetEyeScalingFactor(index);
+	if (isI420)
+	{
+		frameRes.y /= 1.5f;
+	}
 	if (m_cameraConfiguration->cameraRotation[index]==TelubeeCameraConfiguration::CW
 		|| m_cameraConfiguration->cameraRotation[index] == TelubeeCameraConfiguration::CCW)
 		math::Swap(frameRes.x, frameRes.y);
@@ -423,7 +429,7 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 	//draw UI
 
 	math::vector2d pos = rc.ULPoint;
-	_RenderUI(rc,pos);
+	_RenderUI(rc,pos,eye);
 
 	return m_renderTarget[index].pointer();
 }

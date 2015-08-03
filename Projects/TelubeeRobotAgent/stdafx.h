@@ -19,3 +19,5 @@
 #include <map>
 #include <algorithm>
 #include <mrayEngine.h>
+
+#include "AppDef.h"

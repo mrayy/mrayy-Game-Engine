@@ -1,0 +1,42 @@
+// Parameters of a Motor sample
+// Motor [FAULHABER : 1724E024SR IE2-256]
+ 
+IDNumber                     = 0           (0 is default)
+
+TorqueConstant               = 0.02644     [Nm/A]
+AmpType                      = 10          TexART_NCord system
+AmpFactor                    = 0.000094096 [A/CommandDigital]
+AmpOffset(HEX)               = 0x8000      [CommandDigital]
+DirectionMatching_motor      = 1           (1 is default)
+AuxType                      = 7           Encoder:-DVA, Potentio:C---
+
+ResolutionMulti              = 1           (1 is default)
+Resolution                   = 256         [ppr]
+CounterCapacity(HEX)         = 0xfffff     (Although defaylt value is 0xffff(16bit), TexART_NCord system has 20bit)
+DirectionMatching_encoder    = 1           (1 is default)
+
+PGain_D                      = 0.00001     [Nm/rad]
+IGain_D                      = 0.000000001
+DGain_D                      = 0.0000001   [Nm*s/rad]
+PGain_V                      = 0.00005     [Nm*s/rad]
+IGain_V                      = 0.01
+DGain_V                      = 0.0         [Nm*s^2/rad] (Ordinarily this should be set 0, cause it has a tendency to bring a hard oscillation)
+
+LimitTorque                  = 0.005       [Nm]
+LimitAngularVelocity         = 0.0         [rad/s] (0 is default and no limitation)
+
+LimitAngularDisplacement_p   = 1.0         [rad] (1 is default) (when _p = 0 and _n =0, it is no limitation)
+LimitAngularDisplacement_n   = 0.0         [rad] (0 is default)
+DeadendAngularDisplacement_p = 1.0         [rad] (1 is default)
+DeadendAngularDisplacement_n = 0.0         [rad] (0 is default)
+DeadendPotentioValue_p(HEX)  = 0xffff      [DigitalValue] (0xffff is default)
+DeadendPotentioValue_n(HEX)  = 0x0000      [DigitalValue] (0x0000 is default)
+
+TerminalNumber_M             = 5
+TerminalNumber_E             = 6
+TerminalNumber_P             = 6
+MotorDRVNumber               = 3
+EncoderCNTNumber             = 3
+PotentioADNumber             = 3
+
+SampleNumber                 = 3           (3 is default)

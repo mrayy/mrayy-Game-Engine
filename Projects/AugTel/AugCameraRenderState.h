@@ -29,14 +29,17 @@
 #include "LoadingScreen.h"
 #include "GUIInterfaceScreenImpl.h"
 #include "GstStreamBin.h"
+#include "ATAppGlobal.h"
 
 
 namespace mray
 {
 	namespace TBee
 	{
+#ifdef USE_OPENNI
 		class OpenNIHandler;
 		class DepthVisualizer;
+#endif
 	}
 	namespace video
 	{
@@ -80,22 +83,38 @@ protected:
 	VTBaseState* m_vtState;
 	
 	AugTelSceneContext* m_context;
+
+	//	TBee::ICameraVideoSource* m_camVideoSrc;
+	GCPtr<video::GstStreamBin> m_streamer;
+
+#ifdef USE_HANDS
 	typedef std::map<core::string, int> HandsMap;
 	std::vector<IHandsController*> m_hands;
 	HandsMap m_handsMap;
 
-//	TBee::ICameraVideoSource* m_camVideoSrc;
-	GCPtr<video::GstStreamBin> m_streamer;
 
+	bool m_enableHands;
+
+	void _createHands();
+
+	void _EnableHands(bool e);
+	bool _IsHandsEnabled(){ return m_enableHands; }
+#endif
+
+#ifdef USE_OPTITRACK
 	core::string m_optiProvider;
+#endif
 
+#ifdef USE_OPENNI
 	TBee::OpenNIHandler* m_openNiHandler;
-
+	float m_depthTime;
 	math::vector4d m_depthParams;
+	TBee::DepthVisualizer* m_depthVisualizer;
+#endif
+
 
 	GCPtr<GUI::GUIAugTelScreen> m_screenLayout;
 
-	TBee::DepthVisualizer* m_depthVisualizer;
 
 	LoadingScreen* m_loadScreen;
 
@@ -105,8 +124,6 @@ protected:
 
 	bool m_takeScreenShot;
 
-	float m_depthTime;
-	bool m_enableHands;
 	bool m_enableVideo;
 	bool m_enableMic;
 
@@ -122,8 +139,6 @@ protected:
 
 	scene::LightNode* m_lightSrc;
 
-	void _createHands();
-
 	void _UpdateStarted(float dt);
 	void _RenderStarted(const math::rectf& rc, ETargetEye eye);
 	void _ChangeState(EStatus st);
@@ -131,12 +146,10 @@ protected:
 	void _CreatePhysicsSystem();
 
 	void _GenerateLightMap();
-	virtual void _RenderUI(const math::rectf& rc, math::vector2d& pos);
+	virtual void _RenderUI(const math::rectf& rc, math::vector2d& pos, ETargetEye eye);
 
-	void _EnableHands(bool e);
 	void _EnableVideo(bool e);
 	void _EnableMic(bool e);
-	bool _IsHandsEnabled(){ return m_enableHands; }
 	bool _IsVideoEnabled(){ return m_enableVideo; }
 	bool _IsMicEnabled(){ return m_enableMic; }
 

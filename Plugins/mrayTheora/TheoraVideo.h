@@ -75,15 +75,15 @@ public:
 	virtual bool isLoop();
 	virtual bool isDone();
 	virtual float getDuration();
-	virtual float GetCaptureFrameRate() ;
+	virtual float GetCaptureFrameRate(int i);
 
 
 	virtual void setSpeedFactor(float speed);
 	virtual float getSpeedFactor();
 	virtual bool seek(float time);
-	virtual bool GrabFrame();
-	virtual bool HasNewFrame();
-	virtual ulong GetBufferID(){ return m_bufferID; }
+	virtual bool GrabFrame(int i=0);
+	virtual bool HasNewFrame(int i=0);
+	virtual ulong GetBufferID(int i){ return m_bufferID; }
 
 	virtual const ImageInfo* GetLastFrame(int index=0){ return &m_imageData; }
 	void createVideoBuffers();

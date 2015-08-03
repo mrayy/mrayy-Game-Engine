@@ -39,7 +39,7 @@ protected:
 	int m_fps;
 	float m_timeAcc;
 
-	virtual void _RenderUI(const math::rectf& rc, math::vector2d&pos);
+	virtual void _RenderUI(const math::rectf& rc, math::vector2d&pos, ETargetEye eye);
 public:
 	RemoteCameraRenderingState(const core::string& name);
 	virtual~RemoteCameraRenderingState();

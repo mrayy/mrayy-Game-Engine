@@ -207,9 +207,9 @@ void LocalCameraRenderingState::Update(float dt)
 }
 
 
-void LocalCameraRenderingState::_RenderUI(const math::rectf& rc, math::vector2d&pos)
+void LocalCameraRenderingState::_RenderUI(const math::rectf& rc, math::vector2d&pos, ETargetEye eye)
 {
-	IEyesRenderingBaseState::_RenderUI(rc,pos);
+	IEyesRenderingBaseState::_RenderUI(rc,pos,eye);
 	GUI::IFont* font = gFontResourceManager.getDefaultFont();
 	GUI::FontAttributes attr;
 	video::IVideoDevice* dev = Engine::getInstance().getDevice();

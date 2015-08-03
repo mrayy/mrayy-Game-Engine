@@ -161,7 +161,7 @@ bool TheoraVideo::isDone(){
 float TheoraVideo::getDuration(){
 	return m_clip->getDuration();
 }
-float TheoraVideo::GetCaptureFrameRate()
+float TheoraVideo::GetCaptureFrameRate(int i)
 {
 	return m_captureFPS;
 }
@@ -176,7 +176,7 @@ bool TheoraVideo::seek(float time)
 	m_clip->seek(time);
 	return true;
 }
-bool TheoraVideo::GrabFrame(){
+bool TheoraVideo::GrabFrame(int i){
 	m_hasNewFrame=false;
 	TheoraVideoFrame* f=m_clip->getNextFrame();
 	if(!f)
@@ -203,7 +203,7 @@ bool TheoraVideo::GrabFrame(){
 
 	return true;
 }
-bool TheoraVideo::HasNewFrame()
+bool TheoraVideo::HasNewFrame(int i)
 {
 	return m_hasNewFrame;
 }

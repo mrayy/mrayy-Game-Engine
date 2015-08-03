@@ -36,10 +36,10 @@ public:
 	virtual video::EPixelFormat GetImageFormat()=0;
 
 	virtual int GetFramesCount(){ return 1; }
-	virtual bool GrabFrame()=0;
-	virtual bool HasNewFrame()=0;
-	virtual ulong GetBufferID() = 0;// incremented once per frame
-	virtual float GetCaptureFrameRate() = 0;
+	virtual bool GrabFrame(int i=0) = 0;
+	virtual bool HasNewFrame(int i=0) = 0;
+	virtual ulong GetBufferID(int i=0) = 0;// incremented once per frame
+	virtual float GetCaptureFrameRate(int i=0) = 0;
 
 
 	virtual const ImageInfo* GetLastFrame(int index=0) = 0;

@@ -17,6 +17,7 @@ class GstStreamerMultipleVideoSource :public ICameraVideoSource
 protected:
 	GCPtr<video::GstPlayerBin> m_player;
 	std::vector<GCPtr<video::VideoGrabberTexture>> m_playerGrabber;
+	video::GstNetworkMultipleVideoPlayer*m_playerImpl;
 	core::string m_ip;
 	uint m_vport;
 	uint m_aport;

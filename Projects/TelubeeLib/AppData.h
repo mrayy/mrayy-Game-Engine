@@ -16,6 +16,7 @@
 #include "StereoRenderer.h"
 #include "TBeeCommon.h"
 
+//#define USE_OPTITRACK
 
 namespace mray
 {
@@ -26,7 +27,9 @@ namespace mray
 	}
 namespace TBee
 {
+#ifdef USE_OPTITRACK
 	class OptiTrackDataSource;
+#endif
 	class RobotInfoManager;
 	class CameraConfigurationManager;
 
@@ -50,7 +53,9 @@ public:
 	ERobotControllerType robotController;
 
 	video::OculusDevice* oculusDevice;
+#ifdef USE_OPTITRACK
 	OptiTrackDataSource* optiDataSource;
+#endif
 	InputManager* inputMngr;
 	RobotInfoManager* robotInfoManager;
 

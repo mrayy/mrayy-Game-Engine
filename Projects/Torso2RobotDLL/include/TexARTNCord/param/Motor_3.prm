@@ -1,0 +1,33 @@
+// Parameters of the Motor_3
+// Motor [Faulhaber : 3257G024CR IE2-256]
+ 
+IDNumber                     = 3
+
+TorqueConstant               = 0.0377      [Nm/A]
+AmpType                      = 10          TexART_NCord system
+AmpFactor                    = 0.000415129 [A/CommandDigital]
+AmpOffset(HEX)               = 0x8000      [CommandDigital]
+AuxType                      = 5           Encoder:-DVA, Potentio:----
+
+Resolution                   = 256         [ppr]
+CounterCapacity(HEX)         = 0xfffff     20bit
+
+PGain_D                      = 0.004        [Nm/rad]
+IGain_D                      = 0.001    
+DGain_D                      = 0.0002       [Nm*s/rad]
+
+LimitTorque                  = 0.4         [Nm]
+LimitAngularVelocity         = 150.0       [rad/s] (Untouchable!)
+
+LimitAngularDisplacement_p   =  251.3      [rad] =  0.080[m]/(0.002/(2*pi))[GearRatio]
+LimitAngularDisplacement_n   = -251.3      [rad] = -0.080[m]/(0.002/(2*pi))[GearRatio]
+DeadendAngularDisplacement_p =  317.3      [rad] =  0.101[m]/(0.002/(2*pi))[GearRatio]
+DeadendAngularDisplacement_n = -317.3      [rad] = -0.101[m]/(0.002/(2*pi))[GearRatio]
+
+TerminalNumber_M             = 0
+TerminalNumber_E             = 0
+TerminalNumber_P             = 0
+MotorDRVNumber               = 2
+EncoderCNTNumber             = 2
+PotentioADNumber             = 2
+

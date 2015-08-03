@@ -16,6 +16,15 @@
     <Filter Include="Source Files\tinyxml">
       <UniqueIdentifier>{daf1d6d3-c1a4-47c5-b998-8b33a998ef3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Modules">
+      <UniqueIdentifier>{f600e269-d301-4b3d-9af4-fedbcae490ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Helpers">
+      <UniqueIdentifier>{0c91cf38-ed87-4f2b-b074-efb6e004c628}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\old">
+      <UniqueIdentifier>{494e21ec-75cd-4323-8c4a-7357e270195e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -31,29 +40,50 @@
     <ClInclude Include="tinyxml2.h">
       <Filter>Source Files\tinyxml</Filter>
     </ClInclude>
-    <ClInclude Include="GstVideoProvider.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="TRApplication.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="RobotCommunicator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="CombineVideoGrabber.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CMySink.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CMySrc.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="CameraProfile.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="HandsWindow.h">
+    <ClInclude Include="CommunicationMessages.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TBeeServiceContext.h">
+      <Filter>Source Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="AppDef.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AVStreamServiceModule.h">
+      <Filter>Source Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="HandsWindowServiceModule.h">
+      <Filter>Source Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="HandsWindow.h">
+      <Filter>Source Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>Source Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CMySink.h">
+      <Filter>Source Files\old</Filter>
+    </ClInclude>
+    <ClInclude Include="CMySrc.h">
+      <Filter>Source Files\old</Filter>
+    </ClInclude>
+    <ClInclude Include="CombineVideoGrabber.h">
+      <Filter>Source Files\old</Filter>
+    </ClInclude>
+    <ClInclude Include="GstVideoProvider.h">
+      <Filter>Source Files\old</Filter>
+    </ClInclude>
+    <ClInclude Include="AVPlayerServiceModule.h">
+      <Filter>Source Files\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -66,29 +96,41 @@
     <ClCompile Include="tinyxml2.cpp">
       <Filter>Source Files\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="GstVideoProvider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TRApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RobotCommunicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CombineVideoGrabber.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CMySink.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CMySrc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CameraProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TBeeServiceContext.cpp">
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="AVStreamServiceModule.cpp">
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
     <ClCompile Include="HandsWindow.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="HandsWindowServiceModule.cpp">
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="CMySink.cpp">
+      <Filter>Source Files\old</Filter>
+    </ClCompile>
+    <ClCompile Include="CMySrc.cpp">
+      <Filter>Source Files\old</Filter>
+    </ClCompile>
+    <ClCompile Include="CombineVideoGrabber.cpp">
+      <Filter>Source Files\old</Filter>
+    </ClCompile>
+    <ClCompile Include="GstVideoProvider.cpp">
+      <Filter>Source Files\old</Filter>
+    </ClCompile>
+    <ClCompile Include="AVPlayerServiceModule.cpp">
+      <Filter>Source Files\Modules</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -68,15 +68,17 @@ public:
 	void SetImageFormat(video::EPixelFormat fmt);
 	video::EPixelFormat GetImageFormat();
 
-	float GetCaptureFrameRate(){ return m_captureFPS; }
+	float GetCaptureFrameRate(int i){ return m_captureFPS; }
 
-	ulong GetBufferID(){ return m_bufferId; }
+	ulong GetBufferID(int i = 0){ return m_bufferId; }
 
-	bool GrabFrame();
-	bool HasNewFrame();
+	bool GrabFrame(int i=0);
+	bool HasNewFrame(int i = 0);
 
 	void Stop();
 	void Start();
+
+	bool IsConnected();
 
 	const video::ImageInfo*  GetLastFrame(int i);
 

@@ -392,6 +392,9 @@ public:
 		SetPipeline(pipeline);
 		_UpdatePorts();
 
+		printf("Starting video streams\n"
+			"\tPort base number:%d , Ports Count:%d\n", m_baseVideoPort, m_grabber.size());
+
 		return CreatePipeline(true,"",m_clockPort);
 
 	}

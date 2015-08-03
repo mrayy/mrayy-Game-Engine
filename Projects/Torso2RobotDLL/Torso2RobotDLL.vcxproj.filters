@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="include\LoadData.cpp">
+      <Filter>Source\GlobalFunction</Filter>
+    </ClCompile>
+    <ClCompile Include="torsoController.cpp">
+      <Filter>Source\TorsoClass</Filter>
+    </ClCompile>
+    <ClCompile Include="console.cpp">
+      <Filter>Source\GlobalFunction</Filter>
+    </ClCompile>
+    <ClCompile Include="include\TexARTNCord\TexART_ServoMotor2015.cpp">
+      <Filter>Source\MotorClass</Filter>
+    </ClCompile>
+    <ClCompile Include="Torso2RobotDLL.cpp">
+      <Filter>Source\GeneralClass</Filter>
+    </ClCompile>
+    <ClCompile Include="include\TexARTNCord\TexART_MothorCLK.cpp">
+      <Filter>Source\GeneralClass</Filter>
+    </ClCompile>
+    <ClCompile Include="include\TexARTNCord\DummyClass ADBoard.cpp">
+      <Filter>Source\GeneralClass</Filter>
+    </ClCompile>
+    <ClCompile Include="TorsoRobotDLL.cpp" />
+    <ClCompile Include="movingAverage.cpp">
+      <Filter>Source\GeneralClass</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="torsoController.h">
+      <Filter>Source\TorsoClass</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TexARTNCord\TexART_ServoMotor2015.h">
+      <Filter>Source\MotorClass</Filter>
+    </ClInclude>
+    <ClInclude Include="Torso2RobotDLL.h">
+      <Filter>Source\GeneralClass</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TexARTNCord\TexART_MothorCLK.h">
+      <Filter>Source\GeneralClass</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TexARTNCord\DummyClass ADBoard.h">
+      <Filter>Source\GeneralClass</Filter>
+    </ClInclude>
+    <ClInclude Include="TorsoRobotDLL.h" />
+    <ClInclude Include="IRobotController.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="movingAverage.h">
+      <Filter>Source\GeneralClass</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{80fc993d-cafe-44da-b435-0f34fdd611c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GeneralClass">
+      <UniqueIdentifier>{21b59c78-c0b2-41b2-92ba-095e17df9ebc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GlobalFunction">
+      <UniqueIdentifier>{e692f375-a49c-4832-a33e-3c02f8a2bc0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GeneralClass\TimerClass">
+      <UniqueIdentifier>{544d96da-0ed3-40e0-b3d8-1b43f4602382}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\TorsoClass">
+      <UniqueIdentifier>{36fee8f8-a518-4ba5-a837-dfb155d2a410}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\MotorClass">
+      <UniqueIdentifier>{d6d8411e-0e78-4f8e-a90d-a4857ff40837}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

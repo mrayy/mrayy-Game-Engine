@@ -110,6 +110,8 @@
     <ClInclude Include="IDepthProvider.h" />
     <ClInclude Include="IRobotController.h" />
     <ClInclude Include="IRobotControllerDLL.h" />
+    <ClInclude Include="ServiceContext.h" />
+    <ClInclude Include="IServiceModule.h" />
     <ClInclude Include="KeyboardHeadController.h" />
     <ClInclude Include="CRobotConnector.h" />
     <ClInclude Include="DepthFrame.h" />
@@ -171,6 +173,7 @@
     <ClCompile Include="GstStreamerMultipleVideoSource.cpp" />
     <ClCompile Include="GstStreamerVideoSource.cpp" />
     <ClCompile Include="IRobotController.cpp" />
+    <ClCompile Include="IServiceModule.cpp" />
     <ClCompile Include="KeyboardHeadController.cpp" />
     <ClCompile Include="CRobotConnector.cpp" />
     <ClCompile Include="DepthFrame.cpp" />

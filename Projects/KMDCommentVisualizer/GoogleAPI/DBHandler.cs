@@ -56,11 +56,11 @@ namespace GoogleAPI
                 switch (ex.Number)
                 {
                     case 0:
-                        MessageBox.Show("Cannot connect to server.  Contact administrator");
+                        MessageBox.Show("Cannot connect to server.  Contact administrator:"+ ex.Message);
                         break;
 
                     case 1045:
-                        MessageBox.Show("Invalid username/password, please try again");
+                        MessageBox.Show("Invalid username/password, please try again:" + ex.Message);
                         break;
                     default:
                         MessageBox.Show(ex.Message);

@@ -58,6 +58,7 @@ public:
 	virtual bool InitDevice(int device,int w,int h,int fps)=0;
 	virtual void Stop()=0;
 	virtual void Start()=0;
+	virtual bool IsConnected() = 0;
 
 	virtual void SetParameter(const core::string& name,const core::string& value){}
 	virtual core::string GetParameter(const core::string& name){return core::string::Empty;}

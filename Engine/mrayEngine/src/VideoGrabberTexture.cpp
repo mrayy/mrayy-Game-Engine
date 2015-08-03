@@ -26,7 +26,7 @@ void VideoGrabberTexture::Set(const GCPtr<IVideoGrabber>& grabber, ITextureCRef 
 {
 	m_grabber=grabber;
 	m_texture=tex;
-	m_index = 0;
+	m_index = index;
 	if (!m_texture)
 	{
 		m_texture = gEngine.getDevice()->createEmptyTexture2D(false);
@@ -39,7 +39,7 @@ bool VideoGrabberTexture::Blit()
 {
 	if(!m_texture || !m_grabber )
 		return false;
-	if(!m_grabber->GrabFrame())
+	if (!m_grabber->GrabFrame(m_index))
 		return false;
 	if (m_grabber->GetFrameSize().x == 0 || m_grabber->GetFrameSize().y == 0)
 		return false;

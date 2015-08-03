@@ -104,7 +104,7 @@ void PhManager::Update(float dt)
 			(*it)->Update(dt);
 		}
 	}
-	if (false)
+	if (true)
 	{
 		std::list<PhNode*>::iterator it = m_nodes.begin();
 		for (; it != m_nodes.end(); ++it)

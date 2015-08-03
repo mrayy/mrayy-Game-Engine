@@ -330,26 +330,30 @@ public:
 	{
 		return m_playersCount;
 	}
-	virtual bool GrabFrame()
+	virtual bool GrabFrame(int i)
 	{ 
-		bool ret = false;
-		for (int i = 0; i < m_videoHandler.size();++i) 
-			ret |= m_videoHandler[i].handler.GrabFrame();
-		return ret;
+		if (i >= m_playersCount)
+			return false;
+		return m_videoHandler[i].handler.GrabFrame();
 	}
-	virtual bool HasNewFrame()
+	virtual bool HasNewFrame(int i)
 	{
-		bool ret = false;
-		for (int i = 0; i < m_videoHandler.size(); ++i)
-			ret |= m_videoHandler[i].handler.isFrameNew();
-		return ret;
+		if (i >= m_playersCount)
+			return false;
+		return m_videoHandler[i].handler.isFrameNew();
 	}
-	virtual ulong GetBufferID()
+	virtual ulong GetBufferID(int i)
 	{
-		return m_videoHandler[0].handler.GetFrameID();
+		if (i >= m_playersCount)
+			return 0;
+		return m_videoHandler[i].handler.GetFrameID();
 	}
 
-	virtual float GetCaptureFrameRate(){ return m_videoHandler[0].handler.GetCaptureFrameRate(); }
+	virtual float GetCaptureFrameRate(int i){ 
+		if (i>m_videoHandler.size())
+			return 0;
+		return m_videoHandler[i].handler.GetCaptureFrameRate(); 
+	}
 
 	virtual const ImageInfo* GetLastFrame(int i)
 	{ 
@@ -440,24 +444,24 @@ int GstNetworkMultipleVideoPlayer::GetFramesCount()
 	return m_impl->GetFramesCount();
 }
 
-bool GstNetworkMultipleVideoPlayer::GrabFrame()
+bool GstNetworkMultipleVideoPlayer::GrabFrame(int i)
 {
-	return m_impl->GrabFrame();
+	return m_impl->GrabFrame(i);
 }
 
-bool GstNetworkMultipleVideoPlayer::HasNewFrame()
+bool GstNetworkMultipleVideoPlayer::HasNewFrame(int i)
 {
-	return m_impl->HasNewFrame();
+	return m_impl->HasNewFrame(i);
 }
 
-ulong GstNetworkMultipleVideoPlayer::GetBufferID()
+ulong GstNetworkMultipleVideoPlayer::GetBufferID(int i)
 {
-	return m_impl->GetBufferID();
+	return m_impl->GetBufferID(i);
 }
 
-float GstNetworkMultipleVideoPlayer::GetCaptureFrameRate()
+float GstNetworkMultipleVideoPlayer::GetCaptureFrameRate(int i)
 {
-	return m_impl->GetCaptureFrameRate();
+	return m_impl->GetCaptureFrameRate(i);
 }
 
 const ImageInfo* GstNetworkMultipleVideoPlayer::GetLastFrame(int i)

@@ -70,7 +70,7 @@ protected:
 
 	void _UpdateCameraParams();
 
-	virtual void _RenderUI(const math::rectf& rc,math::vector2d& pos);
+	virtual void _RenderUI(const math::rectf& rc, math::vector2d& pos, ETargetEye eye);
 
 public:
 	IEyesRenderingBaseState(const core::string& name);

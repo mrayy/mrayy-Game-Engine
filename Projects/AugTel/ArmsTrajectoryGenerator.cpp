@@ -221,14 +221,17 @@ void ArmsTrajectoryGenerator::_ResetHeadOrintation()
 }
 bool ArmsTrajectoryGenerator::GetPosOri(int id, math::vector3d& p, math::quaternion& ori)
 {
+#ifdef USE_OPTITRACK
 	if (!AugTel::ATAppGlobal::Instance()->optiDataSource->GetPositionByID(id))
 		return false;
 	p= *AugTel::ATAppGlobal::Instance()->optiDataSource->GetPositionByID(id);
 	ori= *AugTel::ATAppGlobal::Instance()->optiDataSource->GetOrientationByID(id);
-
 //  	p.x = -p.x;
 //  	p.z = -p.z;
 	return true;
+#else
+	return false;
+#endif
 }
 float ArmsTrajectoryGenerator::_CalcArmLength(int arm, int wrist)
 {

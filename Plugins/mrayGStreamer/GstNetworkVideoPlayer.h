@@ -75,10 +75,10 @@ public:
 	virtual void SetImageFormat(video::EPixelFormat fmt)  { m_player->SetImageFormat(fmt); }
 	virtual video::EPixelFormat GetImageFormat() { return m_player->GetImageFormat(); }
 
-	virtual bool GrabFrame() { return m_player->GrabFrame(); }
-	virtual bool HasNewFrame() { return m_player->HasNewFrame(); }
-	virtual ulong GetBufferID() { return m_player->GetBufferID(); }
-	virtual float GetCaptureFrameRate() { return m_player->GetCaptureFrameRate(); }
+	virtual bool GrabFrame(int i) { return m_player->GrabFrame(); }
+	virtual bool HasNewFrame(int i) { return m_player->HasNewFrame(); }
+	virtual ulong GetBufferID(int i) { return m_player->GetBufferID(); }
+	virtual float GetCaptureFrameRate(int i) { return m_player->GetCaptureFrameRate(); }
 
 	virtual const ImageInfo* GetLastFrame(int i) { return m_player->GetLastFrame(); }
 };

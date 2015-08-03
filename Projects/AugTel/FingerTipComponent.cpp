@@ -91,6 +91,7 @@ bool FingerTipComponent::_calculateForce(float dt)
 		
 
 	}
+#ifdef USE_OPENNI
 
 	if (!ATAppGlobal::Instance()->depthProvider->ConvertToImageSpace(math::vector2d(m_projPos.x, m_projPos.y), m_depthSpace))
 	{
@@ -125,6 +126,10 @@ bool FingerTipComponent::_calculateForce(float dt)
 	}
 	_sendForceToGG();
 	return true;
+#else
+	return false;
+
+#endif
 }
 
 void FingerTipComponent::_sendForceToGG()

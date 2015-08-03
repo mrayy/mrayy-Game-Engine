@@ -46,7 +46,7 @@ public:
 	virtual void SetFrameSize(int w, int h) {}
 	virtual const math::vector2di& GetFrameSize() ;
 
-	virtual float GetCaptureFrameRate();
+	virtual float GetCaptureFrameRate(int i);
 
 
 	//defined by the source video stream
@@ -54,9 +54,9 @@ public:
 	virtual video::EPixelFormat GetImageFormat() ;
 	
 	int GetFramesCount();
-	virtual bool GrabFrame() ;
-	virtual bool HasNewFrame() ;
-	virtual ulong GetBufferID() ;// incremented once per frame
+	virtual bool GrabFrame(int i) ;
+	virtual bool HasNewFrame(int i);
+	virtual ulong GetBufferID(int i);// incremented once per frame
 
 	virtual const ImageInfo* GetLastFrame(int i) ;
 
@@ -77,10 +77,10 @@ public:
 	virtual video::EPixelFormat GetImageFormat() { return m_player->GetImageFormat(); }
 
 	virtual int GetFramesCount(){ return m_player->GetFramesCount(); }
-	virtual bool GrabFrame() { return m_player->GrabFrame(); }
-	virtual bool HasNewFrame() { return m_player->HasNewFrame(); }
-	virtual ulong GetBufferID() { return m_player->GetBufferID(); }
-	virtual float GetCaptureFrameRate() { return m_player->GetCaptureFrameRate(); }
+	virtual bool GrabFrame(int i) { return m_player->GrabFrame(i); }
+	virtual bool HasNewFrame(int i) { return m_player->HasNewFrame(i); }
+	virtual ulong GetBufferID(int i) { return m_player->GetBufferID(i); }
+	virtual float GetCaptureFrameRate(int i) { return m_player->GetCaptureFrameRate(i); }
 
 	virtual const ImageInfo* GetLastFrame(int i) { return m_player->GetLastFrame(i); }
 };
