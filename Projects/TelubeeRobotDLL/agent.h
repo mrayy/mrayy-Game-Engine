@@ -67,7 +67,31 @@ void load_parameters(){
 	const char const ESCAPE = ';';
 	const char* const DELIMITER = "=";
 
-	ifstream confFile("robotconf.ini");
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+
+	
+	int index = -1;
+	int len = strlen(buffer);
+	for (int i = len - 1; i >= 0; --i)
+	{
+		if (buffer[i] == '\\')
+		{
+			index = i;
+			break;
+		}
+	}
+	std::string path="";
+	if (index != -1)
+	{
+		buffer[index + 1] = 0;
+		path = buffer;
+
+	}
+	path += "robotconf.ini";
+	printf("Path: %s\n", path.c_str());
+
+	ifstream confFile(path);
 
 	if ( !confFile.is_open() ){
 		cout << " FileOpenError(robotconf.ini)" << endl;

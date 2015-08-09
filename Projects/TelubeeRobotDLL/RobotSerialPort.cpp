@@ -160,6 +160,7 @@ RobotSerialPort::RobotSerialPort()
 	_status = ERobotControllerStatus::EStopped;
 
 	ConnectRobot();
+	_setupCaps();
 
 }
 
@@ -171,6 +172,25 @@ RobotSerialPort::~RobotSerialPort()
 	TerminateThread(m_headThread, 0);
 	DisconnectRobot();
 	delete m_impl;
+}
+
+void RobotSerialPort::_setupCaps()
+{
+	m_caps.hasBattery = true;
+	m_caps.hasDistanceSensors = true;
+	m_caps.hasBumpSensors = true;
+	m_caps.canMove = true;
+	m_caps.canRotate = true;
+	m_caps.hasParallaxMotion = false;
+
+	m_caps.distanceSensorCount = 7;
+	m_caps.bumpSensorCount = 2;
+	m_caps.bodyJointsCount = 2 + 3;	//Base: 2 , Head: 3
+
+	m_caps.enabledMotion.set(false, false, true);
+	m_caps.enabledRotation.set(false, true, false);
+	m_caps.headLimits[0].set(-180, -180, -180);
+	m_caps.headLimits[1].set(180, 180, 180);
 }
 
 
@@ -196,8 +216,10 @@ void RobotSerialPort::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 }
 void RobotSerialPort::ConnectRobot()
 {
-
+	if (GetRobotStatus() == EConnected)
+		return;
 	int ret=0;
+
 
 	m_impl->comHEAD = new Tserial_event();
 

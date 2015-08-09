@@ -221,7 +221,7 @@ void ArmsTrajectoryGenerator::_ResetHeadOrintation()
 }
 bool ArmsTrajectoryGenerator::GetPosOri(int id, math::vector3d& p, math::quaternion& ori)
 {
-#ifdef USE_OPTITRACK
+#if USE_OPTITRACK
 	if (!AugTel::ATAppGlobal::Instance()->optiDataSource->GetPositionByID(id))
 		return false;
 	p= *AugTel::ATAppGlobal::Instance()->optiDataSource->GetPositionByID(id);

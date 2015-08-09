@@ -33,14 +33,11 @@ namespace mray
 				{
 					return;
 				}
-				OS::IThreadManager::getInstance().sleep(1);
+		//		OS::IThreadManager::getInstance().sleep(1);
 			}
 		}
 
 	};
-
-	typedef void(*dllFunctionPtr)();
-	typedef IRobotController*(*dllLoadRobotFunctionPtr)();
 
 RobotCommunicator::RobotCommunicator()
 {
@@ -49,58 +46,15 @@ RobotCommunicator::RobotCommunicator()
 	m_thread = 0;
 	
 	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
-	m_localControl = 0;
-	m_robotLib = OS::IDllManager::getInstance().getLibrary("Robot.dll");
-	m_msgSink = 0;
-	if (!m_robotLib)
-	{
-		gLogManager.log("Failed to load Robot.dll!! Please make sure Robot.dll is placed next to application.", ELL_WARNING);
-		m_robotController = 0;
-		return;
-	}
-	dllFunctionPtr libInitPtr;
-	dllLoadRobotFunctionPtr robotLoadPtr;
-	libInitPtr = (dllFunctionPtr)m_robotLib->getSymbolName("DLL_RobotInit");
-	robotLoadPtr = (dllLoadRobotFunctionPtr)m_robotLib->getSymbolName("DLL_GetRobotController");
-
-	libInitPtr();
-
-
-	m_robotController = robotLoadPtr();
-
 		
 }
 
 RobotCommunicator::~RobotCommunicator()
 {
-	dllFunctionPtr libDestroyPtr;
-	libDestroyPtr = 0;
-	if (m_robotLib)
-	{
-		libDestroyPtr = (dllFunctionPtr)m_robotLib->getSymbolName("DLL_RobotDestroy");
-	}
 	StopServer();
 	delete m_client;
-	//delete m_robotController;
-	if (libDestroyPtr)
-		libDestroyPtr();
 	delete m_dataMutex;
 }
-void RobotCommunicator::Initialize()
-{
-	if (m_robotController)
-	{
-		m_robotController->InitializeRobot(this);
-	}
-	if (m_listener)
-		m_listener->OnCalibrationDone(this);
-}
-void RobotCommunicator::GetRobotStatus(RobotStatus& st)const
-{
-	OS::ScopedLock l(m_dataMutex);
-	memcpy(&st, &m_robotStatus, sizeof(m_robotStatus));
-}
-
 void RobotCommunicator::HandleData(network::NetAddress* addr,const core::string& name, const core::string& value)
 {
 
@@ -109,39 +63,7 @@ void RobotCommunicator::HandleData(network::NetAddress* addr,const core::string&
 
 	OS::ScopedLock lock(m_dataMutex);
 
-	if (name == "Speed" && vals.size() == 2)
-	{
-		m_robotStatus.speed[0] = atof(vals[0].c_str());
-		m_robotStatus.speed[1] = atof(vals[1].c_str());
-		//limit the speed
-		m_robotStatus.speed[0] = -math::clamp<float>(m_robotStatus.speed[0], -1, 1);
-		m_robotStatus.speed[1] = math::clamp<float>(m_robotStatus.speed[1], -1, 1);
-	}
-	else if (name == "HeadRotation" && vals.size() == 4)
-	{
-		m_robotStatus.headRotation[0] = atof(vals[0].c_str());
-		m_robotStatus.headRotation[1] = atof(vals[1].c_str());
-		m_robotStatus.headRotation[2] = atof(vals[2].c_str());
-		m_robotStatus.headRotation[3] = atof(vals[3].c_str());
-
-		//do head limits
-// 		m_robotStatus.tilt = math::clamp(m_robotStatus.tilt, -50.0f, 50.0f);
-// 		m_robotStatus.yaw = math::clamp(m_robotStatus.yaw, -70.0f, 70.0f);
-// 		m_robotStatus.roll = math::clamp(m_robotStatus.roll, -40.0f, 40.0f);
-	}
-	else if (name == "HeadPosition" && vals.size() == 3)
-	{
-		m_robotStatus.headPos[0] = atof(vals[0].c_str());
-		m_robotStatus.headPos[1] = atof(vals[1].c_str());
-		m_robotStatus.headPos[2] = atof(vals[2].c_str());
-
-	}
-	else if (name == "Rotation" && vals.size() == 1)
-	{
-		m_robotStatus.rotation = atof(vals[0].c_str());
-		m_robotStatus.rotation = math::clamp<float>(m_robotStatus.rotation, -1, 1);
-	}
-	else if (name == "Connect" && vals.size() == 6)
+	if (name == "Connect" && vals.size() == 6)
 	{
 		int videoPort = atoi(vals[1].c_str());
 		int audioPort = atoi(vals[2].c_str());
@@ -178,56 +100,25 @@ void RobotCommunicator::HandleData(network::NetAddress* addr,const core::string&
 	}
 	else
 	{
-		if (m_msgSink)
-			m_msgSink->OnMessage(addr,name, value);
+		if (m_listener)
+			m_listener->OnUserMessage(addr, name, value);
 	}
 }
 
-void RobotCommunicator::SetRobotData(const RobotStatus &st)
-{
-	if (m_localControl)
-		_RobotStatus(st);
-}
-
-void RobotCommunicator::_RobotStatus(const RobotStatus& st)
-{
-	if (!m_robotController)
-		return;
-	ERobotControllerStatus status=m_robotController->GetRobotStatus();
-	if ((st.connected || m_localControl) && status != ERobotControllerStatus::EConnected)
-	{
-		if (status == ERobotControllerStatus::EStopped)
-			m_robotController->InitializeRobot(this);
-		m_robotController->ConnectRobot();
-	}
-	
-	if ((!st.connected && !m_localControl) && status != ERobotControllerStatus::EDisconnected )
-	{
-		if (status != ERobotControllerStatus::EStopped)
-		{
-			m_robotController->DisconnectRobot();
-		}
-	}
-
-	m_robotController->UpdateRobotStatus(st);
-	if (m_listener)
-		m_listener->OnRobotStatus(this, st);
-}
 void RobotCommunicator::ProcessPacket(network::NetAddress* addr,const char* buffer)
 {
 
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError err = doc.Parse(buffer);
-	if (err != tinyxml2::XML_NO_ERROR)
-	{
-		//send update once
-		if (!m_localControl)
-			_RobotStatus(m_robotStatus);
-		return;
-	}
+ 	if (err != tinyxml2::XML_NO_ERROR)
+ 	{
+// 		if (m_listener)
+		//m_listener->OnRobotStatus(this,m_robotStatus);
+ 		return;
+ 	}
 	tinyxml2::XMLElement*root = doc.RootElement();
 
-	m_robotStatus.connected  = core::StringConverter::toBool(root->Attribute("Connected"));
+//	m_robotStatus.connected  = core::StringConverter::toBool(root->Attribute("Connected"));
 // 	if (!c && !m_robotStatus.connected)
 // 		return;
 // 	if (!m_robotStatus.connected)
@@ -240,8 +131,8 @@ void RobotCommunicator::ProcessPacket(network::NetAddress* addr,const char* buff
 		HandleData(addr,name, value);
 		node = node->NextSiblingElement("Data");
 	}
-	if (!m_localControl)
-		_RobotStatus(m_robotStatus);
+// 	if (m_listener)
+// 		m_listener->OnRobotStatus(this, m_robotStatus);
 }
 
 int RobotCommunicator::_Process()
@@ -277,23 +168,6 @@ void RobotCommunicator::StopServer()
 	delete m_thread;
 	m_thread = 0;
 	printf("Communication Channel closed\n");
-
-}
-
-void RobotCommunicator::OnCollisionData(float left, float right)
-{
-	if (m_listener)
-	{
-		m_listener->OnCollisionData(this,left, right);
-	}
-}
-
-void RobotCommunicator::OnReportMessage(int code, const std::string& msg)
-{
-	if (m_listener)
-	{
-		m_listener->OnReportMessage(this, code, msg);
-	}
 
 }
 

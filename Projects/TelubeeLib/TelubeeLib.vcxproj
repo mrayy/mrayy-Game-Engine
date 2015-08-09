@@ -47,9 +47,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\..\Lib\$(Configuration)</OutDir>
+    <IntDir>..\..\obj\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\..\Lib\$(Configuration)</OutDir>
+    <IntDir>..\..\obj\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,6 +112,9 @@
     <ClInclude Include="IDepthProvider.h" />
     <ClInclude Include="IRobotController.h" />
     <ClInclude Include="IRobotControllerDLL.h" />
+    <ClInclude Include="LocalDLLRobotController.h" />
+    <ClInclude Include="RobotCapabilities.h" />
+    <ClInclude Include="RobotHandler.h" />
     <ClInclude Include="ServiceContext.h" />
     <ClInclude Include="IServiceModule.h" />
     <ClInclude Include="KeyboardHeadController.h" />
@@ -180,6 +185,7 @@
     <ClCompile Include="DepthVisualizer.cpp" />
     <ClCompile Include="GeomDepthCalculator.cpp" />
     <ClCompile Include="GeomDepthRect.cpp" />
+    <ClCompile Include="LocalDLLRobotController.cpp" />
     <ClCompile Include="LocalSingleCameraVideoSource.cpp" />
     <ClCompile Include="NodeHeadController.cpp" />
     <ClCompile Include="OculusBaseController.cpp" />
@@ -205,6 +211,7 @@
     <ClCompile Include="RemoteRobotCommunicator.cpp" />
     <ClCompile Include="RenderBlender.cpp" />
     <ClCompile Include="RenderingStateManager.cpp" />
+    <ClCompile Include="RobotHandler.cpp" />
     <ClCompile Include="RobotInfoManager.cpp" />
     <ClCompile Include="shmem.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>

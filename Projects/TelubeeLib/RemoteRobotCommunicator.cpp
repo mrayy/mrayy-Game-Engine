@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "RemoteRobotCommunicator.h"
-#include "shmem.h"
+//#include "shmem.h"
 #include "IUDPClient.h"
 #include "INetwork.h"
 #include "IThreadFunction.h"
@@ -14,6 +14,16 @@ namespace mray
 {
 namespace TBee
 {
+
+	struct RobotStatusData
+	{
+		bool RobotConnected;
+		bool UserConnected;
+		bool UserOnline;
+		core::string UserID;
+		struct in_addr localAddr;
+	};
+
 #define USE_UDPCLIENT
 #define USE_OPTI
 class RemoteRobotCommunicatorData;
@@ -30,7 +40,7 @@ public:
 class RemoteRobotCommunicatorData
 {
 public:
-	struct shmem_data data;
+	RobotStatusData data;
 	RemoteRobotCommunicator* owner;
 #ifdef USE_UDPCLIENT
 	network::IUDPClient* client;
@@ -63,7 +73,7 @@ public:
 		client = new UDPSender();
 		client->startSending();
 #endif
-		memset(&data, 0, sizeof(shmem_data_t));
+		//memset(&data, 0, sizeof(shmem_data_t));
 	}
 	~RemoteRobotCommunicatorData()
 	{
@@ -95,7 +105,7 @@ public:
 		for (int i = 0; phe->h_addr_list[i] != 0; ++i) {
 			struct in_addr addr;
 			memcpy(&addr, phe->h_addr_list[i], sizeof(struct in_addr));
-			data.user.ipaddress = addr;
+			data.localAddr = addr;
 		}
 
 		return 0;
@@ -107,7 +117,7 @@ public:
 		xml::XMLWriter w;
 		xml::XMLElement root("RobotData");
 		dataMutex->lock();
-		root.addAttribute("Connected", core::StringConverter::toString(data.robot.status.connected));
+		root.addAttribute("Connected", core::StringConverter::toString(data.RobotConnected));
 	//	if (data.robot.status.connected)
 		{
 			for (std::map<core::string, DataInfo>::iterator it = values.begin(); it != values.end(); ++it)
@@ -170,7 +180,7 @@ void RemoteRobotCommunicatorThread::execute(OS::IThread*caller, void*arg)
 		{
 			m_owner->owner->Update(0);
 		}
-		if (m_owner->data.robot.status.connected && m_owner->connected)
+		if (m_owner->data.RobotConnected && m_owner->connected)
 		{
 			OS::IThreadManager::getInstance().sleep(33);
 		}
@@ -183,7 +193,7 @@ void RemoteRobotCommunicatorThread::execute(OS::IThread*caller, void*arg)
 RemoteRobotCommunicator::RemoteRobotCommunicator()
 {
 	m_data = new RemoteRobotCommunicatorData(this);
-	m_data->data.user.status.online = true;
+	m_data->data.UserOnline = true;
 	m_data->getmyip();
 	//	Connect("127.0.0.1",3000);
 
@@ -211,7 +221,7 @@ bool RemoteRobotCommunicator::Connect(const core::string& ip, int port)
 
 #ifdef USE_OPTI
 		{
-			core::string ipaddr = inet_ntoa(m_data->data.user.ipaddress);
+			//core::string ipaddr = inet_ntoa(m_data->data.user.ipaddress);
 			//	TBAppGlobals::optiObj->Connect(ipaddr,ipaddr);
 		}
 #endif
@@ -242,17 +252,18 @@ bool RemoteRobotCommunicator::IsConnected()
 
 void RemoteRobotCommunicator::SetUserID(const core::string& userID)
 {
-	m_data->data.user.user_id = userID.c_str();
+	m_data->data.UserID = userID.c_str();
 }
 
 void RemoteRobotCommunicator::ConnectUser(bool c)
 {
-	m_data->data.user.status.connected = c;
+	m_data->data.UserConnected = c;
 	_SendUpdate();
 }
 void RemoteRobotCommunicator::ConnectRobot(bool c)
 {
-	m_data->data.robot.status.connected = c;
+	m_data->data.RobotConnected = c;
+	SetData("RobotConnect", core::StringConverter::toString(c),true);
 	_SendUpdate();
 }
 

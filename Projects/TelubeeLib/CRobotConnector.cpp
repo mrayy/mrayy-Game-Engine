@@ -35,11 +35,16 @@ CRobotConnector::CRobotConnector()
 	m_clockPort = -1;
 	m_rtcp = false;
 	m_controller = 0;
+
+
+
 }
 CRobotConnector::~CRobotConnector()
 {
 	DisconnectRobot();
 	delete m_communicator;
+	if (m_controller)
+		delete m_controller;
 }
 bool CRobotConnector::IsRobotConnected()
 {
@@ -68,7 +73,6 @@ void CRobotConnector::ConnectRobot()
 	addrStr += "," + core::StringConverter::toString(m_clockPort);
 	addrStr += "," + core::StringConverter::toString(m_rtcp);
 	m_communicator->SetData("Connect", addrStr,true);
-
 	addrStr =  core::StringConverter::toString(m_commPort);
 	m_communicator->SetData("CommPort", addrStr, true);
 
@@ -135,6 +139,24 @@ void CRobotConnector::EndUpdate()
 
 	if (m_controller)
 	{
+		RobotStatus st;
+		st.connected = m_connected;
+		st.headPos[0] = 0;
+		st.headPos[1] = 0;
+		st.headPos[2] = 0;
+
+		st.headRotation[0] = 0;
+		st.headRotation[1] = 0;
+		st.headRotation[2] = 0;
+		st.headRotation[3] = 0;
+
+		st.rotation = 0;
+
+		st.speed[0] = 0;
+		st.speed[1] = 0;
+
+		m_controller->UpdateRobotStatus(st);
+
 		m_controller->DisconnectRobot();
 	}
 }
@@ -200,7 +222,7 @@ void CRobotConnector::UpdateStatus()
 	m_communicator->SetData("Speed", core::StringConverter::toString(math::vector2d(m_speed.x,m_speed.y)), false);
 	m_communicator->SetData("Rotation", core::StringConverter::toString(m_rotation/3), false);
 
-	if (m_controller)
+	if (m_controller && m_status)
 	{
 		RobotStatus st;
 		st.connected = m_connected;

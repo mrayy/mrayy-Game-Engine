@@ -9,7 +9,9 @@
 #include "CMemoryStream.h"
 #include "ATAppGlobal.h"
 #include "GeomDepthRect.h"
+#if USE_OPENNI
 #include "OpenNIHandler.h"
+#endif
 #include "INetwork.h"
 #include "StreamReader.h"
 

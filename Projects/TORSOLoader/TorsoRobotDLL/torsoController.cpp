@@ -44,7 +44,9 @@ public:
 
 torsoController::torsoController()
 {
-	m_connectFlag = m_isConnected = false;
+	m_connectFlag = false;
+	//m_isConnected = false;
+	robotState = ERobotControllerStatus::EStopped;
 	memset(m_headPos, 0, sizeof(m_headPos));
 	memset(m_offset, 0, sizeof(m_offset));
 
@@ -74,11 +76,34 @@ torsoController::~torsoController()
 }
 
 
-bool torsoController::IsConnected()
+void torsoController::_setupCaps()
 {
-	
-	return m_isConnected;
+	m_caps.hasBattery = false;
+	m_caps.hasDistanceSensors = false;
+	m_caps.hasBumpSensors = false;
+	m_caps.canMove = false;
+	m_caps.canRotate = false;
+	m_caps.hasParallaxMotion = true;
+
+	m_caps.distanceSensorCount = 0;
+	m_caps.bumpSensorCount = 0;
+	m_caps.bodyJointsCount = 3 + 3;	//Body: 3 , Head: 3
+
+	m_caps.enabledMotion.set(false, false, false);
+	m_caps.enabledRotation.set(false, false, false);
+	m_caps.headLimits[0].set(-180, -180, -180);
+	m_caps.headLimits[1].set(180, 180, 180);
 }
+ERobotControllerStatus torsoController::GetRobotStatus() {
+	return robotState;
+}
+
+// 
+// bool torsoController::IsConnected()
+// {
+// 	
+// 	return m_isConnected;
+// }
 
 void torsoController::DisconnectRobot()
 {
@@ -294,7 +319,8 @@ void torsoController::_innerProcessRobot()
 		}
 
 		endflag = 0;
-		m_isConnected = true;
+		robotState = ERobotControllerStatus::EConnecting;
+		//m_isConnected = true;
 		m_connectFlag = true;
 
 		realTorso.ClearParameter();					// パラメータ群初期化
@@ -311,6 +337,7 @@ void torsoController::_innerProcessRobot()
 
 		printf("Entering real-time mode..\n");
 		printf("press [q] for exit.\n");
+		robotState = ERobotControllerStatus::EConnected;
 
 		MainTimer.Count();
 		//----- メインループ -----
@@ -348,15 +375,18 @@ void torsoController::_innerProcessRobot()
 			//Sleep(1);
 			//MainTimer.CountAndWait(500);
 		}
-		m_isConnected = false;
+		robotState = ERobotControllerStatus::EDisconnecting;
+		//m_isConnected = false;
 
 		printf("Exiting real-time mode.\n");
 		printf("To kill process, press [e].\n");
 		FinishMoving();
+		robotState = ERobotControllerStatus::EDisconnected;
 
 		printf("move to next visitor. Visitor [count:%d]\n", count);
 	}
-	m_isConnected = false;
+	robotState = ERobotControllerStatus::EDisconnected;
+	//m_isConnected = false;
 
 	for (int i = 0; i < Torso_DOF; i++) torque[i] = 0.0;
 	realTorso.SetDAValue(torque);					// 全チャンネル0トルク出力
@@ -387,7 +417,8 @@ int torsoController::initRobot(bool debug){
 		printf("1. debug routine started...\n\n\n");
 	}
 
-	initDone = true; 
+	robotState = ERobotControllerStatus::EStopped;
+	initDone = true;
 
 	return 0;
 
@@ -548,7 +579,8 @@ int torsoController::FinishMoving(void)
 //---------- PD制御、マスタに合わせてスレーブを動かすだけ ---------------
 int torsoController::mainRoutine(int CalibSelect)
 {
-	m_isConnected = false;
+	//m_isConnected = false;
+	robotState = ERobotControllerStatus::EDisconnected;
 	m_offset[0] = m_offset[1] = m_offset[2] = 0;
 	double tmp_tangles[Torso_DOF] = { 0 }, torque[Torso_DOF] = { 0 };	// テンポラリ目標角格納配列、トルク格納配列
 	int endflag, endflag2;							// 終了処理フラグ(メインループ/タームループ用)

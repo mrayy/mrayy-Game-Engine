@@ -129,9 +129,9 @@ Application::Application()
 	m_screenShotEnabled = false;
 
 	this->m_limitFps = true;
-	this->m_limitFpsCount = 90;
+	this->m_limitFpsCount = 60;
 
-	m_windowPriority = 5;
+	m_windowPriority = 2;
 }
 Application::~Application()
 {
@@ -228,7 +228,7 @@ void Application::onEvent(Event* event)
 
 void Application::_initStates()
 {
-	IRenderingState *nullState, *intro, *login, *camera, *depth, *vtRs, *remote = 0;
+	IRenderingState *nullState, *intro, *login, *camera,  *vtRs, *remote = 0; //*depth
 	nullState = new NullRenderState();
 	nullState->InitState();
 	m_renderingState->AddState(nullState);
@@ -255,8 +255,8 @@ void Application::_initStates()
 // 	camera = new AugCameraRenderState(new TBee::LocalSingleCameraVideoSource(m_cam1), new TBee::LocalRobotCommunicator(), "AugCam");////
 //  	m_renderingState->AddState(camera);
 
-	depth = new GeomDepthState("Depth");
-	m_renderingState->AddState(depth);
+// 	depth = new GeomDepthState("Depth");
+// 	m_renderingState->AddState(depth);
 
 	LatencyTestState* latency = 0;
 
@@ -279,7 +279,7 @@ void Application::_initStates()
 	m_renderingState->AddTransition(login, latency, ToDepthView_CODE);
 	m_renderingState->AddTransition(latency, login, STATE_EXIT_CODE);
 //	m_renderingState->AddTransition(camera, login, STATE_EXIT_CODE);
-	m_renderingState->AddTransition(depth, login, STATE_EXIT_CODE);
+//	m_renderingState->AddTransition(depth, login, STATE_EXIT_CODE);
 	//	m_renderingState->AddTransition(vtRs, login, STATE_EXIT_CODE);
 	m_renderingState->SetInitialState(nullState);
 
@@ -394,8 +394,10 @@ void Application::init(const OptionContainer &extraOptions)
 	m_soundManager = new sound::SFModSoundManager();
 	m_videoManager = new video::TheoraManager();
 	m_videoManager->setSoundManager(m_soundManager);
+#if USE_OPENNI
 	m_openNIMngr = new OpenNIManager();
 	m_openNIMngr->Init(0, 0);
+#endif
 
 	ATAppGlobal::Instance()->soundManager = m_soundManager;
 
@@ -571,8 +573,6 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 		}
 
 #endif
-	//	RenderUI(rc);
-
 		m_previewGUI->DrawAll(&rc);
 #ifdef FULL_RES_PREVIEW
 
@@ -581,6 +581,9 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 		tex.SetTexture(m_previewRT->GetColorTexture());
 		getDevice()->useTexture(0, &tex);
 		getDevice()->draw2DImage(rc, 1);
+
+		RenderUI(rc);
+
 #endif
 
 		if (m_screenShotEnabled && m_screenShotTimer>1)

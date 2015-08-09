@@ -290,6 +290,7 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 				FocalCoeff->SetValue(m_cameraConfiguration->FocalCoeff);
 			if (KPCoeff)
 				KPCoeff->SetValue(m_cameraConfiguration->KPCoeff);
+			m_camConfigDirty = false;
 		}
 
 		m_lensCorrectionPP->Setup(math::rectf(0, size));

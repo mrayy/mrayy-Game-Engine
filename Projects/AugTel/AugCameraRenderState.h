@@ -15,6 +15,9 @@
 #ifndef __AugCameraRenderState__
 #define __AugCameraRenderState__
 
+#define ENABLE_STREAMERS 0
+#define ENABLE_PHYSICS 0
+
 #include "IRobotControlState.h"
 #include "SceneManager.h"
 #include "ViewPort.h"
@@ -28,7 +31,9 @@
 #include "SceneEffectManager.h"
 #include "LoadingScreen.h"
 #include "GUIInterfaceScreenImpl.h"
+#if ENABLE_STREAMERS
 #include "GstStreamBin.h"
+#endif
 #include "ATAppGlobal.h"
 
 
@@ -36,7 +41,7 @@ namespace mray
 {
 	namespace TBee
 	{
-#ifdef USE_OPENNI
+#if USE_OPENNI
 		class OpenNIHandler;
 		class DepthVisualizer;
 #endif
@@ -53,6 +58,7 @@ namespace AugTel
 	class VTBaseState;
 	class IHandsController;
 	class AugTelSceneContext;
+
 
 class AugCameraRenderState :public TBee::IRobotControlState,public scene::IViewportListener,public IDataCommunicatorListener
 {
@@ -71,7 +77,9 @@ protected:
 	GCPtr<scene::SceneManager> m_sceneManager;
 	GCPtr<game::GameEntityManager> m_gameManager;
 	GCPtr<scene::ViewPort> m_viewport[2];
+#if ENABLE_PHYSICS
 	GCPtr<physics::IPhysicManager> m_phManager;
+#endif
 	GCPtr<scene::IDebugDrawManager> m_debugRenderer;
 	GCPtr<SceneEffectManager> m_effects;
 
@@ -85,9 +93,7 @@ protected:
 	AugTelSceneContext* m_context;
 
 	//	TBee::ICameraVideoSource* m_camVideoSrc;
-	GCPtr<video::GstStreamBin> m_streamer;
-
-#ifdef USE_HANDS
+#if USE_HANDS
 	typedef std::map<core::string, int> HandsMap;
 	std::vector<IHandsController*> m_hands;
 	HandsMap m_handsMap;
@@ -101,11 +107,11 @@ protected:
 	bool _IsHandsEnabled(){ return m_enableHands; }
 #endif
 
-#ifdef USE_OPTITRACK
+#if USE_OPTITRACK
 	core::string m_optiProvider;
 #endif
 
-#ifdef USE_OPENNI
+#if USE_OPENNI
 	TBee::OpenNIHandler* m_openNiHandler;
 	float m_depthTime;
 	math::vector4d m_depthParams;
@@ -124,9 +130,6 @@ protected:
 
 	bool m_takeScreenShot;
 
-	bool m_enableVideo;
-	bool m_enableMic;
-
 	float m_focus;
 
 	bool m_showDebug;
@@ -143,15 +146,23 @@ protected:
 	void _RenderStarted(const math::rectf& rc, ETargetEye eye);
 	void _ChangeState(EStatus st);
 
+#if ENABLE_PHYSICS
 	void _CreatePhysicsSystem();
+#endif
 
 	void _GenerateLightMap();
 	virtual void _RenderUI(const math::rectf& rc, math::vector2d& pos, ETargetEye eye);
+
+#if ENABLE_STREAMERS
+	GCPtr<video::GstStreamBin> m_streamer;
+	bool m_enableVideo;
+	bool m_enableMic;
 
 	void _EnableVideo(bool e);
 	void _EnableMic(bool e);
 	bool _IsVideoEnabled(){ return m_enableVideo; }
 	bool _IsMicEnabled(){ return m_enableMic; }
+#endif
 
 public:
 	AugCameraRenderState(TBee::ICameraVideoSource* src, TBee::IRobotCommunicator* comm, const core::string& name);

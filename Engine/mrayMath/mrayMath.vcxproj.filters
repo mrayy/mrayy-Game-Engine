@@ -25,6 +25,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Source Files\math\Lerp">
+      <UniqueIdentifier>{3f748335-5345-48b5-970c-3f78770d8cef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="compileConfig.h">
@@ -158,6 +161,12 @@
     </ClInclude>
     <ClInclude Include="LinearCurve.h">
       <Filter>Source Files\math\Curves</Filter>
+    </ClInclude>
+    <ClInclude Include="ILerpFunction.h">
+      <Filter>Source Files\math\Lerp</Filter>
+    </ClInclude>
+    <ClInclude Include="PoissonLerp.h">
+      <Filter>Source Files\math\Lerp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -31,7 +31,10 @@ purpose:
 #include "RenderingStateManager.h"
 
 #include "ApplicationStateManager.h"
+#if USE_OPENNI
 #include "OpenNIManager.h"
+#endif
+
 #include "TBeeRenderer.h"
 #include "WiimoteManager.h"
 #include "LocalCameraVideoSource.h"
@@ -57,7 +60,9 @@ protected:
 	GCPtr<GUI::GUIBatchRenderer> m_guiRenderer;
 	GCPtr<sound::ISoundManager> m_soundManager;
 	GCPtr<video::IVideoClipManager> m_videoManager;
+#if USE_OPENNI
 	GCPtr<OpenNIManager> m_openNIMngr;
+#endif
 
 	TBeeRenderer* m_tbRenderer;
 

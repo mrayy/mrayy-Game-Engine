@@ -152,6 +152,8 @@ FlyCameraVideoGrabber::FlyCameraVideoGrabber()
 	FlyCameraManager::instance.AddRef();
 	m_hasNewFrame = false;
 
+	m_offsetX = m_offsetY = 0;
+
 	m_bufferId = 0;
 	m_imageMutex=OS::IThreadManager::getInstance().createMutex();
 }
@@ -264,8 +266,8 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 		fmt7ImageSettings.mode = fmt7Info.mode;
 		if (true)
 		{
-			fmt7ImageSettings.offsetX = (fmt7Info.maxWidth - w) / 2;
-			fmt7ImageSettings.offsetY = (fmt7Info.maxHeight - h) / 2;
+			fmt7ImageSettings.offsetX = m_offsetX+ (fmt7Info.maxWidth - w) / 2;
+			fmt7ImageSettings.offsetY = m_offsetY + (fmt7Info.maxHeight - h) / 2;
 			fmt7ImageSettings.width = w;
 			fmt7ImageSettings.height = h;
 		}

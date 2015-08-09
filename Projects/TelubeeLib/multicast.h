@@ -118,12 +118,9 @@ class UDPClient{
 		int buffcount;
 		bool threadflag;
 		HANDLE hTh,hEv,hEvQt;
-		bool stopped;
 	public:
-		UDPClient();
+		UDPClient(int portnum, char *ipaddr);
 		~UDPClient();
-		bool Connect(int portnum, const char *ipaddr);
-		void Close();
 		int sendstr(char* str); 
 		int sendBuffer();
 		int setBuffer(const std::string str);

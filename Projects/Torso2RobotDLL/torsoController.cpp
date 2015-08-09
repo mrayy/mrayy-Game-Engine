@@ -54,12 +54,16 @@ torsoController::torsoController()
 
 	}
 
-	int avgCnt = 1;
+	int avgCnt = 3;
 	for (int i = 0; i < 3; ++i)
 	{
 		m_posAvg[i] = new MovAvg(avgCnt);
 		m_rotAvg[i] = new MovAvg(avgCnt);
 	}
+
+	//change the roll value
+	delete m_rotAvg[0];
+	m_rotAvg[0] = new MovAvg(20);
 
 
 	robotState = EStopped;
@@ -70,9 +74,11 @@ torsoController::torsoController()
 
 	threadStart = false;
 
+	_setupCaps();
+
 	// Thread routine
-	HANDLE hThread= CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThread1, this, NULL, NULL);
-	SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
+	hThread= CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThread1, this, NULL, NULL);
+	SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);	// Make the thread max priority, important to keep the robot stable
 	//CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThread2, NULL, NULL, NULL);
 
 	torsoHeadPos[0] = torsoHeadPos[1] = torsoHeadPos[2] = 0;
@@ -90,9 +96,30 @@ torsoController::~torsoController()
 		delete m_posAvg[i];
 		delete m_rotAvg[i];
 	}
+
+	TerminateThread(hThread, 0);
+	
 }
 
 
+void torsoController::_setupCaps()
+{
+	m_caps.hasBattery = false;
+	m_caps.hasDistanceSensors = false;
+	m_caps.hasBumpSensors = false;
+	m_caps.canMove = false;
+	m_caps.canRotate = false;
+	m_caps.hasParallaxMotion = true;
+
+	m_caps.distanceSensorCount = 0;
+	m_caps.bumpSensorCount = 0;
+	m_caps.bodyJointsCount = 3 + 3;	//Body: 3 , Head: 3
+
+	m_caps.enabledMotion.set(false, false, false);
+	m_caps.enabledRotation.set(false, false, false);
+	m_caps.headLimits[0].set(-180, -180, -180);
+	m_caps.headLimits[1].set(180, 180, 180);
+}
 ERobotControllerStatus torsoController::GetRobotStatus() {
 	return robotState;
 }

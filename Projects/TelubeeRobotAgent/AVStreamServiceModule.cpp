@@ -18,6 +18,8 @@
 #include "FlyCameraManager.h"
 #include "DirectSoundInputStream.h"
 #include "CommunicationMessages.h"
+#include "StreamReader.h"
+#include "XMLTree.h"
 
 namespace mray
 {
@@ -80,14 +82,30 @@ public:
 
 	bool m_streamAudio;
 
+	struct CameraSettings
+	{
+		CameraSettings(){}
+		CameraSettings(const math::vector2d& sz, int bits, int f)
+		{
+			size = sz;
+			bitrate = bits;
+			fps = f;
+		}
+		math::vector2di size;
+		int bitrate;
+		int fps;
+	};
+	std::vector<CameraSettings> m_cameraSettings;
+
 	struct _CameraInfo
 	{
 		CameraInfo ifo;
 		int w, h, fps;
 		GCPtr<video::ICameraVideoGrabber> camera;
+		math::vector2di offsets;
 	}m_cameraIfo[2];
 
-	EStreamingQuality m_quality;
+	int m_quality;
 	CameraProfileManager* m_cameraProfileManager;
 	core::string m_cameraProfile;
 
@@ -106,6 +124,7 @@ public:
 		m_gainValue = 0.1;
 		m_WBValue = -1;
 		m_gammaValue = 0.0;
+		LoadCameraSettings("StreamingProfiles.xml");
 	}
 	~AVStreamServiceModuleImpl()
 	{
@@ -113,6 +132,38 @@ public:
 		m_streamers = 0;
 		delete m_cameraProfileManager;
 	}
+
+	void LoadCameraSettings(const core::string &src)
+	{
+		xml::XMLTree tree;
+		core::string path;
+		gFileSystem.getCorrectFilePath(src, path);
+
+		if (path=="" || tree.load(path) == false)
+		{
+			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 3000, 30));
+			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 4000, 45));
+			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 5000, 50));
+			m_cameraSettings.push_back(CameraSettings(math::vector2di(960, 720), 6000, 45));
+			m_cameraSettings.push_back(CameraSettings(math::vector2di(960,720), 7000, 50));
+			return;
+		}
+
+		xml::XMLElement* e= tree.getSubElement("Settings");
+		e = e->getSubElement("Setting");
+
+		while (e)
+		{
+			CameraSettings s;
+
+			s.size = core::StringConverter::toVector2d( e->getValueString("Resolution"));
+			s.fps = e->getValueInt("FPS");
+			s.bitrate = e->getValueInt("Bitrate");
+			m_cameraSettings.push_back(s);
+			e = e->nextSiblingElement("Setting");
+		}
+	}
+
 	void SetCameraParameterValue(const core::string& name, const core::string& value)
 	{
 
@@ -150,7 +201,7 @@ public:
 
 #endif
 		m_cameraProfile = context->appOptions.GetOptionValue("CameraProfile");
-		m_quality = (EStreamingQuality)context->appOptions.GetOptionByName("Quality")->getValueIndex();
+		m_quality = context->appOptions.GetOptionByName("Quality")->getValueIndex();
 		core::string res = context->appOptions.GetOptionByName("StreamResolution")->getValue();
 
 		if (res == "0-VGA")
@@ -202,35 +253,23 @@ public:
 			}
 		}
 
-		uint bitRate[] =
 		{
-			3000,
-			4000,
-			5000,
-			6000,
-			8000
-		};
-		uint fpsSet[] =
-		{
-			30,
-			40,
-			50,
-			50,
-			50
-		};
-		math::vector2d resolution[] =
-		{
-			math::vector2d(640, 480),
-			math::vector2d(640, 480),
-			math::vector2d(640, 480),
-			math::vector2d(960, 720),
-			math::vector2d(1280, 720)
-		};
+			//load camera cropping offsets
 
+			OS::IStreamPtr s = gFileSystem.openFile(gFileSystem.getAppPath() + "CameraOffsets.txt", OS::TXT_READ);
+			if (!s.isNull())
+			{
+				OS::StreamReader rdr(s);
+				core::StringConverter::parse(rdr.readLine(), m_cameraIfo[0].offsets);
+				core::StringConverter::parse(rdr.readLine(), m_cameraIfo[1].offsets);
+				s->close();
+			}
+		}
 		printf("Initializing Cameras\n");
-		video::GstNetworkVideoStreamer* vstreamer;
-		math::vector2d capRes = m_resolution = resolution[(int)m_quality];
-		int fps = m_fps = fpsSet[(int)m_quality];
+		m_quality = math::Min<int>((int)m_quality, m_cameraSettings.size());
+		CameraSettings setting = m_cameraSettings[m_quality];
+		math::vector2d capRes = m_resolution = setting.size;
+		int fps = m_fps = setting.fps;
 
 		for (int i = 0; i < 2; ++i)
 		{
@@ -240,7 +279,9 @@ public:
 		}
 #if USE_WEBCAMERA
 		if (m_cameraType == ECameraType::Webcam)
-		{
+		{		
+			video::GstNetworkVideoStreamer* vstreamer;
+
 			for (int i = 0; i < 2; ++i)
 			{
 				if (m_cameraIfo[i].ifo.index >= 0)
@@ -304,7 +345,9 @@ public:
 			if (m_cameraIfo[0].ifo.index != -1)
 			{
 				printf("Initializing Pointgrey Camera\n");
-				m_cameraIfo[0].camera = new video::FlyCameraVideoGrabber();
+				video::FlyCameraVideoGrabber* c = 0;
+				m_cameraIfo[0].camera = (c=new video::FlyCameraVideoGrabber());
+				c->SetCroppingOffset(m_cameraIfo[0].offsets.x, m_cameraIfo[0].offsets.y);
 				m_cameraIfo[0].camera->InitDevice(m_cameraIfo[0].ifo.index, m_cameraIfo[0].w, m_cameraIfo[0].h, fps);
 				m_cameraIfo[0].camera->SetImageFormat(video::EPixel_R8G8B8);
 				//	m_cameraIfo[0].camera->Start();
@@ -314,7 +357,9 @@ public:
 				&& m_cameraIfo[0].ifo.index != m_cameraIfo[1].ifo.index)
 			{
 				printf("Initializing Pointgrey Camera\n");
-				m_cameraIfo[1].camera = new video::FlyCameraVideoGrabber();
+				video::FlyCameraVideoGrabber* c = 0;
+				m_cameraIfo[1].camera = (c = new video::FlyCameraVideoGrabber());
+				c->SetCroppingOffset(m_cameraIfo[1].offsets.x, m_cameraIfo[1].offsets.y);
 				m_cameraIfo[1].camera->InitDevice(m_cameraIfo[1].ifo.index, m_cameraIfo[1].w, m_cameraIfo[1].h, fps);
 				m_cameraIfo[1].camera->SetImageFormat(video::EPixel_R8G8B8);
 				//	m_cameraIfo[1].camera->Start();
@@ -339,7 +384,7 @@ public:
 			grabbers.push_back(m_cameraIfo[1].camera);
 			hs->SetVideoGrabber(grabbers);//
 			hs->SetResolution(m_resolution.x, m_resolution.y, fps, true);
-			hs->SetBitRate(bitRate[(int)m_quality]);
+			hs->SetBitRate(setting.bitrate);
 			m_streamers->AddStream(hs, "Video");
 		}
 #endif
@@ -476,7 +521,7 @@ public:
 			{
 				if (m_cameraIfo[i].camera && m_cameraIfo[i].camera->IsConnected() == false)
 				{
-					printf("Camera %d has stopped, restarting it\n", i);
+				//	printf("Camera %d has stopped, restarting it\n", i);
 					m_cameraIfo[i].camera->Start();
 
 					//give the camera sometime to start
@@ -499,7 +544,18 @@ public:
 		{
 
 			 msg = "Capture FPS: " + core::StringConverter::toString(m_cameraIfo[0].camera->GetCaptureFrameRate());
-			context->RenderText(msg, 100, 100);
+			context->RenderText(msg, 100, 0);
+		}
+		if (m_cameraType == ECameraType::PointGrey)
+		{
+			for (int i = 0; i < 2; ++i)
+			{
+				if (m_cameraIfo[i].camera && m_cameraIfo[i].camera->IsConnected() == false)
+				{
+					msg = "Camera: " + core::StringConverter::toString(i)+" is not open!";
+					context->RenderText(msg, 100, 0,video::SColor(1,0,0,1));
+				}
+			}
 		}
 	}
 	void Render(TbeeServiceRenderContext* context)

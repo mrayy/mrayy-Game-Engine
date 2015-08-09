@@ -43,17 +43,15 @@
 #include "IStreamListener.h"
 #include "CommunicationMessages.h"
 #include "TBeeServiceContext.h"
+#include "RobotCommunicator.h"
 
 namespace mray
 {
 
-class RobotCommunicator;
 class GstVideoGrabberImpl;
-class IRobotCommunicatorListener;
-class IMessageSink;
 
 
-class TRApplication :public CMRayApplication, public scene::IViewportListener,public video::IGStreamerStreamerListener
+class TRApplication :public CMRayApplication, public scene::IViewportListener,public video::IGStreamerStreamerListener,public IRobotCommunicatorListener
 {
 protected:
 
@@ -74,14 +72,9 @@ protected:
 	GCPtr<GUI::GUIBatchRenderer> m_guiRender;
 
 
-	//GCPtr<video::GstNetworkVideoStreamer> m_streamer;
-
 	std::vector<TBee::IServiceModule*> m_services;
 
 	RobotCommunicator* m_robotCommunicator;
-
-	IRobotCommunicatorListener* m_communicatorListener;
-	IMessageSink* m_msgSink;
 
 #if USE_OPENNI
 	TBee::OpenNIHandler* m_openNi;
@@ -108,9 +101,6 @@ protected:
 		}
 		bool userConnected;
 		network::NetAddress userAddress;
-		RobotStatus robotData;
-
-		math::vector2d collision;
 		bool debug;
 	}m_debugData;
 
@@ -137,14 +127,10 @@ public:
 
 	virtual void onRenderDone(scene::ViewPort*vp);
 
-	void OnUserConnected(const UserConnectionData& data);
+	virtual void OnUserConnected(RobotCommunicator* sender, const UserConnectionData& data);
 	void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status);
-	void OnCollisionData(RobotCommunicator* sender, float left, float right);
 	void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address);
-	void OnCalibrationDone(RobotCommunicator* sender);
-	void OnReportMessage(RobotCommunicator* sender, int code, const core::string& msg);
-
-	void OnMessage(network::NetAddress* addr, const core::string& msg, const core::string& value);
+	void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value);
 
 
 #if USE_PLAYERS

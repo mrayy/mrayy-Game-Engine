@@ -23,7 +23,9 @@
 #include "TextureRTWrap.h"
 
 #include "AVStreamServiceModule.h"
+#include "AVPlayerServiceModule.h"
 #include "HandsWindowServiceModule.h"
+#include "RobotControlServiceModule.h"
 
 #include "Console.h"
 
@@ -31,59 +33,17 @@
 
 #undef StartService
 
-#define COMMUNICATION_PORT 6000
 #define SEND_ROBOT_SENSORS 0
+#define COMMUNICATION_PORT 6000
 
 namespace mray
 {
 
-	class AppRobotCommunicatorListener :public IRobotCommunicatorListener
-	{
-		TRApplication* m_app;
-	public:
-		AppRobotCommunicatorListener(TRApplication* app)
-		{
-			m_app = app;
-		}
-		virtual void OnUserConnected(RobotCommunicator* sender, const UserConnectionData& data)
-		{
-			m_app->OnUserConnected(data);
-		}
-		virtual void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status)
-		{
-			m_app->OnRobotStatus(sender, status);
-		}
-		void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address)
-		{
-			m_app->OnUserDisconnected(sender, address);
-
-		}
-		virtual void OnCollisionData(RobotCommunicator* sender, float left, float right)
-		{
-		}
-	};
-	class AppRobotMessageSink :public IMessageSink
-	{
-		TRApplication* m_app;
-	public:
-		AppRobotMessageSink(TRApplication* app)
-		{
-			m_app = app;
-		}
-		virtual void OnMessage(network::NetAddress* addr,const core::string& msg, const core::string& value)
-		{
-			m_app->OnMessage(addr,msg, value);
-		}
-
-	};
 
 
 TRApplication::TRApplication()
 {
-	m_robotCommunicator = 0;
 	m_startVideo = 0;
-	m_communicatorListener = new AppRobotCommunicatorListener(this);
-	m_msgSink = new AppRobotMessageSink(this);
 #if USE_OPENNI
 	m_openNi = 0;
 #endif
@@ -98,7 +58,7 @@ TRApplication::TRApplication()
 	m_enablePlayers = false;
 	m_enableStream = true;
 
-
+	m_robotCommunicator = 0;
 	m_isDone = false;
 }
 
@@ -126,9 +86,6 @@ void TRApplication::onClose()
 	m_services.clear();
 
 
-	delete m_robotCommunicator;
-	delete m_communicatorListener;
-	delete m_msgSink;
 	delete m_serviceContext.commChannel;
 }
 
@@ -171,7 +128,7 @@ void TRApplication::onEvent(Event* e)
 		{
 			if (evt->button == 6 && m_controller==EController::Logicool || evt->button== 6 && m_controller==EController::XBox)
 			{
-				m_robotCommunicator->SetLocalControl(!m_robotCommunicator->IsLocalControl());
+			//	m_robotCommunicator->SetLocalControl(!m_robotCommunicator->IsLocalControl());
 			}
 		}
 	}
@@ -180,11 +137,13 @@ void TRApplication::onEvent(Event* e)
 		KeyboardEvent* evt = (KeyboardEvent*)e;
 		if (evt->press && evt->key == KEY_S)
 		{
+#if 0
 			bool started = core::StringConverter::toBool(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, ""));
 			if (started)
 				m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_Stop,"");
 			else
 				m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_Start,"");
+#endif
 		}
 		if (evt->press && evt->key == KEY_F9)
 		{
@@ -225,6 +184,10 @@ void TRApplication::init(const OptionContainer &extraOptions)
 	network::createWin32Network();
 
 
+	printf("Initializing RobotCommunicator\n");
+	m_robotCommunicator = new RobotCommunicator();
+	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
+	m_robotCommunicator->SetListener(this);
 #if USE_OPENNI
 	if (m_depthSend)
 	{
@@ -249,6 +212,7 @@ void TRApplication::init(const OptionContainer &extraOptions)
 	}else
 		this->GetRenderWindow(0)->Hide();
 
+	m_services.push_back(new TBee::RobotControlServiceModule());
 	if (m_enableStream)
 	{
 		//Setup AVStreamer
@@ -292,11 +256,6 @@ void TRApplication::init(const OptionContainer &extraOptions)
 	}
 	Console::setColor(1, 1, 1);
 
-	printf("Initializing RobotCommunicator\n");
-	m_robotCommunicator = new RobotCommunicator();
-	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
-	m_robotCommunicator->SetListener(m_communicatorListener);
-	m_robotCommunicator->SetMessageSink(m_msgSink);
 
 
 	m_serviceContext.commChannel = network::INetwork::getInstance().createUDPClient();
@@ -352,11 +311,6 @@ void TRApplication::update(float dt)
 {
 	CMRayApplication::update(dt);
 
-	if (m_debugData.userConnected && !m_robotInited)
-	{
-		m_robotCommunicator->Initialize();
-		m_robotInited = true;
-	}
 
 	if (m_startVideo || m_debugData.debug)
 	{
@@ -407,79 +361,6 @@ void TRApplication::update(float dt)
 		m_services[i]->Update(dt);
 	}
 
-	if (m_robotCommunicator->IsLocalControl())
-	{
-		math::vector2d speed;
-		float rotation;
-
-		controllers::IJoysticController* joystick = m_inputManager->getJoystick(0);
-		if (joystick)
-		{
-			RobotStatus st;
-			controllers::JoysticAxis x = joystick->getAxisState(0);
-			controllers::JoysticAxis y = joystick->getAxisState(1);
-			controllers::JoysticAxis r = joystick->getAxisState(3);
-
-			st.speed[0] = x.abs;
-			st.speed[1] = y.abs;
-			st.rotation= r.abs;
-
-			st.connected = true;
-			st.headRotation[0] = 1;
-			st.headRotation[1] = 0;
-			st.headRotation[2] = 0;
-			st.headRotation[3] = 0;
-			m_robotCommunicator->SetRobotData(st);
-		}
-	}
-
-	if (m_robotCommunicator->GetRobotController() && m_robotCommunicator->GetRobotController()->GetRobotStatus()==ERobotControllerStatus::EConnected && m_debugData.userConnected)
-	{
-#if SEND_ROBOT_SENSORS
-		const int BufferLen = 128;
-		uchar buffer[BufferLen];
-		//tell the client if we are sending stereo or single video images
-
-		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
-		OS::StreamWriter wrtr(&stream);
-		{
-			int reply = (int)EMessages::BumpSensorMessage;
-			int len = stream.write(&reply, sizeof(reply));
-			bool leftBump = core::StringConverter::toBool(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "0"));
-			bool rightBump = core::StringConverter::toBool(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "1"));
-			int count = 2;
-			len += stream.write(&count, sizeof(count));
-			len += stream.write(&leftBump, sizeof(leftBump));
-			len += stream.write(&rightBump, sizeof(rightBump));
-			m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-		}
-		{
-			stream.seek(0, OS::ESeek_Set);
-			int reply = (int)EMessages::IRSensorMessage;
-			int len = stream.write(&reply, sizeof(reply));
-			float ir[6];
-			ir[0] = core::StringConverter::toFloat(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "2"));
-			ir[1] = core::StringConverter::toFloat(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "3"));
-			ir[2] = core::StringConverter::toFloat(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "4"));
-			ir[3] = core::StringConverter::toFloat(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "5"));
-			ir[4] = core::StringConverter::toFloat(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "6"));
-			ir[5] = core::StringConverter::toFloat(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "7"));
-			int count = 6;
-			len += stream.write(&count, sizeof(count));
-			for (int i = 0; i < 6;++i)
-				len += wrtr.binWriteFloat(ir[i]);
-			m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-		}
-		{
-			stream.seek(0, OS::ESeek_Set);
-			int reply = (int)EMessages::BatteryLevel;
-			int len = stream.write(&reply, sizeof(reply));
-			int batt = core::StringConverter::toInt(m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, ""));
-			len += wrtr.txtWriteInt(batt);
-			m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-		}
-#endif 
-	}
 #if USE_OPENNI
 	if (m_depthSend)
 		m_openNi->Update(dt);
@@ -508,125 +389,37 @@ void TRApplication::onRenderDone(scene::ViewPort*vp)
 
 		m_renderContext.font = font;
 		m_renderContext.viewPort = vp;
+		m_renderContext.guiRenderer = m_guiRender;
+		m_guiRender->Prepare();
+		m_renderContext.Reset();
 
-		if (m_robotCommunicator->GetRobotController() && font)
-		{
-
-			GUI::FontAttributes attr;
-			IRobotController* rc = m_robotCommunicator->GetRobotController();
-			int batt = core::StringConverter::toInt(rc->ExecCommand(IRobotController::CMD_GetBatteryLevel, ""));
-			attr.fontColor = video::SColor(0, 1, 0, 1);
-			if (batt < 20)
-				attr.fontColor = video::SColor(1, 0, 0, 1);
-			attr.fontSize = 20;
-			core::string msg;
-			msg = core::string("Battery Level : ") + core::StringConverter::toString(batt) + "%";
-			font->print(math::rectf(20, vp->GetSize().y - 40, 10, 10), &attr, 0, msg, m_guiRender);
-		}
 
 		for (int i = 0; i < m_services.size(); ++i)
 		{
+			m_renderContext.RenderText("[" + m_services[i]->GetServiceName() + "]:" + TBee::IServiceModule::ServiceStatusToString(m_services[i]->GetServiceStatus()), 50, 0,video::SColor(0,1,0,1));
 			m_services[i]->Render(&m_renderContext);
+			m_renderContext.RenderText("-----------", 50, 0);
 		}
 
 		if (font && m_debugging){
-			m_guiRender->Prepare();
 
-			float yoffset = 50;
-
-
-
+			m_renderContext.RenderText("Debug Data", 50, 0);
+			m_renderContext.RenderText("-----------", 50, 0);
 			{
-				yoffset = 100;
 				core::string msg;
 				msg = core::string("User Status: ") + (m_debugData.userConnected ? "Connected" : "Disconnected");
-				m_renderContext.RenderText(msg, 50, 50);
+				m_renderContext.RenderText(msg, 50, 0);
 				if (m_debugData.userConnected)
 				{
 					msg = "Address: " + m_debugData.userAddress.toString();
-					m_renderContext.RenderText(msg, 100, 50);
-				}
-				{
-					if (m_robotCommunicator->GetRobotController())
-					{
-						ERobotControllerStatus st= m_robotCommunicator->GetRobotController()->GetRobotStatus();
-						msg = core::string("Robot Status: ");
-						if (st == EStopped)msg += "Stopped";
-						if (st == EDisconnected)msg += "Disconnected";
-						if (st == EConnecting)msg += "Connecting";
-						if (st == EDisconnecting)msg += "Disconnecting";
-						if (st == EConnected)msg += "Connected";
-						m_renderContext.RenderText(msg, 50, 100);
-					}
-					msg = core::string("Controlling: ") + (m_robotCommunicator->IsLocalControl() ? "Local" : "Remote");
-					m_renderContext.RenderText(msg, 50, 100);
-					msg = core::string("Sensors : ") + core::StringConverter::toString(math::vector2d(m_debugData.collision));
-					m_renderContext.RenderText(msg, 50, 100);
-					if (m_debugData.robotData.connected || m_robotCommunicator->IsLocalControl())
-					{
-						msg = core::string("Speed: ") + core::StringConverter::toString(math::vector2d(m_debugData.robotData.speed[0], m_debugData.robotData.speed[1]));
-						m_renderContext.RenderText(msg, 100, 100);
-
-						msg = core::string("Rotation: ") + core::StringConverter::toString(m_debugData.robotData.rotation);
-						m_renderContext.RenderText(msg, 100, 100);
-
-						math::vector3d angles;
-						math::quaternion q(m_debugData.robotData.headRotation[0], m_debugData.robotData.headRotation[3],
-							m_debugData.robotData.headRotation[1], m_debugData.robotData.headRotation[2]);
-						q.toEulerAngles(angles);
-						angles.set(angles.y, angles.z, angles.x);
-						msg = core::string("Head Rotation: ") + core::StringConverter::toString(angles);
-						m_renderContext.RenderText(msg, 100, 100);
-
-						msg = core::string("Head Position: ") + core::StringConverter::toString(math::vector3d(m_debugData.robotData.headPos[0], m_debugData.robotData.headPos[1], m_debugData.robotData.headPos[2]));
-						m_renderContext.RenderText(msg, 100, 100);
-
-					}
-
-
-					if (m_robotCommunicator->GetRobotController())
-					{
-						msg = "Robot Started: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Bump Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "0");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Bump Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "1");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Sensor Light Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "2");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Sensor Light Front Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "3");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Sensor Light Center Left: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "4");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Sensor Light Center Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "5");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Sensor Light Front Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "6");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Sensor Light Right: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "7");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Battery Level: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, "");
-						m_renderContext.RenderText(msg, 100, 100);
-						msg = "Battery Status: " + m_robotCommunicator->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryCharge, "");
-						m_renderContext.RenderText(msg, 100, 100);
-
-						std::vector<float> jvalues;
-						m_robotCommunicator->GetRobotController()->GetJointValues(jvalues);
-						m_renderContext.RenderText(core::string("Robot Joint Values:"), 50, 100);
-
-						msg = "";
-						for (int i = 0; i < jvalues.size(); i+=2)
-						{
-							msg = core::StringConverter::toString(jvalues[i], 2) + "/" + core::StringConverter::toString(jvalues[i + 1], 2);
-							msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + msg;
-							m_renderContext.RenderText(msg, 100, 100);
-						}
-					}
+					m_renderContext.RenderText(msg, 100, 0);
 				}
 			}
-
 			for (int i = 0; i < m_services.size(); ++i)
 			{
+				m_renderContext.RenderText("[" + m_services[i]->GetServiceName() + "]", 50, 0, video::SColor(0, 1, 0, 1));
 				m_services[i]->DebugRender(&m_renderContext);
+				m_renderContext.RenderText("-----------", 50, 0);
 			}
 
 		}
@@ -635,7 +428,7 @@ void TRApplication::onRenderDone(scene::ViewPort*vp)
 		getDevice()->useShader(0);
 	}
 }
-void TRApplication::OnUserConnected(const UserConnectionData& data)
+void TRApplication::OnUserConnected(RobotCommunicator* sender,const UserConnectionData& data)
 {
 	if (m_isDone)
 		return;
@@ -664,52 +457,15 @@ void TRApplication::OnUserConnected(const UserConnectionData& data)
 }
 void TRApplication::OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status)
 {
-	m_debugData.robotData = status;
-}
-void TRApplication::OnCollisionData(RobotCommunicator* sender, float left, float right)
-{
-	m_debugData.collision.x = left;
-	m_debugData.collision.y = right;
 }
 void TRApplication::OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address)
 {
-	RobotStatus st;
-	m_robotCommunicator->SetRobotData(st);
 	m_debugData.userConnected = false;
 	m_startVideo = false;
-	if (m_robotCommunicator->GetRobotController() != 0)
-	{
-		ERobotControllerStatus status = m_robotCommunicator->GetRobotController()->GetRobotStatus();
-		m_robotCommunicator->GetRobotController()->ShutdownRobot();
-	}
 	printf("User Disconnected : %s\n", address.toString().c_str());
+	m_serviceContext.__FIRE_OnUserDisconnected();
 }
-void TRApplication::OnCalibrationDone(RobotCommunicator* sender)
-{
-
-	const int BufferLen = 64;
-	uchar buffer[BufferLen];
-	OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
-	int reply = (int)EMessages::DepthSize;
-	int len = stream.write(&reply, sizeof(reply));
-	m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-}
-
-void TRApplication::OnReportMessage(RobotCommunicator* sender, int code, const core::string& msg)
-{
-	const int BufferLen = 512;
-	uchar buffer[BufferLen];
-	OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
-	OS::StreamWriter wrtr(&stream);
-	int reply = (int)EMessages::ReportMessage;
-	int len = stream.write(&reply, sizeof(reply));
-	len += wrtr.binWriteInt(code);
-	len += wrtr.binWriteString(msg);
-	m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-
-}
-
-void TRApplication::OnMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
+void TRApplication::OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
 {
 	const int BufferLen = 65537;
 	uchar buffer[BufferLen];
@@ -724,6 +480,7 @@ void TRApplication::OnMessage(network::NetAddress* addr, const core::string& msg
 	{
 		m_serviceContext.remoteAddr.port = core::StringConverter::toInt(value);
 	}
+	m_serviceContext.__FIRE_OnUserMessage(addr,msg,value);
 #if USE_OPENNI
 	else
 	if (m.equals_ignore_case("depthSize") && m_depthSend)
@@ -746,40 +503,6 @@ void TRApplication::OnMessage(network::NetAddress* addr, const core::string& msg
 		m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
 	}
 #endif
-	else if (m.equals_ignore_case("query"))
-	{
-		if (m_robotCommunicator->GetRobotController() != 0)
-		{
-			ERobotControllerStatus st = m_robotCommunicator->GetRobotController()->GetRobotStatus();
-			int reply = (int)EMessages::RobotStatus;
-			int len = stream.write(&reply, sizeof(reply));
-			len += stream.write(&st, sizeof(st));
-			m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-		}
-	}
-	else if (m.equals_ignore_case("jointVals"))
-	{
-		if (m_robotCommunicator->GetRobotController() != 0)
-		{
-			std::vector<float> vals;
-			 m_robotCommunicator->GetRobotController()->GetJointValues(vals);
-			int reply = (int)EMessages::JointValues;
-			int len = stream.write(&reply, sizeof(reply));
-			int count = vals.size();
-			len += stream.write(&count, sizeof(count));
-			for (int i = 0; i < count; ++i)
-				len += wrtr.binWriteFloat(vals[i]);
-			m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-		}
-	}
-	else if (m.equals_ignore_case("reinit"))
-	{
-		if (m_robotCommunicator->GetRobotController() != 0)
-		{
-			ERobotControllerStatus status= m_robotCommunicator->GetRobotController()->GetRobotStatus();
-			m_robotCommunicator->GetRobotController()->ShutdownRobot();
-		}
-	}
 }
 
 void TRApplication::OnStreamerReady(video::IGStreamerStreamer* s)

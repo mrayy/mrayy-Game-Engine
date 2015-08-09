@@ -59,7 +59,7 @@ TCPClient::TCPClient(int portnum, char *ipaddr){
 	// 接続先指定用構造体の準備
 	server.sin_family = AF_INET;
 	server.sin_port = htons(portnum);
-	server.sin_addr.S_un.S_addr = InetPton(AF_INET,ipaddr,0);
+	server.sin_addr.S_un.S_addr = inet_addr(ipaddr);
 	// ソケットの作成
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 	// サーバに接続
@@ -134,7 +134,7 @@ int UDPServer::readBuffer(char *buf, int buflen){//内部バッファから読む
 	if(buf == NULL) return 0;	// 与えられたbufがNULLの場合
 	if(buflen < (int)buffer.size()+1) return 0;	// 与えられた領域サイズが足りない場合
 	//コピー
-	strcpy_s(buf,buflen,buffer.c_str());
+	strcpy(buf,buffer.c_str());
 	thisbuffcount = buffcount;
 	return buffcount;
 }
@@ -177,22 +177,14 @@ unsigned UDPServer::recvloop(){
 
 // ---------------------- UDPClient function implementation -----------------------------------//
 
-UDPClient::UDPClient()
-{
-	stopped=true;
-}
-UDPClient::~UDPClient()
-{
-	Close();
-}
 
-bool UDPClient::Connect(int portnum, const char *ipaddr){
+UDPClient::UDPClient(int portnum, char *ipaddr){
 	// ソケット初期化
 	WSAStartup(MAKEWORD(2,0), &wsaData);
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(portnum);
-	addr.sin_addr.S_un.S_addr = InetPton(AF_INET, ipaddr, 0); //inet_addr(ipaddr);
+	addr.sin_addr.S_un.S_addr = inet_addr(ipaddr);
 	// 送信用変数の初期化
 	buffer = "";
 	buffcount = 0;
@@ -200,10 +192,9 @@ bool UDPClient::Connect(int portnum, const char *ipaddr){
 	// スレッド制御用変数初期化
 	hEv = CreateEvent(NULL,true,false,NULL); //送信タイミング同期用イベントハンドル
 	hEvQt = CreateEvent(NULL,true,false,NULL); //送信スレッド終了通知用イベント
-	return true;
 }
 
-void UDPClient::Close(){
+UDPClient::~UDPClient(){
 	// スレッド終了処理
 	stopSending();
 	CloseHandle(hTh);
@@ -239,7 +230,6 @@ int UDPClient::sendBuffer(){
 // 通信用スレッド
 // スレッド開始
 int UDPClient::startSending(){
-	stopped=false;
 	DWORD retth = WaitForSingleObject(hTh,0); //スレッドは開始しているか？
 	if(retth == WAIT_TIMEOUT) return 0;//スレッド起動済みなのでエラー返し
 	unsigned threadID;
@@ -248,7 +238,6 @@ int UDPClient::startSending(){
 }
 
 int UDPClient::stopSending(){
-	stopped=true;
 	DWORD retth = WaitForSingleObject(hTh,0); //スレッドは開始しているか？
 	if(retth == WAIT_OBJECT_0) return 0;//スレッドが走っていなければ無視
 	SetEvent(hEvQt);	//スレッド終了指令イベント
@@ -266,7 +255,7 @@ unsigned UDPClient::sendloop(){
 	DWORD rethd;
 	while(1){
 		rethd = WaitForMultipleObjects(2,hs,false,INFINITE);
-		if(rethd == WAIT_OBJECT_0 || stopped) break; //hEvQtがシグナル状態になったなら終了
+		if(rethd == WAIT_OBJECT_0) break; //hEvQtがシグナル状態になったなら終了
 		sendBuffer();
 	}
 	return 1;
@@ -413,7 +402,7 @@ int MCASTServer::recvBuffer(){
 int MCASTServer::readBuffer(char *buf, int buflen){
 	if(buf == NULL) return 0;
 	if(buflen < (int)buffer.size()+1) return 0;	
-	strcpy_s(buf, buflen, buffer.c_str());
+	strcpy(buf,buffer.c_str());
 	thisbuffcount = buffcount;
 
 	return buffcount;

@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 #include "FlyingTelubeeRobotCommunicator.h"
-#include "shmem.h"
+//#include "shmem.h"
 #include "IUDPClient.h"
 #include "INetwork.h"
 #include "IThreadFunction.h"

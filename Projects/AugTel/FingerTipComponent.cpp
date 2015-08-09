@@ -6,7 +6,9 @@
 #include "ATAppGlobal.h"
 #include "IGUIRenderer.h"
 #include "FontResourceManager.h"
+#if USE_OPENNI
 #include "OpenNIHandler.h"
+#endif
 #include "GGComponent.h"
 
 #include "ATAppGlobal.h"
@@ -91,7 +93,7 @@ bool FingerTipComponent::_calculateForce(float dt)
 		
 
 	}
-#ifdef USE_OPENNI
+#if USE_OPENNI
 
 	if (!ATAppGlobal::Instance()->depthProvider->ConvertToImageSpace(math::vector2d(m_projPos.x, m_projPos.y), m_depthSpace))
 	{

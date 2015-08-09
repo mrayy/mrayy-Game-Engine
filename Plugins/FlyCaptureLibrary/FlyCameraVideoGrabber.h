@@ -50,6 +50,7 @@ protected:
 	float m_timeAcc;
 	float m_lastT;
 
+	int m_offsetX, m_offsetY;
 
 public:
 	FlyCameraVideoGrabber();
@@ -62,6 +63,8 @@ public:
 	void SetFrameRate(int fps);
 	int GetFrameRate();
 
+	//call before init device
+	void SetCroppingOffset(int x, int y){ m_offsetX = x; m_offsetY = y; }
 	bool InitDevice(int device,int w,int h,int fps);
 
 	void SetFrameSize(int w,int h);

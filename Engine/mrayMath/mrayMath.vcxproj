@@ -185,6 +185,7 @@
     <ClInclude Include="FastFourierTransform.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GenericMatrix.h" />
+    <ClInclude Include="ILerpFunction.h" />
     <ClInclude Include="Intersection.h" />
     <ClInclude Include="line2d.h" />
     <ClInclude Include="line3d.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="point2d.h" />
     <ClInclude Include="point3d.h" />
     <ClInclude Include="Point4d.h" />
+    <ClInclude Include="PoissonLerp.h" />
     <ClInclude Include="Polygon2D.h" />
     <ClInclude Include="quaternion.h" />
     <ClInclude Include="randomizer.h" />

@@ -61,6 +61,12 @@
     <Filter Include="Source Files\Module">
       <UniqueIdentifier>{1421f4f8-4bd2-4c50-a7c6-7a530bf44a84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\libs\SharedMemory">
+      <UniqueIdentifier>{09aa1608-a904-49d5-9c37-3d583c1054ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\User">
+      <UniqueIdentifier>{f3a94f53-5490-4369-9614-1895e3c5164c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -128,12 +134,6 @@
     </ClInclude>
     <ClInclude Include="IRobotCommunicator.h">
       <Filter>Source Files\Robot</Filter>
-    </ClInclude>
-    <ClInclude Include="shmem.h">
-      <Filter>Source Files\libs</Filter>
-    </ClInclude>
-    <ClInclude Include="multicast.h">
-      <Filter>Source Files\libs</Filter>
     </ClInclude>
     <ClInclude Include="CRobotConnector.h">
       <Filter>Source Files\Robot</Filter>
@@ -249,6 +249,21 @@
     <ClInclude Include="ServiceContext.h">
       <Filter>Source Files\Module</Filter>
     </ClInclude>
+    <ClInclude Include="multicast.h">
+      <Filter>Source Files\libs\SharedMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="shmem.h">
+      <Filter>Source Files\libs\SharedMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalDLLRobotController.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotCapabilities.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotHandler.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -286,12 +301,6 @@
     </ClCompile>
     <ClCompile Include="RemoteRobotCommunicator.cpp">
       <Filter>Source Files\Robot</Filter>
-    </ClCompile>
-    <ClCompile Include="shmem.cpp">
-      <Filter>Source Files\libs</Filter>
-    </ClCompile>
-    <ClCompile Include="multicast.cpp">
-      <Filter>Source Files\libs</Filter>
     </ClCompile>
     <ClCompile Include="CRobotConnector.cpp">
       <Filter>Source Files\Robot</Filter>
@@ -385,6 +394,18 @@
     </ClCompile>
     <ClCompile Include="IServiceModule.cpp">
       <Filter>Source Files\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="multicast.cpp">
+      <Filter>Source Files\libs\SharedMemory</Filter>
+    </ClCompile>
+    <ClCompile Include="shmem.cpp">
+      <Filter>Source Files\libs\SharedMemory</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalDLLRobotController.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotHandler.cpp">
+      <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

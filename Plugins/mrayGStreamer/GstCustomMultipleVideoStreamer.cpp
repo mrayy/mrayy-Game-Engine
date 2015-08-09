@@ -189,7 +189,7 @@ public:
 
 
 				videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate/m_grabber.size()) +
-					" speed-preset=superfast tune=zerolatency sync-lookahead=0  pass=qual ! rtph264pay ";
+					" speed-preset=superfast tune=zerolatency sync-lookahead=0  pass=qual sliced-threads=true ! rtph264pay ";
 				videoStr +=" ! myudpsink name=videoSink"+core::StringConverter::toString(i)+" sync=false ";
 
 				//videoStr += " ! autovideosink sync=false ";
@@ -381,6 +381,7 @@ public:
 	{
 		GError *err = 0;
 		BuildString();
+		//printf("\n\n%s\n\n", m_pipeLineString.c_str());
 		GstElement* pipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
 		if (err)
 		{

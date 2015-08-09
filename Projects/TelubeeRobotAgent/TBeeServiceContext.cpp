@@ -8,9 +8,10 @@ namespace TBee
 {
 
 
-void TbeeServiceRenderContext::RenderText(const core::string &txt, float x, float y)
+	void TbeeServiceRenderContext::RenderText(const core::string &txt, int x, int y, const video::SColor& clr)
 {
 
+		fontAttrs.fontColor = clr;
 	font->print(math::rectf(x, y+m_yOffset, 10, 10), &fontAttrs, 0, txt, guiRenderer);
 	m_yOffset += fontAttrs.fontSize;
 }

@@ -87,7 +87,10 @@ void GStreamerCore::_Init()
 	}
 	else
 	{
-		g_log_set_handler(0,  G_LOG_LEVEL_CRITICAL, g_logFunction, 0);
+		g_log_set_handler(0, G_LOG_LEVEL_INFO, g_logFunction, 0);
+		g_log_set_handler(0, G_LOG_LEVEL_DEBUG, g_logFunction, 0);
+		g_log_set_handler(0, G_LOG_LEVEL_MESSAGE, g_logFunction, 0);
+		g_log_set_handler(0, G_LOG_LEVEL_CRITICAL, g_logFunction, 0);
 		g_log_set_handler(0, G_LOG_FLAG_FATAL , g_logFunction, 0);
 		g_log_set_default_handler(g_logFunction, 0);
 

@@ -18,12 +18,15 @@
 
 #include <string>
 #include "IRobotController.h"
+#include "RobotCapabilities.h"
 #include <windows.h>
 
 class RobotSerialPortImpl;
 class RobotSerialPort:public IRobotController
 {
 protected:
+
+	mray::TBee::RobotCapabilities m_caps;
 
 	RobotSerialPortImpl* m_impl;
 	float robotX, robotY, robotZ;
@@ -44,6 +47,8 @@ protected:
 	static DWORD WINAPI timerThreadBase(RobotSerialPort *robot, LPVOID pdata);
 
 	std::string ScanePorts();
+
+	void _setupCaps();
 public:
 	RobotSerialPort();
 	virtual~RobotSerialPort();
@@ -58,6 +63,7 @@ public:
 	virtual ERobotControllerStatus GetRobotStatus();
 	virtual void ShutdownRobot() ;
 	virtual bool GetJointValues(std::vector<float>& values) ;
+	virtual const mray::TBee::RobotCapabilities* GetRobotCaps()const { return &m_caps; }
 
 
 	virtual std::string ExecCommand(const std::string& cmd, const std::string& args);

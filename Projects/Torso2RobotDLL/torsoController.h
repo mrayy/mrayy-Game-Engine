@@ -9,6 +9,7 @@
 #include "TexARTNCord\TexART_ServoMotor2015.h"
 
 #include "movingAverage.h"
+#include "RobotCapabilities.h"
 
 class torsoControllerImpl;
 class torsoController :public IRobotController
@@ -22,8 +23,9 @@ protected:
 	MovAvg *m_rotAvg[3];
 	
 	torsoControllerImpl* m_impl;
-
+	HANDLE hThread;
 	ERobotControllerStatus robotState; 
+	mray::TBee::RobotCapabilities m_caps;
 	float torsoHeadPos[3];
 	float torsoHeadOri[3];
 	float robotJointData[12];
@@ -36,6 +38,8 @@ protected:
 	static DWORD WINAPI timerThread2(torsoController *robot, LPVOID pdata);
 
 	std::string ScanePorts();
+
+	void _setupCaps();
 
 public:
 
@@ -89,6 +93,7 @@ public:
 	ERobotControllerStatus GetRobotStatus();
 	void ShutdownRobot();
 	bool GetJointValues(std::vector<float>& values);
+	virtual const mray::TBee::RobotCapabilities* GetRobotCaps()const { return &m_caps; }
 
 
 	virtual std::string ExecCommand(const std::string& cmd, const std::string& args){ return ""; }

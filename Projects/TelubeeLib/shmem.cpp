@@ -11,7 +11,7 @@
 //
 /*--------------------------------------------------------------------------*/
 
-#include "shmem.h" 
+#include "shmem.h"
 #include <windows.h>
 
 
@@ -23,8 +23,8 @@ int shmem::createRead(void){
         NULL,                    // default security
         PAGE_READWRITE,          // read/write access
         0,                       // maximum object size (high-order DWORD)
-        SHMEM_SIZE,              // maximum object size (low-order DWORD)
-        SHMEM_NAME_PREFIX);      // name of mapping object
+        size,              // maximum object size (low-order DWORD)
+		m_name.c_str());      // name of mapping object
 
 	if (hMap == NULL)
 		return -1;		// error!. shared memory creare failed.
@@ -34,14 +34,14 @@ int shmem::createRead(void){
 		FILE_MAP_READ,		// read/write permission
 		0, 
 		0, 
-		SHMEM_SIZE);
+		size);
 
 	if (pMap == NULL){
 		CloseHandle(hMap);
 		return -2;		// error! mapviewoffile failed.
 	}
 
-	data = reinterpret_cast<shmem_data_t*>(pMap);
+	data = pMap;
 
 	return 1; 
 
@@ -55,8 +55,8 @@ int shmem::createWrite(void){
         NULL,                    // default security
         PAGE_READWRITE,          // read/write access
         0,                       // maximum object size (high-order DWORD)
-        SHMEM_SIZE,              // maximum object size (low-order DWORD)
-        SHMEM_NAME_PREFIX);            // name of mapping object
+        size,              // maximum object size (low-order DWORD)
+		m_name.c_str());            // name of mapping object
 
 	if (hMap == NULL)
 		return -1;		// error!. shared memory creare failed.
@@ -66,15 +66,15 @@ int shmem::createWrite(void){
 		FILE_MAP_WRITE,			// read/write permission
 		0, 
 		0, 
-		SHMEM_SIZE);
+		size);
 
 	if (pMap == NULL) {
 		CloseHandle(hMap);
 		return -2;		// error! mapviewoffile failed.
 	}
 
-	data = reinterpret_cast<shmem_data_t*>(pMap);
-	memset(data, 0, sizeof(shmem_data_t));
+	data = pMap;
+	memset(data, 0, size);
 	
 	return 1; 
 
@@ -86,7 +86,7 @@ int shmem::openRead(void){
 	hMap = OpenFileMapping(
 		FILE_MAP_READ,		// read/write access
 		FALSE,				// do not inherit the name
-		SHMEM_NAME_PREFIX);		// name of mapping object
+		m_name.c_str());		// name of mapping object
 
 	if(hMap == NULL)
 		return -1;		// error!. shared memory open failed.
@@ -96,14 +96,14 @@ int shmem::openRead(void){
 		FILE_MAP_READ,		// read/write permission
 		0, 
 		0, 
-		SHMEM_SIZE);
+		size);
 
 	if (pMap == NULL){
 		CloseHandle(hMap);
 		return -2;		// error! mapviewoffile failed.
 	}
 
-	data = reinterpret_cast<shmem_data_t*>(pMap);
+	data = pMap;
 
 	return 1; 
 	
@@ -115,7 +115,7 @@ int shmem::openWrite(void){
 	hMap = OpenFileMapping(
 		FILE_MAP_WRITE,		// read/write access
 		FALSE,				// do not inherit the name
-		SHMEM_NAME_PREFIX);		// name of mapping object
+		m_name.c_str());		// name of mapping object
 
 	if (hMap == NULL)
 		return -1;		// error!. shared memory open failed.
@@ -125,7 +125,7 @@ int shmem::openWrite(void){
 		FILE_MAP_WRITE,		// read/write permission
 		0, 
 		0, 
-		SHMEM_SIZE);
+		size);
 
 	if (pMap == NULL) {
 		CloseHandle(hMap);
@@ -134,8 +134,8 @@ int shmem::openWrite(void){
 
 	}
 
-	data = reinterpret_cast<shmem_data_t*>(pMap);
-	memset(data, 0, sizeof(shmem_data_t));
+	data = pMap;
+ 	memset(data, 0, size);
 
 	return 1; 
 

@@ -4,6 +4,7 @@
 #include <string>
 #include "IRobotController.h"
 #include "vectors.h"
+#include "RobotCapabilities.h"
 
 class torsoControllerImpl;
 class torsoController :public IRobotController
@@ -18,7 +19,11 @@ protected:
 	bool baseConnected;
 
 	bool m_connectFlag;
-	bool m_isConnected;
+	//bool m_isConnected;
+
+
+	ERobotControllerStatus robotState;
+	mray::TBee::RobotCapabilities m_caps;
 
 	float m_headPos[3];
 
@@ -40,6 +45,7 @@ protected:
 
 	void SetZeroPos();
 
+	void _setupCaps();
 
 public:
 	torsoController();
@@ -50,7 +56,7 @@ public:
 	int initRobot(bool debug);
 	void ConnectRobot();
 	void DisconnectRobot();
-	bool IsConnected();
+	//bool IsConnected();
 	void UpdateRobotStatus(const RobotStatus& st);
 
 
@@ -58,6 +64,11 @@ public:
 
 
 	void _innerProcessRobot();
+
+	ERobotControllerStatus GetRobotStatus();
+	//void ShutdownRobot();
+	//bool GetJointValues(std::vector<float>& values);
+	virtual const mray::TBee::RobotCapabilities* GetRobotCaps()const { return &m_caps; }
 
 };
 

@@ -20,13 +20,17 @@ namespace TBee
 	public:
 
 		virtual void OnUserConnected(const UserConnectionData& data){}
+		virtual void OnUserDisconnected(){}
+		virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value){}
 	};
 	
 class TBeeServiceContext:public ServiceContext,public ListenerContainer<IServiceContextListener*>
 {
 protected:
 public:
-	DECLARE_FIRE_METHOD(OnUserConnected,(const UserConnectionData& data),(data))
+	DECLARE_FIRE_METHOD(OnUserConnected, (const UserConnectionData& data), (data))
+	DECLARE_FIRE_METHOD(OnUserDisconnected, (), ())
+	DECLARE_FIRE_METHOD(OnUserMessage, (network::NetAddress* addr, const core::string& msg, const core::string& value), (addr,msg,value))
 public:
 	TBeeServiceContext(){}
 	virtual ~TBeeServiceContext(){}
@@ -46,7 +50,7 @@ public:
 class TbeeServiceRenderContext:public ServiceRenderContext
 {
 protected:
-	float m_xOffset, m_yOffset;
+	int m_xOffset, m_yOffset;
 public:
 	GUI::IFont* font;
 	GUI::FontAttributes fontAttrs;
@@ -62,11 +66,11 @@ public:
 		Reset();
 	}
 
-	void RenderText(const core::string &txt, float x, float y);
+	void RenderText(const core::string &txt, int x, int y,const video::SColor& clr=1);
 	void Reset();
 
-	void AddXOffsetText(float x){ m_xOffset += x; }
-	void AddYOffsetText(float y){ m_yOffset += y; }
+	void AddXOffsetText(int x){ m_xOffset += x; }
+	void AddYOffsetText(int y){ m_yOffset += y; }
 };
 
 }

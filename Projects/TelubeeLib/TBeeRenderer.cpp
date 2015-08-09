@@ -25,7 +25,7 @@ public:
 	GCPtr<video::OculusManager> oculusManager;
 	GCPtr<video::ParsedShaderPP> oculusRenderer[2];
 	game::OculusCameraComponent* oculusComponents[2];
-
+	video::ITexturePtr rtTexture;
 	video::IRenderTargetPtr renderTarget;;
 
 	scene::ViewPort* m_viewPort[2];
@@ -166,7 +166,7 @@ public:
 				}
 
 				{
-					video::ITexturePtr rtTexture = device->createEmptyTexture2D(true);
+					rtTexture = device->createEmptyTexture2D(true);
 					rtTexture->setMipmapsFilter(false);
 					rtTexture->createTexture(math::vector3d(w / 2, h, 1), video::EPixel_R8G8B8);
 
@@ -194,7 +194,10 @@ public:
 		device->setRenderTarget(0, false, true, video::SColor(1, 1, 1, 0));
 
 		video::TextureUnit texU;
-
+		if (rtTexture && (rtTexture->getSize().x != rc.getSize().x || rtTexture->getSize().x != rc.getSize().y))
+		{
+			rtTexture->createTexture(math::vector3di(rc.getSize().x, rc.getSize().y, 1), rtTexture->getImageFormat());
+		}
 		if (AppData::Instance()->stereoMode == ERenderStereoMode::Oculus && oculusRenderer[i])
 		{
 			device->set2DMode();
@@ -213,6 +216,7 @@ public:
 				device->setRenderTarget(0);
 				device->setTransformationState(video::TS_PROJECTION, m);
 			}
+			oculusRenderer[i]->Setup(math::rectf(0, renderTarget->GetSize()));
 			oculusRenderer[i]->render(renderTarget);
 			texU.SetTexture(oculusRenderer[i]->getOutput()->GetColorTexture());
 			device->setRenderTarget(m_finalRT[i], false, true, video::SColor(1, 1, 1, 0));

@@ -6,6 +6,13 @@
 #include <vector>
 
 
+namespace mray
+{
+	namespace TBee
+	{
+		class RobotCapabilities;
+	}
+}
 
 class ITelubeeRobotListener;
 struct RobotStatus;
@@ -44,11 +51,11 @@ public:
 };
 enum ERobotControllerStatus
 {
-	EStopped,
-	EDisconnected,
-	EConnected,
-	EConnecting,
-	EDisconnecting
+	EStopped,		// The robot is not inited
+	EDisconnected,	// The robot inited and waiting for connection
+	EDisconnecting,	// The robot is disconnecting
+	EConnected,		// The robot is connected
+	EConnecting,	// The robot is connecting
 };
 class IRobotController
 {
@@ -82,6 +89,7 @@ public:
 	virtual bool GetJointValues(std::vector<float>& values) = 0;
 	virtual void ManualControlRobot() {};
 
+	virtual const mray::TBee::RobotCapabilities* GetRobotCaps()const { return 0; }
 };
 
 

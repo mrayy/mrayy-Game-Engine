@@ -85,6 +85,9 @@
     <ClInclude Include="AVPlayerServiceModule.h">
       <Filter>Source Files\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="RobotControlServiceModule.h">
+      <Filter>Source Files\Modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -130,6 +133,9 @@
       <Filter>Source Files\old</Filter>
     </ClCompile>
     <ClCompile Include="AVPlayerServiceModule.cpp">
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotControlServiceModule.cpp">
       <Filter>Source Files\Modules</Filter>
     </ClCompile>
   </ItemGroup>

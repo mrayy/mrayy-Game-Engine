@@ -1,6 +1,8 @@
 #ifndef _INC_T5_SHMEM_H
 #define _INC_T5_SHMEM_H
 
+#include <string>
+
 /*--------------------------------------------------------------------------*/
 // Shared Memory map definition shared mem access class
 //
@@ -13,86 +15,42 @@
 //
 /*--------------------------------------------------------------------------*/
 
-#include <winsock2.h>		// for struct in_addr
-#include <string>
 
-
-#define SHMEM_NAME_PREFIX	"TELEUB_MMF_"
-#define SHMEM_SIZE			0x00001900
-#define SHMEM_HEAD_SIZE		0x00000100
-
-
-// custom typedefs
-typedef struct shmem_status {
-	bool connected;
-	bool online;  
-	bool home; 
-	bool initial;
-	bool reset;
-} shmem_status_t;
-
-
-typedef struct head {
-	float x;
-	float y;
-	float z;
-	float roll;
-	float pitch;
-	float yaw;
-} head_t;
-
-
-typedef struct joystick {
-	float wheel_l;
-	bool button_A;
-	bool button_B;
-	bool button_C;
-	bool button_D;
-} joystick_t;
-
-
-typedef struct location {
-	float latitude;
-	float longitude;
-} location_t;
-
-
-typedef struct shmem_user {
-	std::string user_id; 
-//	char tmp[12];
-	in_addr ipaddress;
-	location_t location;
-	head_t head;
-	joystick_t joystick;
-	shmem_status_t status;
-} shmem_user_t;
-
-
-typedef struct shmem_robot {
-	std::string robot_id; 
-	in_addr ipaddress;
-	location_t location;
-	head_t head;
-	joystick_t joystick;
-	shmem_status_t status;
-} shmem_robot_t;
-
-
-
-// final TELUBee data structure
-
-typedef struct shmem_data {
-	unsigned long timestamp;
-	shmem_user_t user;
-	shmem_robot_t robot; 
-} shmem_data_t;
-
+//#define SHMEM_NAME_PREFIX	"T5MA_MMF_"
+//#define SHMEM_SIZE			0x00001900
+//#define SHMEM_HEAD_SIZE		0x00000100
 
 
 
 class shmem {
 
 public:
+	shmem() :data(0), size(0)
+	{
+	}
+	shmem(const std::string& name, unsigned int size)
+	{
+		m_name = name;
+		this->size = size;
+	}
+
+	void SetName(const std::string& name)
+	{
+		m_name = name;
+	}
+	const std::string& GetName()
+	{
+		return m_name;
+	}
+
+	void SetDataSize( unsigned int size)
+	{
+		this->size = size;
+	}
+
+	void*GetData(){ return data; }
+	unsigned int GetDataSize(){ return size; }
+
 	bool Attach(void);
 	bool Detach(void);
 	bool attached(void); 
@@ -100,8 +58,10 @@ public:
 	int createWrite(void); 
 	int openRead(void); 
 	int openWrite(void); 
-	shmem_data_t* data;
 private: 
+	std::string m_name;
+	void* data;
+	unsigned int size;
 	void* hMap;
 	void* pMap;
 }; 
