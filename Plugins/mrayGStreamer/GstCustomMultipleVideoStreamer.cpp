@@ -72,7 +72,7 @@ public:
 		m_owner = owner;
 		m_ipAddr = "127.0.0.1";
 		m_baseVideoPort = 5000;
-		m_clockPort = 5010;
+		m_clockPort = 0;
 
 		m_bitRate = 5000;
 
@@ -159,7 +159,7 @@ public:
 
 				videoStr += "! videoconvert  ! video/x-raw,format=I420 ";// !videoflip method = 1  ";
 				//videoStr += "! videorate ";//" max-rate=" + core::StringConverter::toString(m_fps) + " ";
-				//	videoStr += " ! queue ";
+				videoStr += " ! queue ";
 				//	if (m_grabber[i]->GetImageFormat()!=video::EPixel_YUYV)
 		}
 		else{

@@ -4,6 +4,7 @@
 #define __MODULESHAREDMEMORY__
 
 #include "NetAddress.h"
+#include "RobotCommunicator.h"
 
 namespace mray
 {
@@ -14,9 +15,11 @@ struct ModuleSharedMemory
 {
 public:
 	bool UserConnected;	//indicate if the user being connected or not
-	network::NetAddress userIP;	//target user ip
+	TBee::UserConnectionData userConnectionData;
 	int userCommPort;	//direct communication port with the user
-	int hostPort;	//port for the host service to communicate with
+	network::NetAddress hostAddress;	//host service address to communicate with
+
+	//bool IsStarted; //indicate if the services should run or not
 
 };
 

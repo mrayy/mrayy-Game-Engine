@@ -15,6 +15,8 @@
 
 namespace mray
 {
+	namespace TBee
+	{
 
 
 	class RobotCommunicatorThread :public OS::IThreadFunction
@@ -171,4 +173,5 @@ void RobotCommunicator::StopServer()
 
 }
 
+}
 }

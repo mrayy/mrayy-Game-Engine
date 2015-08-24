@@ -185,7 +185,7 @@ void TRApplication::init(const OptionContainer &extraOptions)
 
 
 	printf("Initializing RobotCommunicator\n");
-	m_robotCommunicator = new RobotCommunicator();
+	m_robotCommunicator = new TBee::RobotCommunicator();
 	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
 	m_robotCommunicator->SetListener(this);
 #if USE_OPENNI
@@ -428,7 +428,7 @@ void TRApplication::onRenderDone(scene::ViewPort*vp)
 		getDevice()->useShader(0);
 	}
 }
-void TRApplication::OnUserConnected(RobotCommunicator* sender,const UserConnectionData& data)
+void TRApplication::OnUserConnected(TBee::RobotCommunicator* sender, const TBee::UserConnectionData& data)
 {
 	if (m_isDone)
 		return;
@@ -455,10 +455,10 @@ void TRApplication::OnUserConnected(RobotCommunicator* sender,const UserConnecti
 
 
 }
-void TRApplication::OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status)
+void TRApplication::OnRobotStatus(TBee::RobotCommunicator* sender, const RobotStatus& status)
 {
 }
-void TRApplication::OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address)
+void TRApplication::OnUserDisconnected(TBee::RobotCommunicator* sender, const network::NetAddress& address)
 {
 	m_debugData.userConnected = false;
 	m_startVideo = false;

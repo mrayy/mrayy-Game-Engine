@@ -264,6 +264,15 @@
     <ClInclude Include="RobotHandler.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
+    <ClInclude Include="TBeeServiceContext.h">
+      <Filter>Source Files\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotCommunicator.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="CommunicationMessages.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -405,6 +414,12 @@
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
     <ClCompile Include="RobotHandler.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="TBeeServiceContext.cpp">
+      <Filter>Source Files\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotCommunicator.cpp">
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>

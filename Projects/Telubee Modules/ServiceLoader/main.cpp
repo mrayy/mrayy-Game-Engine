@@ -21,10 +21,13 @@ void OnExit()
 int _tmain(int argc, _TCHAR* argv[])
 {
 	atexit(OnExit);
-	s_loader=new ServiceLoader(argc,argv);
+	s_loader=new ServiceLoader();
+	if (s_loader->Init(argc, argv))
+	{
+		s_loader->Run();
+	}
+	OnExit();
 
-	s_loader->Run();
-	
 	return 0;
 }
 

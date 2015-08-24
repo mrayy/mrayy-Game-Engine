@@ -27,8 +27,14 @@
     <ClInclude Include="AudioVideoModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AudioVideoServiceProvider.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="AVStreamServiceModule.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraProfile.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GstVideoProvider.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -41,7 +47,13 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AudioVideoServiceProvider.cpp">
+    <ClCompile Include="AVStreamServiceModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraProfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GstVideoProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

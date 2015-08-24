@@ -130,8 +130,8 @@ public:
 	FlyCapture2::Image convertedImage;
 };
 
-#define CheckError(x) {e=x;if(e!=PGRERROR_OK){FlyCameraManager::instance.LogError(e);return false;}}
-#define CheckError_NoRet(x) {e=x;if(e!=PGRERROR_OK){FlyCameraManager::instance.LogError(e);}}
+#define CheckError(x) {e=x;if(e!=PGRERROR_OK){FlyCameraManager::getInstance().LogError(e);return false;}}
+#define CheckError_NoRet(x) {e=x;if(e!=PGRERROR_OK){FlyCameraManager::getInstance().LogError(e);}}
 
 
 void FlyCameraImageEventCallback( class Image* pImage, const void* pCallbackData )
@@ -149,7 +149,7 @@ FlyCameraVideoGrabber::FlyCameraVideoGrabber()
 	m_format=video::EPixel_R8G8B8;
 	m_fps=30;
 	m_data=new FlyCameraData();
-	FlyCameraManager::instance.AddRef();
+	FlyCameraManager::getInstance().AddRef();
 	m_hasNewFrame = false;
 
 	m_offsetX = m_offsetY = 0;
@@ -161,7 +161,7 @@ FlyCameraVideoGrabber::~FlyCameraVideoGrabber()
 {
 	ShutDown();
 	delete m_data;
-	FlyCameraManager::instance.SubRef();
+	FlyCameraManager::getInstance().SubRef();
 	delete m_imageMutex;
 }
 
@@ -171,7 +171,7 @@ void FlyCameraVideoGrabber::ShutDown()
 
 int FlyCameraVideoGrabber::ListDevices()
 {
-	return FlyCameraManager::instance.GetCamerasCount();
+	return FlyCameraManager::getInstance().GetCamerasCount();
 }
 core::string FlyCameraVideoGrabber::GetDeviceName(int id)
 {
@@ -205,7 +205,7 @@ bool FlyCameraVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	m_inited=false;
 
 	PGRGuid guid;
-	if(!FlyCameraManager::instance.GetCamera(device,guid))
+	if (!FlyCameraManager::getInstance().GetCamera(device, guid))
 		return false;
 
 	CheckError(m_data->cam.Connect(&guid));

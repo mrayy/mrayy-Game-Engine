@@ -95,6 +95,7 @@ void LocalCameraVideoSource::Open()
 	{
 		if (m_cameraSource[i].camera)
 		{
+			//m_cameraSource[i].camera->SetImageFormat(video::EPixel_YUYV);
 			m_cameraSource[i].camera->InitDevice(m_cameraSource[i].id, m_cameraResolution.x, m_cameraResolution.y, m_cameraFPS);
 			m_cameraSource[i].camera->Start();
 		}

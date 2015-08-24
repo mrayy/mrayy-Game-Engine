@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "AudioVideoModule.h"
-#include "AudioVideoServiceProvider.h"
+#include "AVStreamServiceModule.h"
 
 
 namespace mray
@@ -15,7 +15,7 @@ namespace mray
 		class  CServiceModule
 		{
 		protected:
-			AudioVideoServiceProvider* m_impl;
+			AVStreamServiceModule* m_impl;
 		public:
 
 			static CServiceModule* instance;
@@ -25,7 +25,7 @@ namespace mray
 
 			virtual~CServiceModule();
 
-			AudioVideoServiceProvider* GetService()
+			AVStreamServiceModule* GetService()
 			{
 				return m_impl;
 			}
@@ -38,7 +38,7 @@ namespace mray
 		// see TelubeeRobotDLL.h for the class definition
 		CServiceModule::CServiceModule()
 		{
-			m_impl = new AudioVideoServiceProvider();
+			m_impl = new AVStreamServiceModule();
 
 		}
 
@@ -52,14 +52,14 @@ namespace mray
 
 	AUDIOVIDEOMODULE_API std::string DLL_GetServiceName()
 	{
-		return TBee::AudioVideoServiceProvider::ServiceName;
+		return TBee::AVStreamServiceModule::ModuleName;
 	}
 	AUDIOVIDEOMODULE_API void  DLL_ServiceInit()
 	{
 		printf("[%s] Init\n", DLL_GetServiceName().c_str());
 		TBee::CServiceModule::instance = new TBee::CServiceModule();
 	}
-	AUDIOVIDEOMODULE_API TBee::IServiceModule*  DLL_GetServiceModule()
+	AUDIOVIDEOMODULE_API void*  DLL_GetServiceModule()
 	{
 		return TBee::CServiceModule::instance->GetService();
 	}

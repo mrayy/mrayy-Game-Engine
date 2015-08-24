@@ -16,6 +16,7 @@
 #define ___FlyCameraManager___
 
 #include <FlyCapture2/FlyCapture2.h>
+#include <ISingleton.h>
 
 
 namespace mray
@@ -23,14 +24,14 @@ namespace mray
 namespace video
 {
 
-class FlyCameraManager
+class FlyCameraManager:public ISingleton<FlyCameraManager>
 {
 protected:
 
 
 	int m_refCount;
 
-	FlyCapture2::BusManager m_busManager;
+	FlyCapture2::BusManager *m_busManager;
 public:
 	FlyCameraManager();
 	virtual~FlyCameraManager();
@@ -45,7 +46,6 @@ public:
 
 	void LogError(FlyCapture2::Error e);
 
-	static FlyCameraManager instance;
 };
 
 }

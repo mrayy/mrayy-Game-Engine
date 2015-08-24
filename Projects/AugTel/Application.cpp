@@ -129,7 +129,7 @@ Application::Application()
 	m_screenShotEnabled = false;
 
 	this->m_limitFps = true;
-	this->m_limitFpsCount = 60;
+	this->m_limitFpsCount = 120;
 
 	m_windowPriority = 2;
 }

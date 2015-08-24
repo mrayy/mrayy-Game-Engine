@@ -92,7 +92,7 @@ bool DirectShowVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	//s_videoInput->setFormat(device, format);
 		
 	s_videoInput->setRequestedMediaSubType(VI_MEDIASUBTYPE_YUYV);
-	s_videoInput->setIdealFramerate(device, fps);
+//	s_videoInput->setIdealFramerate(device, fps);
 	if(!s_videoInput->setupDevice(device,w,h))
 	{
 		m_inited=false;
@@ -127,13 +127,15 @@ void DirectShowVideoGrabber::Stop()
 {
 	if(m_inited)
 		s_videoInput->stopDevice(m_device);
+	m_inited = false;
 }
 void DirectShowVideoGrabber::Start()
 {
-	if(m_inited)
+//	if(m_inited)
 	{
-		bool r=s_videoInput->restartDevice(m_device);
-		if(!r)
+		if(!InitDevice(m_device, m_size.x, m_size.y, m_fps))
+		//bool r=s_videoInput->restartDevice(m_device);
+		//if(!r)
 			printf("failed to start device\n");
 	}
 }

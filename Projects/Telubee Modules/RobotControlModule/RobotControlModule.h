@@ -5,18 +5,23 @@
 // ROBOTCONTROLMODULE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 #ifdef ROBOTCONTROLMODULE_EXPORTS
-#define ROBOTCONTROLMODULE_API __declspec(dllexport)
+#define ROBOTCONTROLMODULE_API extern "C" __declspec(dllexport)
 #else
 #define ROBOTCONTROLMODULE_API __declspec(dllimport)
 #endif
+#include <string>
 
-// This class is exported from the RobotControlModule.dll
-class ROBOTCONTROLMODULE_API CRobotControlModule {
-public:
-	CRobotControlModule(void);
-	// TODO: add your methods here.
-};
+namespace mray
+{
+	namespace TBee
+	{
+		class IServiceModule;
+	}
 
-extern ROBOTCONTROLMODULE_API int nRobotControlModule;
+	ROBOTCONTROLMODULE_API std::string DLL_GetServiceName();
+	ROBOTCONTROLMODULE_API void  DLL_ServiceInit();
+	ROBOTCONTROLMODULE_API void*  DLL_GetServiceModule();
+	ROBOTCONTROLMODULE_API void  DLL_SreviceDestroy();
+}
 
-ROBOTCONTROLMODULE_API int fnRobotControlModule(void);
+

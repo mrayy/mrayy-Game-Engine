@@ -24,13 +24,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RobotControlServiceModule.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommunicationMessages.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RobotControlModule.h">
+    <ClInclude Include="ServiceHostManager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,13 +32,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RobotControlModule.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="ServiceHostManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RobotControlServiceModule.cpp">
+    <ClCompile Include="..\..\Dependencies\include\tinyxml2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

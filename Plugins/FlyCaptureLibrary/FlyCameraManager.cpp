@@ -12,14 +12,14 @@ namespace video
 
 
 
-FlyCameraManager FlyCameraManager::instance;
-
 FlyCameraManager::FlyCameraManager()
 {
+	m_busManager = new FlyCapture2::BusManager();
 	m_refCount=0;
 }
 FlyCameraManager::~FlyCameraManager()
 {
+	delete m_busManager;
 }
 
 void FlyCameraManager::AddRef()
@@ -41,7 +41,7 @@ int FlyCameraManager::GetCamerasCount()
 {
 	uint cCount=0;
 	FlyCapture2::Error e;
-	e=m_busManager.GetNumOfCameras(&cCount);
+	e=m_busManager->GetNumOfCameras(&cCount);
 	if(e!=FlyCapture2::PGRERROR_OK)
 	{
 		LogError(e);
@@ -51,7 +51,7 @@ int FlyCameraManager::GetCamerasCount()
 }
 bool FlyCameraManager::GetCamera(int index,FlyCapture2::PGRGuid& out)
 {
-	FlyCapture2::Error e	= m_busManager.GetCameraFromIndex(index, &out);
+	FlyCapture2::Error e = m_busManager->GetCameraFromIndex(index, &out);
 	if (e != FlyCapture2::PGRERROR_OK)
 	{
 		LogError( e );
@@ -62,7 +62,7 @@ bool FlyCameraManager::GetCamera(int index,FlyCapture2::PGRGuid& out)
 }
 bool FlyCameraManager::GetCameraSerialNumber(int index, unsigned int& pSerialNumber)
 {
-	FlyCapture2::Error e = m_busManager.GetCameraSerialNumberFromIndex(index, &pSerialNumber);
+	FlyCapture2::Error e = m_busManager->GetCameraSerialNumberFromIndex(index, &pSerialNumber);
 	if (e != FlyCapture2::PGRERROR_OK)
 	{
 		LogError(e);

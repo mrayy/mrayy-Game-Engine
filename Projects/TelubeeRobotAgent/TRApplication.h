@@ -51,7 +51,7 @@ namespace mray
 class GstVideoGrabberImpl;
 
 
-class TRApplication :public CMRayApplication, public scene::IViewportListener,public video::IGStreamerStreamerListener,public IRobotCommunicatorListener
+class TRApplication :public CMRayApplication, public scene::IViewportListener,public video::IGStreamerStreamerListener,public TBee::IRobotCommunicatorListener
 {
 protected:
 
@@ -74,7 +74,7 @@ protected:
 
 	std::vector<TBee::IServiceModule*> m_services;
 
-	RobotCommunicator* m_robotCommunicator;
+	TBee::RobotCommunicator* m_robotCommunicator;
 
 #if USE_OPENNI
 	TBee::OpenNIHandler* m_openNi;
@@ -127,9 +127,9 @@ public:
 
 	virtual void onRenderDone(scene::ViewPort*vp);
 
-	virtual void OnUserConnected(RobotCommunicator* sender, const UserConnectionData& data);
-	void OnRobotStatus(RobotCommunicator* sender, const RobotStatus& status);
-	void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address);
+	virtual void OnUserConnected(TBee::RobotCommunicator* sender, const TBee::UserConnectionData& data);
+	void OnRobotStatus(TBee::RobotCommunicator* sender, const RobotStatus& status);
+	void OnUserDisconnected(TBee::RobotCommunicator* sender, const network::NetAddress& address);
 	void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value);
 
 

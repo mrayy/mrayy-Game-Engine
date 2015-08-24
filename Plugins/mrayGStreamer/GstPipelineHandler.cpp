@@ -151,6 +151,8 @@ namespace video
 	}
 	void GstPipelineHandler::Stop()
 	{
+		SetPaused(true);
+		return;
 		if (!m_data->Loaded)return;
 		GstState state;
 		if (!m_data->paused){

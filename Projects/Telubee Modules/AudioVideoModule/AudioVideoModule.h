@@ -7,7 +7,7 @@
 
 
 #ifdef AUDIOVIDEOMODULE_EXPORTS
-#define AUDIOVIDEOMODULE_API __declspec(dllexport)
+#define AUDIOVIDEOMODULE_API extern "C" __declspec(dllexport)
 #else
 #define AUDIOVIDEOMODULE_API __declspec(dllimport)
 #endif
@@ -23,7 +23,7 @@ namespace mray
 
 	AUDIOVIDEOMODULE_API std::string DLL_GetServiceName();
 	AUDIOVIDEOMODULE_API void  DLL_ServiceInit();
-	AUDIOVIDEOMODULE_API TBee::IServiceModule*  DLL_GetServiceModule();
+	AUDIOVIDEOMODULE_API void*  DLL_GetServiceModule();
 	AUDIOVIDEOMODULE_API void  DLL_SreviceDestroy();
 }
 

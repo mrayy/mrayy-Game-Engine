@@ -338,8 +338,13 @@ ulong Win32Network::getLocalAddress(){
 	if(err==-1)return 0;
 
 	hostent *hn=gethostbyname(name);
-	if(hn)res=(ulong)hn->h_addr;
+	if (hn){
 
+		struct in_addr addr;
+		memcpy(&addr, hn->h_addr_list[0], sizeof(struct in_addr));
+		res = (ulong)addr.S_un.S_addr;
+	}
+	
 	return res;
 }
 int Win32Network::getSocketPort(SOCKET s){

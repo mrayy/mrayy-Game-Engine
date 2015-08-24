@@ -103,6 +103,7 @@
     <ClInclude Include="AppData.h" />
     <ClInclude Include="CameraConfigurationManager.h" />
     <ClInclude Include="CameraTextureSource.h" />
+    <ClInclude Include="CommunicationMessages.h" />
     <ClInclude Include="FlyingTelubeeRobotCommunicator.h" />
     <ClInclude Include="GstLocalCameraVideoSource.h" />
     <ClInclude Include="GstSingleNetVideoSource.h" />
@@ -114,6 +115,7 @@
     <ClInclude Include="IRobotControllerDLL.h" />
     <ClInclude Include="LocalDLLRobotController.h" />
     <ClInclude Include="RobotCapabilities.h" />
+    <ClInclude Include="RobotCommunicator.h" />
     <ClInclude Include="RobotHandler.h" />
     <ClInclude Include="ServiceContext.h" />
     <ClInclude Include="IServiceModule.h" />
@@ -157,6 +159,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TBeeCommon.h" />
     <ClInclude Include="TBeeRenderer.h" />
+    <ClInclude Include="TBeeServiceContext.h" />
     <ClInclude Include="TBRobotInfo.h" />
     <ClInclude Include="TBRobotUserInfo.h" />
     <ClInclude Include="TBUserInfo.h" />
@@ -211,6 +214,7 @@
     <ClCompile Include="RemoteRobotCommunicator.cpp" />
     <ClCompile Include="RenderBlender.cpp" />
     <ClCompile Include="RenderingStateManager.cpp" />
+    <ClCompile Include="RobotCommunicator.cpp" />
     <ClCompile Include="RobotHandler.cpp" />
     <ClCompile Include="RobotInfoManager.cpp" />
     <ClCompile Include="shmem.cpp">
@@ -222,6 +226,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TBeeRenderer.cpp" />
+    <ClCompile Include="TBeeServiceContext.cpp" />
     <ClCompile Include="WiiboardInputController.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,7 +1,7 @@
 Settings{
 	Audio	"No"
 	Bits	"32"
-	CameraSource	"Local"
+	CameraSource	"Remote"
 	CameraType	"DirectShow"
 	Controller	"Logicool"
 	DS_Camera_Left	"1-See3CAM_CU130"

@@ -21,6 +21,8 @@
 
 namespace mray
 {
+namespace TBee
+{
 
 
 
@@ -82,6 +84,7 @@ public:
 
 };
 
+}
 }
 
 

@@ -3,20 +3,75 @@
 
 #include "stdafx.h"
 #include "RobotControlModule.h"
+#include "RobotControlServiceModule.h"
 
 
-// This is an example of an exported variable
-ROBOTCONTROLMODULE_API int nRobotControlModule=0;
-
-// This is an example of an exported function.
-ROBOTCONTROLMODULE_API int fnRobotControlModule(void)
+namespace mray
 {
-	return 42;
-}
+namespace TBee
+{
+class IServiceModule;
+
+class  CServiceModule
+{
+protected:
+	RobotControlServiceModule* m_impl;
+public:
+
+	static CServiceModule* instance;
+
+	CServiceModule(void);
+	// TODO: add your methods here.
+
+	virtual~CServiceModule();
+
+	RobotControlServiceModule* GetService()
+	{
+		return m_impl;
+	}
+
+};
+
+CServiceModule* CServiceModule::instance = 0;
 
 // This is the constructor of a class that has been exported.
-// see RobotControlModule.h for the class definition
-CRobotControlModule::CRobotControlModule()
+// see TelubeeRobotDLL.h for the class definition
+CServiceModule::CServiceModule()
 {
-	return;
+	m_impl = new RobotControlServiceModule();
+
 }
+
+
+CServiceModule::~CServiceModule(void)
+{
+	delete m_impl;
+}
+
+}
+
+ROBOTCONTROLMODULE_API std::string DLL_GetServiceName()
+{
+	return TBee::RobotControlServiceModule::ModuleName;
+}
+ROBOTCONTROLMODULE_API void  DLL_ServiceInit()
+{
+	printf("[%s] Init\n", DLL_GetServiceName().c_str());
+	TBee::CServiceModule::instance = new TBee::CServiceModule();
+}
+ROBOTCONTROLMODULE_API void*  DLL_GetServiceModule()
+{
+	return TBee::CServiceModule::instance->GetService();
+}
+ROBOTCONTROLMODULE_API void  DLL_SreviceDestroy()
+{
+	if (TBee::CServiceModule::instance)
+	{
+		printf("[%s] Destroy\n", DLL_GetServiceName().c_str());
+		delete TBee::CServiceModule::instance;
+		TBee::CServiceModule::instance = 0;
+	}
+}
+}
+
+

@@ -37,13 +37,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tinyxml2.h">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClInclude>
     <ClInclude Include="TRApplication.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RobotCommunicator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="CameraProfile.h">
@@ -96,13 +90,7 @@
     <ClCompile Include="TelubeeRobotAgent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tinyxml2.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
     <ClCompile Include="TRApplication.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RobotCommunicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CameraProfile.cpp">
@@ -137,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="RobotControlServiceModule.cpp">
       <Filter>Source Files\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Dependencies\include\tinyxml2.cpp">
+      <Filter>Source Files\tinyxml</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
