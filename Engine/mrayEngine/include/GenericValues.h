@@ -32,7 +32,7 @@ public:
 
 	virtual EValueType getType(){return EVT_INT;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -50,7 +50,7 @@ public:
 
 	virtual EValueType getType(){return EVT_FLOAT;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -68,7 +68,7 @@ public:
 
 	virtual EValueType getType(){return EVT_BOOLEAN;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -86,7 +86,7 @@ public:
 
 	virtual EValueType getType(){return EVT_STRING;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 

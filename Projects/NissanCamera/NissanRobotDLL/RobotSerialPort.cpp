@@ -473,8 +473,8 @@ void RobotSerialPort::UpdateRobotStatus(RobotStatus& st)
 	//robot_vy = m_impl->mvRobot[BASE][1]->getNext(st.speedY*v_scale);
 	//robot_rot = m_impl->mvRobot[BASE][2]->getNext(st.rotation*r_scale);
 
-	robotX = m_impl->mvRobot[BASE][0]->getNext(-st.Y * 1000);
-	robotY = m_impl->mvRobot[BASE][1]->getNext(st.X * 1000);
+	robotX = m_impl->mvRobot[BASE][0]->getNext(st.X * 1000);
+	robotY = m_impl->mvRobot[BASE][1]->getNext(-st.Y * 1000);
 
 	pan = m_impl->mvRobot[HEAD][0]->getNext(st.yaw);
 	tilt = m_impl->mvRobot[HEAD][1]->getNext(st.tilt);

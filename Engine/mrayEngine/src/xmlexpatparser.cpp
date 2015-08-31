@@ -87,8 +87,22 @@ XMLExpatParser::XMLExpatParser(){
 XMLExpatParser::~XMLExpatParser(){
 }
 
-bool XMLExpatParser::parserXML(OS::IStream*stream,XMLTree*tree){
-	if(!stream)return false;
+bool XMLExpatParser::parserXML(OS::IStream*stream, XMLTree*tree)
+{
+	if (!stream)return false;
+	core::string data;
+	data.resize(stream->length() + 1);
+
+	stream->read(&data[0], data.size());
+	data[data.size() - 1] = 0;
+	if (!parserXML(data, tree))
+	{
+		gLogManager.log(core::string(mT("XMLExpatParser::parserXML()-couldn't parse file.")) + stream->getStreamName(), ELL_WARNING);
+
+	}
+}
+
+bool XMLExpatParser::parserXML(const core::string& xml, XMLTree*tree){
 	XML_Parser parser=XML_ParserCreate(0);
 	ExpatUserData ud;
 	ud.node=tree;
@@ -97,23 +111,15 @@ bool XMLExpatParser::parserXML(OS::IStream*stream,XMLTree*tree){
 	XML_SetCharacterDataHandler(parser,charDataHandler);
 	XML_SetCommentHandler(parser,charCommentHandler);
 
-	
-	std::vector<char> data;
-	data.resize(stream->length()+1);
-
-	stream->read(&data[0],data.size());
-	data[data.size()-1]=0;
 	//listner->onStart();
-	if(!XML_Parse(parser,&data[0],data.size()-1,true)){
-		data.clear();
+	if (!XML_Parse(parser, xml.c_str(), xml.size() - 1, true)){
 		//listner->onDone(false);
 		int line=XML_GetCurrentLineNumber(parser);
-		XML_ParserFree(parser);
-		gLogManager.log(core::string(mT("XMLExpatParser::parserXML()-couldn't parse \""))+stream->getStreamName()+mT("\" at line :")+core::StringConverter::toString(line),ELL_WARNING);
+		int col = XML_GetCurrentColumnNumber(parser);
+		const char* err = XML_ErrorString(XML_GetErrorCode(parser));
+		gLogManager.log(core::string(mT("XMLExpatParser::parserXML()-Failed parsing xml with error: ") + core::string(err) + mT("at line: ")) + core::StringConverter::toString(line) + " - " + core::StringConverter::toString(col), ELL_WARNING);
 		return false;
 	}
-	//listner->onDone(true);
-	data.clear();
 
 	XML_ParserFree(parser);
 	return true;

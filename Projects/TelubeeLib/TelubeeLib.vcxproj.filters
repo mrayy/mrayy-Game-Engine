@@ -273,6 +273,9 @@
     <ClInclude Include="CommunicationMessages.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkValueController.h">
+      <Filter>Source Files\DataSource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -421,6 +424,9 @@
     </ClCompile>
     <ClCompile Include="RobotCommunicator.cpp">
       <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkValueController.cpp">
+      <Filter>Source Files\DataSource</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

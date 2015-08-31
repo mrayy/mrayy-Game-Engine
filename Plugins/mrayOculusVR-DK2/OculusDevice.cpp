@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "OculusDevice.h"
 #include "OculusManager.h"
+#include "RenderWindow.h"
 #include <windows.h>
 
 using namespace OVR;
@@ -74,6 +75,7 @@ namespace video
 			m_data.hmdResolution.y = m_device->Resolution.h;
 
 
+
 			bool IsLowPersistence = true;
 			bool DynamicPrediction = false;
 			bool VsyncEnabled = false;
@@ -107,6 +109,17 @@ namespace video
 				ovrHmd_ConfigureTracking(m_device, sensorCaps, 0);
 				StartTrackingCaps = sensorCaps;
 			}
+		}
+		bool AttachToWindow(video::RenderWindow* window)
+		{
+			HWND* ptr;
+			window->GetCustomParam("WINDOW", (void*)&ptr);
+			if (!ovrHmd_AttachToWindow(m_device, ptr, NULL, NULL))
+				return false;
+
+			ovrHmd_GetTrackingState(m_device, 0.0);
+			return true;
+			
 		}
 
 		const OculusDeviceData& GetDeviceInfo()const
@@ -326,6 +339,10 @@ void OculusDevice::SetLowPresistenceMode(bool on)
 	m_impl->SetLowPresistenceMode(on);
 }
 
+bool OculusDevice::AttachToWindow(video::RenderWindow* window)
+{
+	return m_impl->AttachToWindow(window);
+}
 void OculusDevice::Update(float dt)
 {
 	m_impl->Update(dt);

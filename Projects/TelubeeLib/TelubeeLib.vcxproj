@@ -114,6 +114,7 @@
     <ClInclude Include="IRobotController.h" />
     <ClInclude Include="IRobotControllerDLL.h" />
     <ClInclude Include="LocalDLLRobotController.h" />
+    <ClInclude Include="NetworkValueController.h" />
     <ClInclude Include="RobotCapabilities.h" />
     <ClInclude Include="RobotCommunicator.h" />
     <ClInclude Include="RobotHandler.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="GeomDepthRect.cpp" />
     <ClCompile Include="LocalDLLRobotController.cpp" />
     <ClCompile Include="LocalSingleCameraVideoSource.cpp" />
+    <ClCompile Include="NetworkValueController.cpp" />
     <ClCompile Include="NodeHeadController.cpp" />
     <ClCompile Include="OculusBaseController.cpp" />
     <ClCompile Include="RemoteCameraRenderingState.cpp" />

@@ -23,7 +23,8 @@ public:
 	IXMLParser(){}
 	virtual~IXMLParser(){}
 
-	virtual bool parserXML(OS::IStream*stream,XMLTree*tree)=0;
+	virtual bool parserXML(OS::IStream*stream, XMLTree*tree) = 0;
+	virtual bool parserXML(const core::string& xml, XMLTree*tree) = 0;
 
 	virtual core::string getParserName()=0;
 

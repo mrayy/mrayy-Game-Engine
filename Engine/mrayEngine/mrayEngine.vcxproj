@@ -309,6 +309,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\ValueGroup.cpp" />
     <ClCompile Include="src\3DSLoader.cpp" />
     <ClCompile Include="src\InputKeyMap.cpp" />
     <ClCompile Include="UI3DRenderNode.cpp" />
@@ -398,6 +399,7 @@
     <ClInclude Include="include\UI3DRenderNode.h" />
     <ClInclude Include="include\UniqueIDGenerator.h" />
     <ClInclude Include="include\ValueControllerManager.h" />
+    <ClInclude Include="include\ValueGroup.h" />
     <ClInclude Include="include\VideoResourceManager.h" />
     <ClInclude Include="include\VideoTextureSource.h" />
     <ClInclude Include="include\ViewPort.h" />

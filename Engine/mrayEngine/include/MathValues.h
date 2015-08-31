@@ -40,7 +40,7 @@ public:
 
 	virtual EValueType getType(){return EVT_VECTOR2Di;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -58,7 +58,7 @@ public:
 
 	virtual EValueType getType(){return EVT_VECTOR2Df;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -76,7 +76,7 @@ public:
 
 	virtual EValueType getType(){return EVT_VECTOR3Di;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -94,7 +94,7 @@ public:
 
 	virtual EValueType getType(){return EVT_VECTOR3Df;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -112,7 +112,7 @@ public:
 
 	virtual EValueType getType(){return EVT_VECTOR4Di;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -130,7 +130,7 @@ public:
 
 	virtual EValueType getType(){return EVT_VECTOR4Df;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -148,7 +148,7 @@ public:
 
 	virtual EValueType getType(){return EVT_LINE2D;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -166,7 +166,7 @@ public:
 
 	virtual EValueType getType(){return EVT_LINE3D;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -184,7 +184,7 @@ public:
 
 	virtual EValueType getType(){return EVT_BOX3D;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -202,7 +202,7 @@ public:
 
 	virtual EValueType getType(){return EVT_MATRIX3x3;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -220,7 +220,7 @@ public:
 
 	virtual EValueType getType(){return EVT_MATRIX4x4;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -238,7 +238,7 @@ public:
 
 	virtual EValueType getType(){return EVT_PLANE;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -256,7 +256,7 @@ public:
 
 	virtual EValueType getType(){return EVT_QUATERNION;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -274,7 +274,7 @@ public:
 
 	virtual EValueType getType(){return EVT_RECTi;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -292,7 +292,7 @@ public:
 
 	virtual EValueType getType(){return EVT_RECTf;}
 
-	virtual const mchar* toString()const;
+	virtual core::string  toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 

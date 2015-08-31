@@ -24,6 +24,7 @@ namespace mray
 {
 namespace video
 {
+	class RenderWindow;
 
 	class OculusDeviceImpl;
 	class OculusManager;
@@ -71,6 +72,8 @@ public:
 	bool IsConnected();
 	ovrHmd GetDevice();
 	const OculusDeviceData& GetDeviceInfo()const ;
+
+	bool AttachToWindow(video::RenderWindow* window);
 
 	void Update(float dt);
 

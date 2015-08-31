@@ -17,6 +17,7 @@ public:
 	virtual~XMLExpatParser();
 
 	virtual bool parserXML(OS::IStream*stream,XMLTree*tree);
+	virtual bool parserXML(const core::string& xml, XMLTree*tree);
 
 	virtual core::string getParserName();
 

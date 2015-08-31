@@ -26,12 +26,15 @@ protected:
 		float  aspect;		//Remote Camera Texture Aspect Ratio
 		float fovScaler;	//Render Plane scaler value based on Remote Camera FoV and plane distance
 		float distance;		//Render Plane distance from the camera
+		float eyeConvergance; //rotation for each eye 
+		float eyeDistance;	  //eyes distance for the projected contents
 	};
 
 
 	scene::MeshRenderableNode* m_surface[2];
 	SurfaceMeshParams m_surfaceParams;
-	math::vector3d m_cameraOffsets;
+	math::vector3d m_userOffset;
+
 
 	video::OffAxisProjection m_offAxisProj[2];
 
@@ -47,15 +50,20 @@ protected:
 
 	bool m_useLensCorrection;
 	GCPtr<video::ParsedShaderPP> m_lensCorrectionPP;
+	GCPtr<video::ParsedShaderPP> m_I420ToRGB;
 	TBee::TelubeeCameraConfiguration *m_cameraConfiguration;
 	bool m_camConfigDirty;
 
 	void _UpdateCameraProj();
 	void _UpdateHead(const math::vector3d& pos, const math::vector3d &angles);
 	void _UpdateCameraPlane();
-	float CalcDisplayFoV(float headDistance);
+	//float CalcDisplayFoV(float headDistance);
 	void _UpdateCameraPlaneScaler();
 	void _SetCameraPlaneDistance(float d);
+
+	void _RegisterNetworkValues();
+	void _OnCameraPropertyChanged(IValue* v);
+	void _OnProjectionPropertyChanged(IValue* v);
 public:
 	CameraPlaneRenderer();
 	virtual ~CameraPlaneRenderer();
@@ -78,8 +86,8 @@ public:
 	void DebugRender(GUI::IGUIRenderer* r);
 
 
-	math::vector3d GetCameraOffset(){ return m_cameraOffsets; }
-	void SetCameraOffset(const math::vector3d& v){ m_cameraOffsets=v; }
+	math::vector3d GetUserOffset(){ return m_userOffset; }
+	void SetUserOffset(const math::vector3d& v){ m_userOffset = v; }
 
 	TBee::ICameraVideoSource* GetVideoSource(){ return  m_videoSource; }
 

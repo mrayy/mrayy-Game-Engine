@@ -41,6 +41,7 @@
 #include "GUIElementFactory.h"
 #include "GUIConsole.h"
 #include "AppData.h"
+#include "FlyCameraManager.h"
 
 //#include "PythonScriptManager.h"
 
@@ -156,6 +157,7 @@ void Application::onEvent(Event* event)
 
 void Application::_initStates()
 {
+	gLogManager.log("Initing states",ELL_INFO);
 	IRenderingState *nullState, *streamerTest, *cameraState;
 	nullState = new TBee::NullRenderState();
 	nullState->InitState();
@@ -208,8 +210,24 @@ void Application::init(const OptionContainer &extraOptions)
 			m_cameraID[Eye_Right] = extraOptions.GetOptionByName("DS_Camera_Right")->getValueIndex() - 1;
 		}else 
 		{
-			m_cameraID[Eye_Left] = extraOptions.GetOptionByName("PT_Camera_Left")->getValueIndex() - 1;
-			m_cameraID[Eye_Right] = extraOptions.GetOptionByName("PT_Camera_Right")->getValueIndex() - 1;
+			//point grey cameras have unique serial number
+			int count = video::FlyCameraManager::getInstance().GetCamerasCount();
+			int c1 = core::StringConverter::toInt(extraOptions.GetOptionByName("PT_Camera_Left")->getValue());
+			int c2 = core::StringConverter::toInt(extraOptions.GetOptionByName("PT_Camera_Right")->getValue());
+			for (int i = 0; i < count; ++i)
+			{
+				uint sp;
+				video::FlyCameraManager::getInstance().GetCameraSerialNumber(i, sp);
+				if (sp == c1)
+				{
+					m_cameraID[Eye_Left] = i;
+				}
+				if (sp == c2)
+				{
+					m_cameraID[Eye_Right] = i;
+				}
+
+			}
 		}
 		AppData::Instance()->headController = EHeadControllerType::OptiTrack;
 		AppData::Instance()->robotController = ERobotControllerType::None;
@@ -242,27 +260,30 @@ void Application::init(const OptionContainer &extraOptions)
 	}
 	m_guiRender=new GUI::GUIBatchRenderer();
 	m_guiRender->SetDevice(getDevice());
+	printf("Starting up\n");
 
 	NCAppGlobals::Instance()->inputMngr = m_inputManager;
 
-	m_soundManager=new sound::FSLManager();
+	//m_soundManager=new sound::FSLManager();
+
 
 	m_screenShot=getDevice()->createEmptyTexture2D(true);
 	m_screenShot->setMipmapsFilter(false);
 	m_screenShot->createTexture(math::vector3d(GetRenderWindow()->GetSize().x,GetRenderWindow()->GetSize().y,1),video::EPixel_B8G8R8A8);
 
+	printf("Creating Render Manager\n");
 	m_tbRenderer = new TBeeRenderer();
 	m_tbRenderer->AddListener(this);
 	m_tbRenderer->Init(GetRenderWindow(0));
 
-	NCAppGlobals::Instance()->robotInfoManager=new RobotInfoManager();
-	NCAppGlobals::Instance()->robotInfoManager->LoadRobots("RobotsMap.xml");
-
-	m_appStateManager=new TBee::ApplicationStateManager();
+	printf("Creating App Manager\n");
+	m_appStateManager = new TBee::ApplicationStateManager();
 
 
-	m_renderingState=new TBee::RenderingStateManager();
-	m_renderingState->SetSleepTime(1.0 / 150.0f);
+	printf("Creating Render State Manager\n");
+	m_renderingState = new TBee::RenderingStateManager();
+	m_renderingState->SetSleepTime(0);// 1.0 / 150.0f);
+	printf("Initing States\n");
 	_initStates();
 	m_appStateManager->AddState(m_renderingState,"Rendering");
 	m_appStateManager->SetInitialState("Rendering");
@@ -270,15 +291,35 @@ void Application::init(const OptionContainer &extraOptions)
 	m_renderingState->InitStates();
 	_createViewports();
 
+	//Set head controller to optiTrack
+	NCAppGlobals::Instance()->headController = EHeadControllerType::OptiTrack;
 	if (NCAppGlobals::Instance()->headController == EHeadControllerType::OptiTrack)
-		AppData::Instance()->optiDataSource->ConnectLocal();
+		NCAppGlobals::Instance()->optiDataSource->ConnectLocal();
+
+	_RegisterNetworkValues();
+	NCAppGlobals::Instance()->netValueController->StartReceiver(6001);
 
 	gLogManager.log("Starting Application", ELL_INFO);
+
 
 // 	script::PythonScriptManager* scriptManager = new script::PythonScriptManager();
 // 	scriptManager->ExecuteFile(gFileSystem.openFile("testPython.py"));
 
 }
+
+void Application::_RegisterNetworkValues()
+{
+// 	ValueGroup* g = new ValueGroup("App");
+// 	NCAppGlobals::Instance()->netValueController->GetValues()->AddValueGroup(g);
+// 
+//	g->AddValue(new Vector2dfValue("Resolution", GetRenderWindow(0)->GetSize() / 100.0f))->OnChanged += newClassDelegate1("", this, &Application::_OnPropertyChanged);
+}
+
+void Application::_OnPropertyChanged(IValue* v)
+{
+	printf("Value[%s] = %s\n", v->getName().c_str(), v->toString().c_str());
+}
+
 void Application::_createViewports()
 {
 
@@ -371,7 +412,6 @@ void Application::WindowPostRender(video::RenderWindow* wnd)
 void Application::update(float dt)
 {
 	CMRayApplication::update(dt);
-
 	if(m_soundManager)
 		m_soundManager->runSounds(dt);
 

@@ -480,11 +480,13 @@ void FlyCameraVideoGrabber::BlitImage(const void* img)
 	default:
 		break;
 	}
-	// 	if(pixFormat!=PIXEL_FORMAT_RGB8)
-	// 	{
-	// 		pImage->Convert( PIXEL_FORMAT_RGB8, &convertedImage );
-	// 		ptr=&convertedImage;
-	// 	}
+// 	Image convertedImage;
+// 	if(pixFormat!=PIXEL_FORMAT_RGB8)
+// 	{
+// 	 	pImage->Convert( PIXEL_FORMAT_RGB8, &convertedImage );
+// 		fmt = EPixel_R8G8B8;
+// 	 	ptr=&convertedImage;
+// 	}
 
 
 	uchar* buf= ptr->GetData();
@@ -502,13 +504,76 @@ void FlyCameraVideoGrabber::BlitImage(const void* img)
 		}
 		else if (fmt == EPixel_YUYV)
 		{
-			m_tempImage.setData(buf, math::vector3d(cols, rows, 1), fmt);
+			m_tempImage.setData(buf, math::vector3d(cols, rows , 1), fmt);
 		}
 	}
 	m_hasNewFrame=true;
 	m_imageMutex->unlock();
 
 }
+
+void FlyCameraVideoGrabber::SetParameter(const core::string& name, const core::string& value)
+{
+
+	Property val;
+	val.present = true;
+	val.absControl = true;
+	val.onePush = false;
+	val.onOff = true;
+	PropertyInfo ifo;
+	if (name == Param_Brightness)
+	{
+		val.type = AUTO_EXPOSURE;
+		float v = core::StringConverter::toFloat(value);
+		ifo.type = val.type;
+		m_data->cam.GetPropertyInfo(&ifo);
+		if (v < 0)
+			val.autoManualMode = true;
+		else {
+			v = ifo.absMin + (ifo.absMax - ifo.absMin)*v;
+			val.autoManualMode = false;
+			val.absValue = v;
+		}
+		(m_data->cam.SetProperty(&val));
+	}
+	else
+	if (name == Param_Gain)
+	{
+		val.type = GAIN;
+		float v = core::StringConverter::toFloat(value);
+		ifo.type = val.type;
+		m_data->cam.GetPropertyInfo(&ifo);
+		if (v < 0)
+			val.autoManualMode = true;
+		else {
+			v = ifo.absMin + (ifo.absMax - ifo.absMin)*v;
+			val.autoManualMode = false;
+			val.absValue = v;
+		}
+		(m_data->cam.SetProperty(&val));
+	}
+	else
+	if (name == Param_WhiteBalance)
+	{
+		val.type = WHITE_BALANCE;
+		math::vector2d v = core::StringConverter::toVector2d(value);
+		if (v.x < 0)
+			val.autoManualMode = true;
+		else {
+			val.autoManualMode = false;
+			val.valueA = v.x;
+			val.valueB = v.y;
+		}
+		(m_data->cam.SetProperty(&val));
+	}
+}
+core::string FlyCameraVideoGrabber::GetParameter(const core::string& name)
+{
+	return "";
+}
+
+
+
 
 }
 }

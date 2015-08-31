@@ -16,6 +16,7 @@
 #define ___IValue___
 
 #include "mString.h"
+#include "IDelegate.h"
 
 
 namespace mray{
@@ -50,12 +51,19 @@ enum EValueType{
 	EVT_SHADER,
 	EVT_COUNT,		//---
 };
+class IValue;
+
+typedef DelegateEvent1<IValue*> ValueEvent;
 
 class MRAY_DLL IValue
 {
-public:
+protected:
 	core::string m_name;
 public:
+
+	ValueEvent OnChanged;
+public:
+
 	IValue(const core::string&name):m_name(name){}
 	virtual~IValue(){}
 
@@ -64,7 +72,7 @@ public:
 
 	virtual EValueType getType(){return EVT_UNKOWN;}
 
-	virtual const mchar* toString()const{return mT("");}
+	virtual core::string toString()const{ return core::string::Empty; }
 	virtual void parse(const core::string&v){}
 	virtual IValue* duplicate()=0;
 

@@ -86,11 +86,11 @@ EntryPoint
 		op.name = "PT_" + CameraName[c]; // "Camera" + core::StringConverter::toString(c);
 
 		op.valueSet.insert("None");
-		int camsCount = video::FlyCameraManager::instance.GetCamerasCount();
+		int camsCount = video::FlyCameraManager::getInstance().GetCamerasCount();
 		for (int i = 0; i<camsCount; ++i)
 		{
 			uint sp;
-			video::FlyCameraManager::instance.GetCameraSerialNumber(i, sp);
+			video::FlyCameraManager::getInstance().GetCameraSerialNumber(i, sp);
 			op.valueSet.insert(/*core::StringConverter::toString(i + 1) + " - FC_" +*/ core::StringConverter::toString(sp));
 		}
 		if (op.valueSet.size()>0)

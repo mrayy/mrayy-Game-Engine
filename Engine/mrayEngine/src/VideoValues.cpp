@@ -15,7 +15,7 @@ MaterialValue::MaterialValue(const core::string&name,GCPtr<video::RenderMaterial
 }
 
 
-const mchar* MaterialValue::toString()const{return mT("");}
+core::string MaterialValue::toString()const{return mT("");}
 void MaterialValue::parse(const core::string&v){
 }
 IValue* MaterialValue::duplicate()
@@ -49,7 +49,7 @@ TextureValue::~TextureValue(){
 }
 
 
-const mchar* TextureValue::toString()const{return mT("");}
+core::string TextureValue::toString()const{return mT("");}
 void TextureValue::parse(const core::string&v){
 }
 IValue* TextureValue::duplicate()
@@ -82,11 +82,12 @@ ColorValue::ColorValue(const core::string&name,const video::SColor& v)
 }
 
 
-const mchar* ColorValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string ColorValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void ColorValue::parse(const core::string&v){
 	core::StringConverter::parse(v,value);
+	OnChanged(this);
 }
 IValue* ColorValue::duplicate()
 {
@@ -115,15 +116,16 @@ ShaderValue::ShaderValue(const core::string&name,GCPtr<video::GPUShader> v)
 }
 
 
-const mchar* ShaderValue::toString()const{
+core::string ShaderValue::toString()const{
 	if(value)
 	{
-		return value->GetName().c_str();
+		return value->GetName();
 	}
 	return mT("");
 }
 void ShaderValue::parse(const core::string&v){
 	value=gShaderResourceManager.getResource(v);
+	OnChanged(this);
 }
 IValue* ShaderValue::duplicate()
 {

@@ -2333,6 +2333,9 @@
     <ClInclude Include="include\InputKeyMap.h">
       <Filter>Source Files\controllers</Filter>
     </ClInclude>
+    <ClInclude Include="include\ValueGroup.h">
+      <Filter>Source Files\Base\Values</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\RTTI_OBJECTS.cpp">
@@ -3660,6 +3663,9 @@
     </ClCompile>
     <ClCompile Include="src\InputKeyMap.cpp">
       <Filter>Source Files\controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ValueGroup.cpp">
+      <Filter>Source Files\Base\Values</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

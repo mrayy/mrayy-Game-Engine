@@ -31,7 +31,7 @@ public:
 
 	virtual EValueType getType(){return EVT_MATERIAL;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -50,7 +50,7 @@ public:
 
 	virtual EValueType getType(){return EVT_TEXTURE;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -68,7 +68,7 @@ public:
 
 	virtual EValueType getType(){return EVT_COLOR;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 
@@ -86,7 +86,7 @@ public:
 
 	virtual EValueType getType(){return EVT_SHADER;}
 
-	virtual const mchar* toString()const;
+	virtual core::string toString()const;
 	virtual void parse(const core::string&v);
 	virtual IValue* duplicate();
 

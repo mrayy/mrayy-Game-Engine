@@ -16,20 +16,20 @@
 #define PropertyValue_h__
 
 #include "IValue.h"
-#include "CPropertie.h"
+#include "IProperty.h"
 
 namespace mray
 {
 
-template <typename Container,class T>
 class PropertyValue:public IValue
 {
 private:
 protected:
-	rwProperty<Container,T>* m_property;
+	IProperty* m_property;
+	CPropertieSet* m_pset;
 	EValueType m_type;
 public:
-	PropertyValue(rwProperty<Container,T>*p,EValueType type):IValue(p->getName()),m_property(p),m_type(type)
+	PropertyValue(CPropertieSet* pset, IProperty*p, EValueType type) :IValue(p->getName()), m_pset(pset),m_property(p), m_type(type)
 	{
 	}
 	virtual ~PropertyValue()
@@ -46,11 +46,12 @@ public:
 	}
 	virtual void parse(const core::string&v)
 	{
-		return m_property->parse(v);
+		m_property->parse(m_pset,v);
+		OnChanged((IValue*)this);
 	}
 	virtual IValue* duplicate()
 	{
-		return new PropertyValue<Container,T>(m_property,m_type);
+		return 0;// new PropertyValue<Container, T>(m_property, m_type);
 	}
 
 	virtual void loadXMLSettings(xml::XMLElement* elem)

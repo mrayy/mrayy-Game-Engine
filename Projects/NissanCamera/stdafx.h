@@ -20,3 +20,5 @@
 #include <algorithm>
 #include <mrayEngine.h>
 #include <IGameComponent.h>
+
+#define USE_OPTITRACK

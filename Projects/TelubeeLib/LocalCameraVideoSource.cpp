@@ -6,6 +6,7 @@
 #include "DirectShowVideoGrabber.h"
 #include "FlyCameraVideoGrabber.h"
 
+#include "StreamReader.h"
 
 namespace mray
 {
@@ -72,6 +73,18 @@ void LocalCameraVideoSource::SetCameraResolution(const math::vector2d& res, int 
 }
 void LocalCameraVideoSource::Init()
 {
+	{
+		//load camera cropping offsets
+
+		OS::IStreamPtr s = gFileSystem.openFile(gFileSystem.getAppPath() + "CameraOffsets.txt", OS::TXT_READ);
+		if (!s.isNull())
+		{
+			OS::StreamReader rdr(s);
+			core::StringConverter::parse(rdr.readLine(), m_cameraSource[0].offsets);
+			core::StringConverter::parse(rdr.readLine(), m_cameraSource[1].offsets);
+			s->close();
+		}
+	}
 	for (int i = 0; i < 2; ++i)
 	{
 		if (!m_cameraSource[i].videoGrabber)
@@ -79,8 +92,14 @@ void LocalCameraVideoSource::Init()
 		//m_eyes[i].flip90 = true;
 		if (m_camConnection==ECam_DirectShow)
 			m_cameraSource[i].camera = new video::DirectShowVideoGrabber();
-		else 
-			m_cameraSource[i].camera = new video::FlyCameraVideoGrabber();
+		else
+		{
+			video::FlyCameraVideoGrabber* c = new video::FlyCameraVideoGrabber();;
+			m_cameraSource[i].camera = c;
+			//c->SetImageFormat(video::EPixel_YUYV);
+
+			c->SetCroppingOffset(m_cameraSource[i].offsets.x, m_cameraSource[i].offsets.y);
+		}
 
 		video::ITexturePtr tex = Engine::getInstance().getDevice()->createEmptyTexture2D(true);
 

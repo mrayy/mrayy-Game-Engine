@@ -85,8 +85,8 @@ RobotCameraState::RobotCameraState()
 	m_robotConnector->SetCommunicator(m_robotComm);
 	m_cameraRenderer = new CameraPlaneRenderer();
 
-	//m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
-	m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
+	m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
+	//m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
 	//m_headController = new TBee::CalibHeadController(new TestController());
 
 	m_robotConnector->SetHeadController(m_headController);
@@ -378,9 +378,17 @@ void RobotCameraState::InitState()
 	//init camera render plane
 	m_cameraRenderer->Init(&m_carObjects);
 
+	_RegisterNetworkValues();
 	m_console->AddToHistory("System Inited.", video::DefaultColors::Green);
 }
 
+void RobotCameraState::_RegisterNetworkValues()
+{
+
+}
+void RobotCameraState::_OnPropertyChanged(IValue* v)
+{
+}
 
 bool RobotCameraState::OnEvent(Event* e, const math::rectf& rc)
 {
@@ -466,19 +474,20 @@ void RobotCameraState::OnExit()
 
 void RobotCameraState::SetTransformation( const math::vector3d& pos, const math::vector3d &angles)
 {
-	{
 // 		m_headNode->setOrintation(m_headRotationOffset);;// +angles);
 // 		m_headNode->setPosition(m_headPosOffset);// +pos);
-		m_vehicleRef->obj->pos += m_headPosOffset;
-		m_vehicleRef->obj->dir += m_headRotationOffset;
-		m_vehicleRef->sceneNode->setPosition(m_vehicleRef->obj->pos );
-		m_vehicleRef->sceneNode->setOrintation(m_vehicleRef->obj->dir );
 
-		m_carObjects.Head->setPosition(pos);
+	// Update vehicle position and orientation
+	m_vehicleRef->obj->pos += m_vMotionSpeed;
+	m_vehicleRef->obj->dir += m_vRotationSpeed;
+	m_vehicleRef->sceneNode->setPosition(m_vehicleRef->obj->pos );
+	m_vehicleRef->sceneNode->setOrintation(m_vehicleRef->obj->dir );
 
-		m_headRotationOffset = 0;	
-		m_headPosOffset = 0;
-	}
+	//m_carObjects.Head->setPosition(pos);
+
+	m_vRotationSpeed = 0;
+	m_vMotionSpeed = 0;
+
 	m_cameraRenderer->SetTransformation(pos, angles);
 }
 
@@ -489,7 +498,7 @@ void RobotCameraState::Update(float dt)
 	m_guimngr->Update(dt);
 	m_robotConnector->UpdateStatus();
 	m_cameraRenderer->Update(dt);
-	
+
 
 	math::quaternion q;// = m_robotConnector->GetCurrentHeadRotation();// m_robotConnector->GetHeadRotation();
 	math::vector3d pos =  m_robotConnector->GetHeadPosition();
@@ -555,18 +564,6 @@ void RobotCameraState::_UpdateMovement(float dt)
 
 	if (kb->getKeyState(KEY_LCONTROL))
 	{
-		math::vector3d angles;
-		angles.x = kb->getKeyState(KEY_LEFT) - kb->getKeyState(KEY_RIGHT);
-		angles.y = kb->getKeyState(KEY_UP) - kb->getKeyState(KEY_DOWN);
-
-		//	m_headNode->rotate(angles*100*dt, scene::TS_Local);
-		math::vector3d camOff= m_cameraRenderer->GetCameraOffset();
-		camOff.x += angles.x*dt*0.1f;
-		camOff.y += angles.y*dt*0.1f;
-		m_cameraRenderer->SetCameraOffset(camOff);
-	}
-	if (kb->getKeyState(KEY_LCONTROL))
-	{
 		math::vector3d speed;
 		speed.x = kb->getKeyState(KEY_A) - kb->getKeyState(KEY_D);
 		speed.z = kb->getKeyState(KEY_W) - kb->getKeyState(KEY_S);
@@ -581,20 +578,20 @@ void RobotCameraState::_UpdateMovement(float dt)
 		pos += m_carObjects.Head->getOrintation()*math::vector3d::ZAxis*speed.z;
 		//m_headNode->setPosition(pos);
 
-		m_headPosOffset += pos;
+		m_vMotionSpeed += pos;
 
 		//	m_headNode->rotate(angles*100*dt, scene::TS_Local);
 
 		// 			m_cameraOffsets.x += angles.x*dt*0.1f;
 		// 			m_cameraOffsets.y += angles.y*dt*0.1f;
 	}
-	if (m->isPressed(controllers::EMB_Right))
+	if (m->isPressed(controllers::EMB_Right) && false)
 	{
 		math::vector3d angles;
 		angles.x = m->getDY();
 		angles.y = -m->getDX();
 		angles *= 10 * dt;
-		m_headRotationOffset += angles;
+		m_vRotationSpeed += angles;
 
 		//math::quaternion q = math::quaternion(angles.y,  m_headNode->getOrintation().getYAxis());
 
@@ -625,8 +622,8 @@ video::IRenderTarget* RobotCameraState::Render(const math::rectf& rc, TBee::ETar
 
 	video::TextureUnit tex;
 	device->set2DMode();
+	device->setRenderTarget(m_renderTarget[index]);
 	{
-		device->setRenderTarget(m_renderTarget[index]);
 		tex.SetTexture(m_viewport[index]->getRenderTarget()->GetColorTexture());
 		device->useTexture(0, &tex);
 		math::rectf tc = math::rectf(0, 0, 1, 1);
@@ -658,20 +655,24 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 	if (vp->getName() == "Left")
 		index = 0;
 	else index = 1;
+	
+	return;
+
 	video::IVideoDevice* device = Engine::getInstance().getDevice();
 //	device->set3DMode();
 	video::RenderPass pass(0);
 	pass.setRenderState(video::RS_Lighting, video::ES_DontUse);
 	pass.setRenderState(video::RS_ZTest, video::ES_DontUse);
 	pass.SetThickness(2);
+	//device->clearBuffer(video::EDB_DEPTH);
 	device->useRenderPass(&pass);
 	device->setTransformationState(video::TS_WORLD, m_carObjects.Head->getAbsoluteTransformation());
 
 	math::vector3d origin;
 	origin = 0;
-	origin += math::vector3d::XAxis* m_cameraRenderer->GetCameraOffset().x;
-	origin += math::vector3d::YAxis* m_cameraRenderer->GetCameraOffset().y;
-	device->draw3DLine(origin, origin + math::vector3d::ZAxis * m_cameraRenderer->GetCameraOffset().z, video::SColor(1, 0, 0, 1));
+	origin += math::vector3d::XAxis* m_cameraRenderer->GetUserOffset().x;
+	origin += math::vector3d::YAxis* m_cameraRenderer->GetUserOffset().y;
+	device->draw3DLine(origin, origin + math::vector3d::ZAxis * m_cameraRenderer->GetUserOffset().z, video::SColor(1, 0, 0, 1));
 
 
 	int n =30;
@@ -679,8 +680,8 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 	{
 		math::vector3d a;
 		math::vector3d b;
-		a.z = m_cameraRenderer->GetCameraOffset().z;
-		b.z = m_cameraRenderer->GetCameraOffset().z;
+		a.z = m_cameraRenderer->GetUserOffset().z;
+		b.z = m_cameraRenderer->GetUserOffset().z;
 		float step = (i - n*0.5f)*0.1f;;
 
 		a.y = -1 ;
@@ -694,8 +695,8 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 		a.x = -1 ;
 		b.x = 1 ;
 		b.y = a.y = step;
-		a.z = m_cameraRenderer->GetCameraOffset().z;
-		b.z = m_cameraRenderer->GetCameraOffset().z;
+		a.z = m_cameraRenderer->GetUserOffset().z;
+		b.z = m_cameraRenderer->GetUserOffset().z;
 		device->draw3DLine(a, b, video::SColor(strength, 0, 0, 1));
 	}
 
@@ -705,7 +706,6 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 
 void RobotCameraState::_RenderUI(const math::rectf& rc)
 {
-
 	GUI::IFont* font = gFontResourceManager.getDefaultFont();
 	GUI::FontAttributes attr;
 
@@ -756,17 +756,26 @@ void RobotCameraState::_RenderUI(const math::rectf& rc)
 			PRINT_LOG(msg);
 		}
 		{
-
-			core::string msg = mT("Camera Offset: ") + core::StringConverter::toString(math::vector2d(m_cameraRenderer->GetCameraOffset().x, m_cameraRenderer->GetCameraOffset().y));
+			core::string msg;
+			if (m_robotConnector->IsRobotConnected())
+				msg = "Robot Connected";
+			else
+				msg = "Robot Disconnected";
 			PRINT_LOG(msg);
 		}
+
 		attr.fontColor.Set(1, 1, 1, 1);
 		if (m_robotConnector->GetHeadController())
 		{
+			
+			core::string msg;
 			math::vector3d head;
-			 m_robotConnector->GetHeadRotation().toEulerAngles(head);
-			 core::string msg = mT("Head Rotation: ") + core::StringConverter::toString((math::vector3di)head);
-			 PRINT_LOG(msg);
+			math::quaternion q;
+			m_headController->GetHeadOrientation(q, false);
+			q.toEulerAngles(head);
+			
+			msg = mT("Head Rotation: ") + core::StringConverter::toString((math::vector3di)head) + mT(" <--> ") + core::StringConverter::toString((math::vector3di)m_robotConnector->GetCurrentHeadRotation());
+			PRINT_LOG(msg);
 
 			head = m_robotConnector->GetHeadPosition();
 			msg = mT("Head Position: ") + core::StringConverter::toString((math::vector3d)head);

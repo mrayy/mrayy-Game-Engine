@@ -46,15 +46,15 @@ class ConsoleLogDevice;
 class CarObjects
 {
 public:
-	// Vehicle
-	// |---HeadNode
-	// |---|---Left Eye
-	// |---|---|---Left Camera
-	// |---|---|---Left Screen Node
+	// Vehicle							-- position/orientation controlled by GPS
+	// |---Projection Plane				-- represents display screen, position is fixed
+	// |---HeadNode						-- Position/orientation controlled from optiTrack
+	// |---|---Left Eye					-- Fixed position based on physical distance
+	// |---|---|---Left Camera			-- virtual cameras
+	// |---|---|---Left Screen Node		-- Render screen node
 	// |---|---Right Eye
 	// |---|---|---Right Camera
 	// |---|---|---Right Screen Node
-	// |---Projection Plane
 	scene::ISceneNode* Vehicle;
 	scene::ISceneNode* Head;
 	scene::ISceneNode* Eyes[2];
@@ -91,8 +91,9 @@ protected:
 	GUI::GUIConsole* m_console;
 	ARSceneObject* m_vehicleRef;
 	scene::ISceneNode* m_arRoot;
-	math::vector3d m_headRotationOffset;
-	math::vector3d m_headPosOffset;
+
+	math::vector3d m_vMotionSpeed;	//Vehicle motion speed
+	math::vector3d m_vRotationSpeed; // Vehicle rotation speed
 
 	GCPtr<CommandManager> m_commandManager;
 
@@ -112,6 +113,8 @@ protected:
 
 	void _UpdateMovement(float dt);
 
+	void _RegisterNetworkValues();
+	void _OnPropertyChanged(IValue* v);
 public:
 	RobotCameraState();
 	virtual~RobotCameraState();

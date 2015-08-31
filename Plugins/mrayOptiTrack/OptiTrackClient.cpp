@@ -122,9 +122,9 @@ namespace animation
 			}
 			if (!ok)
 				continue;
-			pos.x = data->RigidBodies[i].x;
-			pos.y = data->RigidBodies[i].y;
-			pos.z = data->RigidBodies[i].z;
+			pos.x = -data->RigidBodies[i].y;
+			pos.y = data->RigidBodies[i].z;
+			pos.z = data->RigidBodies[i].x;
 			/*
 			// Same ground plane with FST
 			ori.x = data->RigidBodies[i].qx;

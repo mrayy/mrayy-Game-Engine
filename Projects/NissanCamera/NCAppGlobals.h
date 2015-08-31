@@ -19,6 +19,8 @@ purpose:
 #include "AppData.h"
 #include "CameraConfigurationManager.h"
 #include "InputKeyMap.h"
+#include "OptiTrackDataSource.h"
+#include "ValueGroup.h"
 
 
 namespace mray
@@ -32,16 +34,20 @@ class NCAppGlobals :public TBee::AppData
 protected:
 
 public:
-	NCAppGlobals()
+	NCAppGlobals() :AppControlledValues("AppValues")
 	{
 		App = 0;
-
 	}
-
+	virtual ~NCAppGlobals()
+	{
+		delete optiDataSource;
+	}
 	controllers::InputKeyMap keyMap;
 
 	Application* App;
 	math::vector2d GetStereoScaleRatio(){ return 1; }
+
+	ValueGroup AppControlledValues;
 
 	static NCAppGlobals* Instance(){ return (NCAppGlobals*)s_instance; }
 };

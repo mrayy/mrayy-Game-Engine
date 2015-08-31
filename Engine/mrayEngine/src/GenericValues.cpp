@@ -14,11 +14,12 @@ IntValue::IntValue(const core::string&name,int v)
 }
 
 
-const mchar*IntValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string IntValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void IntValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v,value);
+	OnChanged(this);
 }
 
 IValue* IntValue::duplicate()
@@ -49,11 +50,12 @@ FloatValue::FloatValue(const core::string&name,float v)
 }
 
 
-const mchar*FloatValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string FloatValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void FloatValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 
 
@@ -84,11 +86,12 @@ BoolValue::BoolValue(const core::string&name,bool v)
 }
 
 
-const mchar*BoolValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string BoolValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void BoolValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 IValue* BoolValue::duplicate()
 {
@@ -117,11 +120,12 @@ StringValue::StringValue(const core::string&name,const core::string& v)
 }
 
 
-const mchar*StringValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string StringValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void StringValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 IValue* StringValue::duplicate()
 {

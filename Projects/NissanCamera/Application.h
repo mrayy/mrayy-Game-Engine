@@ -76,6 +76,9 @@ protected:
 	void _initStates();
 
 	void _createViewports();
+
+	void _RegisterNetworkValues();
+	void _OnPropertyChanged(IValue* v);
 public:
 	Application();
 	virtual~Application();

@@ -17,6 +17,10 @@ void IValue::loadXMLSettings(xml::XMLElement* elem)
 	attr=elem->getAttribute(mT("Name"));
 	if(attr)
 		m_name=attr->value;
+	attr = elem->getAttribute(mT("Value"));
+	if (attr)
+		parse(attr->value);
+
 }
 xml::XMLElement*  IValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -24,6 +28,7 @@ xml::XMLElement*  IValue::exportXMLSettings(xml::XMLElement* elem)
 	elem->addSubElement(e);
 	e->addAttribute(mT("Name"),m_name);
 	e->addAttribute(mT("Type"),EnumManager::getInstance().getName(mT("EValueType"),getType()));
+	e->addAttribute(mT("Value"), toString());
 
 	return e;
 }

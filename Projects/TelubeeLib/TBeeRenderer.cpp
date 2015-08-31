@@ -145,6 +145,8 @@ public:
 				int w = AppData::Instance()->oculusDevice->GetDeviceInfo().deviceInfo.HResolution;
 				int h = AppData::Instance()->oculusDevice->GetDeviceInfo().deviceInfo.VResolution;
 #else
+				if (!AppData::Instance()->oculusDevice->AttachToWindow(rw))
+					printf("Failed to Attach oculus to render window!\n");
 
 				int w = AppData::Instance()->oculusDevice->GetDeviceInfo().texSize.x;
 				int h = AppData::Instance()->oculusDevice->GetDeviceInfo().texSize.y;

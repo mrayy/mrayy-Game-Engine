@@ -13,8 +13,8 @@ Vector2diValue::Vector2diValue(const core::string&name,const math::vector2di& v)
 }
 
 
-const mchar* Vector2diValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Vector2diValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Vector2diValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -47,8 +47,8 @@ Vector2dfValue::Vector2dfValue(const core::string&name,const math::vector2df& v)
 }
 
 
-const mchar* Vector2dfValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Vector2dfValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Vector2dfValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -81,8 +81,8 @@ Vector3diValue::Vector3diValue(const core::string&name,const math::vector3di& v)
 }
 
 
-const mchar* Vector3diValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Vector3diValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Vector3diValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -115,8 +115,8 @@ Vector3dfValue::Vector3dfValue(const core::string&name,const math::vector3df& v)
 }
 
 
-const mchar* Vector3dfValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Vector3dfValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Vector3dfValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -150,8 +150,8 @@ Vector4diValue::Vector4diValue(const core::string&name,const math::vector4di& v)
 }
 
 
-const mchar* Vector4diValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Vector4diValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Vector4diValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -183,8 +183,8 @@ Vector4dfValue::Vector4dfValue(const core::string&name,const math::vector4df& v)
 }
 
 
-const mchar* Vector4dfValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Vector4dfValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Vector4dfValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -217,8 +217,8 @@ Line2dfValue::Line2dfValue(const core::string&name,const math::line2d& v)
 }
 
 
-const mchar* Line2dfValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Line2dfValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Line2dfValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -251,8 +251,8 @@ Line3dfValue::Line3dfValue(const core::string&name,const math::line3d& v)
 }
 
 
-const mchar* Line3dfValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Line3dfValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Line3dfValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -285,8 +285,8 @@ box3dfValue::box3dfValue(const core::string&name,const math::box3d& v)
 }
 
 
-const mchar* box3dfValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  box3dfValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void box3dfValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -319,8 +319,8 @@ Matrix3x3Value::Matrix3x3Value(const core::string&name,const math::matrix3x3& v)
 }
 
 
-const mchar* Matrix3x3Value::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Matrix3x3Value::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Matrix3x3Value::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -353,8 +353,8 @@ Matrix4x4Value::Matrix4x4Value(const core::string&name,const math::matrix4x4& v)
 }
 
 
-const mchar* Matrix4x4Value::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  Matrix4x4Value::toString()const{
+	return core::StringConverter::toString(value);
 }
 void Matrix4x4Value::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -387,8 +387,8 @@ PlaneValue::PlaneValue(const core::string&name,const math::Plane& v)
 }
 
 
-const mchar* PlaneValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  PlaneValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void PlaneValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -420,8 +420,8 @@ QuaternionValue::QuaternionValue(const core::string&name,const math::quaternion&
 }
 
 
-const mchar* QuaternionValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  QuaternionValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void QuaternionValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -453,8 +453,8 @@ RectiValue::RectiValue(const core::string&name,const math::recti& v)
 }
 
 
-const mchar* RectiValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  RectiValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void RectiValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);
@@ -486,8 +486,8 @@ RectfValue::RectfValue(const core::string&name,const math::rectf& v)
 }
 
 
-const mchar* RectfValue::toString()const{
-	return core::StringConverter::toString(value).c_str();
+core::string  RectfValue::toString()const{
+	return core::StringConverter::toString(value);
 }
 void RectfValue::parse(const core::string&v){
 	return core::StringConverter::parse(v,value);

@@ -46,6 +46,8 @@ EntryPoint
 	extraOptions.push_back(op);
 	op.valueSet.clear();
 	string CameraName[2] = { "Camera_Left", "Camera_Right" };
+	new video::FlyCameraManager();
+
 	for (int c = 0; c < 2;++c)
 	{
 		op.name = "DS_"+CameraName[c]; // "Camera" + core::StringConverter::toString(c);
@@ -63,17 +65,17 @@ EntryPoint
 		extraOptions.push_back(op);
 		op.valueSet.clear();
 	}
-	for (int c = 0; c < 2;++c)
+	for (int c = 0; c < 2; ++c)
 	{
-		op.name = "PT_"+CameraName[c]; // "Camera" + core::StringConverter::toString(c);
+		op.name = "PT_" + CameraName[c]; // "Camera" + core::StringConverter::toString(c);
 
-		op.valueSet.insert("0 - None");
-		int camsCount = video::FlyCameraManager::instance.GetCamerasCount();
+		op.valueSet.insert("None");
+		int camsCount = video::FlyCameraManager::getInstance().GetCamerasCount();
 		for (int i = 0; i<camsCount; ++i)
 		{
 			uint sp;
-			video::FlyCameraManager::instance.GetCameraSerialNumber(i, sp);
-			op.valueSet.insert(core::StringConverter::toString(i+1) + " - FC_" + core::StringConverter::toString(sp));
+			video::FlyCameraManager::getInstance().GetCameraSerialNumber(i, sp);
+			op.valueSet.insert(/*core::StringConverter::toString(i + 1) + " - FC_" +*/ core::StringConverter::toString(sp));
 		}
 		if (op.valueSet.size()>0)
 		{

@@ -8,6 +8,7 @@
 #include "TextureResourceManager.h"
 #include "DynamicFontGenerator.h"
 #include "StreamReader.h"
+#include "FlyCameraManager.h"
 
 #include "DirectShowVideoGrabber.h"
 #include "FlyCameraVideoGrabber.h"
@@ -164,9 +165,9 @@ void Application::init(const OptionContainer &extraOptions)
 	m_guiRenderer = new GUI::GUIBatchRenderer();
 	m_guiRenderer->SetDevice(getDevice());
 
-
-	m_impl->camera = new video::DirectShowVideoGrabber();
-	//m_impl->camera = new video::FlyCameraVideoGrabber();
+	new video::FlyCameraManager();
+	//m_impl->camera = new video::DirectShowVideoGrabber();
+	m_impl->camera = new video::FlyCameraVideoGrabber();
 	m_impl->camera->InitDevice(0, 1280,720, 30);
 	m_impl->grabber = new video::VideoGrabberTexture();
 	m_impl->grabber->Set(m_impl->camera, 0);

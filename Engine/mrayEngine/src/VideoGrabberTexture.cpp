@@ -41,15 +41,15 @@ bool VideoGrabberTexture::Blit()
 		return false;
 	if (!m_grabber->GrabFrame(m_index))
 		return false;
-	if (m_grabber->GetFrameSize().x == 0 || m_grabber->GetFrameSize().y == 0)
+	const video::ImageInfo* ifo = m_grabber->GetLastFrame(m_index);
+	if (ifo->Size.x == 0 || ifo->Size.y == 0)
 		return false;
-	if(m_texture->getSize().x!=m_grabber->GetFrameSize().x ||
-		m_texture->getSize().y!=m_grabber->GetFrameSize().y )
+	if (m_texture->getSize().x != ifo->Size.x ||
+		m_texture->getSize().y != ifo->Size.y)
 	{
 		m_texture->setMipmapsFilter(false);
-		m_texture->createTexture(math::vector3d(m_grabber->GetFrameSize().x,m_grabber->GetFrameSize().y,1),m_grabber->GetImageFormat());
+		m_texture->createTexture(math::vector3d(ifo->Size.x, ifo->Size.y, 1), ifo->format);
 	}
-	const video::ImageInfo* ifo= m_grabber->GetLastFrame(m_index);
 
 	video::LockedPixelBox box(math::box3d(0,ifo->Size),ifo->format,ifo->imageData);
 	m_texture->getSurface(0)->blitFromMemory(box);

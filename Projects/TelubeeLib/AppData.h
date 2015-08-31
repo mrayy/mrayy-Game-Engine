@@ -15,8 +15,10 @@
 
 #include "StereoRenderer.h"
 #include "TBeeCommon.h"
+#include "NetworkValueController.h"
 
-//#define USE_OPTITRACK
+#define USE_OPTITRACK 1
+
 
 namespace mray
 {
@@ -27,12 +29,9 @@ namespace mray
 	}
 namespace TBee
 {
-#ifdef USE_OPTITRACK
-	class OptiTrackDataSource;
-#endif
 	class RobotInfoManager;
 	class CameraConfigurationManager;
-
+	class OptiTrackDataSource;
 
 class AppData
 {
@@ -53,13 +52,14 @@ public:
 	ERobotControllerType robotController;
 
 	video::OculusDevice* oculusDevice;
-#ifdef USE_OPTITRACK
-	OptiTrackDataSource* optiDataSource;
-#endif
 	InputManager* inputMngr;
 	RobotInfoManager* robotInfoManager;
 
 	CameraConfigurationManager* camConfig;
+
+	TBee::OptiTrackDataSource* optiDataSource;
+
+	NetworkValueController* netValueController;
 
 	core::string GetVersion();
 	core::string GetBuild();

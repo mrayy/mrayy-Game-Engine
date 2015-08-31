@@ -73,7 +73,11 @@ void OptiTrackDataSource::Connect(const core::string& serverIP,const core::strin
 	}
 	printf("Trying to connect to optiTrack server: %s\n", serverIP.c_str());
 
-	m_tracker->Connect(animation::Opti_Unicast,serverIP,ip,"239.255.30.99");
+	//TODO: Make multicast interface as a parameter!!
+	if (!m_tracker->Connect(animation::Opti_Unicast, serverIP, ip, "239.255.42.99"))
+		printf("Failed to connect to optiTrack!\n");
+	else 
+		printf("Successfully connected to optiTrack!\n");
 }
 void OptiTrackDataSource::Disconnect()
 {

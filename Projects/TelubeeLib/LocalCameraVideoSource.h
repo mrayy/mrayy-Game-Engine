@@ -43,6 +43,7 @@ protected:
 		{
 		}
 		int id;
+		math::vector2di offsets;
 
 		video::VideoGrabberTexture* videoGrabber;
 
