@@ -25,7 +25,8 @@ protected:
 	{
 		float  aspect;		//Remote Camera Texture Aspect Ratio
 		float fovScaler;	//Render Plane scaler value based on Remote Camera FoV and plane distance
-		float distance;		//Render Plane distance from the camera
+		float screenDistance;		//Render Plane distance from the camera
+		float planeDistance;
 		float eyeConvergance; //rotation for each eye 
 		float eyeDistance;	  //eyes distance for the projected contents
 	};
@@ -58,8 +59,6 @@ protected:
 	void _UpdateHead(const math::vector3d& pos, const math::vector3d &angles);
 	void _UpdateCameraPlane();
 	//float CalcDisplayFoV(float headDistance);
-	void _UpdateCameraPlaneScaler();
-	void _SetCameraPlaneDistance(float d);
 
 	void _RegisterNetworkValues();
 	void _OnCameraPropertyChanged(IValue* v);
@@ -77,7 +76,7 @@ public:
 
 	virtual void SetTransformation(const math::vector3d& pos, const math::vector3d &angles);
 
-	void GenerateSurface(float aspectRatio, float cameraScreenDistance);
+	void GenerateSurface(float aspectRatio);
 
 	virtual void Update(float dt);
 

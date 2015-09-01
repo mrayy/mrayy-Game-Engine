@@ -60,6 +60,7 @@
             this.Controls.Add(this.XVal);
             this.Name = "Vector2Ctl";
             this.Size = new System.Drawing.Size(382, 38);
+            this.Resize += new System.EventHandler(this.Vector2Ctl_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.XVal)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.YVal)).EndInit();
             this.ResumeLayout(false);

@@ -18,7 +18,13 @@ namespace NetworkValueController
         {
             set
             {
-                XVal.Value = value;
+                try
+                {
+                    XVal.Value = value;
+                }catch
+                {
+
+                }
             }
             get
             {
@@ -29,7 +35,14 @@ namespace NetworkValueController
         {
             set
             {
-                YVal.Value = value;
+                try
+                {
+                    YVal.Value = value;
+                }
+                catch
+                {
+
+                }
             }
             get
             {
@@ -56,7 +69,7 @@ namespace NetworkValueController
             }
             get
             {
-                return (X * 100.0f).ToString() + "," + (Y * 100.0f).ToString();
+                return (X).ToString() + "," + (Y ).ToString();
             }
         }
         public Vector2Ctl()
@@ -74,6 +87,14 @@ namespace NetworkValueController
         {
             if (OnChanged != null)
                 OnChanged(this, e);
+        }
+
+        private void Vector2Ctl_Resize(object sender, EventArgs e)
+        {
+            XVal.Width = Width / 2;
+            YVal.Width = Width / 2;
+            YVal.Left = Width / 2;
+
         }
 
 

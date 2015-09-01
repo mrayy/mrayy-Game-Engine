@@ -43,7 +43,8 @@ CameraPlaneRenderer::CameraPlaneRenderer()
 	m_cameraConfiguration = 0;
 	m_displayFov = 80;
 
-	m_surfaceParams.distance=1.0;
+	m_surfaceParams.screenDistance = 1.0;
+	m_surfaceParams.planeDistance = 10.0;
 	m_surfaceParams.eyeConvergance = 0;
 
 //	m_userOffset.z = 1.5f;		//camera offset from user eye
@@ -90,7 +91,6 @@ bool CameraPlaneRenderer::OnEvent(Event* e)
 			{
 
 				m_surfaceParams.eyeDistance += 0.005f*(evt->key == KEY_I ? 1 : -1);
-				_SetCameraPlaneDistance(m_surfaceParams.distance);
 				ok = true;
 			}
 		}
@@ -113,7 +113,7 @@ void CameraPlaneRenderer::Init(CarObjects* car)
 	m_I420ToRGB = new video::ParsedShaderPP(Engine::getInstance().getDevice());
 	m_I420ToRGB->LoadXML(gFileSystem.openFile("I422ToRGB.peff"));
 
-	GenerateSurface(m_videoSource->GetEyeResolution(0).x / m_videoSource->GetEyeResolution(0).y, m_surfaceParams.distance);
+	GenerateSurface(m_videoSource->GetEyeResolution(0).x / m_videoSource->GetEyeResolution(0).y);
 
 	{
 
@@ -139,17 +139,21 @@ void CameraPlaneRenderer::_RegisterNetworkValues()
 	ValueGroup* g = new ValueGroup("Camera");
 	NCAppGlobals::Instance()->netValueController->GetValues()->AddValueGroup(g);
 
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Brightness, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
+	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Exposure, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
 	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Gain, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
 	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_WhiteBalance, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
 	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Gamma, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
+	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Brightness, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
+	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Saturation, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
+	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Sharpness, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
 
 
 	g = new ValueGroup("Projection");
 	NCAppGlobals::Instance()->netValueController->GetValues()->AddValueGroup(g);
 
 	g->AddValue(new FloatValue("Lens FOV", m_cameraConfiguration->fov / 100.0f))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
-	g->AddValue(new FloatValue("Screen Distance", m_userOffset.z))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
+	g->AddValue(new FloatValue("Screen Distance", m_surfaceParams.screenDistance))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
+	g->AddValue(new Vector2dfValue("User Offset", math::vector2d((m_userOffset.x + 1) * 50, (m_userOffset.y + 1) * 50)))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
 
 }
 void CameraPlaneRenderer::_OnCameraPropertyChanged(IValue* v)
@@ -166,7 +170,13 @@ void CameraPlaneRenderer::_OnProjectionPropertyChanged(IValue* v)
 		m_camConfigDirty = true;
 	}else if (v->getName() == "Screen Distance")
 	{
-		m_surfaceParams.distance = core::StringConverter::toFloat(v->toString());
+		m_surfaceParams.screenDistance = core::StringConverter::toFloat(v->toString());
+	}
+	else if (v->getName() == "User Offset")
+	{
+		math::vector2d val = core::StringConverter::toVector2d(v->toString());
+		m_userOffset.x = (val.x / 100.0f) * 2 - 1;
+		m_userOffset.y = (val.y / 100.0f) * 2 - 1;
 	}
 }
 void CameraPlaneRenderer::Start()
@@ -181,12 +191,11 @@ void CameraPlaneRenderer::Stop()
 }
 
 
-void CameraPlaneRenderer::GenerateSurface(  float aspectRatio, float cameraScreenDistance)
+void CameraPlaneRenderer::GenerateSurface(  float aspectRatio)
 {
-	float radius = cameraScreenDistance;
-	m_surfaceParams.aspect = aspectRatio;
+	float radius = m_surfaceParams.planeDistance;
+	m_surfaceParams.aspect = 1;
 	m_surfaceParams.fovScaler = 1;
-	m_surfaceParams.distance = cameraScreenDistance;
 
 	for (int i = 0; i < 2; ++i)
 	{
@@ -217,10 +226,10 @@ void CameraPlaneRenderer::GenerateSurface(  float aspectRatio, float cameraScree
 
 		math::vector3d posPtr[4] =
 		{
-			math::vector3d(-1, -1, 0),
-			math::vector3d(+1, -1, 0),
-			math::vector3d(+1, +1, 0),
-			math::vector3d(-1, +1, 0)
+			math::vector3d(-0.5, -0.5, 0),
+			math::vector3d(+0.5, -0.5, 0),
+			math::vector3d(+0.5, +0.5, 0),
+			math::vector3d(-0.5, + 0.5, 0)
 		};
 		math::vector2d tcPtr[4] = {
 			math::vector2d(0, 0),
@@ -295,21 +304,7 @@ void CameraPlaneRenderer::GenerateSurface(  float aspectRatio, float cameraScree
  //	m_car->CameraPlane[0]->setOrintation(math::quaternion(180, math::vector3d::ZAxis));
  //	m_car->CameraPlane[1]->setOrintation(math::quaternion(180, math::vector3d::ZAxis));
 //	m_car->ProjectionPlane->setScale(math::vector3d(m_displaySize.x, 1, m_displaySize.y) );
-	_SetCameraPlaneDistance(cameraScreenDistance);
 
-}
-
-void CameraPlaneRenderer::_UpdateCameraPlaneScaler()
-{
-	m_surfaceParams.fovScaler = fabs(tan(math::toRad(m_cameraConfiguration->fov / 2.0f))*m_surfaceParams.distance);
-}
-void CameraPlaneRenderer::_SetCameraPlaneDistance(float d)
-{
-	m_surfaceParams.distance = d;
-	m_car->CameraPlane[0]->setPosition(math::vector3d(-m_surfaceParams.eyeDistance / 2.0f, 0, m_surfaceParams.distance));
-	m_car->CameraPlane[1]->setPosition(math::vector3d(m_surfaceParams.eyeDistance / 2.0f, 0, m_surfaceParams.distance));
-
-	_UpdateCameraPlaneScaler();
 }
 // float CameraPlaneRenderer::CalcDisplayFoV(float headDistance)
 // {
@@ -329,13 +324,14 @@ void CameraPlaneRenderer::_UpdateCameraProj()
 	projPlane.x += m_userOffset.x;
 	projPlane.y += m_userOffset.y;
 	//shift the display on the Z axis using screen distance and head displacement
-	projPlane.z += m_surfaceParams.distance + m_car->Head->getPosition().z;
+	projPlane.z += m_surfaceParams.screenDistance + m_car->Head->getPosition().z;
 	m_car->ProjectionPlane->setPosition(projPlane);
 	//float aspect = m_displaySize.x / m_displaySize.y;
 	m_car->ProjectionPlane->setScale(math::vector3d(m_displaySize.x, m_displaySize.y, 1));
-	//Calculate half size of the projection plane
-	math::vector3d hsz = m_car->ProjectionPlane->getScale() / 2.0f;	
 
+
+	//Calculate half size of the projection plane
+	math::vector3d hsz = m_car->ProjectionPlane->getScale() ;	
 	for (int i = 0; i < 2; ++i)
 	{
 		//Set Offaxis Projection Parameters : Eye position and plane position
@@ -356,19 +352,23 @@ void CameraPlaneRenderer::_UpdateHead(const math::vector3d& pos, const math::vec
 {
 	m_car->Head->setOrintation(angles);
 	m_car->Head->setPosition(pos);
-	_UpdateCameraProj();
 }
 void CameraPlaneRenderer::_UpdateCameraPlane()
 {
-	math::vector3d s (m_surfaceParams.fovScaler*m_surfaceParams.aspect, m_surfaceParams.fovScaler, 1);
+	m_surfaceParams.fovScaler = fabs(tan(math::toRad(m_cameraConfiguration->fov / 2.0f))*m_surfaceParams.planeDistance);
+	math::vector3d s(m_surfaceParams.fovScaler*m_surfaceParams.aspect, m_surfaceParams.fovScaler, 1);
 	m_car->CameraPlane[0]->setScale(s);
 	m_car->CameraPlane[1]->setScale(s);
+
+	m_car->CameraPlane[0]->setPosition(math::vector3d(-m_surfaceParams.eyeDistance / 2.0f, 0, m_surfaceParams.planeDistance));
+	m_car->CameraPlane[1]->setPosition(math::vector3d(m_surfaceParams.eyeDistance / 2.0f, 0, m_surfaceParams.planeDistance));
+
+//	m_car->CameraPlane[0]->updateAbsoluteTransformation();
 }
 void CameraPlaneRenderer::SetTransformation(const math::vector3d& pos, const math::vector3d &angles)
 {
 	// Set head position/orientation
 	_UpdateHead(pos, angles); 
-	_UpdateCameraPlane();
 }
 void CameraPlaneRenderer::Update(float dt)
 {
@@ -380,7 +380,7 @@ void CameraPlaneRenderer::Update(float dt)
 	{
 		float fov = kb->getKeyState(KEY_LEFT) - kb->getKeyState(KEY_RIGHT);
 
-		m_cameraConfiguration->fov += fov*dt*0.1f;
+		m_cameraConfiguration->fov += fov*dt;
 
 		m_camConfigDirty = true;
 
@@ -392,7 +392,7 @@ void CameraPlaneRenderer::Update(float dt)
 // 		_UpdateCameraPlaneScaler();
 		if (kb->getKeyState(KEY_LSHIFT))
 		{
-			m_surfaceParams.distance += (kb->getKeyState(KEY_LEFT) - kb->getKeyState(KEY_RIGHT))*dt * 0.1f;
+			m_surfaceParams.screenDistance += (kb->getKeyState(KEY_LEFT) - kb->getKeyState(KEY_RIGHT))*dt * 0.1f;
 		}
 		else
 		{
@@ -423,6 +423,12 @@ void CameraPlaneRenderer::PreRender(const math::rectf& rc, int index)
 	video::ITexture* camTex1 = camTex;
 	video::ShaderSemanticTable::getInstance().setRenderPass(0);
 
+
+	//update camera planes
+	_UpdateCameraPlane();
+	//Update projection
+	_UpdateCameraProj();
+
 	float aspect;
 	math::vector2d size(camTex->getSize().x, camTex->getSize().y);
 	bool isI420 = false;
@@ -437,6 +443,8 @@ void CameraPlaneRenderer::PreRender(const math::rectf& rc, int index)
 	if (size.y != 0)
 		aspect = (float)size.x / (float)size.y;
 	else aspect = 1;
+
+	//Do camera lens correction
 	if (m_useLensCorrection)
 	{
 		math::vector2d size(rc.getSize());
@@ -450,7 +458,6 @@ void CameraPlaneRenderer::PreRender(const math::rectf& rc, int index)
 		if (m_camConfigDirty)
 		{
 			m_camConfigDirty = false;
-			_UpdateCameraPlaneScaler();
 
 			video::ParsedShaderPP::MappedParams* OpticalCenter = m_lensCorrectionPP->GetParam("OpticalCenter");
 			video::ParsedShaderPP::MappedParams* FocalCoeff = m_lensCorrectionPP->GetParam("FCoff");
@@ -530,9 +537,13 @@ void CameraPlaneRenderer::DebugRender(GUI::IGUIRenderer* renderer)
 		msg = core::string("Distortion Correction: ") + core::string(m_useLensCorrection ? "Enabled" : "Disabled");
 		PRINT_LOG_COLORED(msg,video::SColor(1,0.7,0.7,1));
 		PRINT_LOG_COLORED(core::string("Screen Parameters"), video::SColor(1, 0.7, 0.7, 1));
-		PRINT_LOG("Screen Distance: " + core::StringConverter::toString(m_surfaceParams.distance));
+		PRINT_LOG("Screen Distance: " + core::StringConverter::toString(m_surfaceParams.screenDistance));
+		PRINT_LOG("Projection Scale: " + core::StringConverter::toString(m_surfaceParams.fovScaler));
 		PRINT_LOG("Screen FoV: " + core::StringConverter::toString(m_offAxisProj[0].GetFoV()));
 		PRINT_LOG("Camera FoV: " + core::StringConverter::toString(m_cameraConfiguration->fov));
+		PRINT_LOG("Plane Position: " + core::StringConverter::toString(m_car->CameraPlane[0]->getAbsolutePosition()));
+		PRINT_LOG("Screen Position: " + core::StringConverter::toString(m_car->ProjectionPlane->getAbsolutePosition()));
+		PRINT_LOG("Camera Front: " + core::StringConverter::toString(m_car->Camera[0]->getAbsoluteOrintation()*math::vector3d::ZAxis));
 
 		msg = mT("Camera Offset: ") + core::StringConverter::toString(math::vector2d(GetUserOffset().x, GetUserOffset().y));
 		PRINT_LOG(msg);
@@ -562,7 +573,7 @@ void CameraPlaneRenderer::LoadFromXML(xml::XMLElement* e)
 	math::vector2d proj = core::StringConverter::toVector2d(e->getValueString("CameraProjection"));
 	m_userOffset.x = proj.x;
 	m_userOffset.y = proj.y;
-	m_surfaceParams.distance = e->getValueFloat("ScreenDistance");
+	m_surfaceParams.screenDistance = e->getValueFloat("ScreenDistance");
 
 	m_displaySize = core::StringConverter::toVector2d(e->getValueString("DisplaySize"));
 

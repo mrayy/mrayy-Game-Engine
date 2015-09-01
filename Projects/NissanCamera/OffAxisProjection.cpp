@@ -108,7 +108,7 @@ void OffAxisProjection::_UpdateMatrix()
 
 	m_view = rot*tran;
 
-	m_rotation.fromMatrix(math::MathUtil::CreateLookAtMatrix((m_pb + m_pc)*0.5f, m_pos, vu));
+	m_rotation.fromMatrix(math::MathUtil::CreateLookAtMatrix(m_pos,(m_pb + m_pc)*0.5f, vu));
 
 	
 	float ba = (m_pb - m_pa).Length();

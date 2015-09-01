@@ -514,20 +514,19 @@ void FlyCameraVideoGrabber::BlitImage(const void* img)
 
 void FlyCameraVideoGrabber::SetParameter(const core::string& name, const core::string& value)
 {
-
 	Property val;
 	val.present = true;
 	val.absControl = true;
 	val.onePush = false;
 	val.onOff = true;
 	PropertyInfo ifo;
-	if (name == Param_Brightness)
+	if (name == Param_Exposure)
 	{
 		val.type = AUTO_EXPOSURE;
 		float v = core::StringConverter::toFloat(value);
 		ifo.type = val.type;
 		m_data->cam.GetPropertyInfo(&ifo);
-		if (v < 0)
+		if (v < 0 || value == "auto")
 			val.autoManualMode = true;
 		else {
 			v = ifo.absMin + (ifo.absMax - ifo.absMin)*v;
@@ -543,7 +542,55 @@ void FlyCameraVideoGrabber::SetParameter(const core::string& name, const core::s
 		float v = core::StringConverter::toFloat(value);
 		ifo.type = val.type;
 		m_data->cam.GetPropertyInfo(&ifo);
-		if (v < 0)
+		if (v < 0 || value=="auto")
+			val.autoManualMode = true;
+		else {
+			v = ifo.absMin + (ifo.absMax - ifo.absMin)*v;
+			val.autoManualMode = false;
+			val.absValue = v;
+		}
+		(m_data->cam.SetProperty(&val));
+	}
+	else
+	if (name == Param_Gamma)
+	{
+		val.type = GAMMA;
+		float v = core::StringConverter::toFloat(value);
+		ifo.type = val.type;
+		m_data->cam.GetPropertyInfo(&ifo);
+		if (v < 0 || value == "auto")
+			val.autoManualMode = true;
+		else {
+			v = ifo.absMin + (ifo.absMax - ifo.absMin)*v;
+			val.autoManualMode = false;
+			val.absValue = v;
+		}
+		(m_data->cam.SetProperty(&val));
+	}
+	else
+	if (name == Param_Brightness)
+	{
+		val.type = BRIGHTNESS;
+		float v = core::StringConverter::toFloat(value);
+		ifo.type = val.type;
+		m_data->cam.GetPropertyInfo(&ifo);
+		if (v < 0 || value == "auto")
+			val.autoManualMode = true;
+		else {
+			v = ifo.absMin + (ifo.absMax - ifo.absMin)*v;
+			val.autoManualMode = false;
+			val.absValue = v;
+		}
+		(m_data->cam.SetProperty(&val));
+	}
+	else
+	if (name == Param_Saturation)
+	{
+		val.type = SATURATION;
+		float v = core::StringConverter::toFloat(value);
+		ifo.type = val.type;
+		m_data->cam.GetPropertyInfo(&ifo);
+		if (v < 0 || value == "auto")
 			val.autoManualMode = true;
 		else {
 			v = ifo.absMin + (ifo.absMax - ifo.absMin)*v;
@@ -557,7 +604,7 @@ void FlyCameraVideoGrabber::SetParameter(const core::string& name, const core::s
 	{
 		val.type = WHITE_BALANCE;
 		math::vector2d v = core::StringConverter::toVector2d(value);
-		if (v.x < 0)
+		if (v.x < 0 || value == "auto")
 			val.autoManualMode = true;
 		else {
 			val.autoManualMode = false;

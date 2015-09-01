@@ -40,7 +40,11 @@ namespace NetworkValueController
                 TrackBar tb = new TrackBar();
                 tb.Minimum = 0;
                 tb.Maximum = 100;
-                tb.Value = (int)(float.Parse(value)*100);
+                try
+                {
+                    tb.Value = (int)(float.Parse(value) * 100);
+                }catch
+                { }
                 tb.ValueChanged += c_tbChanged;
                 c = tb;
             }

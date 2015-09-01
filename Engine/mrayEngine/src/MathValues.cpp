@@ -17,7 +17,8 @@ core::string  Vector2diValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector2diValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	 core::StringConverter::parse(v,value);
+	 OnChanged(this);
 }
 
 IValue* Vector2diValue::duplicate()
@@ -51,7 +52,8 @@ core::string  Vector2dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector2dfValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	 core::StringConverter::parse(v,value);
+	 OnChanged(this);
 }
 IValue* Vector2dfValue::duplicate()
 {
@@ -85,7 +87,8 @@ core::string  Vector3diValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector3diValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v,value);
+	OnChanged(this);
 }
 
 IValue* Vector3diValue::duplicate()
@@ -119,7 +122,8 @@ core::string  Vector3dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector3dfValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v,value);
+	OnChanged(this);
 }
 
 
@@ -154,7 +158,8 @@ core::string  Vector4diValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector4diValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	 core::StringConverter::parse(v,value);
+	OnChanged(this);
 }
 
 IValue* Vector4diValue::duplicate()
@@ -187,7 +192,8 @@ core::string  Vector4dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector4dfValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 
 IValue* Vector4dfValue::duplicate()
@@ -221,7 +227,8 @@ core::string  Line2dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Line2dfValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 
 IValue* Line2dfValue::duplicate()
@@ -255,7 +262,8 @@ core::string  Line3dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Line3dfValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 
 IValue* Line3dfValue::duplicate()
@@ -289,7 +297,8 @@ core::string  box3dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void box3dfValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 
 IValue* box3dfValue::duplicate()
@@ -323,7 +332,8 @@ core::string  Matrix3x3Value::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Matrix3x3Value::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 
 IValue* Matrix3x3Value::duplicate()
@@ -357,7 +367,8 @@ core::string  Matrix4x4Value::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Matrix4x4Value::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 
 IValue* Matrix4x4Value::duplicate()
@@ -391,7 +402,8 @@ core::string  PlaneValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void PlaneValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 IValue* PlaneValue::duplicate()
 {
@@ -424,7 +436,8 @@ core::string  QuaternionValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void QuaternionValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 IValue* QuaternionValue::duplicate()
 {
@@ -457,7 +470,8 @@ core::string  RectiValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void RectiValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 IValue* RectiValue::duplicate()
 {
@@ -490,7 +504,8 @@ core::string  RectfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void RectfValue::parse(const core::string&v){
-	return core::StringConverter::parse(v,value);
+	core::StringConverter::parse(v, value);
+	OnChanged(this);
 }
 IValue* RectfValue::duplicate()
 {
