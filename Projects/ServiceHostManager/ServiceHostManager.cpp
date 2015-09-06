@@ -129,8 +129,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 
 	for (int i = 1; i < argc; ++i)
 	{
-		if (argv[i] == "-r")
+		if (strcmp(argv[i] ,"-r")==0)
+		{
 			m_autoRestartService = true;
+			printf("Auto Restart Services: Enabled\n");
+		}
 		else
 		{
 			RunLocalService(argv[i]);
@@ -165,7 +168,7 @@ void ServiceHostManager::Run()
 }
 bool ServiceHostManager::RunLocalService(const core::string& name)
 {
-	core::string lpApplicationName = core::string("C:\\Development\\mrayEngine\\bin\\Debug\\ServiceLoader.exe"); /* The program to be executed */
+	core::string lpApplicationName = core::string(".\\ServiceLoader.exe"); /* The program to be executed */
 	core::string args = lpApplicationName+" "+(name + ".dll");
 
 
@@ -241,11 +244,11 @@ bool ServiceHostManager::_ProcessPacket()
 	}
 	tinyxml2::XMLElement*root = doc.RootElement();
 
-	std::string msg= root->Attribute("Message");
+	std::string msg = root->Attribute("Message");
 	if (msg == "Connect") //New service
 	{
 		ServiceInfo ifo;
-		ifo.name= root->Attribute("Name");
+		ifo.name = root->Attribute("Name");
 		ifo.address = src;
 
 
@@ -267,14 +270,15 @@ bool ServiceHostManager::_ProcessPacket()
 			m_serviceList.push_back(ifo);
 			m_dataMutex->unlock();
 		}
-	}else if (msg == "Disconnect") //New service
+	}
+	else if (msg == "Disconnect") //New service
 	{
 		int i = GetServiceByAddress(&src);
 		if (i != -1)
 		{
 			printf("Service disconnected [%s]\n", m_serviceList[i].name.c_str());
 			m_dataMutex->lock();
-			m_serviceList.erase(m_serviceList.begin()+i);
+			m_serviceList.erase(m_serviceList.begin() + i);
 			m_dataMutex->unlock();
 		}
 	}
@@ -374,6 +378,19 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 	{
 		m_memory->userConnectionData.address.port = core::StringConverter::toInt(value);
 		m_memory->userCommPort = m_memory->userConnectionData.address.port;
+	}
+	else
+	{
+		//printf("Forwarding Message: %s\n", msg.c_str());
+		core::string buffer;
+		buffer = "<Data Message=\"" + msg + "\" Value=\"" + value + "\"/>";
+		//forward the message to the services
+		for (int i = 0; i < m_serviceList.size(); ++i)
+		{
+			//	printf("Sending Ping to %s\n", m_serviceList[i].name.c_str());
+			if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port!=0)
+				m_commLink->SendTo(&m_serviceList[i].address, buffer.c_str(), buffer.length()+1);
+		}
 	}
 #if USE_OPENNI
 	else

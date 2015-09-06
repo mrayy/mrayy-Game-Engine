@@ -59,17 +59,17 @@ namespace NetworkValueController
                     return;
                 if(vals.Length==1)
                 {
-                    X = Y = (int)(float.Parse(vals[0]));
+                    X = Y = (int)(float.Parse(vals[0]) * 100);
                 }
                 else
                 {
-                    X = (int)(float.Parse(vals[0]) );
-                    Y = (int)(float.Parse(vals[1]) );
+                    X = (int)(float.Parse(vals[0]) * 100);
+                    Y = (int)(float.Parse(vals[1]) * 100);
                 }
             }
             get
             {
-                return (X).ToString() + "," + (Y ).ToString();
+                return (X / 100.0f).ToString() + "," + (Y / 100.0f).ToString();
             }
         }
         public Vector2Ctl()

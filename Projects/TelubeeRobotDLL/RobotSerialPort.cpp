@@ -438,6 +438,25 @@ qtomatrix(Matrix m, const mray::math::quaternion& q)
 
 	m[3][3] = 1.0;
 }
+void QuaternionToEuler(const math::quaternion quaternion, math::vector3df &euler)
+{
+	float w, x, y, z;
+
+	w = quaternion.w;
+	x = quaternion.x;
+	y = quaternion.y;
+	z = quaternion.z;
+
+	double sqw = w*w;
+	double sqx = x*x;
+	double sqy = y*y;
+	double sqz = z*z;
+
+	euler.z = (float) math::toDeg(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)) );
+	euler.x = (float)math::toDeg(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)) );
+	euler.y = (float)math::toDeg(asin(-2.0 * (x*z - y*w)) );
+
+}
 
 void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 {
@@ -482,6 +501,7 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	//MatrixtoXYZ((double*)rotMat, &angles.x, &angles.y, &angles.z);
 	math::vector3d angles;
 	q.toEulerAngles(angles);
+	//QuaternionToEuler(q, angles);
 
 	tilt = m_impl->mvRobot[HEAD][1]->getNext(-angles.y);
 	pan = m_impl->mvRobot[HEAD][0]->getNext(-angles.z);

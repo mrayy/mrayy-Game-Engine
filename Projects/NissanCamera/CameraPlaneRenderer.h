@@ -63,6 +63,7 @@ protected:
 	void _RegisterNetworkValues();
 	void _OnCameraPropertyChanged(IValue* v);
 	void _OnProjectionPropertyChanged(IValue* v);
+
 public:
 	CameraPlaneRenderer();
 	virtual ~CameraPlaneRenderer();

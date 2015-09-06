@@ -518,12 +518,17 @@ void quaternion::fromEulerAngles(float pitch,float yaw,float roll){
 }
 
 void quaternion::toEulerAngles(vector3d &angles)const{
+
 	double sqw = w*w;
 	double sqx = x*x;
 	double sqy = y*y;
 	double sqz = z*z;
 
+	angles.x = (float)math::toDeg(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)));
+	angles.y = (float)math::toDeg(asin(-2.0 * (x*z - y*w)));
+	angles.z = (float)math::toDeg(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)));
 
+#if 0
 	// rotation about x-axis
 	
 	angles.x = (float) (atan2(2.0 * (y*z +x*w),(-sqx - sqy + sqz + sqw)));
@@ -547,6 +552,7 @@ void quaternion::toEulerAngles(vector3d &angles)const{
 	angles.x=(float)toDeg(angles.x);
 	angles.y=(float)toDeg(angles.y);
 	angles.z=(float)toDeg(angles.z);
+#endif
 }
 
 void quaternion::Slerp(const quaternion& rkP,const quaternion& rkQ,float t,bool shortPath){

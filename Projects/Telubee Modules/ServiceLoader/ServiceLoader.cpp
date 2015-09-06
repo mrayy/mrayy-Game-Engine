@@ -97,6 +97,11 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 
 	m_sharedMemory.openRead();
 	m_memory = (TBee::ModuleSharedMemory*)m_sharedMemory.GetData();
+	if (!m_memory)
+	{
+		printf("Couldnt open shared memory! Make sure the service host manager is loaded first!\n");
+		exit(0);
+	}
 	memset(&m_oldMemory, 0, sizeof(m_oldMemory));
 
 	Console::setColor(CONSOLE_CLR_INFO);
@@ -329,6 +334,12 @@ bool ServiceLoader::_ProcessPacket()
 	{
 	//	printf("Recevied ping message\n");
 		_sendPongMessage();
+	}
+	else
+	{
+		//printf("Message Arrived: %s\n", msg.c_str());
+		core::string value = root->Attribute("Value");
+		m_context.__FIRE_OnUserMessage(&src, msg, value);
 	}
 
 	return 0;

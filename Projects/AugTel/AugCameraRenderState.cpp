@@ -121,7 +121,7 @@ namespace AugTel
 #endif
 	m_robotConnector->SetCommunicator(comm);
 
-	m_robotConnector->AttachRobotController(new LocalDLLRobotController());
+	//m_robotConnector->AttachRobotController(new LocalDLLRobotController());
 	//m_robotConnector->AttachRobotController(new PhantomCommunicator());
 	m_viewDepth = false;
 

@@ -602,20 +602,86 @@ void FlyCameraVideoGrabber::SetParameter(const core::string& name, const core::s
 	else
 	if (name == Param_WhiteBalance)
 	{
+		return;	// White Balance is problamatic.. 
+		Property tmp;
 		val.type = WHITE_BALANCE;
+		ifo.type = val.type;
+		m_data->cam.GetPropertyInfo(&ifo);
+		m_data->cam.GetProperty(&tmp);
 		math::vector2d v = core::StringConverter::toVector2d(value);
 		if (v.x < 0 || value == "auto")
 			val.autoManualMode = true;
 		else {
 			val.autoManualMode = false;
-			val.valueA = v.x;
-			val.valueB = v.y;
+			val.valueA = ifo.min + (float)(ifo.max - ifo.min)*v.x;
+			val.valueB = ifo.min + (float)(ifo.max - ifo.min)*v.y;
 		}
+		val.absValue = 0;
+		val.absControl = false;
+		if (tmp.autoManualMode == true && val.autoManualMode == true)
+			return;
 		(m_data->cam.SetProperty(&val));
 	}
 }
 core::string FlyCameraVideoGrabber::GetParameter(const core::string& name)
 {
+	Property val;
+	val.present = true;
+	val.absControl = true;
+	val.onePush = false;
+	val.onOff = true;
+	PropertyInfo ifo;
+#define GET_VALUE(t)\
+	val.type = t;\
+	ifo.type = val.type;\
+	m_data->cam.GetPropertyInfo(&ifo);\
+	if (m_data->cam.GetProperty(&val) != PGRERROR_OK)\
+		return ""; \
+	if (val.autoManualMode == true)\
+	return "auto";\
+
+	if (name == Param_Exposure)
+	{
+		GET_VALUE(AUTO_EXPOSURE);
+		float v = (val.absValue / (ifo.absMax - ifo.absMin)) - ifo.absMin;
+		return core::StringConverter::toString(v);
+	}
+	else
+	if (name == Param_Gain)
+	{
+		GET_VALUE(GAIN);
+		float v = (val.absValue / (ifo.absMax - ifo.absMin)) - ifo.absMin;
+		return core::StringConverter::toString(v);
+	}
+	else
+	if (name == Param_Gamma)
+	{
+		GET_VALUE(GAMMA);
+		float v = (val.absValue / (ifo.absMax - ifo.absMin)) - ifo.absMin;
+		return core::StringConverter::toString(v);
+	}
+	else
+	if (name == Param_Brightness)
+	{
+		GET_VALUE(BRIGHTNESS);
+		float v = (val.absValue / (ifo.absMax - ifo.absMin)) - ifo.absMin;
+		return core::StringConverter::toString(v);
+	}
+	else
+	if (name == Param_Saturation)
+	{
+		GET_VALUE(SATURATION);
+		float v = (val.absValue / (ifo.absMax - ifo.absMin)) - ifo.absMin;
+		return core::StringConverter::toString(v);
+	}
+	else
+	if (name == Param_WhiteBalance)
+	{
+		GET_VALUE(WHITE_BALANCE);
+		float va = ((float)val.valueA / (float)(ifo.max - ifo.min)) - ifo.min;
+		float vb = ((float)val.valueB / (float)(ifo.max - ifo.min)) - ifo.min;
+		return core::StringConverter::toString(math::vector2d(va,vb));
+	}
 	return "";
 }
 

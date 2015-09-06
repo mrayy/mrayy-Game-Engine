@@ -142,11 +142,11 @@ void LocalCameraVideoSource::SetCameraParameterValue(const core::string& name, c
 		{
 			m_cameraSource[i].camera->SetParameter(name, value);
 
-			printf("Camera [%d] %s value is: %s\n", i, name.c_str(), m_cameraSource[i].camera->GetParameter(name).c_str());
+		//	printf("Camera [%d] %s value is: %s\n", i, name.c_str(), m_cameraSource[i].camera->GetParameter(name).c_str());
 		}
 	}
 }
-const core::string& LocalCameraVideoSource::GetCameraParameterValue(const core::string& namne)
+core::string LocalCameraVideoSource::GetCameraParameterValue(const core::string& namne)
 {
 	return m_cameraSource[0].camera->GetParameter(namne);
 }

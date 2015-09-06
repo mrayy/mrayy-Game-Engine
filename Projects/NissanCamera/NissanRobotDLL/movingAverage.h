@@ -8,9 +8,11 @@
 class MovAvg
 {
 public:
-	MovAvg();
+	MovAvg(int count = _MOVING_AVERAGE_BUF_LENGTH_);
+	~MovAvg();
 	double getNext(double next);
 private:
 	int cur;
-	double buf[_MOVING_AVERAGE_BUF_LENGTH_];
+	int _count;
+	double *buf;
 };

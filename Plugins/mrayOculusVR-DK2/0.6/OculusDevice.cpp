@@ -1,10 +1,12 @@
 
 
 #include "stdafx.h"
+#include "../SRC/GL/CAPI_GLE.h"
 #include "OculusDevice.h"
 #include "OculusManager.h"
 #include "RenderWindow.h"
 #include <windows.h>
+#include "OVR_CAPI_GL.h"
 
 using namespace OVR;
 
@@ -13,7 +15,7 @@ namespace mray
 namespace video
 {
 
-
+	static GLEContext _glContext;
 	class OculusDeviceImpl
 	{
 		ovrHmd m_device;
@@ -23,6 +25,12 @@ namespace video
 		OculusDeviceData m_data;
 
 		unsigned StartTrackingCaps;
+		ovrGLTexture* mirrorTexture;
+		GLuint mirrorFBO = 0;
+		ovrEyeRenderDesc EyeRenderDesc[2];
+		ovrPosef         EyeRenderPose[2];
+		ovrVector3f      ViewOffset[2];
+		ovrTrackingState hmdState;
 
 	public:
 		OculusDeviceImpl(ovrHmd device, OculusDevice* o, OculusManager*mngr)
@@ -35,6 +43,8 @@ namespace video
 
 			StartTrackingCaps = 0;
 
+			if (!_glContext.IsInitialized())
+				_glContext.Init();
 
 			Init();
 
@@ -77,7 +87,7 @@ namespace video
 
 
 			bool IsLowPersistence = true;
-			bool DynamicPrediction = false;
+			bool DynamicPrediction = true;
 			bool VsyncEnabled = false;
 
 			// Hmd caps.
@@ -100,12 +110,39 @@ namespace video
 
 
 		}
+
+		void CreateEyeBuffers()
+		{
+			// Make eye render buffers
+			ovrSwapTextureSet* TextureSet[2];
+			for (int i = 0; i < 2; i++)
+			{
+				ovrSizei size = ovrHmd_GetFovTextureSize(m_device, (ovrEyeType)i, m_device->DefaultEyeFov[i], 1);
+				if (ovrHmd_CreateSwapTextureSetGL(m_device, GL_SRGB8_ALPHA8, size.w, size.h, &TextureSet[i]) != ovrSuccess)
+				{
+					ovrErrorInfo err;
+					ovr_GetLastErrorInfo(&err);
+					printf("Failed to create swap texture! %s\n",err.ErrorString);
+				}
+			}
+
+			ovrSizei windowSize = { m_device->Resolution.w / 2, m_device->Resolution.h / 2 };
+			// Create mirror texture and an FBO used to copy mirror texture to back buffer
+			ovrHmd_CreateMirrorTextureGL(m_device, GL_RGBA, windowSize.w, windowSize.h, (ovrTexture**)&mirrorTexture);
+			// Configure the mirror read buffer
+			mirrorFBO = 0;
+			glGenFramebuffers(1, &mirrorFBO);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, mirrorFBO);
+			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirrorTexture->OGL.TexId, 0);
+			glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		}
 		bool AttachToWindow(video::RenderWindow* window)
 		{
 			HWND* ptr;
 			window->GetCustomParam("WINDOW", (void*)&ptr);
-			if (!ovrHmd_AttachToWindow(m_device, ptr, NULL, NULL))
-				return false;
+
+			ovrHmd_SetEnabledCaps(m_device, ovrHmdCap_LowPersistence | ovrHmdCap_DynamicPrediction);
 
 			unsigned sensorCaps = ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection;
 			if (!IsTrackingConnected())
@@ -118,14 +155,11 @@ namespace video
 				StartTrackingCaps = sensorCaps;
 			}
 
-			ovrHmd_SetEnabledCaps(m_device, ovrHmdCap_LowPersistence | ovrHmdCap_DynamicPrediction);
 			return true;
 
 		}
 		void GetDevicePosSize(math::vector2di& pos, math::vector2di& size)
 		{
-			pos.set(m_device->WindowsPos.x, m_device->WindowsPos.y);
-			size.set(m_device->Resolution.w, m_device->Resolution.h);
 		}
 		const OculusDeviceData& GetDeviceInfo()const
 		{
@@ -137,6 +171,10 @@ namespace video
 			if (!m_device)
 				return;
 
+
+			EyeRenderDesc[0] = ovrHmd_GetRenderDesc(m_device, ovrEye_Left, m_device->DefaultEyeFov[0]);
+			EyeRenderDesc[1] = ovrHmd_GetRenderDesc(m_device, ovrEye_Right, m_device->DefaultEyeFov[1]);
+			CreateEyeBuffers();
 		}
 
 		void SetLowPresistenceMode(bool on)
@@ -152,22 +190,6 @@ namespace video
 		uint GetDisplayID()
 		{
 
-			DISPLAY_DEVICE d;
-			d.cb = sizeof(DISPLAY_DEVICE);
-			int monitor = 0;
-			uint i = 0;
-			int result;
-
-			do
-			{
-
-				result = EnumDisplayDevices(0, i, &d, 0);
-				if (strstr(m_device->DisplayDeviceName,d.DeviceName))
-				{
-					return i;
-				}
-				++i;
-			} while (result);
 			return 0;
 		}
 
@@ -180,16 +202,56 @@ namespace video
 		}
 		void BeginFrame()
 		{
-			ovrHmd_BeginFrame(m_device, 0);
+			// Get eye poses, feeding in correct IPD offset
+			ViewOffset[0] = EyeRenderDesc[0].HmdToEyeViewOffset;
+			ViewOffset[1]=EyeRenderDesc[1].HmdToEyeViewOffset;
+			ovrFrameTiming   ftiming = ovrHmd_GetFrameTiming(m_device, 0);
+			hmdState = ovrHmd_GetTrackingState(m_device, ftiming.DisplayMidpointSeconds);
+			ovr_CalcEyePoses(hmdState.HeadPose.ThePose, ViewOffset, EyeRenderPose);
+
 		}
 
 		void EndFrame(const ovrTexture* eyes)
 		{
+
+			// Do distortion rendering, Present and flush/sync
+
+			// Set up positional data.
+			ovrViewScaleDesc viewScaleDesc;
+			viewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
+			viewScaleDesc.HmdToEyeViewOffset[0] = ViewOffset[0];
+			viewScaleDesc.HmdToEyeViewOffset[1] = ViewOffset[1];
+
+			ovrLayerEyeFov ld;
+			ld.Header.Type = ovrLayerType_EyeFov;
+			ld.Header.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;   // Because OpenGL.
+			/*
+			for (int eye = 0; eye < 2; eye++)
+			{
+				ld.ColorTexture[eye] = eyeRenderTexture[eye]->TextureSet;
+				ld.Viewport[eye] = Recti(eyeRenderTexture[eye]->GetSize());
+				ld.Fov[eye] = HMD->DefaultEyeFov[eye];
+				ld.RenderPose[eye] = EyeRenderPose[eye];
+			}
+
+			ovrLayerHeader* layers = &ld.Header;
+			ovrResult result = ovrHmd_SubmitFrame(HMD, 0, &viewScaleDesc, &layers, 1);
+			isVisible = result == ovrSuccess;*/
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, mirrorFBO);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			GLint w = mirrorTexture->OGL.Header.TextureSize.w;
+			GLint h = mirrorTexture->OGL.Header.TextureSize.h;
+			glBlitFramebuffer(0, h, w, 0,
+				0, 0, w, h,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			/*
 			static ovrPosef eyeRenderPose[2];
 			eyeRenderPose[0] = ovrHmd_GetEyePose(m_device, ovrEyeType::ovrEye_Left);
 			eyeRenderPose[1] = ovrHmd_GetEyePose(m_device, ovrEyeType::ovrEye_Right);
 
-			ovrHmd_EndFrame(m_device, eyeRenderPose, eyes);
+			ovrHmd_EndFrame(m_device, eyeRenderPose, eyes);*/
 		}
 
 		float GetEyeHeight()
@@ -200,8 +262,7 @@ namespace video
 		bool GetEyePos(OVREye e, math::vector3d& pos, math::quaternion& ori)
 		{
 
-			ovrEyeType eye = m_device->EyeRenderOrder[(int)e];
-			ovrPosef p = ovrHmd_GetEyePose(m_device, eye);
+			ovrPosef &p = EyeRenderPose[(int)e];
 			pos.set(p.Position.x, p.Position.y, p.Position.z);
 			ori = math::quaternion(p.Orientation.w, p.Orientation.x, p.Orientation.y, p.Orientation.z);
 			return true;
@@ -221,19 +282,16 @@ namespace video
 		}
 		math::vector3d GetPosition()
 		{
-
-			ovrEyeType eye = m_device->EyeRenderOrder[0];
-			ovrPosef p = ovrHmd_GetEyePose(m_device, eye);
-			return math::vector3d(p.Position.x, p.Position.y, p.Position.z);
-			ovrTrackingState s = ovrHmd_GetTrackingState(m_device, 0);
-			return math::vector3d(s.HeadPose.ThePose.Position.x, s.HeadPose.ThePose.Position.y, -s.HeadPose.ThePose.Position.z);
+// 			ovrFrameTiming   ftiming = ovrHmd_GetFrameTiming(m_device, 0);
+// 			ovrTrackingState hmdState = ovrHmd_GetTrackingState(m_device, ftiming.DisplayMidpointSeconds);
+			return math::vector3d(hmdState.HeadPose.ThePose.Position.x, hmdState.HeadPose.ThePose.Position.y, -hmdState.HeadPose.ThePose.Position.z);
 
 		}
 		math::quaternion GetOrientation()
 		{
-
-			ovrTrackingState s = ovrHmd_GetTrackingState(m_device, 0);
-			return math::quaternion(s.HeadPose.ThePose.Orientation.w, s.HeadPose.ThePose.Orientation.x, s.HeadPose.ThePose.Orientation.y, s.HeadPose.ThePose.Orientation.z);
+// 			ovrFrameTiming   ftiming = ovrHmd_GetFrameTiming(m_device, 0);
+// 			ovrTrackingState hmdState = ovrHmd_GetTrackingState(m_device, ftiming.DisplayMidpointSeconds);
+			return math::quaternion(hmdState.HeadPose.ThePose.Orientation.w, hmdState.HeadPose.ThePose.Orientation.x, hmdState.HeadPose.ThePose.Orientation.y, hmdState.HeadPose.ThePose.Orientation.z);
 
 		}
 
@@ -254,18 +312,6 @@ namespace video
 		}
 		void GetRenderScaleAndOffset(ovrFovPort fov, const math::vector2di& textureSize, const math::recti& renderVP, math::vector2d& scale, math::vector2d& offset)
 		{
-			ovrSizei sz;
-			sz.w = textureSize.x;
-			sz.h = textureSize.y;
-			ovrRecti r;
-			r.Pos.x = renderVP.ULPoint.x;
-			r.Pos.y = renderVP.ULPoint.y;
-			r.Size.w = renderVP.getWidth();
-			r.Size.h = renderVP.getHeight();
-			ovrVector2f so[2];
-			ovrHmd_GetRenderScaleAndOffset(fov, sz, r, so);
-			scale.set(so[0].x, so[0].y);
-			offset.set(so[1].x, so[1].y);
 		}
 
 		void ResetOrientation()
@@ -288,7 +334,7 @@ namespace video
 		}
 		bool IsExtendedDesktop()
 		{
-			return m_device->HmdCaps & ovrHmdCap_ExtendDesktop;
+			return true;
 		}
 	};
 

@@ -147,6 +147,10 @@ public:
 #else
 				if (!AppData::Instance()->oculusDevice->AttachToWindow(rw))
 					printf("Failed to Attach oculus to render window!\n");
+				math::vector2di pos, size;
+				AppData::Instance()->oculusDevice->GetDevicePosSize(pos, size);
+				rw->SetPosition(pos);
+				rw->Resize(size);
 
 				int w = AppData::Instance()->oculusDevice->GetDeviceInfo().texSize.x;
 				int h = AppData::Instance()->oculusDevice->GetDeviceInfo().texSize.y;

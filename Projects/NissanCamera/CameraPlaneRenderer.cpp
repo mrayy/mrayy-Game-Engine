@@ -51,7 +51,7 @@ CameraPlaneRenderer::CameraPlaneRenderer()
 //	m_userOffset.z = 1.0f;		//camera offset from user eye
 	m_userOffset.x = -0.6;		// camera offset from center of screen
 	m_userOffset.y = -0.1;		// camera offset from center of screen
-	m_surfaceParams.eyeDistance = -0.065f;// 0.065f;
+	m_surfaceParams.eyeDistance = 0;// -0.065f;// 0.065f;
 }
 CameraPlaneRenderer::~CameraPlaneRenderer()
 {
@@ -138,22 +138,31 @@ void CameraPlaneRenderer::_RegisterNetworkValues()
 {
 	ValueGroup* g = new ValueGroup("Camera");
 	NCAppGlobals::Instance()->netValueController->GetValues()->AddValueGroup(g);
+	core::string value;
+	IValue* tmpV;
 
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Exposure, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Gain, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_WhiteBalance, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Gamma, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Brightness, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Saturation, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
-	g->AddValue(new FloatValue(video::ICameraVideoGrabber::Param_Sharpness, 0.5))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged);
+#define GET_VALUE(X) (((TBee::LocalCameraVideoSource*)m_videoSource)->GetCameraParameterValue(X))
+#define ADD_CAMERA_VALUE(Type,Name)\
+	value = GET_VALUE(Name); \
+	tmpV = g->AddValue(new Type(Name, 0));\
+	if (value != "")\
+		tmpV->parse(value); \
+	tmpV->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnCameraPropertyChanged); 
 
+	ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Exposure);
+	ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Gain);
+	ADD_CAMERA_VALUE(Vector2dfValue, video::ICameraVideoGrabber::Param_WhiteBalance);
+	ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Gamma);
+	ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Brightness);
+	ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Saturation);
+	ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Sharpness);
 
 	g = new ValueGroup("Projection");
 	NCAppGlobals::Instance()->netValueController->GetValues()->AddValueGroup(g);
 
 	g->AddValue(new FloatValue("Lens FOV", m_cameraConfiguration->fov / 100.0f))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
 	g->AddValue(new FloatValue("Screen Distance", m_surfaceParams.screenDistance))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
-	g->AddValue(new Vector2dfValue("User Offset", math::vector2d((m_userOffset.x + 1) * 50, (m_userOffset.y + 1) * 50)))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
+	g->AddValue(new Vector2dfValue("User Offset", math::vector2d((m_userOffset.x + 1) * 0.5f, (m_userOffset.y + 1) * 0.5f)))->OnChanged += newClassDelegate1("", this, &CameraPlaneRenderer::_OnProjectionPropertyChanged);
 
 }
 void CameraPlaneRenderer::_OnCameraPropertyChanged(IValue* v)
@@ -175,14 +184,32 @@ void CameraPlaneRenderer::_OnProjectionPropertyChanged(IValue* v)
 	else if (v->getName() == "User Offset")
 	{
 		math::vector2d val = core::StringConverter::toVector2d(v->toString());
-		m_userOffset.x = (val.x / 100.0f) * 2 - 1;
-		m_userOffset.y = (val.y / 100.0f) * 2 - 1;
+		m_userOffset.x = (val.x ) * 2 - 1;
+		m_userOffset.y = (val.y ) * 2 - 1;
 	}
 }
 void CameraPlaneRenderer::Start()
 {
 	m_videoSource->Open();
 	((TBee::LocalCameraVideoSource*)m_videoSource)->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0.0");
+
+	core::string v;
+	ValueGroup* g = NCAppGlobals::Instance()->netValueController->GetValues()->GetValueGroup("Camera");
+#define GET_VALUE(X) ((TBee::LocalCameraVideoSource*)m_videoSource)->GetCameraParameterValue(X)
+#define UPDATE_CAMERA_VALUE(Name)\
+	v = GET_VALUE(Name);\
+	if (v != "")\
+	{\
+		if (v == "auto") v = "-1"; \
+			g->GetValue(Name)->parse(v);\
+	}
+	UPDATE_CAMERA_VALUE(video::ICameraVideoGrabber::Param_Exposure);
+	UPDATE_CAMERA_VALUE(video::ICameraVideoGrabber::Param_Gain);
+	UPDATE_CAMERA_VALUE(video::ICameraVideoGrabber::Param_WhiteBalance);
+	UPDATE_CAMERA_VALUE(video::ICameraVideoGrabber::Param_Gamma);
+	UPDATE_CAMERA_VALUE(video::ICameraVideoGrabber::Param_Brightness);
+	UPDATE_CAMERA_VALUE(video::ICameraVideoGrabber::Param_Saturation);
+	UPDATE_CAMERA_VALUE(video::ICameraVideoGrabber::Param_Sharpness);
 }
 
 void CameraPlaneRenderer::Stop()
@@ -272,7 +299,8 @@ void CameraPlaneRenderer::GenerateSurface(  float aspectRatio)
 
 
 		m_car->CameraPlane[i]->AttachNode(rnode);
-		m_car->Eyes[i]->addChild(m_car->CameraPlane[i]);
+		//m_car->Eyes[i]->addChild(m_car->CameraPlane[i]);
+		m_car->Head->addChild(m_car->CameraPlane[i]);
 		//m_headNode->addChild(m_screenNode[i]);
 		m_car->CameraPlane[i]->setVisible(false);
 		m_car->CameraPlane[i]->setScale(1);
@@ -351,10 +379,11 @@ void CameraPlaneRenderer::_UpdateCameraProj()
 void CameraPlaneRenderer::_UpdateHead(const math::vector3d& pos, const math::vector3d &angles)
 {
 	m_car->Head->setOrintation(angles);
-	m_car->Head->setPosition(pos);
+	//m_car->Head->setPosition(pos);
 }
 void CameraPlaneRenderer::_UpdateCameraPlane()
 {
+	m_surfaceParams.planeDistance= m_surfaceParams.screenDistance;
 	m_surfaceParams.fovScaler = fabs(tan(math::toRad(m_cameraConfiguration->fov / 2.0f))*m_surfaceParams.planeDistance);
 	math::vector3d s(m_surfaceParams.fovScaler*m_surfaceParams.aspect, m_surfaceParams.fovScaler, 1);
 	m_car->CameraPlane[0]->setScale(s);

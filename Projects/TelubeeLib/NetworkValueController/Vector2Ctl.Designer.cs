@@ -38,8 +38,9 @@
             // 
             this.XVal.Location = new System.Drawing.Point(3, 3);
             this.XVal.Maximum = 100;
+            this.XVal.Minimum = -1;
             this.XVal.Name = "XVal";
-            this.XVal.Size = new System.Drawing.Size(190, 35);
+            this.XVal.Size = new System.Drawing.Size(190, 45);
             this.XVal.TabIndex = 0;
             this.XVal.ValueChanged += new System.EventHandler(this.XVal_ValueChanged);
             // 
@@ -47,8 +48,9 @@
             // 
             this.YVal.Location = new System.Drawing.Point(179, 3);
             this.YVal.Maximum = 100;
+            this.YVal.Minimum = -1;
             this.YVal.Name = "YVal";
-            this.YVal.Size = new System.Drawing.Size(200, 35);
+            this.YVal.Size = new System.Drawing.Size(200, 45);
             this.YVal.TabIndex = 1;
             this.YVal.ValueChanged += new System.EventHandler(this.YVal_ValueChanged);
             // 

@@ -31,6 +31,7 @@ AppData::AppData()
 }
 AppData::~AppData()
 {
+	SaveNetValues();
 	delete camConfig;
 	delete netValueController;
 }
@@ -75,6 +76,28 @@ void AppData::Save(const core::string& path)
 	stream->close();
 }
 
+void AppData::SaveNetValues()
+{
+	core::string name = "NetValues.xml";
+	xml::XMLElement root("root");
+	xml::XMLElement* e = netValueController->GetValues()->exportXMLSettings(&root);
+	xml::XMLWriter w;
+	w.addElement(e);
+	OS::IStreamPtr stream = gFileSystem.openFile(name, OS::TXT_WRITE);
+	OS::StreamWriter sw(stream);
+
+	sw.writeString(w.flush());
+	stream->close();
+}
+void AppData::LoadNetValues()
+{
+	core::string name = "NetValues.xml";
+	xml::XMLTree t;
+	if (!t.load(name))
+		return;
+
+	netValueController->GetValues()->loadXMLSettings((xml::XMLElement*)*t.getElementsBegin());
+}
 
 
 }

@@ -64,6 +64,9 @@ public:
 	core::string GetVersion();
 	core::string GetBuild();
 
+	void SaveNetValues();
+	void LoadNetValues();
+
 	void SetValue(const core::string&catagory, const core::string&name, const core::string& v);
 	core::string GetValue(const core::string&catagory, const core::string&name);
 

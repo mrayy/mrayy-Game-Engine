@@ -85,8 +85,8 @@ RobotCameraState::RobotCameraState()
 	m_robotConnector->SetCommunicator(m_robotComm);
 	m_cameraRenderer = new CameraPlaneRenderer();
 
-	//m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
-	m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
+	m_headController = new TBee::CalibHeadController(new TBee::OptiTrackHeadController(1));
+	//m_headController = new TBee::CalibHeadController(new TBee::KeyboardHeadController());
 	//m_headController = new TBee::CalibHeadController(new TestController());
 
 	m_robotConnector->SetHeadController(m_headController);
@@ -506,7 +506,7 @@ void RobotCameraState::Update(float dt)
 
 	math::vector3d rot,r ;
 	//q.toEulerAngles(r);
-	if (false)
+	if (true)
 	{
 		//in the car
 		r = m_robotConnector->GetCurrentHeadRotation();

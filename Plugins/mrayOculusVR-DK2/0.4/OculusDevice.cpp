@@ -5,6 +5,7 @@
 #include "OculusManager.h"
 #include "RenderWindow.h"
 #include <windows.h>
+#include "OVR_CAPI_GL.h"
 
 using namespace OVR;
 

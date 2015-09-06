@@ -77,6 +77,8 @@ class RobotSerialPortImpl
 		Tserial_event *comHEAD;		// Serial Port
 		MovAvg *mvRobot[2][3];		// 1 - base, 2 - head moving avarage 
 
+		MovAvg *mvRet[2][3];		// 1 - base, 2 - head moving avarage 
+
 		ITelubeeRobotListener* listener;
 
 		void NotifyCollision(float l, float r)
@@ -145,8 +147,11 @@ RobotSerialPort::RobotSerialPort()
 	load_parameters();
 
 	for (int i = 0; i < 3; i++){
-		m_impl->mvRobot[BASE][i] = new MovAvg();
-		m_impl->mvRobot[HEAD][i] = new MovAvg();
+		m_impl->mvRobot[BASE][i] = new MovAvg(5);
+		m_impl->mvRobot[HEAD][i] = new MovAvg(5);
+
+		m_impl->mvRet[BASE][i] = new MovAvg(2);
+		m_impl->mvRet[HEAD][i] = new MovAvg(2);
 	}
 
 	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadHead, this, NULL, NULL);
@@ -566,6 +571,10 @@ void RobotSerialPort::HeadDataArrived(char *inBuff, int size){
 		*ptr++ = m_headbBuffer[i];
 
 	sscanf(buffer, "%f,%f,%f", &tx, &ty, &tz);
+
+	tx = m_impl->mvRet[HEAD][0]->getNext(tx);
+	ty = m_impl->mvRet[HEAD][1]->getNext(ty);
+	tz = m_impl->mvRet[HEAD][2]->getNext(tz);
 
 	m_headbBuffer.erase(m_headbBuffer.begin(), m_headbBuffer.begin() + (End));
 

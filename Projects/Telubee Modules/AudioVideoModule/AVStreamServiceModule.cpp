@@ -503,8 +503,10 @@ public:
 		Sleep(1000);
 
 		printf("Stopping Cameras.\n");
-		m_cameraIfo[0].camera->Stop();
-		m_cameraIfo[1].camera->Stop();
+		if (m_cameraIfo[0].camera)
+			m_cameraIfo[0].camera->Stop();
+		if (m_cameraIfo[1].camera)
+			m_cameraIfo[1].camera->Stop();
 
 		m_status = EServiceStatus::Stopped;
 		return true;

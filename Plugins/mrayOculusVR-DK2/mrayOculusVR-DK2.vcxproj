@@ -61,14 +61,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Engine\mrayEngine\include;..\..\Engine\mrayMath;..\..\Dependencies\include\LibOVR2\include;..\..\Engine\mrayGameLayer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Engine\mrayEngine\include;..\..\Engine\mrayMath;..\..\Dependencies\include\;..\..\Dependencies\include\LibOVR2\include;..\..\Engine\mrayGameLayer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>libovr2.lib;winmm.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>libovr.lib;winmm.lib;ws2_32.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>..\..\Dependencies\lib\Debug</AdditionalLibraryDirectories>
@@ -82,7 +82,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Engine\mrayEngine\include;..\..\Engine\mrayMath;..\..\Dependencies\include\LibOVR2\include;..\..\Engine\mrayGameLayer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Engine\mrayEngine\include;..\..\Engine\mrayMath;..\..\Dependencies\include\;..\..\Dependencies\include\LibOVR2\include;..\..\Engine\mrayGameLayer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

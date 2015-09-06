@@ -83,13 +83,16 @@ void NetworkValueController::Stop()
 	if (m_client)
 	{
 		m_client->Close();
-		delete m_client;
-		m_client = 0;
 	}
 	if (m_thread){
 		OS::IThreadManager::getInstance().killThread(m_thread);
 		delete m_thread;
 		m_thread = 0;
+	}
+	if (m_client)
+	{
+		delete m_client;
+		m_client = 0;
 	}
 	printf("NetworkValueController closed\n");
 }

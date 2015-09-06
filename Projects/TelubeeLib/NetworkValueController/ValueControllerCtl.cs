@@ -38,7 +38,7 @@ namespace NetworkValueController
             else if (type == "float" || type == "int")
             {
                 TrackBar tb = new TrackBar();
-                tb.Minimum = 0;
+                tb.Minimum = -1;
                 tb.Maximum = 100;
                 try
                 {

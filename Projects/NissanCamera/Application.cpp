@@ -298,6 +298,7 @@ void Application::init(const OptionContainer &extraOptions)
 
 	_RegisterNetworkValues();
 	NCAppGlobals::Instance()->netValueController->StartReceiver(6001);
+	NCAppGlobals::Instance()->LoadNetValues();
 
 	gLogManager.log("Starting Application", ELL_INFO);
 
