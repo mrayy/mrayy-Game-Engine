@@ -91,7 +91,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>libovr2.lib;winmm.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>libovr.lib;winmm.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\Dependencies\lib\Release</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>

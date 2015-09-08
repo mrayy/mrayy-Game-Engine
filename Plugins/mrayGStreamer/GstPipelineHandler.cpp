@@ -5,7 +5,7 @@
 #include "ILogManager.h"
 #include "GStreamerCore.h"
 
-#include <gst/net/gstnet.h>
+//#include <gst/net/gstnet.h>
 
 namespace mray
 {
@@ -23,28 +23,28 @@ namespace video
 			Loaded = false;
 			playing = false;
 
-			baseTime = 0;
-			isMasterClock = false;
-			clockProvider = 0;
+//			baseTime = 0;
+//			isMasterClock = false;
+//			clockProvider = 0;
 
-			clock = 0;
-			clockPort = 0;
+//			clock = 0;
+//			clockPort = 0;
 		}
 
 		guint busWatchID;
 		GstElement* gstPipeline;
-		GstNetTimeProvider* clockProvider;
-		GstClock* clock;
+//		GstNetTimeProvider* clockProvider;
+//		GstClock* clock;
 
 		bool  paused;
 		bool  Loaded;
 		bool  playing;
 		bool  closing;
 
-		uint clockPort;
-		core::string clockIP;
-		ulong baseTime;
-		bool isMasterClock;
+//		uint clockPort;
+//		core::string clockIP;
+//		ulong baseTime;
+//		bool isMasterClock;
 	};
 
 	GstPipelineHandler::GstPipelineHandler()
@@ -70,9 +70,9 @@ namespace video
 		g_signal_connect(m_data->gstPipeline, "deep-notify", G_CALLBACK(gst_object_default_deep_notify), NULL);
 
 
-		m_data->clockIP = clockIP;
-		m_data->clockPort = clockPort;
-		m_data->isMasterClock = isMasterClock;
+// 		m_data->clockIP = clockIP;
+// 		m_data->clockPort = clockPort;
+// 		m_data->isMasterClock = isMasterClock;
 		m_data->paused = true;
 		m_data->Loaded = false;
 		m_data->playing = false;
@@ -101,7 +101,7 @@ namespace video
 			(gLogManager.StartLog(ELL_WARNING) << "GStreamerNetworkPlayer::Play(): unable to pause pipeline").flush();
 			return false;
 		}
-
+#if 0
 		if (m_data->clockPort > 0)
 		{
 			if (m_data->isMasterClock)
@@ -123,6 +123,7 @@ namespace video
 				gst_pipeline_use_clock(GST_PIPELINE(m_data->gstPipeline), m_data->clock);
 			}
 		}
+#endif
 		return true;
 	}
 
@@ -307,6 +308,7 @@ namespace video
 
 	void GstPipelineHandler::SetClockBaseTime(ulong baseTime)
 	{
+#if 0
 		m_data->baseTime = baseTime;
 		if (m_data->gstPipeline)
 		{
@@ -314,12 +316,16 @@ namespace video
 
 			gst_element_set_base_time(m_data->gstPipeline, baseTime);// -gst_clock_get_time(clock));
 		}
+#endif
 	}
 	ulong GstPipelineHandler::GetClockBaseTime()
 	{
+#if 0
 		if (m_data->clock)
 			return gst_clock_get_time(m_data->clock);
 		return m_data->baseTime;
+#endif
+		return 0;
 	}
 	bool GstPipelineHandler::busFunction(GstBus * bus, GstMessage * message, GstPipelineHandler * player)
 	{

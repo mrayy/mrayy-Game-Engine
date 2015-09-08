@@ -90,6 +90,12 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	gEngine.loadPlugins("plugins.stg");
 	gEngine.createDevice("OpenGL");
 
+	core::string logFile = gFileSystem.getAppPath() + argv[1] + ".log";
+	printf("Starting log:%s\n", logFile.c_str());
+	GCPtr<StreamLogger> logger = new StreamLogger(true);
+	logger->setStream(gFileSystem.createTextFileWriter( logFile));
+	gLogManager.addLogDevice(logger);
+
 	network::createWin32Network();
 
 	m_sharedMemory.SetDataSize(sizeof(TBee::ModuleSharedMemory));

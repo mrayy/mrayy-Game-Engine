@@ -74,6 +74,7 @@ void g_logFunction(const gchar   *log_domain,
 	const gchar   *message,
 	gpointer       user_data)
 {
+	printf("GStreamer::%s\n", message);
 }
 
 void GStreamerCore::_Init()
@@ -83,44 +84,52 @@ void GStreamerCore::_Init()
 	_gst_debug_enabled = false; 
 	if (!gst_init_check(0,0, &err))
 	{
-		gLogManager.log("GStreamerCore - Failed to init GStreamer!"+ core::StringConverter::toString(err->message), ELL_ERROR, EVL_Heavy);
+		gLogManager.log("GStreamerCore - Failed to init GStreamer!"+ core::StringConverter::toString(err->message), ELL_ERROR);
 	}
 	else
 	{
-		g_log_set_handler(0, G_LOG_LEVEL_INFO, g_logFunction, 0);
-		g_log_set_handler(0, G_LOG_LEVEL_DEBUG, g_logFunction, 0);
-		g_log_set_handler(0, G_LOG_LEVEL_MESSAGE, g_logFunction, 0);
-		g_log_set_handler(0, G_LOG_LEVEL_CRITICAL, g_logFunction, 0);
-		g_log_set_handler(0, G_LOG_FLAG_FATAL , g_logFunction, 0);
-		g_log_set_default_handler(g_logFunction, 0);
+// 		g_log_set_handler(0, G_LOG_LEVEL_INFO, g_logFunction, 0);
+// 		g_log_set_handler(0, G_LOG_LEVEL_DEBUG, g_logFunction, 0);
+// 		g_log_set_handler(0, G_LOG_LEVEL_MESSAGE, g_logFunction, 0);
+// 		g_log_set_handler(0, G_LOG_LEVEL_CRITICAL, g_logFunction, 0);
+// 		g_log_set_handler(0, G_LOG_FLAG_FATAL , g_logFunction, 0);
+// 		g_log_set_default_handler(g_logFunction, 0);
 
-		fclose(stderr);
+//		fclose(stderr);
 
 		//register plugin path
+		gLogManager.log("GStreamerCore - Starting Gstreamer", ELL_INFO);
 		core::string gst_path = g_getenv("GSTREAMER_1_0_ROOT_X86");
-		putenv(("GST_PLUGIN_PATH_1_0=" + gst_path + "lib\\gstreamer-1.0" + ";.").c_str());
+		gst_path = ("GST_PLUGIN_PATH_1_0=" + gst_path + "lib\\gstreamer-1.0" + ";.");
+		putenv(gst_path.c_str());
+		gLogManager.log("GStreamerCore - GStreamer Plugins Path:" + gst_path, ELL_INFO);
+
+
+		gLogManager.log("GStreamerCore - Adding Appsink", ELL_INFO);
 		//add our custom src/sink elements
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
 			"appsink", (char*)"Element application sink",
 			appsink_plugin_init, "0.1", "LGPL", "ofVideoPlayer", "openFrameworks",
 			"http://openframeworks.cc/");
-		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
-			"mysrc", (char*)"Element application src",
-			_GstMySrcClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
-			"");
-		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
-			"mysink", (char*)"Element application sink",
-			_GstMySinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
-			"");
+// 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+// 			"mysrc", (char*)"Element application src",
+// 			_GstMySrcClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
+// 			"");
+// 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+// 			"mysink", (char*)"Element application sink",
+// 			_GstMySinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
+// 			"");
+		gLogManager.log("GStreamerCore - Adding myudpsrc", ELL_INFO);
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
 			"myudpsrc", (char*)"Element udp src",
 			_GstMyUDPSrcClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 			"");
+		gLogManager.log("GStreamerCore - Adding myudpsink", ELL_INFO);
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
 			"myudpsink", (char*)"Element udp sink",
 			_GstMyUDPSinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 			"");
-		gLogManager.log("GStreamerCore - GStreamer inited", ELL_INFO, EVL_Heavy);
+		gLogManager.log("GStreamerCore - GStreamer inited", ELL_INFO);
 	}
 
 #if GLIB_MINOR_VERSION<32

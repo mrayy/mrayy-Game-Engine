@@ -50,11 +50,7 @@ public:
 	int m_fps;
 
 
-	video::VideoGrabberTexture m_cameraTextures[2];
-	float m_exposureValue;
-	float m_gainValue;
-	float m_gammaValue;
-	float m_WBValue;
+	//video::VideoGrabberTexture m_cameraTextures[2];
 
 	bool m_streamAudio;
 
@@ -97,10 +93,6 @@ public:
 
 
 		m_streamers = new video::GstStreamBin();
-		m_exposureValue = -1;
-		m_gainValue = 0.1;
-		m_WBValue = -1;
-		m_gammaValue = 0.0;
 		LoadCameraSettings("StreamingProfiles.xml");
 	}
 	~AVStreamServiceModuleImpl()
@@ -276,10 +268,8 @@ public:
 			}
 
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, (m_exposureValue > 0 ? core::StringConverter::toString(m_exposureValue) : "auto"));
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, (m_gainValue > 0 ? core::StringConverter::toString(m_gainValue) : "auto"));
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_WhiteBalance, (m_WBValue > 0 ? core::StringConverter::toString(m_WBValue) : "auto"));
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gamma, (m_gammaValue > 0 ? core::StringConverter::toString(m_gammaValue) : "auto"));
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, context->appOptions.GetOptionByName("Gain")->getValue());
 
 			// Now close cameras
 			for (int i = 0; i < 2; ++i)
@@ -288,10 +278,10 @@ public:
  					m_cameraIfo[i].camera->Stop();
 			}
 
+			printf("Creating Video Streamer\n");
 			if (true)
 			{
 
-				printf("Creating Video Streamer\n");
 				video::GstCustomMultipleVideoStreamer* hs = new video::GstCustomMultipleVideoStreamer();
 				hs->AddListener(this);
 
@@ -378,6 +368,8 @@ public:
 			std::vector<video::IVideoGrabber*> grabbers;
 			grabbers.push_back(m_cameraIfo[0].camera);
 			grabbers.push_back(m_cameraIfo[1].camera);
+
+			printf("Setting Streaming Settings: %dx%d@%d - %d kbps\n", m_resolution.x, m_resolution.y, fps, m_currentSettings.bitrate);
 			hs->SetVideoGrabber(grabbers);//
 			hs->SetResolution(m_resolution.x, m_resolution.y, fps, true);
 			hs->SetBitRate(m_currentSettings.bitrate);
@@ -388,10 +380,12 @@ public:
 		//Create Audio Stream
 		if (m_streamAudio)
 		{
+			printf("Creating Audio Streamer\n");
 			video::GstNetworkAudioStreamer* streamer;
 			streamer = new video::GstNetworkAudioStreamer();
 			m_streamers->AddStream(streamer, "Audio");
 		}
+		printf("Finished streams\n");
 
 
 		m_streamers->GetStream("Video")->CreateStream();
@@ -416,6 +410,7 @@ public:
 		int count = sizeof(camParams) / sizeof(core::string);
 		//init cameras
 		CameraProfile* prof = m_cameraProfileManager->GetProfile(m_cameraProfile);
+		if (false)
 		{
 			for (int i = 0; i < 2; ++i)
 			{
@@ -434,21 +429,22 @@ public:
 				{
 					//	m_cameraIfo[i].camera->Stop();
 				}
-				m_cameraTextures[i].Set(m_cameraIfo[i].camera, gEngine.getDevice()->createEmptyTexture2D(true));
+				//m_cameraTextures[i].Set(m_cameraIfo[i].camera, gEngine.getDevice()->createEmptyTexture2D(true));
 
 			}
 		}
 
 		context->AddListener(this);
 		m_status = EServiceStatus::Inited;
+		printf("Done Initing.\n");
 	}
 	void Destroy()
 	{
 		if (m_status == EServiceStatus::Idle)
 			return;
 		 
-		m_cameraTextures[0].Set(0, 0);
-		m_cameraTextures[1].Set(0, 0);
+// 		m_cameraTextures[0].Set(0, 0);
+// 		m_cameraTextures[1].Set(0, 0);
 
 		StopStream();
 		m_streamers->CloseAll();
