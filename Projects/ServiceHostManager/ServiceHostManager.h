@@ -8,6 +8,7 @@
 #include "RobotCommunicator.h"
 #include "IServiceModule.h"
 #include "IUDPClient.h"
+#include "TBRobotInfo.h"
 
 #include <windows.h>
 
@@ -28,6 +29,7 @@ protected:
 	OS::IThread* m_commThread;
 	OS::IThread* m_serviceThread;
 
+	TBee::TBRobotInfo m_info;
 
 	TBee::RobotCommunicator* m_robotCommunicator;
 

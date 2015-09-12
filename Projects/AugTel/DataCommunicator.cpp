@@ -14,6 +14,8 @@
 #endif
 #include "INetwork.h"
 #include "StreamReader.h"
+#include "CommunicationMessages.h"
+#include "TBRobotInfo.h"
 
 namespace mray
 {
@@ -21,19 +23,6 @@ namespace AugTel
 {
 
 
-	enum class EMessages
-	{
-		DepthData = 1,
-		DepthSize = 2,
-		IsStereo = 3,
-		CameraConfig = 4,
-		CalibrationDone = 5,
-		ReportMessage = 6,
-		IRSensorMessage = 7,
-		BumpSensorMessage = 8,
-		BatteryLevel = 9,
-		ClockSync = 10,
-	};
 	class DataCommunicatorThread :public OS::IThreadFunction
 	{
 		DataCommunicator* m_owner;
@@ -78,7 +67,13 @@ void DataCommunicator::Stop()
 	delete m_thread;
 	m_thread = 0;
 }
-
+void DataCommunicator::DetectRobots(int port)
+{
+	core::string detectMsg = "<M><Data N=\"Detect\" /></M>";
+	network::NetAddress addr = network::NetAddress::AnyAddr;
+	addr.port = port;
+	m_client->SendTo(&addr,detectMsg.c_str(),detectMsg.length()+1);
+}
 int DataCommunicator::_Process()
 {
 
@@ -91,11 +86,19 @@ int DataCommunicator::_Process()
 	if (m_client->RecvFrom(buffer, &len, &src,0) != network::UDP_SOCKET_ERROR_NONE)
 		return 0;//failed to receive the packet
 	OS::CMemoryStream stream("", (uchar*)buffer, len, false);
+	OS::StreamReader rdr(&stream);
 	int msg = 0;
 	stream.read(&msg,sizeof(msg));
 
 	switch (msg)
 	{
+	case (int)EMessages::Presence:
+	{
+		TBee::TBRobotInfo ifo;
+		ifo.Read(&rdr);
+		FIRE_LISTENR_METHOD(OnRobotInfoDetected, (ifo));
+
+	}break;
 	case (int)EMessages::DepthData:
 	{
 		TBee::GeomDepthRect rc;

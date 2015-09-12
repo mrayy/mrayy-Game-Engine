@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{011F365F-97D0-4428-A125-DE735A365858}</ProjectGuid>
+    <ProjectGuid>{C2BEC376-580A-4CA6-83D1-4E226B0D1122}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>RobotControlModule</RootNamespace>
-    <ProjectName>RobotControlServiceModule</ProjectName>
+    <RootNamespace>HandsWindowModule</RootNamespace>
+    <ProjectName>HandsWindowServiceModule</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -55,15 +55,15 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ROBOTCONTROLMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;HandsWindowMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
-      <AdditionalDependencies>TelubeeLib.lib;mrayMath.lib;mrayEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TelubeeLib.lib;mrayWin32.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -73,9 +73,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ROBOTCONTROLMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;HandsWindowMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -83,15 +83,16 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
-      <AdditionalDependencies>TelubeeLib.lib;mrayMath.lib;mrayEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayWin32.lib;TelubeeLib.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RobotControlModule.h" />
-    <ClInclude Include="RobotControlServiceModule.h" />
+    <ClInclude Include="HandsWindow.h" />
+    <ClInclude Include="HandsWindowModule.h" />
+    <ClInclude Include="HandsWindowServiceModule.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -104,8 +105,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="RobotControlModule.cpp" />
-    <ClCompile Include="RobotControlServiceModule.cpp" />
+    <ClCompile Include="HandsWindow.cpp" />
+    <ClCompile Include="HandsWindowModule.cpp" />
+    <ClCompile Include="HandsWindowServiceModule.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -16,7 +16,8 @@
 #define __TBRobotInfo__
 
 
-
+#include "StreamWriter.h"
+#include "StreamReader.h"
 
 namespace mray
 {
@@ -39,6 +40,46 @@ public:
 
 	bool Connected;
 	bool Avaliable;
+
+	xml::XMLElement* WriteXML(xml::XMLElement* elem)
+	{
+		xml::XMLElement* e = new xml::XMLElement("RobotInfo");
+
+		e->addAttribute("ID", core::StringConverter::toString(ID));
+		e->addAttribute("Name", name);
+		e->addAttribute("IP", IP);
+		e->addAttribute("Location", Location);
+		e->addAttribute("Longitude", core::StringConverter::toString(lng));
+		e->addAttribute("Latitude", core::StringConverter::toString(lat));
+
+		elem->addSubElement(e);
+		return e;
+	}
+
+	int Write(OS::StreamWriter* w)
+	{
+		int len = 0;
+		len += w->writeValue(ID);
+		len += w->binWriteString(name);
+		len += w->binWriteString(IP);
+		len += w->binWriteString(Location);
+		len += w->writeValue(lng);
+		len += w->writeValue(lat);
+		len += w->writeValue(Connected);
+		len += w->writeValue(Avaliable);
+		return len;
+	}
+	void Read(OS::StreamReader* w)
+	{
+		w->readValue(ID);
+		name = w->readString();
+		IP = w->readString();
+		Location = w->readString();
+		w->readValue(lng);
+		w->readValue(lat);
+		w->readValue(Connected);
+		w->readValue(Avaliable);
+	}
 };
 
 }

@@ -57,8 +57,8 @@ namespace mray
 		virtual void Reset()
 		{
 			m_currPos = 0;
-			Console::clear();
-			Console::locate(m_currPos.x, m_currPos.y);
+ 			Console::clear();
+ 			Console::locate(m_currPos.x, m_currPos.y);
 		}
 	};
 
@@ -88,6 +88,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	new OS::WinFileSystem();
 	new Engine(new OS::WinOSystem());
 	gEngine.loadPlugins("plugins.stg");
+	gEngine.loadResourceFile("ServicesRes.stg");
 	gEngine.createDevice("OpenGL");
 
 	core::string logFile = gFileSystem.getAppPath() + argv[1] + ".log";
@@ -118,13 +119,16 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	m_context.commChannel->Open();
 	m_context.localAddr.address = network::INetwork::getInstance().getLocalAddress();
 	m_context.localAddr.port = m_context.commChannel->Port();
+	m_context.sharedMemory = m_memory;
 
 	//load settings file
 	_loadSettings();
 
 	m_renderContext = new ServiceLoaderRenderContext();
 
-	m_moduleLib = OS::IDllManager::getInstance().getLibrary(m_moduleName);
+	core::string path;
+	gFileSystem.getCorrectFilePath(m_moduleName, path);
+	m_moduleLib = OS::IDllManager::getInstance().getLibrary( path);
 	if (m_moduleLib)
 	{
 		dllFunctionPtr libInitPtr;
@@ -239,7 +243,9 @@ void ServiceLoader::_destroy()
 		_sendDisconnectMessage();
 
 		m_serviceModule->DestroyService();
-
+		m_context.commChannel->Close();
+		delete m_context.commChannel;
+		m_context.commChannel = 0;
 		if (m_moduleLib)
 		{
 			dllFunctionPtr libDestroyPtr;
@@ -314,7 +320,7 @@ void ServiceLoader::_RenderInfo()
 
 bool ServiceLoader::_ProcessPacket()
 {
-	if (!m_context.commChannel->IsOpen())
+	if (!m_context.commChannel || !m_context.commChannel->IsOpen())
 		return -1;
 #define MAX_BUFFER 4096*4
 	char buffer[MAX_BUFFER];

@@ -525,6 +525,7 @@ void GLWin32RenderWindow::Destroy()
 	m_isClosed = true;
 	m_hDc = 0;
 	m_hWnd = 0;
+	FIRE_LISTENR_METHOD(WindowClosed, (this));
 }
 
 void GLWin32RenderWindow::Resize(const math::vector2di& size)

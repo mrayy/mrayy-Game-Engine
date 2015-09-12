@@ -276,6 +276,9 @@
     <ClInclude Include="NetworkValueController.h">
       <Filter>Source Files\DataSource</Filter>
     </ClInclude>
+    <ClInclude Include="IXMLNetMessageHandler.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -427,6 +430,12 @@
     </ClCompile>
     <ClCompile Include="NetworkValueController.cpp">
       <Filter>Source Files\DataSource</Filter>
+    </ClCompile>
+    <ClCompile Include="CommunicationMessages.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="IXMLNetMessageHandler.cpp">
+      <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -24,8 +24,6 @@ namespace TBee
 		struct in_addr localAddr;
 	};
 
-#define USE_UDPCLIENT
-#define USE_OPTI
 class RemoteRobotCommunicatorData;
 class RemoteRobotCommunicatorThread :public OS::IThreadFunction
 {
@@ -42,11 +40,8 @@ class RemoteRobotCommunicatorData
 public:
 	RobotStatusData data;
 	RemoteRobotCommunicator* owner;
-#ifdef USE_UDPCLIENT
 	network::IUDPClient* client;
-#else
-	UDPSender*	client;
-#endif
+
 	network::NetAddress addr;
 	OS::IMutex* dataMutex;
 	OS::IThread* thread;
@@ -64,26 +59,17 @@ public:
 	{
 		owner = o;
 		connected = false;
-#ifdef USE_UDPCLIENT
 		client = network::INetwork::getInstance().createUDPClient();
 		client->Open();
 
 		dataMutex=OS::IThreadManager::getInstance().createMutex();
-#else
-		client = new UDPSender();
-		client->startSending();
-#endif
 		//memset(&data, 0, sizeof(shmem_data_t));
 	}
 	~RemoteRobotCommunicatorData()
 	{
 		if (client)
 		{
-#ifdef USE_UDPCLIENT
 			client->Close();
-#else
-			client->stopSending();
-#endif
 			delete client;
 			client = 0;
 		}
@@ -117,7 +103,7 @@ public:
 		xml::XMLWriter w;
 		xml::XMLElement root("RobotData");
 		dataMutex->lock();
-		root.addAttribute("Connected", core::StringConverter::toString(data.RobotConnected));
+		//root.addAttribute("Connected", core::StringConverter::toString(data.RobotConnected));
 	//	if (data.robot.status.connected)
 		{
 			for (std::map<core::string, DataInfo>::iterator it = values.begin(); it != values.end(); ++it)
@@ -212,19 +198,11 @@ bool RemoteRobotCommunicator::Connect(const core::string& ip, int port)
 		Disconnect();
 	bool res = false;
 	m_data->addr = network::NetAddress(ip, port);
-#ifdef USE_UDPCLIENT
 	if (m_data->client->Connect(m_data->addr))
-#else
-	if (m_data->client->Connect(port, ip.c_str()))
-#endif
+
+
 	{
 
-#ifdef USE_OPTI
-		{
-			//core::string ipaddr = inet_ntoa(m_data->data.user.ipaddress);
-			//	TBAppGlobals::optiObj->Connect(ipaddr,ipaddr);
-		}
-#endif
 		m_data->connected = true;
 		res = true;
 	}
@@ -235,14 +213,8 @@ void RemoteRobotCommunicator::Disconnect()
 {
 	if (!m_data->connected)
 		return;
-#ifdef USE_OPTI
-	//TBAppGlobals::optiObj->Disconnect();
-#endif
-#ifdef USE_UDPCLIENT
 	m_data->client->Disconnect();
-#else
-	m_data->client->stopSending();
-#endif
+
 	m_data->connected = false;
 }
 bool RemoteRobotCommunicator::IsConnected()
@@ -294,28 +266,16 @@ void RemoteRobotCommunicator::Update(float dt)
 		return;
 
 	//construct the xml data fields
-
-
-#ifdef USE_UDPCLIENT
 	m_data->dataMutex->lock();
 	core::string data = m_data->outputValues;
 	m_data->dataMutex->unlock();
 	m_data->client->SendTo(&m_data->addr, data.c_str(), data.length() + 1);
-#else
-	m_data->client->setBuffer(str.c_str());
-#endif
+
 	m_data->CleanData(false);
 }
 
 void RemoteRobotCommunicator::_SendUpdate()
-{/*
-	core::string ipaddr;
-	if (TBee::TBAppGlobals::selectedRobot)
-		ipaddr = TBee::TBAppGlobals::selectedRobot->IP;//inet_ntoa(m_data->data.user.ipaddress);
-	else
-		return;*/
-	char buffer[512];
-	//sprintf(buffer, "%s %d %d", ipaddr.c_str(), m_data->data.user.status.connected, m_data->data.robot.status.connected);
+{
 
 	m_data->dataMutex->lock();
 	m_data->UpdateData();
@@ -324,11 +284,6 @@ void RemoteRobotCommunicator::_SendUpdate()
 	m_data->client->SendTo(&m_data->addr, data.c_str(), data.length() + 1,0);
 
 	return;
-#ifdef USE_UDPCLIENT
-	m_data->client->SendTo(&m_data->addr, buffer, strlen(buffer));
-#else
-	m_data->client->setBuffer(buffer);
-#endif
 
 
 }

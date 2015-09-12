@@ -4,24 +4,34 @@
 
 namespace mray
 {
+namespace TBee
+{
 
-	enum class EMessages
-	{
-		DepthData = 1,
-		DepthSize = 2,
-		IsStereo = 3,
-		CameraConfig = 4,
-		CalibrationDone = 5,
-		ReportMessage = 6,
-		IRSensorMessage = 7,
-		BumpSensorMessage = 8,
-		BatteryLevel = 9,
-		ClockSync = 10,
-		ReinitializeRobot = 11,
-		RobotStatus=12,
-		JointValues=13
-	};
+enum class EMessages
+{
+	MessageUnkown=0,
+	DepthData = 1,
+	DepthSize = 2,
+	IsStereo = 3,
+	CameraConfig = 4,
+	CalibrationDone = 5,
+	ReportMessage = 6,
+	IRSensorMessage = 7,
+	BumpSensorMessage = 8,
+	BatteryLevel = 9,
+	ClockSync = 10,
+	ReinitializeRobot = 11,
+	RobotStatus = 12,
+	JointValues = 13,
+	Detect = 14,
+	Presence = 15
 
+};
+
+core::string ToStringMessage(EMessages msg);
+EMessages ParseMessage(const core::string& msg);
+
+}
 }
 
 

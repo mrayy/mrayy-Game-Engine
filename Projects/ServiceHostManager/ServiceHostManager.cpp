@@ -11,6 +11,7 @@
 #include "XMLTree.h"
 #include "StringUtil.h"
 #include "MutexLocks.h"
+#include "CommunicationMessages.h"
 
 #include <tinyxml2.h>
 #include <windows.h>
@@ -126,6 +127,9 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_robotCommunicator = new TBee::RobotCommunicator();
 	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
 	m_robotCommunicator->SetListener(this);
+
+	m_info.IP = m_memory->hostAddress.toString();
+	m_info.name = "Telexistence Robot";
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -329,6 +333,9 @@ bool ServiceHostManager::_ProcessServices()
 	m_dataMutex->lock();
 	for (int i = 0; i < toRemove.size(); ++i)
 	{
+		TerminateProcess(toRemove[i]->processHandle, 0);
+		CloseHandle(toRemove[i]->processHandle);
+		CloseHandle(toRemove[i]->threadHandle);
 		m_serviceList.erase( toRemove[i]);
 	}
 	m_dataMutex->unlock();
@@ -374,10 +381,61 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 	if (i != -1)
 		m = msg.substr(0, i);
 	else m = msg;
+
+	std::vector<core::string> vals;
+	vals = core::StringUtil::Split(value, ",");
 	if (m.equals_ignore_case("commPort"))
 	{
 		m_memory->userConnectionData.address.port = core::StringConverter::toInt(value);
 		m_memory->userCommPort = m_memory->userConnectionData.address.port;
+	}
+	else if (m.equals_ignore_case("detect"))
+	{
+		printf("Robot scan message was received, sending presence message.\n");
+		//detect message arrived from a broadcast, reply to let the src about our existence!
+		int reply = (int)TBee::EMessages::Presence;
+		int len = stream.write(&reply, sizeof(reply));
+		len += m_info.Write(&wrtr);
+		network::NetAddress retAddr ;
+		retAddr.address = addr->address;
+		retAddr.port = core::StringConverter::toInt(value);
+		m_commLink->SendTo(&retAddr, (char*)buffer, len);
+	}
+	else if (msg.equals_ignore_case("RobotConnect") && vals.size() == 1)
+	{
+		m_memory->robotData.connected = core::StringConverter::toBool(vals[0].c_str());
+	}
+	else if (msg.equals_ignore_case("Speed") && vals.size() == 2)
+	{
+		m_memory->robotData.speed[0] = atof(vals[0].c_str());
+		m_memory->robotData.speed[1] = atof(vals[1].c_str());
+		//limit the speed
+		m_memory->robotData.speed[0] = -math::clamp<float>(m_memory->robotData.speed[0], -1, 1);
+		m_memory->robotData.speed[1] = math::clamp<float>(m_memory->robotData.speed[1], -1, 1);
+	}
+	else if (msg.equals_ignore_case("HeadRotation") && vals.size() == 4)
+	{
+		m_memory->robotData.headRotation[0] = atof(vals[0].c_str());
+		m_memory->robotData.headRotation[1] = atof(vals[1].c_str());
+		m_memory->robotData.headRotation[2] = atof(vals[2].c_str());
+		m_memory->robotData.headRotation[3] = atof(vals[3].c_str());
+
+		//do head limits
+		// 		m_memory->robotData.tilt = math::clamp(m_memory->robotData.tilt, -50.0f, 50.0f);
+		// 		m_memory->robotData.yaw = math::clamp(m_memory->robotData.yaw, -70.0f, 70.0f);
+		// 		m_memory->robotData.roll = math::clamp(m_memory->robotData.roll, -40.0f, 40.0f);
+	}
+	else if (msg.equals_ignore_case("HeadPosition") && vals.size() == 3)
+	{
+		m_memory->robotData.headPos[0] = atof(vals[0].c_str());
+		m_memory->robotData.headPos[1] = atof(vals[1].c_str());
+		m_memory->robotData.headPos[2] = atof(vals[2].c_str());
+
+	}
+	else if (msg.equals_ignore_case("Rotation") && vals.size() == 1)
+	{
+		m_memory->robotData.rotation = atof(vals[0].c_str());
+		m_memory->robotData.rotation = math::clamp<float>(m_memory->robotData.rotation, -1, 1);
 	}
 	else
 	{

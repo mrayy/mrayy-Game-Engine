@@ -5,6 +5,7 @@
 
 #include "NetAddress.h"
 #include "RobotCommunicator.h"
+#include "IRobotController.h"
 
 namespace mray
 {
@@ -20,7 +21,7 @@ public:
 	network::NetAddress hostAddress;	//host service address to communicate with
 
 	//bool IsStarted; //indicate if the services should run or not
-
+	RobotStatus robotData;	//robot control data
 };
 
 }

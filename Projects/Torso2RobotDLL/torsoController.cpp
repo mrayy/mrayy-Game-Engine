@@ -24,22 +24,23 @@ bool upCount = true;
 
 
 
-
 class torsoControllerImpl
 {
 public:
 	MovAvg *mvRobot[6];		// 6 DoF moving avarage 
 
 	ITelubeeRobotListener* listener;
-	torsoControllerImpl()
+	torsoController* _c;
+	torsoControllerImpl(torsoController* c)
 	{
+		_c = c;
 		listener = 0;
 	}
 	void NotifyCollision(float l, float r)
 	{
 		if (listener)
 		{
-			listener->OnCollisionData(l, r);
+			listener->OnCollisionData(_c,l, r);
 		}
 	}
 };
@@ -50,7 +51,9 @@ torsoController::torsoController()
 {
 	if (GetCurrentDir(cCurrentPath, sizeof(cCurrentPath)))
 	{
-		cCurrentPath[sizeof(cCurrentPath)-1] = '\0'; /* not really required */
+		int len=strlen(cCurrentPath);
+		cCurrentPath[len ] = '\\'; /* not really required */
+		cCurrentPath[len + 1] = '\0'; /* not really required */
 
 	}
 
@@ -68,7 +71,7 @@ torsoController::torsoController()
 
 	robotState = EStopped;
 
-	m_impl = new torsoControllerImpl();
+	m_impl = new torsoControllerImpl(this);
 	m_impl->listener = 0;
 	m_robotStatusProvider = 0;
 
@@ -130,7 +133,7 @@ bool torsoController::GetJointValues(std::vector<float>& values){
 	for (i = 0; i<12; i++) 
 		values.push_back(robotJointData[i]);
 
-	printf("IK values: %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[0], robotJointData[2], robotJointData[4], robotJointData[6], robotJointData[8], robotJointData[10]);
+	printf("IK values      : %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[0], robotJointData[2], robotJointData[4], robotJointData[6], robotJointData[8], robotJointData[10]);
 	printf("Realtime values: %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[1], robotJointData[3], robotJointData[5], robotJointData[7], robotJointData[9], robotJointData[11]);
 
 	return true; 
@@ -181,9 +184,45 @@ void torsoController::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 	printf("Initialization done\n");
 	return;
 }
+void QuatToEuler(float* q, float* euler)
+{/*
+ float w, x, y, z;
 
+ w = quaternion.w;
+ x = quaternion.x;
+ y = quaternion.y;
+ z = quaternion.z;
+
+ double sqw = w*w;
+ double sqx = x*x;
+ double sqy = y*y;
+ double sqz = z*z;
+
+ euler.z = (float) math::toDeg(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)) );
+ euler.x = (float)math::toDeg(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)) );
+ euler.y = (float)math::toDeg(asin(-2.0 * (x*z - y*w)) );
+ */
+
+	float w = q[0];
+	float x = q[1];
+	float y = q[2];
+	float z = q[3];
+
+	float q0 = w;
+	float q1 = y;
+	float q2 = x;
+	float q3 = z;
+
+	euler[1] = ((float)atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1*q1 + q2*q2)));
+	euler[0] = ((float)asin(2 * (q0 * q2 - q3 * q1)));
+	euler[2] = ((float)atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2*q2 + q3*q3)));
+
+}
+#if 0
 void QuatToEuler(float* q, float* euler)
 {
+// 	math::quaternion qq(q[0], q[1], q[2], q[3]);
+// 	return;
 	float w = q[0];
 	float x = q[1];
 	float y = q[2];
@@ -194,7 +233,10 @@ void QuatToEuler(float* q, float* euler)
 	double sqy = y*y;
 	double sqz = z*z;
 
-
+	euler[0] = (float)(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)));
+	euler[1] = (float)(asin(-2.0 * (x*z - y*w)));
+	euler[2] = (float)(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)));
+	/*
 	// rotation about x-axis
 	euler[0] = (float)(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)));
 
@@ -202,34 +244,52 @@ void QuatToEuler(float* q, float* euler)
 	euler[1] = (float)(asin(2.0 * (x*z + y*w)));
 
 	// rotation about z-axis
-	euler[2] = (float)(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)));
+	euler[2] = (float)(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)));*/
 
 }
-
+#endif
 void torsoController::UpdateRobotStatus(const RobotStatus& st)
+
 {
 	Quaternion targetQuat;
+// 	targetQuat[0] = st.headRotation[0];
+// 	targetQuat[1] = st.headRotation[3];
+// 	targetQuat[2] = st.headRotation[1];
+// 	targetQuat[3] = -st.headRotation[2];
+
 	targetQuat[0] = st.headRotation[0];
 	targetQuat[1] = st.headRotation[3];
 	targetQuat[2] = st.headRotation[1];
-	targetQuat[3] = -st.headRotation[2];
+	targetQuat[3] = st.headRotation[2];
 
-	torsoHeadPos[0] = -st.headPos[2];
-	torsoHeadPos[1] = -st.headPos[0];
-	torsoHeadPos[2] = st.headPos[1];
+	torsoHeadPos[0] = st.headPos[2];	//Front Axis
+	torsoHeadPos[1] = -st.headPos[0];	//Side Axis
+	torsoHeadPos[2] = st.headPos[1];	//Up Axis
 
 
-	QuatToEuler(targetQuat, torsoHeadOri);
-	torsoHeadOri[0] = -torsoHeadOri[0];
-	torsoHeadOri[1] = -torsoHeadOri[1];
-	torsoHeadOri[2] = -torsoHeadOri[2];
+	float rotTmp[3];
+	QuatToEuler(targetQuat, rotTmp);
+// 	torsoHeadOri[0] = -rotTmp[0];
+// 	torsoHeadOri[1] = -rotTmp[1];
+// 	torsoHeadOri[2] = -rotTmp[2];
 
-	if (false)
+// 	torsoHeadOri[0] = -rotTmp[2];	// Roll
+// 	torsoHeadOri[1] = -rotTmp[0];	// Pitch
+//	torsoHeadOri[2] = rotTmp[1];	// Yaw
+
+	torsoHeadOri[0] = -rotTmp[0];	// Roll
+	torsoHeadOri[1] = -rotTmp[1];	// Pitch
+	torsoHeadOri[2] = rotTmp[2];	// Yaw
+
+
+	if (true)
 	{
+		static const float PosPrecision = 100000;
+		static const float RotPrecision = 1000;
 		for (int i = 0; i < 3; ++i)
 		{
-			torsoHeadPos[i] = ((int)(torsoHeadPos[i] * 1000000)) / 1000000.0f;
-			torsoHeadOri[i] = ((int)(torsoHeadOri[i] * 10000)) / 10000.0f;
+			torsoHeadPos[i] = ((int)(torsoHeadPos[i] * PosPrecision)) / PosPrecision;
+			torsoHeadOri[i] = ((int)(torsoHeadOri[i] * RotPrecision)) / RotPrecision;
 		}
 	}
 
@@ -248,6 +308,14 @@ void torsoController::UpdateRobotStatus(const RobotStatus& st)
 }
 
 
+void torsoController::_processData()
+{
+	if (m_robotStatusProvider)
+	{
+		RobotStatus st;
+		m_robotStatusProvider->GetRobotStatus(st);
+	}
+}
 void torsoController::SetListener(ITelubeeRobotListener* l)
 {
 	m_impl->listener = l;
@@ -258,6 +326,7 @@ DWORD torsoController::timerThread1(torsoController *robot, LPVOID pdata){
 	int count1 = 0;
 	while (!isDone){
 		if (threadStart){
+			robot->_processData();
 			robot->controlStateMachine();
 		}
 		else
@@ -319,9 +388,10 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	//-----[Step1] Load setup parameters to LinearArm.
 	printf("Loading setup parameters: ");
-	SetupDataFile.open("SetUp_Torso.prm");
+	std::string path = std::string(cCurrentPath) + "SetUp_Torso.prm";
+	SetupDataFile.open(path);
 	if (!SetupDataFile) {
-		cout << " FileOpenError(SetupDataFile1)" << endl;
+		cout << " FileOpenError(SetupDataFile1):" << path << endl;
 		return 0;
 	}
 	else
@@ -345,7 +415,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	for (i = 0; i<6; i++) {
 		SetupDataFile >> Name_ParameterFile_M[i];
-		Name_ParameterFile_M[i] = cCurrentPath + ("\\"+Name_ParameterFile_M[i]);
+		Name_ParameterFile_M[i] = cCurrentPath + (Name_ParameterFile_M[i]);
 		SetupDataFile.get(temp, 100);              // Absorbing comment.
 		SetupDataFile.get(ctemp);                  // Absorbing '\n'.
 	}

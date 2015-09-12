@@ -146,7 +146,7 @@
       </SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Projects\TelubeeLib;include/TexARTNCord/;include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Projects\TelubeeLib;include/TexARTNCord/;include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

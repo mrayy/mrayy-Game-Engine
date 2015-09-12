@@ -39,15 +39,19 @@ struct RobotStatus
 class IRobotStatusProvider
 {
 public:
-	virtual void GetRobotStatus(RobotStatus& st)const = 0;
+	virtual void GetRobotStatus(RobotStatus& st) = 0;
 };
+
+class IRobotController;
+
 
 class ITelubeeRobotListener
 {
 public:
 
-	virtual void OnCollisionData(float left, float right){}
-	void OnReportMessage(int code, const std::string& msg){}
+	virtual void OnCollisionData(IRobotController* c, float left, float right){}
+	void OnReportMessage(IRobotController* c,int code, const std::string& msg){}
+
 };
 enum ERobotControllerStatus
 {

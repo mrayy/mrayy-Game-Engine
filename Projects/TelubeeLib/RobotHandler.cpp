@@ -50,16 +50,26 @@ namespace TBee
 	}
 	void RobotHandler::Initialize()
 	{
-		if (m_robotController)
+		if (m_robotController && m_robotController->GetRobotStatus()==ERobotControllerStatus::EStopped)
 		{
+			gLogManager.log("RobotHandler::Initialize() - Initing Robot", ELL_INFO);
 			m_robotController->InitializeRobot(this);
+			gLogManager.log("RobotHandler::Initialize() - Finished initing Robot", ELL_INFO);
 		}
 		if (m_listener)
 			m_listener->OnCalibrationDone(this);
 	}
-	void RobotHandler::GetRobotStatus(RobotStatus& st)const
+	void RobotHandler::GetRobotStatus(RobotStatus& st)
 	{
-		memcpy(&st, &m_robotStatus, sizeof(m_robotStatus));
+
+		if (m_listener)
+		{
+			m_listener->RequestData(this, st);
+			_RobotStatus(st);
+		}
+		else{
+			memcpy(&st, &m_robotStatus, sizeof(m_robotStatus));
+		}
 	}
 	void RobotHandler::SetRobotData(const RobotStatus &st)
 	{
@@ -78,6 +88,7 @@ namespace TBee
 				m_robotController->InitializeRobot(this);
 			m_robotController->ConnectRobot();
 		}
+
 
 		if ((!st.connected && !m_localControl) && status != ERobotControllerStatus::EDisconnected)
 		{

@@ -14,6 +14,7 @@ namespace TBee
 	class IRobotHandlerListener
 	{
 	public:
+		virtual void RequestData(RobotHandler* r,RobotStatus& st){}
 		virtual void OnCalibrationDone(RobotHandler* sender){};
 
 		virtual void OnCollisionData(RobotHandler* sender, float left, float right){}
@@ -45,7 +46,7 @@ public:
 		return m_robotStatus;
 	}
 
-	virtual void GetRobotStatus(RobotStatus& st)const;
+	virtual void GetRobotStatus(RobotStatus& st);
 
 	IRobotController* GetRobotController(){ return m_robotController; }
 

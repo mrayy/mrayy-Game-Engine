@@ -439,7 +439,7 @@ qtomatrix(Matrix m, const mray::math::quaternion& q)
 	m[3][3] = 1.0;
 }
 void QuaternionToEuler(const math::quaternion quaternion, math::vector3df &euler)
-{
+{/*
 	float w, x, y, z;
 
 	w = quaternion.w;
@@ -455,6 +455,16 @@ void QuaternionToEuler(const math::quaternion quaternion, math::vector3df &euler
 	euler.z = (float) math::toDeg(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)) );
 	euler.x = (float)math::toDeg(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)) );
 	euler.y = (float)math::toDeg(asin(-2.0 * (x*z - y*w)) );
+	*/
+
+	float q0 = quaternion.w;
+	float q1 = quaternion.y;
+	float q2 = quaternion.x;
+	float q3 = quaternion.z;
+
+	euler.y = math::toDeg((float)atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1*q1 + q2*q2)));
+	euler.x = math::toDeg((float)asin(2 * (q0 * q2 - q3 * q1)));
+	euler.z = math::toDeg((float)atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2*q2 + q3*q3)));
 
 }
 

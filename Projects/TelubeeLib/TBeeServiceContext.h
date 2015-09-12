@@ -13,7 +13,7 @@ namespace mray
 	class CMRayApplication;
 namespace TBee
 {
-
+	class ModuleSharedMemory;
 	//Set of events the services can listen to
 	class IServiceContextListener
 	{
@@ -48,6 +48,8 @@ public:
 
 	//Communication Channel with the user end
 	network::IUDPClient* commChannel;
+
+	ModuleSharedMemory* sharedMemory;
 };
 
 class TbeeServiceRenderContext:public ServiceRenderContext

@@ -16,7 +16,7 @@
 #define __RobotCommunicator__
 
 
-#include "IUDPClient.h"
+#include "IXMLNetMessageHandler.h"
 
 
 namespace mray
@@ -54,17 +54,11 @@ namespace TBee
 	};
 
 
-class RobotCommunicator 
+class RobotCommunicator :protected IXMLNetMessageHandler
 {
 protected:
 	UserStatus m_userStatus;
-	void HandleData(network::NetAddress* addr,const core::string& name, const core::string& value);
-	void ProcessPacket(network::NetAddress* addr,const char* buffer);
-
-	network::IUDPClient* m_client;
-
-	OS::IMutex* m_dataMutex;
-	OS::IThread* m_thread;
+	void _HandleData(network::NetAddress* addr,const core::string& name, const core::string& value);
 
 	IRobotCommunicatorListener* m_listener;
 
@@ -78,9 +72,6 @@ public:
 
 
 	void SetListener(IRobotCommunicatorListener* l){ m_listener = l; }
-
-	int _Process();
-
 
 };
 

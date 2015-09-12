@@ -26,6 +26,7 @@ namespace mray
 	namespace TBee
 	{
 		class GeomDepthRect;
+		class TBRobotInfo;
 	}
 namespace AugTel
 {
@@ -44,6 +45,8 @@ namespace AugTel
 		virtual void OnIRSensor(int count, float* v){}
 		virtual void OnBatteryLevel(int level){}
 		virtual void OnClockSync(ulong clock){}
+
+		virtual void OnRobotInfoDetected(const TBee::TBRobotInfo& ifo){}
 	};
 
 class DataCommunicator:public ListenerContainer<IDataCommunicatorListener*>
@@ -63,12 +66,15 @@ protected:
 	DECLARE_FIRE_METHOD(OnIRSensor, (int count, float* v), (count, v));
 	DECLARE_FIRE_METHOD(OnBatteryLevel, (int level), (level));
 	DECLARE_FIRE_METHOD(OnClockSync, (ulong clock), (clock));
+	DECLARE_FIRE_METHOD(OnRobotInfoDetected, (const TBee::TBRobotInfo& ifo), (ifo));
 public:
 	DataCommunicator();
 	virtual~DataCommunicator();
 
 	void Start(int port);
 	void Stop();
+
+	void DetectRobots(int port);
 
 	int _Process();
 };

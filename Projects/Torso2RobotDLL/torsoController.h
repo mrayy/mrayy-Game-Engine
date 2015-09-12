@@ -40,7 +40,7 @@ protected:
 	std::string ScanePorts();
 
 	void _setupCaps();
-
+	void _processData();
 public:
 
 	TexART_NCord000_Interface  *Torso_02;   // Interface object for the machine hardware.
