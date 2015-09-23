@@ -34,6 +34,9 @@ void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
 	if (attr)
 		KPCoeff = core::StringConverter::toVector4d(attr->value);
 
+	attr = e->getAttribute("PixelShift");
+	if (attr)
+		PixelShift = core::StringConverter::toVector4d(attr->value);
 	for (int i = 0; i < 2; ++i)
 	{
 		if (i == 0)
@@ -52,6 +55,41 @@ void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
 				cameraRotation[i] = Flipped;
 		}
 	}
+}
+
+
+xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
+{
+	xml::XMLElement* e=new xml::XMLElement("CameraConfiguration");
+	elem->addSubElement(e);
+
+	e->addAttribute("Name", name);
+	e->addAttribute("FOV", core::StringConverter::toString(fov));
+	e->addAttribute("CameraOffset", core::StringConverter::toString(cameraOffset));
+	e->addAttribute("StereoOffset", core::StringConverter::toString(stereoOffset));
+	e->addAttribute("OpticalCenter", core::StringConverter::toString(OpticalCenter));
+	e->addAttribute("FocalCoeff", core::StringConverter::toString(FocalCoeff));
+	e->addAttribute("KPCoeff", core::StringConverter::toString(KPCoeff));
+	e->addAttribute("PixelShift", core::StringConverter::toString(PixelShift));
+
+
+	for (int i = 0; i < 2; ++i)
+	{
+
+		core::string v = "None";
+		if (cameraRotation[i]==CW)
+			v = "CW";
+		if (cameraRotation[i] == CCW)
+			v = "CCW";
+		if (cameraRotation[i] == Flipped)
+			v = "Flipped";
+		if (i == 0)
+			e->addAttribute("LeftRotation", v);
+		else
+			e->addAttribute("RightRotation", v);
+	}
+
+	return e;
 }
 
 CameraConfigurationManager::CameraConfigurationManager()

@@ -186,8 +186,7 @@ public:
 		if (m_grabber[0] != 0 && m_grabber[1] != 0 )
 		{
 			mixer = true;
-			videoStr = "videomixer name=mix ";
-
+			videoStr = "videomixer name=mix "
 				"  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_0::alpha=1  "
 				"  sink_1::xpos=0 sink_1::ypos=0  sink_1::zorder=1  "
 				"  sink_2::xpos=" + core::StringConverter::toString(halfW) + "   sink_2::ypos=0  sink_2::zorder=1  ";

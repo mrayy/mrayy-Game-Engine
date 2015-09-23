@@ -18,8 +18,13 @@ core::string IntValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void IntValue::parse(const core::string&v){
-	core::StringConverter::parse(v,value);
-	OnChanged(this);
+	int tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value=tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* IntValue::duplicate()
@@ -31,7 +36,7 @@ void IntValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
  xml::XMLElement*  IntValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -54,8 +59,13 @@ core::string FloatValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void FloatValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	float tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 
@@ -68,7 +78,7 @@ void FloatValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  FloatValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -90,8 +100,13 @@ core::string BoolValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void BoolValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	bool tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 IValue* BoolValue::duplicate()
 {
@@ -102,7 +117,7 @@ void BoolValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  BoolValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -124,8 +139,11 @@ core::string StringValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void StringValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	if (v!= value)
+	{
+		value = v;
+		OnChanged(this);
+	}
 }
 IValue* StringValue::duplicate()
 {

@@ -11,6 +11,7 @@
 #include "ModuleSharedMemory.h"
 #include "IThreadManager.h"
 #include "IThread.h"
+#include "MutexLocks.h"
 
 namespace mray
 {
@@ -44,7 +45,7 @@ public:
 			}
 		}
 	};
-//	RobotStatus m_context->sharedMemory->robotData;
+	RobotStatus m_robotData;
 
 	math::vector2d m_collision;
 	RobotHandler* m_RobotHandler;
@@ -52,6 +53,7 @@ public:
 	EServiceStatus m_status;
 	TBeeServiceContext* m_context;
 	OS::IThreadPtr m_thread;
+	OS::IMutex* m_dataMutex;
 
 	bool m_connected;
 
@@ -66,17 +68,25 @@ public:
 			return true;
 		}
 
-		m_RobotHandler->SetRobotData(m_context->sharedMemory->robotData);
+		m_RobotHandler->SetRobotData(m_robotData);
 		return true;
 	}
 
-	virtual void RequestData(RobotHandler* r, RobotStatus& status)
+	virtual bool RequestData(RobotHandler* r, RobotStatus& status)
 	{
 // 		if (m_connected && m_RobotHandler->GetRobotController()->GetRobotStatus() == ERobotControllerStatus::EStopped)
 // 			m_RobotHandler->Initialize();
-		//memcpy(&status,&m_context->sharedMemory->robotData,sizeof(status));
-		if (m_connected)
-			r->SetRobotData(m_context->sharedMemory->robotData);
+// 		TBee::SharedMemoryLock m(m_context->sharedMemory);
+// 		OS::ScopedLock l(m_dataMutex);
+		if (m_dataMutex->tryLock())
+		{
+			memcpy(&status, &m_robotData, sizeof(status));
+			m_dataMutex->unlock();
+			return true;
+		}
+		return false;
+		//if (m_connected)
+		//	r->SetRobotData(m_robotData);
 	}
 
 public:
@@ -141,6 +151,8 @@ public:
 		m_RobotHandler = new RobotHandler();
 		m_RobotHandler->SetListener(this);
 
+		m_dataMutex = OS::IThreadManager::getInstance().createMutex();
+
 		//m_RobotHandler->Initialize();
 
 		context->AddListener(this);
@@ -164,6 +176,8 @@ public:
 		delete m_RobotHandler;
 		m_RobotHandler = 0;
 
+		delete m_dataMutex;
+		m_dataMutex = 0;
 
 	}
 
@@ -277,6 +291,7 @@ public:
 			return;
 
 
+		char buffer[512];
 		float yoffset = 50;
 
 		core::string msg;
@@ -290,29 +305,33 @@ public:
 			if (st == EConnected)msg += "Connected";
 			context->RenderText(msg, 50, 0);
 		}
-		msg = core::string("User Controlling: ") + (m_context->sharedMemory->robotData.connected ? "Yes" : "No");
+		msg = core::string("User Controlling: ") + (m_robotData.connected ? "Yes" : "No");
 		context->RenderText(msg, 50, 0);
 		msg = core::string("Controlling: ") + (m_RobotHandler->IsLocalControl() ? "Local" : "Remote");
 		context->RenderText(msg, 50, 0);
 		msg = core::string("Sensors : ") + core::StringConverter::toString(math::vector2d(m_collision));
 		context->RenderText(msg, 50, 0);
-		if (m_context->sharedMemory->robotData.connected || m_RobotHandler->IsLocalControl())
+		if (m_robotData.connected || m_RobotHandler->IsLocalControl())
 		{
-			msg = core::string("Speed: ") + core::StringConverter::toString(math::vector2d(m_context->sharedMemory->robotData.speed[0], m_context->sharedMemory->robotData.speed[1]));
+
+			sprintf_s(buffer, "%-2.2f, %-2.2f", m_robotData.speed[0], m_robotData.speed[1]);
+			msg = core::string("Speed: ") + buffer;
 			context->RenderText(msg, 100, 0);
 
-			msg = core::string("Rotation: ") + core::StringConverter::toString(m_context->sharedMemory->robotData.rotation);
+			msg = core::string("Rotation: ") + core::StringConverter::toString(m_robotData.rotation,2);
 			context->RenderText(msg, 100, 0);
 
 			math::vector3d angles;
-			math::quaternion q(m_context->sharedMemory->robotData.headRotation[0], m_context->sharedMemory->robotData.headRotation[3],
-				m_context->sharedMemory->robotData.headRotation[1], m_context->sharedMemory->robotData.headRotation[2]);
+			math::quaternion q(m_robotData.headRotation[0], m_robotData.headRotation[3],
+				m_robotData.headRotation[1], m_robotData.headRotation[2]);
 			q.toEulerAngles(angles);
 			angles.set(angles.y, angles.z, angles.x);
-			msg = core::string("Head Rotation: ") + core::StringConverter::toString(angles);
+			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", angles.x, angles.y, angles.z);
+			msg = core::string("Head Rotation: ") + buffer;
 			context->RenderText(msg, 100, 0);
 
-			msg = core::string("Head Position: ") + core::StringConverter::toString(math::vector3d(m_context->sharedMemory->robotData.headPos[0], m_context->sharedMemory->robotData.headPos[1], m_context->sharedMemory->robotData.headPos[2]));
+			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", m_robotData.headPos[0], m_robotData.headPos[1], m_robotData.headPos[2]);
+			msg = core::string("Head Position: ") + buffer;
 			context->RenderText(msg, 100, 0);
 
 		}
@@ -348,12 +367,14 @@ public:
 
 			m_RobotHandler->GetRobotController()->GetJointValues(jvalues);
 			context->RenderText(core::string("Robot Joint Values:"), 50, 0);
-
+						
 			msg = "";
+			context->RenderText("   \tIK\t/ Real", 100, 0);
 			for (int i = 0; i < jvalues.size(); i += 2)
 			{
-				msg = core::StringConverter::toString(jvalues[i], 2) + "/" + core::StringConverter::toString(jvalues[i + 1], 2);
-				msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + msg;
+				
+				sprintf_s(buffer, "\t%-2.2f\t/ %-2.2f", jvalues[i], jvalues[i+1]);
+				msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
 				context->RenderText(msg, 100, 0);
 			}
 			
@@ -384,7 +405,12 @@ public:
 	/// Listeners
 	virtual void OnUserConnected(const UserConnectionData& data)
 	{
+		// change main thread priority to max
+		HANDLE thread = GetCurrentThread();
+		SetThreadPriority(thread, THREAD_PRIORITY_HIGHEST);
 		m_RobotHandler->Initialize();
+		// change it back to normal
+		SetThreadPriority(thread, THREAD_PRIORITY_NORMAL);
 		m_connected = true;
 	}
 	virtual void OnUserDisconnected()
@@ -419,6 +445,49 @@ public:
 				len += stream.write(&st, sizeof(st));
 				m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
 			}
+		}
+		else if (msg.equals_ignore_case("RobotConnect") && vals.size() == 1)
+		{
+			OS::ScopedLock l(m_dataMutex);
+			m_robotData.connected = core::StringConverter::toBool(vals[0].c_str());
+		}
+		else if (msg.equals_ignore_case("Speed") && vals.size() == 2)
+		{
+			OS::ScopedLock l(m_dataMutex);
+			m_robotData.speed[0] = atof(vals[0].c_str());
+			m_robotData.speed[1] = atof(vals[1].c_str());
+			//limit the speed
+			m_robotData.speed[0] = -math::clamp<float>(m_robotData.speed[0], -1, 1);
+			m_robotData.speed[1] = math::clamp<float>(m_robotData.speed[1], -1, 1);
+
+		}
+		else if (msg.equals_ignore_case("HeadRotation") && vals.size() == 4)
+		{
+			OS::ScopedLock l(m_dataMutex);
+			m_robotData.headRotation[0] = atof(vals[0].c_str());
+			m_robotData.headRotation[1] = atof(vals[1].c_str());
+			m_robotData.headRotation[2] = atof(vals[2].c_str());
+			m_robotData.headRotation[3] = atof(vals[3].c_str());
+
+
+			//do head limits
+			// 		m_robotData.tilt = math::clamp(m_robotData.tilt, -50.0f, 50.0f);
+			// 		m_robotData.yaw = math::clamp(m_robotData.yaw, -70.0f, 70.0f);
+			// 		m_robotData.roll = math::clamp(m_robotData.roll, -40.0f, 40.0f);
+		}
+		else if (msg.equals_ignore_case("HeadPosition") && vals.size() == 3)
+		{
+			OS::ScopedLock l(m_dataMutex);
+			m_robotData.headPos[0] = atof(vals[0].c_str());
+			m_robotData.headPos[1] = atof(vals[1].c_str());
+			m_robotData.headPos[2] = atof(vals[2].c_str());
+
+		}
+		else if (msg.equals_ignore_case("Rotation") && vals.size() == 1)
+		{
+			OS::ScopedLock l(m_dataMutex);
+			m_robotData.rotation = atof(vals[0].c_str());
+			m_robotData.rotation = math::clamp<float>(m_robotData.rotation, -1, 1);
 		}
 		else if (msg.equals_ignore_case("jointVals"))
 		{

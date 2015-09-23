@@ -293,8 +293,8 @@ namespace network
 		bool result=Win32Network::inner_connect(handle,theAddress);
 		if (false == result)
 		{
-			TRACE("Win32UDPClient::Connect()  error: (%d)\n",
-				WSAGetLastError());
+			TRACE("Win32UDPClient::Connect(%s:%d)  error: (%d)\n",
+				theAddress.toString().c_str(), theAddress.port, WSAGetLastError());
 			Disconnect();
 			return false;
 		}
@@ -338,7 +338,7 @@ namespace network
 			{
 				perror("Win32UDPClient::SendTo(): send() error:");
 #ifdef WIN32
-				TRACE("Win32UDPClient::SendTo() error (%d)\n", WSAGetLastError());
+				printf("Win32UDPClient::SendTo(%s:%d) error (%d)\n", destAddr->toString().c_str(),destAddr->port, WSAGetLastError());
 #endif // WIN32
 				return UDP_SOCKET_ERROR_SEND;
 			}
@@ -364,7 +364,7 @@ namespace network
 			if (l < 0)
 			{
 #ifdef WIN32
-				TRACE("Win32UDPClient::SendTo() error (%d)\n", WSAGetLastError());
+				printf("Win32UDPClient::SendTo(%s:%d) error (%d)\n", destAddr->toString().c_str(), destAddr->port, WSAGetLastError());
 #else
 				perror("Win32UDPClient::SendTo(): sendto() error:");
 #endif // WIN32

@@ -1215,7 +1215,7 @@ double Time_present)
   if(Time_elapsed < 0.0) Time_elapsed = 0.0;
 
   // Skip this routine.
-  if(VersatileParameter_01 >= 100.0) // Terminating code.
+  if(VersatileParameter_01 >= 200.0) // Terminating code.
     return(0);
 
   // Release the displacement and velocity controls temporarily.
@@ -1273,7 +1273,7 @@ double Time_present)
   }
 
   // Terminating,
-  if(VersatileParameter_01 >= 99.0){
+  if(VersatileParameter_01 >= 199.0){
     // Reset AngularDisplacement_encoder.
     AngularDisplacement_encoder = AngularDisplacement_encoder_offset = AngularDisplacement_deadend;
     EncoderCount = CountMedian;

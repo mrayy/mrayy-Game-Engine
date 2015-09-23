@@ -46,8 +46,7 @@ public:
 	TexART_NCord000_Interface  *Torso_02;   // Interface object for the machine hardware.
 	TexART_ServoMotor2015      *ServoMotor; // Interface object for each servo motor.
 
-	int i,j,
-		ControlMode = 0,				    
+	int ControlMode = 0,				    
 		// 0: Keyboard JointSpace Simulate
 		// 1: Keyboard CoordinateSpace Simulate
 		// 2: fade connect

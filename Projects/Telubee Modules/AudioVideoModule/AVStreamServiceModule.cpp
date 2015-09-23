@@ -20,6 +20,8 @@
 #include "StreamReader.h"
 #include "XMLTree.h"
 #include "GstVideoProvider.h"
+#include "NetworkValueController.h"
+#include "CameraConfigurationManager.h"
 
 namespace mray
 {
@@ -48,6 +50,8 @@ public:
 	ECameraType m_cameraType;
 	math::vector2di m_resolution;
 	int m_fps;
+	CameraConfigurationManager* m_camConfigMngr;
+	TelubeeCameraConfiguration* m_camConfig;
 
 
 	//video::VideoGrabberTexture m_cameraTextures[2];
@@ -90,7 +94,8 @@ public:
 	{
 		m_status = EServiceStatus::Idle;
 		m_cameraProfileManager = new CameraProfileManager();
-
+		m_camConfigMngr = new CameraConfigurationManager();
+		m_camConfigMngr->LoadConfigurations("CameraConfigurations.xml");
 
 		m_streamers = new video::GstStreamBin();
 		LoadCameraSettings("StreamingProfiles.xml");
@@ -100,6 +105,7 @@ public:
 		Destroy();
 		m_streamers = 0;
 		delete m_cameraProfileManager;
+		delete m_camConfigMngr;
 		if (video::FlyCameraManager::isExist())
 			delete video::FlyCameraManager::getInstancePtr();
 	}
@@ -148,6 +154,15 @@ public:
 			}
 		}
 	}
+	core::string GetCameraParameterValue(const core::string& name, int i)
+	{
+
+		if (m_cameraIfo[i].camera)
+		{
+			return m_cameraIfo[i].camera->GetParameter(name);
+		}
+		return core::string::Empty;
+	}
 
 	void Init(TBeeServiceContext* context)
 	{
@@ -172,6 +187,13 @@ public:
 
 #endif
 		m_cameraProfile = context->appOptions.GetOptionValue("CameraProfile");
+
+		{
+
+			m_camConfig = m_camConfigMngr->GetCameraConfiguration(m_cameraProfile);
+			if (!m_camConfig)
+				gLogManager.log("Couldn't find camera configurations! : " + m_cameraProfile, ELL_WARNING);
+		}
 		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionByName("Quality")->getValue());
 		/*core::string res = context->appOptions.GetOptionByName("StreamResolution")->getValue();
 		
@@ -433,10 +455,41 @@ public:
 
 			}
 		}
+		_RegisterValues();
 
 		context->AddListener(this);
 		m_status = EServiceStatus::Inited;
+
 		printf("Done Initing.\n");
+	}
+
+	void _RegisterValues()
+	{
+
+		ValueGroup* g = new ValueGroup("Camera");
+		m_context->netValueController->GetValues()->AddValueGroup(g);
+		core::string value;
+		IValue* tmpV;
+#define GET_VALUE(X) (GetCameraParameterValue(X,0))
+#define ADD_CAMERA_VALUE(Type,Name)\
+	value = GET_VALUE(Name); \
+	tmpV = g->AddValue(new Type(Name, 0)); \
+		if (value != "")\
+		tmpV->parse(value); \
+		tmpV->OnChanged += newClassDelegate1("", this, &AVStreamServiceModuleImpl::_OnCameraPropertyChanged);
+
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Exposure);
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Gain);
+		ADD_CAMERA_VALUE(Vector2dfValue, video::ICameraVideoGrabber::Param_WhiteBalance);
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Gamma);
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Brightness);
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Saturation);
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Sharpness);
+
+	}
+	void _OnCameraPropertyChanged(IValue* v)
+	{
+		SetCameraParameterValue(v->getName(), v->toString());
 	}
 	void Destroy()
 	{
@@ -622,13 +675,51 @@ public:
 			len += wrtr.binWriteInt(baseClock);
 			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
 		}
-
+		_SendCameraSettings();
+		if (false)
 		{
 			stream.seek(0, OS::ESeek_Set);
 			int reply = (int)EMessages::CameraConfig;
 			int len = stream.write(&reply, sizeof(reply));
 			len += wrtr.binWriteString(m_cameraProfile);
 			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+		}
+	}
+
+	void _SendCameraSettings()
+	{
+		if (!m_camConfig)
+			return;
+
+		//reply with camera settings
+		xml::XMLWriter w;
+		xml::XMLElement e("root");
+
+		xml::XMLElement* ret = m_camConfig->ExportToXML(&e);
+
+		w.addElement(ret);
+		core::string res = w.flush();
+
+		int bufferLen = res.length() + sizeof(int)* 10;
+		byte* buffer = new byte[bufferLen];
+
+		//tell the client if we are sending stereo or single video images
+		OS::CMemoryStream stream("", buffer, bufferLen, false, OS::BIN_WRITE);
+		OS::StreamWriter wrtr(&stream);
+
+		stream.seek(0, OS::ESeek_Set);
+		int reply = (int)EMessages::CameraConfig;
+		int len = stream.write(&reply, sizeof(reply));
+		len += wrtr.binWriteString(res);
+		m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+
+	}
+	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
+	{
+
+		if (msg == "CameraParameters")
+		{
+			_SendCameraSettings();
 		}
 	}
 

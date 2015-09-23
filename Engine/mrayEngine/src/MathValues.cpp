@@ -17,8 +17,13 @@ core::string  Vector2diValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector2diValue::parse(const core::string&v){
-	 core::StringConverter::parse(v,value);
-	 OnChanged(this);
+	math::vector2di tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* Vector2diValue::duplicate()
@@ -30,7 +35,7 @@ void Vector2diValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Vector2diValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -52,8 +57,13 @@ core::string  Vector2dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector2dfValue::parse(const core::string&v){
-	 core::StringConverter::parse(v,value);
-	 OnChanged(this);
+	math::vector2df tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 IValue* Vector2dfValue::duplicate()
 {
@@ -64,7 +74,7 @@ void Vector2dfValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Vector2dfValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -87,8 +97,13 @@ core::string  Vector3diValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector3diValue::parse(const core::string&v){
-	core::StringConverter::parse(v,value);
-	OnChanged(this);
+	math::vector3di tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* Vector3diValue::duplicate()
@@ -100,7 +115,7 @@ void Vector3diValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Vector3diValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -122,8 +137,13 @@ core::string  Vector3dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector3dfValue::parse(const core::string&v){
-	core::StringConverter::parse(v,value);
-	OnChanged(this);
+	math::vector3df tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 
@@ -136,7 +156,7 @@ void Vector3dfValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Vector3dfValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -158,8 +178,13 @@ core::string  Vector4diValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector4diValue::parse(const core::string&v){
-	 core::StringConverter::parse(v,value);
-	OnChanged(this);
+	math::vector4di tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* Vector4diValue::duplicate()
@@ -171,7 +196,7 @@ void Vector4diValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Vector4diValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -192,8 +217,13 @@ core::string  Vector4dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Vector4dfValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	math::vector4df tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* Vector4dfValue::duplicate()
@@ -205,7 +235,7 @@ void Vector4dfValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Vector4dfValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -227,8 +257,13 @@ core::string  Line2dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Line2dfValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	math::line2d tmp ;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* Line2dfValue::duplicate()
@@ -240,7 +275,7 @@ void Line2dfValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Line2dfValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -262,8 +297,13 @@ core::string  Line3dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void Line3dfValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	math::line3d tmp ;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* Line3dfValue::duplicate()
@@ -275,7 +315,7 @@ void Line3dfValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Line3dfValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -297,8 +337,13 @@ core::string  box3dfValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void box3dfValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	math::box3d tmp = 0;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 
 IValue* box3dfValue::duplicate()
@@ -310,7 +355,7 @@ void box3dfValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  box3dfValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -345,7 +390,7 @@ void Matrix3x3Value::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Matrix3x3Value::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -380,7 +425,7 @@ void Matrix4x4Value::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  Matrix4x4Value::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -415,7 +460,7 @@ void PlaneValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  PlaneValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -436,8 +481,13 @@ core::string  QuaternionValue::toString()const{
 	return core::StringConverter::toString(value);
 }
 void QuaternionValue::parse(const core::string&v){
-	core::StringConverter::parse(v, value);
-	OnChanged(this);
+	math::quaternion tmp;
+	core::StringConverter::parse(v, tmp);
+	if (tmp != value)
+	{
+		value = tmp;
+		OnChanged(this);
+	}
 }
 IValue* QuaternionValue::duplicate()
 {
@@ -449,7 +499,7 @@ void QuaternionValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  QuaternionValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -483,7 +533,7 @@ void RectiValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  RectiValue::exportXMLSettings(xml::XMLElement* elem)
 {
@@ -517,7 +567,7 @@ void RectfValue::loadXMLSettings(xml::XMLElement* elem)
 	IValue::loadXMLSettings(elem);
 	xml::XMLAttribute*attr=elem->getAttribute(mT("Value"));
 	if(attr)
-		core::StringConverter::parse(attr->value,value);
+		parse(attr->value);
 }
 xml::XMLElement*  RectfValue::exportXMLSettings(xml::XMLElement* elem)
 {

@@ -14,6 +14,8 @@ namespace mray
 namespace TBee
 {
 	class ModuleSharedMemory;
+	class NetworkValueController;
+
 	//Set of events the services can listen to
 	class IServiceContextListener
 	{
@@ -50,6 +52,8 @@ public:
 	network::IUDPClient* commChannel;
 
 	ModuleSharedMemory* sharedMemory;
+
+	NetworkValueController* netValueController;
 };
 
 class TbeeServiceRenderContext:public ServiceRenderContext

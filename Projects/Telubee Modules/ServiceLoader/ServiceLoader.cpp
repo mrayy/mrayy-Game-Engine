@@ -10,6 +10,7 @@
 #include "StringUtil.h"
 #include "tinyxml2.h"
 #include "Console.h"
+#include "NetworkValueController.h"
 
 #include <windows.h>
 
@@ -120,6 +121,9 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	m_context.localAddr.address = network::INetwork::getInstance().getLocalAddress();
 	m_context.localAddr.port = m_context.commChannel->Port();
 	m_context.sharedMemory = m_memory;
+	m_context.netValueController = new TBee::NetworkValueController();
+	m_context.netValueController->StartReceiver(0);
+	m_context.netValueController->GetValues();
 
 	//load settings file
 	_loadSettings();
@@ -148,7 +152,6 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 		return false;
 	}
 
-	m_serviceModule->InitService(&m_context);
 
 // 	m_serviceClient = network::INetwork::getInstance().createUDPClient();
 // 	m_serviceClient->Open();
@@ -159,6 +162,9 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 
 	_sendConnectMessage();
+
+
+	m_serviceModule->InitService(&m_context);
 
 	m_inited = true;
 
@@ -217,6 +223,10 @@ void ServiceLoader::_loadSettings()
 			m_context.appOptions.AddOption(v);
 		}
 	}
+	else
+	{
+		printf("Failed to load Module Settings!\n");
+	}
 }
 
 void ServiceLoader::_MonitorEvents()
@@ -255,6 +265,8 @@ void ServiceLoader::_destroy()
 		}
 		m_moduleLib = 0;
 
+		delete m_context.netValueController;
+		m_context.netValueController = 0;
 
 		OS::IThreadManager::getInstance().killThread(m_thread);
 
@@ -308,6 +320,9 @@ void ServiceLoader::_RenderInfo()
 {
 
 	m_renderContext->Reset();
+
+	m_renderContext->RenderText("Service Name: " + m_moduleName, 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
+	m_renderContext->RenderText("NetValues Port: " + core::StringConverter::toString(m_context.netValueController->GetPort()), 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
 	m_serviceModule->Render(m_renderContext);
 	m_serviceModule->DebugRender(m_renderContext);
 
@@ -344,7 +359,7 @@ bool ServiceLoader::_ProcessPacket()
 	std::string msg = root->Attribute("Message");
 	if (msg == "Ping")
 	{
-	//	printf("Recevied ping message\n");
+		//printf("Recevied ping message\n");
 		_sendPongMessage();
 	}
 	else

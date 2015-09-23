@@ -158,7 +158,7 @@ public:
 					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
 				videoStr += "! videoconvert  ! video/x-raw,format=I420 ";// !videoflip method = 1  ";
-				//videoStr += "! videorate ";//" max-rate=" + core::StringConverter::toString(m_fps) + " ";
+				//videoStr += "! videorate ";//  max-rate=" + core::StringConverter::toString(m_fps) + " ";
 				videoStr += " ! queue ";
 				//	if (m_grabber[i]->GetImageFormat()!=video::EPixel_YUYV)
 		}
@@ -258,6 +258,7 @@ public:
 		gst_buffer_unmap(outbuf, &map);
 		m_grabber[index]->Unlock();
 		*buffer = outbuf;
+		OS::IThreadManager::getInstance().sleep(5);
 		return GST_FLOW_OK;
 	}
 
@@ -329,7 +330,7 @@ public:
 			if (m_videoSrc[i].videoSrc){
 
 				gst_base_src_set_blocksize(GST_BASE_SRC(m_videoSrc[i].videoSrc), 640 * 480 * 3);
-				gst_base_src_set_live(GST_BASE_SRC(m_videoSrc[i].videoSrc), false);
+				gst_base_src_set_live(GST_BASE_SRC(m_videoSrc[i].videoSrc), true);
 				gst_base_src_set_async(GST_BASE_SRC(m_videoSrc[i].videoSrc), false);
 				gst_base_src_set_do_timestamp(GST_BASE_SRC(m_videoSrc[i].videoSrc), true);
 

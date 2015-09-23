@@ -25,11 +25,11 @@ protected:
 	OS::IMutex* m_dataMutex;
 	OS::IThread* m_thread;
 	TBee::ServiceRenderContext* m_renderContext;
+	TBee::TBeeServiceContext m_context;
 
 	std::string m_moduleName;
 	bool m_inited;
 
-	TBee::TBeeServiceContext m_context;
 
 	void _MonitorEvents();
 	void _UpdateServiceStatus();

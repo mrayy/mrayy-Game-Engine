@@ -31,6 +31,8 @@ public:
 	void StartReceiver(int port);
 	void StartSender(const network::NetAddress& target);
 
+	int GetPort();
+
 	void Stop();
 
 	//if not receiver, then you can send data

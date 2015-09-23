@@ -31,12 +31,14 @@ public:
 	math::vector2d OpticalCenter;
 	math::vector2d FocalCoeff;
 	math::vector4d KPCoeff;
+	math::vector4d PixelShift;
 	core::string name;
 
 public:
 	TelubeeCameraConfiguration();
 
 	void LoadFromXML(xml::XMLElement*e);
+	xml::XMLElement* ExportToXML(xml::XMLElement*e);
 };
 
 

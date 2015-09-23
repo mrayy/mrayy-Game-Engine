@@ -64,8 +64,8 @@ namespace TBee
 
 		if (m_listener)
 		{
-			m_listener->RequestData(this, st);
-			_RobotStatus(st);
+			if(m_listener->RequestData(this, st))
+				_RobotStatus(st);
 		}
 		else{
 			memcpy(&st, &m_robotStatus, sizeof(m_robotStatus));
@@ -86,7 +86,8 @@ namespace TBee
 		{
 			if (status == ERobotControllerStatus::EStopped)
 				m_robotController->InitializeRobot(this);
-			m_robotController->ConnectRobot();
+			if (status == ERobotControllerStatus::EDisconnected)
+				m_robotController->ConnectRobot();
 		}
 
 

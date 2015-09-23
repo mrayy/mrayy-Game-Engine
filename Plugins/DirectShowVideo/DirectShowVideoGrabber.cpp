@@ -220,6 +220,8 @@ void DirectShowVideoGrabber::SetParameter(const core::string& name,const core::s
 {
 	if (m_device == -1 || !m_inited)
 		return;
+	if (GetParameter(name) == value)
+		return;
 	bool isauto = (value == "auto");
 	float v = 0;
 	if (!isauto)

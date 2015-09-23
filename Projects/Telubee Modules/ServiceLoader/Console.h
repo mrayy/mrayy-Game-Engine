@@ -11,7 +11,7 @@ static HANDLE STDOUT = GetStdHandle(STD_OUTPUT_HANDLE);
 
 #define CONSOLE_CLR_WARNING 1,1,0
 #define CONSOLE_CLR_ERROR   1,0,0
-#define CONSOLE_CLR_INFO	0,0,1
+#define CONSOLE_CLR_INFO	0,1,1
 #define CONSOLE_CLR_SUCCESS	0,1,0
 #define CONSOLE_CLR_NORMAL	1,1,1
 namespace Console

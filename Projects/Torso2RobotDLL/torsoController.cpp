@@ -76,6 +76,7 @@ torsoController::torsoController()
 	m_robotStatusProvider = 0;
 
 	threadStart = false;
+	torsoInitializatiion = false;
 
 	_setupCaps();
 
@@ -129,12 +130,12 @@ ERobotControllerStatus torsoController::GetRobotStatus() {
 
 
 bool torsoController::GetJointValues(std::vector<float>& values){
-	
-	for (i = 0; i<12; i++) 
-		values.push_back(robotJointData[i]);
+	values.resize(12);
+	for (int i = 0; i<12; i++) 
+		values[i]=(robotJointData[i]);
 
-	printf("IK values      : %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[0], robotJointData[2], robotJointData[4], robotJointData[6], robotJointData[8], robotJointData[10]);
-	printf("Realtime values: %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[1], robotJointData[3], robotJointData[5], robotJointData[7], robotJointData[9], robotJointData[11]);
+// 	printf("IK values      : %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[0], robotJointData[2], robotJointData[4], robotJointData[6], robotJointData[8], robotJointData[10]);
+// 	printf("Realtime values: %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[1], robotJointData[3], robotJointData[5], robotJointData[7], robotJointData[9], robotJointData[11]);
 
 	return true; 
 }
@@ -144,8 +145,11 @@ void torsoController::ConnectRobot()
 {
 	manualMode = false;
 
-	if ((robotState == EDisconnected) && torsoInitialized)
+	if ((robotState == EDisconnected) && torsoInitialized && ControlMode!=2)
+	{
 		ControlMode = 2;
+		printf("Connecting Robot\n");
+	}
 
 	return;
 }
@@ -154,7 +158,7 @@ void torsoController::ManualControlRobot()
 {
 	manualMode = true; 
 
-	if ((robotState == EDisconnected) && torsoInitialized)
+	if ((robotState == EDisconnected) && torsoInitialized && ControlMode != 2)
 		ControlMode = 2;
 
 	return;
@@ -169,7 +173,7 @@ void torsoController::DisconnectRobot()
 
 void torsoController::ShutdownRobot(){
 
-	if (robotState == EDisconnected)
+	if (robotState == EDisconnected && ControlMode != 5)
 		ControlMode = 5;
 
 	return;
@@ -178,10 +182,9 @@ void torsoController::ShutdownRobot(){
 
 void torsoController::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 {
-	printf("Initializing Robot....\n");
 	m_robotStatusProvider = robotStatusProvider;
-	torsoInitializatiion = InitializeTorsoRobot(false);
-	printf("Initialization done\n");
+	if (robotState==EStopped)
+		torsoInitializatiion = InitializeTorsoRobot(false);
 	return;
 }
 void QuatToEuler(float* q, float* euler)
@@ -356,7 +359,7 @@ int torsoController::ReInitializeTorsoRobot(void){
 
 	if (!torsoInitialized)
 		return false;
-
+	return true;
 }
 
 
@@ -368,6 +371,11 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	if (torsoInitialized)
 		return torsoInitializatiion;
 
+	if (robotState != ERobotControllerStatus::EStopped)
+		return torsoInitializatiion;
+
+	printf("Initing Robot.\n");
+	robotState = ERobotControllerStatus::EIniting;
 	threadStart = false;
 	Sleep(100);
 	torsoInitializatiion = false; 
@@ -397,7 +405,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	else
 		printf("done\n");
 
-	for (i = 0; i<10; i++){
+	for (int i = 0; i<10; i++){
 		SetupDataFile.get(temp, 100);              // Absorbing comment.
 		SetupDataFile.get(ctemp);                  // Absorbing '\n'.
 	}
@@ -413,7 +421,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	SetupDataFile.get(temp, 100);                // Absorbing comment.
 	SetupDataFile.get(ctemp);                    // Absorbing '\n'.
 
-	for (i = 0; i<6; i++) {
+	for (int i = 0; i<6; i++) {
 		SetupDataFile >> Name_ParameterFile_M[i];
 		Name_ParameterFile_M[i] = cCurrentPath + (Name_ParameterFile_M[i]);
 		SetupDataFile.get(temp, 100);              // Absorbing comment.
@@ -423,7 +431,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	SetupDataFile.get(temp, 100);                // Absorbing comment.
 	SetupDataFile.get(ctemp);                    // Absorbing '\n'.
 
-	for (i = 0; i<6; i++) {
+	for (int i = 0; i<6; i++) {
 		SetupDataFile >> GearRatio_J[i];
 		SetupDataFile.get(temp, 100);              // Absorbing comment.
 		SetupDataFile.get(ctemp);                  // Absorbing '\n'.
@@ -432,7 +440,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	SetupDataFile.get(temp, 100);                // Absorbing comment.
 	SetupDataFile.get(ctemp);                    // Absorbing '\n'.
 
-	for (i = 0; i<6; i++) {
+	for (int i = 0; i<6; i++) {
 		SetupDataFile >> LimitDisplacement_p_J[i];
 		SetupDataFile.get(temp, 100);              // Absorbing comment.
 		SetupDataFile.get(ctemp);                  // Absorbing '\n'.
@@ -444,7 +452,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	SetupDataFile.get(temp, 100);                // Absorbing comment.
 	SetupDataFile.get(ctemp);                    // Absorbing '\n'.
 
-	for (i = 0; i<6; i++) {
+	for (int i = 0; i<6; i++) {
 		SetupDataFile >> StepDisplacement_J[i];
 		SetupDataFile.get(temp, 100);              // Absorbing comment.
 		SetupDataFile.get(ctemp);                  // Absorbing '\n'.
@@ -453,7 +461,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	SetupDataFile.get(temp, 100);                // Absorbing comment.
 	SetupDataFile.get(ctemp);                    // Absorbing '\n'.
 
-	for (i = 0; i<6; i++) {
+	for (int i = 0; i<6; i++) {
 		SetupDataFile >> StepCoordinate_Head[i];
 		SetupDataFile.get(temp, 100);              // Absorbing comment.
 		SetupDataFile.get(ctemp);                  // Absorbing '\n'.
@@ -463,14 +471,39 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	printf("Initialize NCord Interface: ");
 	//-----[Step2] Initialize Torso_02.
-	Torso_02 = new TexART_NCord000_Interface(0);
-	ret = Torso_02->Initialize();
-	if (ret) {
-		printf("Initialize error = %d \n", ret);
-		motorForceShutdown();
+
+	//Added by Yamen: Fix the initialization bug
+	int runCounter = 0;
+	for (int i = 0; i < 7; ++i)
+	{
+		printf("Test Run: %d/7\n", i);
+		Torso_02 = new TexART_NCord000_Interface(0);
+		ret = Torso_02->Initialize();
+		if (ret) {
+			printf("Initialize error = %d \n", ret);
+			motorForceShutdown();
+			Sleep(100);
+		}
+		else
+		{
+			runCounter++;
+			if (runCounter<3)
+			{
+				printf("Purging data\n");
+				motorForceShutdown();
+				Sleep(100);
+			}
+			else
+			{
+				printf("done.\n");
+				break;
+			}
+		}
 	}
-	else
-		printf("done.\n");
+	if (!runCounter)
+	{
+		return false;
+	}
 
 	printf("Start NCord Interface: ");
 	//-----[Step3] Start the interface object Torso_02.
@@ -485,7 +518,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	printf("Initialize ServoMotor Control: ");
 	//-----[Step4] Initialize ServoMotor.
-	for (i = 0; i<6; i++) {
+	for (int i = 0; i<6; i++) {
 		ParameterFile_M[i].open(Name_ParameterFile_M[i]);
 		if (!ParameterFile_M[i].is_open()) {
 			cout << " FileOpenError(ParameterFile_M[" << i << "])" << endl;
@@ -495,8 +528,8 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	printf("done.\n");
 
 	ServoMotor = new TexART_ServoMotor2015[6];
-	for (i = 0; i<6; i++) ServoMotor[i].Initialize(ParameterFile_M[i], 0, 0, 0, Torso_02); // Load initial data file.
-	for (i = 0; i<6; i++) ParameterFile_M[i].close();                                      // Close initial data file.
+	for (int i = 0; i<6; i++) ServoMotor[i].Initialize(ParameterFile_M[i], 0, 0, 0, Torso_02); // Load initial data file.
+	for (int i = 0; i<6; i++) ParameterFile_M[i].close();                                      // Close initial data file.
 
 	//-----[Check stage] Search DeadendPotentioValue except J3 by manual motion.
 	// [Danger!] Cut the motor power.
@@ -581,8 +614,8 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
 	AngularDisplacement_goal_M[5] = CalcMotorDisplacement(&(ServoMotor[5]), 0.0, LimitDisplacement_p_J[5], LimitDisplacement_n_J[5]);
 
-	for (i = 0; i<6; i++) ServoMotor[i].ZeroLimitAngularDisplacement(); // Cancel limitation by AngularDisplacement.
-	ServoMotor[2].ChangePGain_V(0.0004);								// Give PGain_V to M3 for GoDeadEndPosition.
+	for (int i = 0; i<6; i++) ServoMotor[i].ZeroLimitAngularDisplacement(); // Cancel limitation by AngularDisplacement.
+	ServoMotor[2].ChangePGain_V(0.0008);								// Give PGain_V to M3 for GoDeadEndPosition.
 	Time_start = MothorCLK.Elapsed();
 
 	while (0
@@ -600,7 +633,8 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	}
 	printf("done. \n");
 
-	for (i = 0; i<6; i++) ServoMotor[i].ReloadLimitAngularDisplacement(); // Reset limitation by AngularDisplacement.
+
+	for (int i = 0; i<6; i++) ServoMotor[i].ReloadLimitAngularDisplacement(); // Reset limitation by AngularDisplacement.
 	ServoMotor[2].ZeroPGain_V();                                       // Zero PGain_V of M3.
 
 	//-----[Step8] Move J3 to neutral position in 5 seconds.
@@ -629,7 +663,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	printf("Move Robot to Parking Positiion..");
 	// moving the robot to parked positin
-	for (i = 0; i<6; i++) AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;
+	for (int i = 0; i<6; i++) AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;
 
 	AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
 	AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 30.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
@@ -658,7 +692,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	ServoMotor[2].ReloadLimitAngularDisplacement();   // Reset limitation by AngularDisplacement of J3 after every Zero Limit Cancellation
 	
 	// making sure the Desired Displacement it Initialized to Zero for Keyboard Input
-	for (i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++) {
 		DesiredDisplacement_J[i] = CalcJointDisplacement(&(ServoMotor[i]), LimitDisplacement_p_J[i], LimitDisplacement_n_J[i]);
 		DesiredCoordinate_Head[i] = 0.0;
 	}
@@ -668,6 +702,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	torsoInitialized = true;
 	ControlMode = 0;
 
+	robotState = ERobotControllerStatus::EDisconnected;
 	threadStart = true; 
 
 	return true;
@@ -857,7 +892,7 @@ void torsoController::InverseKinematicsTORSO_RPY(
 }
 
 int torsoController::motorSafeShutdown(){
-	for (i = 0; i<6; i++) 
+	for (int i = 0; i<6; i++) 
 		ServoMotor[i].TorqueCut();
 
 	Torso_02->Contact();
@@ -869,6 +904,7 @@ int torsoController::motorSafeShutdown(){
 int torsoController::motorForceShutdown(){
 	Torso_02->Free();
 	delete Torso_02;
+	Torso_02 = 0;
 
 	return true;
 }
@@ -879,6 +915,7 @@ int torsoController::controlStateMachine(){
 
 	if (!torsoInitialized)
 		return false;
+	
 
 	switch (ControlMode) {
 		case 0:		//parking mode
@@ -935,13 +972,13 @@ int torsoController::controlStateMachine(){
 
 			robotState = EConnecting;
 
-			for (i = 0; i<6; i++)
+			for (int i = 0; i<6; i++)
 				AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;	// note: angular displacement is in Deg
 
-			for (i = 0; i<6; i++)
+			for (int i = 0; i<6; i++)
 				DesiredDisplacement_J[i] = 0.0; 
 
-			for (i = 0; i<6; i++)
+			for (int i = 0; i<6; i++)
 				AngularDisplacement_goal_M[i] = CalcMotorDisplacement(&(ServoMotor[i]), DesiredDisplacement_J[i], LimitDisplacement_p_J[i], LimitDisplacement_n_J[i]);
 
 			ServoMotor[1].ZeroLimitAngularDisplacement(); // Cancel limitation by AngularDisplacement of J2.
@@ -960,7 +997,7 @@ int torsoController::controlStateMachine(){
 				Torso_02->ContactPeriodic();
 			}
 
-			for (i = 0; i<6; i++) ServoMotor[i].ReloadLimitAngularDisplacement(); // Reload Limit Angles
+			for (int i = 0; i<6; i++) ServoMotor[i].ReloadLimitAngularDisplacement(); // Reload Limit Angles
 
 			if (manualMode)
 				ControlMode = 1; 
@@ -980,9 +1017,14 @@ int torsoController::controlStateMachine(){
 			DesiredCoordinate_Head[3] = torsoHeadOri[0];     // Roll  of head.					 Start at 0.0 [rad]
 			DesiredCoordinate_Head[4] = torsoHeadOri[1];     // Pitch  of head.					 Start at 0.0 [rad]
 			DesiredCoordinate_Head[5] = torsoHeadOri[2];     // Yaw  of head.					 Start at 0.0 [rad]		
-			gamma = 0.0;									 // Virtual turning displacement.	Start at 0.0[rad]
+			gamma = 0.0;		// Virtual turning displacement.	Start at 0.0[rad]
+			
+			
+			// initial J3 value
+#define  J3MiddleValue  0.655
 
-			DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + 0.6 + 0.055;
+			//DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + 0.6 + 0.055;
+			DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + J3MiddleValue;
 
 			// limit DesiredCoordinate_Head.
 			if (DesiredCoordinate_Head[3] >  (25.0 + 25.0) / 180 * PI) DesiredCoordinate_Head[3] = (25.0 + 25.0) / 180 * PI;
@@ -1009,6 +1051,8 @@ int torsoController::controlStateMachine(){
 				&(DesiredDisplacement_J[4]),
 				&(DesiredDisplacement_J[5]));
 
+
+		//	DesiredDisplacement_J[2] = 0;
 		//	DesiredDisplacement_J[2] = 0.0;
 			break; 
 
@@ -1017,12 +1061,13 @@ int torsoController::controlStateMachine(){
 
 			robotState = EDisconnecting;
 
-			for (i = 0; i<6; i++)
+			for (int i = 0; i<6; i++)
 				AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;
 
 			AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
 			AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 30.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
-			AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0 / 180.0*PI, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
+			//AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0 / 180.0*PI, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
+			AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.00, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
 			AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 			AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
 			AngularDisplacement_goal_M[5] = CalcMotorDisplacement(&(ServoMotor[5]), 0.0 / 180.0*PI, LimitDisplacement_p_J[5], LimitDisplacement_n_J[5]);
@@ -1048,6 +1093,7 @@ int torsoController::controlStateMachine(){
 			break;
 
 		case 5:
+			robotState = EStopping;
 			motorSafeShutdown();
 			torsoInitialized = false;
 			robotState = EStopped;
@@ -1056,20 +1102,25 @@ int torsoController::controlStateMachine(){
 			break; 
 		}
 
+
 	//-----[Step12] Adapt to complex limitaions.
 	AdaptComplexLimitation(&(DesiredDisplacement_J[0]), &(DesiredDisplacement_J[1]), 25.0 / 180 * PI);
 	AdaptComplexLimitation(&(DesiredDisplacement_J[3]), &(DesiredDisplacement_J[4]), 40.0 / 180 * PI);
 
 	//-----[Step13] Check DesiredDisplacement_J by LimitAngularDisplacement of each ServoMotor.
-	for (i = 0; i<6; i++){
+	for (int i = 0; i<6; i++){
 		if (DesiredDisplacement_J[i] > ServoMotor[i].ReadLimitAngularDisplacement_p() / GearRatio_J[i])
 			DesiredDisplacement_J[i] = ServoMotor[i].ReadLimitAngularDisplacement_p() / GearRatio_J[i];
 		else if (DesiredDisplacement_J[i] < ServoMotor[i].ReadLimitAngularDisplacement_n() / GearRatio_J[i])
 			DesiredDisplacement_J[i] = ServoMotor[i].ReadLimitAngularDisplacement_n() / GearRatio_J[i];
 	}
 
+	// add J3 Displacement limits
+//  	if (DesiredDisplacement_J[2] > -0.01) DesiredDisplacement_J[2] = -0.01;
+// 	if (DesiredDisplacement_J[2] < -0.08) DesiredDisplacement_J[2] = -0.08;
+	//DesiredDisplacement_J[2] = 0.0f;
 	//-----[Step14] Set Refernce_D and calculate commands of PID control for each ServoMotor.
-	for (i = 0; i<6; i++){
+	for (int i = 0; i<6; i++){
 		ServoMotor[i].SetReference_D(CalcMotorDisplacement(&(ServoMotor[i]), DesiredDisplacement_J[i], LimitDisplacement_p_J[i], LimitDisplacement_n_J[i]));
 		ServoMotor[i].CalcPIDControl();
 	}
@@ -1077,10 +1128,13 @@ int torsoController::controlStateMachine(){
 contactNCord:
 	Torso_02->ContactPeriodic();
 
-	j = 0;
+	int j = 0;
 
-	for (i = 0; i < 6; i++){
-		robotJointData[j] = DesiredDisplacement_J[i] * 180 / PI;
+	for (int i = 0; i < 6; i++){
+		if (i != 2)
+			robotJointData[j] = DesiredDisplacement_J[i] * 180 / PI;
+		else
+			robotJointData[j] = DesiredDisplacement_J[i];
 		robotJointData[j + 1] = ServoMotor[i].AngularDisplacement;
 		j+=2;
 	}
@@ -1098,8 +1152,8 @@ int torsoController::printRealtimeInfo(){
 		Console::locate(0, 6);
 		printf("LoopCount = %4d x 1000\n", LoopCount / 1000);
 		printf("Virtual turning; gamma = %8.4f [deg]\n", gamma / PI*180.0);
-		for (i = 0; i < 6; i++)  cout << "DesiredCoordinate_Head[" << i << "] = " << DesiredCoordinate_Head[i] << " \n";
-		for (i = 0; i < 6; i++)  cout << "DesiredDisplacement_J[" << i << "] = " << DesiredDisplacement_J[i] << " \n";
+		for (int i = 0; i < 6; i++)  cout << "DesiredCoordinate_Head[" << i << "] = " << DesiredCoordinate_Head[i] << " \n";
+		for (int i = 0; i < 6; i++)  cout << "DesiredDisplacement_J[" << i << "] = " << DesiredDisplacement_J[i] << " \n";
 	}
 
 	return LoopCount;

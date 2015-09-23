@@ -56,6 +56,8 @@ public:
 enum ERobotControllerStatus
 {
 	EStopped,		// The robot is not inited
+	EIniting,		// The robot is initializing
+	EStopping,		// The robot is shutting down
 	EDisconnected,	// The robot inited and waiting for connection
 	EDisconnecting,	// The robot is disconnecting
 	EConnected,		// The robot is connected

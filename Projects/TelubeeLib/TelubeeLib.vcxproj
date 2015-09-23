@@ -67,8 +67,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>mrayOculusVR-DK2.lib;WiimoteController.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\lib\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mrayOculusVR-DK2.lib;WiimoteController.lib;pthreadVCE2.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -89,8 +89,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>mrayOculusVR-DK2.lib;WiimoteController.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\lib\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mrayOculusVR-DK2.lib;WiimoteController.lib;pthreadVC2.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

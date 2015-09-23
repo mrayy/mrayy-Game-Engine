@@ -104,7 +104,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_sharedMemory.createWrite();
 	m_sharedMemory.openWrite();
 	m_memory = (TBee::ModuleSharedMemory*)m_sharedMemory.GetData();
+	m_memory->InitMaster(m_memory);
 
+	{
+		TBee::SharedMemoryLock m(m_memory);
+	}
 
 	m_commLink = network::INetwork::getInstance().createUDPClient();
 	m_commLink->Open();
@@ -300,7 +304,6 @@ bool ServiceHostManager::_ProcessPacket()
 	}
 	
 	return 0;
-
 }
 
 
@@ -386,6 +389,7 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 	vals = core::StringUtil::Split(value, ",");
 	if (m.equals_ignore_case("commPort"))
 	{
+		TBee::SharedMemoryLock m(m_memory);
 		m_memory->userConnectionData.address.port = core::StringConverter::toInt(value);
 		m_memory->userCommPort = m_memory->userConnectionData.address.port;
 	}
@@ -400,42 +404,6 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 		retAddr.address = addr->address;
 		retAddr.port = core::StringConverter::toInt(value);
 		m_commLink->SendTo(&retAddr, (char*)buffer, len);
-	}
-	else if (msg.equals_ignore_case("RobotConnect") && vals.size() == 1)
-	{
-		m_memory->robotData.connected = core::StringConverter::toBool(vals[0].c_str());
-	}
-	else if (msg.equals_ignore_case("Speed") && vals.size() == 2)
-	{
-		m_memory->robotData.speed[0] = atof(vals[0].c_str());
-		m_memory->robotData.speed[1] = atof(vals[1].c_str());
-		//limit the speed
-		m_memory->robotData.speed[0] = -math::clamp<float>(m_memory->robotData.speed[0], -1, 1);
-		m_memory->robotData.speed[1] = math::clamp<float>(m_memory->robotData.speed[1], -1, 1);
-	}
-	else if (msg.equals_ignore_case("HeadRotation") && vals.size() == 4)
-	{
-		m_memory->robotData.headRotation[0] = atof(vals[0].c_str());
-		m_memory->robotData.headRotation[1] = atof(vals[1].c_str());
-		m_memory->robotData.headRotation[2] = atof(vals[2].c_str());
-		m_memory->robotData.headRotation[3] = atof(vals[3].c_str());
-
-		//do head limits
-		// 		m_memory->robotData.tilt = math::clamp(m_memory->robotData.tilt, -50.0f, 50.0f);
-		// 		m_memory->robotData.yaw = math::clamp(m_memory->robotData.yaw, -70.0f, 70.0f);
-		// 		m_memory->robotData.roll = math::clamp(m_memory->robotData.roll, -40.0f, 40.0f);
-	}
-	else if (msg.equals_ignore_case("HeadPosition") && vals.size() == 3)
-	{
-		m_memory->robotData.headPos[0] = atof(vals[0].c_str());
-		m_memory->robotData.headPos[1] = atof(vals[1].c_str());
-		m_memory->robotData.headPos[2] = atof(vals[2].c_str());
-
-	}
-	else if (msg.equals_ignore_case("Rotation") && vals.size() == 1)
-	{
-		m_memory->robotData.rotation = atof(vals[0].c_str());
-		m_memory->robotData.rotation = math::clamp<float>(m_memory->robotData.rotation, -1, 1);
 	}
 	else
 	{

@@ -67,7 +67,13 @@ void NetworkValueController::StartReceiver(int port)
 	m_client->Open(port);
 	m_thread = OS::IThreadManager::getInstance().createThread(new NetworkValueControllerThread(this));
 	m_thread->start(0);
-	printf("NetworkValueController started - Port : %d\n", port);
+	printf("NetworkValueController started - Port : %d\n", m_client->Port());
+}
+int NetworkValueController::GetPort()
+{
+	if (m_client == 0)
+		return 0;
+	return m_client->Port();
 }
 void NetworkValueController::StartSender(const network::NetAddress& target)
 {

@@ -52,7 +52,9 @@ public:
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=8000,channels=1 ! audioconvert ! flacenc quality=2 ! rtpgstpay ";
 #else 
 #ifdef VORBIS_ENC
-		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=22000,channels=2   ! audioconvert ! vorbisenc quality=0.7 ! rtpvorbispay config-interval=3 ";
+		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=22000,channels=2   ! audioconvert ! "
+			"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
+			"vorbisenc quality=0.7 ! rtpvorbispay config-interval=3 ";
 #else
 #ifdef SPEEX_ENC
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=22000,channels=2   ! speexenc ! rtpspeexpay";
