@@ -153,7 +153,7 @@ public:
 
 				videoStr = "appsrc";
 				videoStr += " name=src" + core::StringConverter::toString(i) +
-					" do-timestamp=true is-live=true block=true"
+					" do-timestamp=true is-live=true "//"block=true"
 					" ! video/x-raw,format=" + format + ",width=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().x) +
 					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
@@ -258,7 +258,7 @@ public:
 		gst_buffer_unmap(outbuf, &map);
 		m_grabber[index]->Unlock();
 		*buffer = outbuf;
-		OS::IThreadManager::getInstance().sleep(5);
+		//OS::IThreadManager::getInstance().sleep(5);
 		return GST_FLOW_OK;
 	}
 
@@ -292,6 +292,11 @@ public:
 	static void start_feed(GstAppSrc *source, guint size, gpointer data)
 	{
 		VideoSrcData* o = static_cast<VideoSrcData*>(data);
+		if (o->sourceID != 0)
+		{
+			g_source_remove(o->sourceID);
+			o->sourceID = 0;
+		}
 		if (o->sourceID == 0) {
 			GST_DEBUG("start feeding");
 			o->sourceID = g_idle_add((GSourceFunc)read_data, o);
@@ -403,6 +408,10 @@ public:
 	void Stream()
 	{
 		SetPaused(false);
+	}
+	void Stop()
+	{
+		SetPaused(true);
 	}
 	bool IsStreaming()
 	{
