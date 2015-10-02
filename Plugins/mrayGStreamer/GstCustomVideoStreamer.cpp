@@ -473,9 +473,9 @@ void GstCustomVideoStreamer::Stop()
 }
 
 
-void GstCustomVideoStreamer::BindPorts(const core::string& addr, uint videoPort, uint clockPort, bool rtcp)
+void GstCustomVideoStreamer::BindPorts(const core::string& addr, uint* videoPort, uint count, uint clockPort, bool rtcp)
 {
-	m_impl->BindPorts(addr, videoPort, clockPort, rtcp);
+	m_impl->BindPorts(addr, videoPort[0], clockPort, rtcp);
 }
 
 bool GstCustomVideoStreamer::CreateStream()

@@ -27,7 +27,7 @@ protected:
 	GstCustomMultipleVideoStreamer* m_owner;
 
 	core::string m_ipAddr;
-	uint m_baseVideoPort;
+	uint m_videoPorts[2];
 	uint m_clockPort;
 
 	std::vector<IVideoGrabber*> m_grabber;
@@ -71,7 +71,8 @@ public:
 	{
 		m_owner = owner;
 		m_ipAddr = "127.0.0.1";
-		m_baseVideoPort = 5000;
+		m_videoPorts[0] = 0;
+		m_videoPorts[1] = 0;
 		m_clockPort = 0;
 
 		m_bitRate = 5000;
@@ -187,9 +188,13 @@ public:
 
 				}
 
-
-				videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate/m_grabber.size()) +
-					" speed-preset=superfast tune=zerolatency sync-lookahead=0  pass=qual sliced-threads=true ! rtph264pay ";
+				
+				videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / m_grabber.size()) +
+						" speed-preset=superfast pass=qual tune=zerolatency sync-lookahead=0  sliced-threads=true  "// 
+					" ! rtph264pay ";
+					/*
+				//videoStr += " ! vp8enc ! rtpvp8pay ";
+				videoStr += " ! theoraenc ! rtptheorapay ";*/
 				videoStr +=" ! myudpsink name=videoSink"+core::StringConverter::toString(i)+" sync=false ";
 
 				//videoStr += " ! autovideosink sync=false ";
@@ -348,7 +353,7 @@ public:
 				gst_app_src_set_callbacks(m_videoSrc[i].videoSrc, &m_videoSrc[i].srcCB, &m_videoSrc[i], NULL);
 
 				core::string videoSinkName="videoSink"+core::StringConverter::toString(i);
-				SET_SINK(m_videoSrc[i].videoSink, videoSinkName.c_str(), m_baseVideoPort+i);
+				SET_SINK(m_videoSrc[i].videoSink, videoSinkName.c_str(), m_videoPorts[i]);
 			}
 #else
 
@@ -366,18 +371,21 @@ public:
 		//g_object_set(G_OBJECT(m_videoSink), "sync", false, (void*)NULL);
 
 		if (m_rtcp){
-			SET_SRC(videoRtcpSrc, (m_baseVideoPort + 1));
+			//SET_SRC(videoRtcpSrc, (m_baseVideoPort + 1));
 //			SET_SINK(videoRtcpSink, (m_baseVideoPort + 2));
 		}
 
 	}
 
-	void BindPorts(const core::string& addr, int baseVideoPort, uint clockPort, bool rtcp)
+	void BindPorts(const core::string& addr, uint *videoPorts, uint count, uint clockPort, bool rtcp)
 	{
-		if (m_ipAddr == addr && m_baseVideoPort == baseVideoPort && m_rtcp == rtcp)
+		if (count < 2)
+			return;
+		if (m_ipAddr == addr && m_videoPorts[0] == videoPorts[0] && m_videoPorts[1] == videoPorts[1] && m_rtcp == rtcp)
 			return;
 		m_ipAddr = addr;
-		m_baseVideoPort = baseVideoPort;
+		m_videoPorts[0] = videoPorts[0];
+		m_videoPorts[1] = videoPorts[1];
 		m_rtcp = rtcp;
 		m_clockPort = clockPort;
 
@@ -400,7 +408,7 @@ public:
 		_UpdatePorts();
 
 		printf("Starting video streams\n"
-			"\tPort base number:%d , Ports Count:%d\n", m_baseVideoPort, m_grabber.size());
+			"\tPorts number:%d,%d , Ports Count:%d\n", m_videoPorts[0], m_videoPorts[1], m_grabber.size());
 
 		return CreatePipeline(true,"",m_clockPort);
 
@@ -448,9 +456,9 @@ void GstCustomMultipleVideoStreamer::Stop()
 }
 
 
-void GstCustomMultipleVideoStreamer::BindPorts(const core::string& addr, uint videoPort, uint clockPort, bool rtcp)
+void GstCustomMultipleVideoStreamer::BindPorts(const core::string& addr, uint *videoPorts, uint count, uint clockPort, bool rtcp)
 {
-	m_impl->BindPorts(addr, videoPort, clockPort, rtcp);
+	m_impl->BindPorts(addr, videoPorts,count, clockPort, rtcp);
 }
 
 bool GstCustomMultipleVideoStreamer::CreateStream()

@@ -165,9 +165,9 @@ GstPipelineHandler* GstNetworkAudioStreamer::GetPipeline()
 	return m_impl;
 }
 
-void GstNetworkAudioStreamer::BindPorts(const core::string& addr, uint audioPort, uint clockPort, bool rtcp)
+void GstNetworkAudioStreamer::BindPorts(const core::string& addr, uint* ports, uint count, uint clockPort, bool rtcp)
 {
-	m_impl->BindPorts(addr, audioPort,clockPort, rtcp);
+	m_impl->BindPorts(addr, ports[0], clockPort, rtcp);
 }
 
 bool GstNetworkAudioStreamer::CreateStream()

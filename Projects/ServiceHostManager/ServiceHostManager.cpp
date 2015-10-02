@@ -165,7 +165,7 @@ void ServiceHostManager::Run()
 			if (c == ' ')
 			{
 				m_memory->userConnectionData.address = mray::network::NetAddress("127.0.0.1", 1234);
-				m_memory->userConnectionData.videoPort = 7000;
+				//m_memory->userConnectionData.videoPort = 7000;
 				m_memory->UserConnected = !m_memory->UserConnected;
 			}
 			else if (c == 'q')

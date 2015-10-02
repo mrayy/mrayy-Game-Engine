@@ -35,11 +35,12 @@ namespace TBee
 	struct UserConnectionData
 	{
 		network::NetAddress address;
+		/*
 		uint videoPort;
 		uint audioPort;
 		uint handsPort;
 		uint clockPort;
-		bool rtcp;
+		bool rtcp;*/
 	};
 
 	class RobotCommunicator;

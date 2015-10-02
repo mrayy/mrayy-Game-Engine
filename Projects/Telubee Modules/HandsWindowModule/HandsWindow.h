@@ -8,6 +8,7 @@
 #include "ViewportListener.h"
 #include "ParsedShaderPP.h"
 #include "GstNetworkVideoPlayer.h"
+#include "RenderWindow.h"
 
 namespace mray
 {
@@ -16,7 +17,7 @@ namespace TBee
 {
 	class TBeeServiceContext;
 
-class HandsWindow:public scene::IViewportListener
+class HandsWindow:public scene::IViewportListener,public video::IRenderWindowListener
 {
 protected:
 
@@ -48,6 +49,7 @@ public:
 
 	void OnUpdate(float dt);
 	void onRenderDone(scene::ViewPort*vp);
+	virtual void WindowPostRender(video::RenderWindow* wnd);
 
 	video::RenderWindow* GetHandsWindow(){
 		return m_handsWnd;

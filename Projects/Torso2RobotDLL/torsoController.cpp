@@ -65,8 +65,8 @@ torsoController::torsoController()
 	}
 
 	//change the roll value
-	delete m_rotAvg[0];
-	m_rotAvg[0] = new MovAvg(20);
+// 	delete m_rotAvg[0];
+// 	m_rotAvg[0] = new MovAvg(20);
 
 
 	robotState = EStopped;

@@ -136,7 +136,9 @@ namespace video
 			if (m_data->playing)
 			{
 				if (m_data->paused)
+				{
 					gst_element_set_state(m_data->gstPipeline, GST_STATE_PAUSED);
+				}
 				else
 					gst_element_set_state(m_data->gstPipeline, GST_STATE_PLAYING);
 			}
@@ -153,8 +155,8 @@ namespace video
 	}
 	void GstPipelineHandler::Stop()
 	{
-  		SetPaused(true);
-  		return;
+//   		SetPaused(true);
+//   		return;
 		if (!m_data->Loaded)return;
 		GstState state;
 		if (!m_data->paused){

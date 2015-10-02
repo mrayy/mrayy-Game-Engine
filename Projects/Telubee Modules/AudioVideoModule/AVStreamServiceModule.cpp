@@ -22,6 +22,7 @@
 #include "GstVideoProvider.h"
 #include "NetworkValueController.h"
 #include "CameraConfigurationManager.h"
+#include "StringUtil.h"
 
 namespace mray
 {
@@ -80,6 +81,9 @@ public:
 		GCPtr<video::ICameraVideoGrabber> camera;
 		math::vector2di offsets;
 	}m_cameraIfo[2];
+
+	uint m_VideoPorts[2];
+	uint m_AudioPort;
 
 	int m_quality;
 	CameraProfileManager* m_cameraProfileManager;
@@ -645,25 +649,7 @@ public:
 		//tell the client if we are sending stereo or single video images
 		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 		OS::StreamWriter wrtr(&stream);
-
-		if (m_streamers)
-		{
-			printf("Starting video stream to: %s:%d\n", data.address.toString().c_str(), data.videoPort);
-
-			m_streamers->GetStream("Video")->BindPorts(data.address.toString(), data.videoPort, data.clockPort, data.rtcp);
-			if (m_streamAudio)
-				m_streamers->GetStream("Audio")->BindPorts(data.address.toString(), data.audioPort, data.clockPort + 1, data.rtcp);
-
-
-			int reply = (int)EMessages::IsStereo;
-			int len = stream.write(&reply, sizeof(reply));
-			bool stereo = m_cameraIfo[0].ifo.index != m_cameraIfo[1].ifo.index &&
-				m_cameraIfo[0].ifo.index != -1 && m_cameraIfo[1].ifo.index != -1;// ((video::GstNetworkVideoStreamer*)m_streamers->GetStream("Video"))->IsStereo();
-			len += stream.write(&stereo, sizeof(stereo));
-			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
-
-		}
-
+		/*
 		if (false)
 		{
 			stream.seek(0, OS::ESeek_Set);
@@ -674,16 +660,7 @@ public:
 
 			len += wrtr.binWriteInt(baseClock);
 			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
-		}
-		_SendCameraSettings();
-		if (false)
-		{
-			stream.seek(0, OS::ESeek_Set);
-			int reply = (int)EMessages::CameraConfig;
-			int len = stream.write(&reply, sizeof(reply));
-			len += wrtr.binWriteString(m_cameraProfile);
-			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
-		}
+		}*/
 	}
 
 	void _SendCameraSettings()
@@ -717,9 +694,51 @@ public:
 	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
 	{
 
+		const int BufferLen = 128;
+		uchar buffer[BufferLen];
+		//tell the client if we are sending stereo or single video images
+		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
+		OS::StreamWriter wrtr(&stream);
+		std::vector<core::string> values = core::StringUtil::Split(value, ",");
 		if (msg == "CameraParameters")
 		{
 			_SendCameraSettings();
+		}
+		else if (msg == "VideoPorts" && values.size()>=2)
+		{
+			int ports[2];
+
+			ports[0] = core::StringConverter::toInt(values[0]);
+			ports[1] = core::StringConverter::toInt(values[1]);
+			if (m_VideoPorts[0] == ports[0] && m_VideoPorts[1] == ports[1])
+				return;
+			m_VideoPorts[0] = ports[0];
+			m_VideoPorts[1] = ports[1];
+			if (m_streamers)
+			{
+				printf("Starting video stream to: %s:%d,%d\n", m_context->remoteAddr.toString().c_str(), m_VideoPorts[0], m_VideoPorts[1]);
+
+				m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), m_VideoPorts, 2, 0, 0);
+
+
+				int reply = (int)EMessages::IsStereo;
+				int len = stream.write(&reply, sizeof(reply));
+				bool stereo = m_cameraIfo[0].ifo.index != m_cameraIfo[1].ifo.index &&
+					m_cameraIfo[0].ifo.index != -1 && m_cameraIfo[1].ifo.index != -1;// ((video::GstNetworkVideoStreamer*)m_streamers->GetStream("Video"))->IsStereo();
+				len += stream.write(&stereo, sizeof(stereo));
+				m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+
+				_SendCameraSettings();
+			}
+		}
+		else if (msg == "AudioPort" && values.size() >= 1)
+		{
+			int port;
+			port= core::StringConverter::toInt(values[0]);
+			if (port == m_AudioPort)return;
+			m_AudioPort - port;
+			if (m_streamAudio)
+				m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort, 1, 0, 0);
 		}
 	}
 

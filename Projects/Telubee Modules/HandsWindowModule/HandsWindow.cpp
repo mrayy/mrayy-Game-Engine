@@ -9,6 +9,7 @@
 #include "IMonitorDevice.h"
 #include "ViewPort.h"
 #include "RenderWindow.h"
+#include "RenderWindowUtils.h"
 
 
 namespace mray
@@ -91,14 +92,17 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 		m_handsViewPort = m_handsWnd->CreateViewport(mT("Main"), 0, 0, math::rectf(0, 0, 1, 1), 0);
 		//context->app->AddRenderWindow(m_handsWnd);
 		m_handsViewPort->AddListener(this);
+		video::RenderWindowUtils::AddListener(m_handsWnd, this);
 
-		m_I420ToRGB = new video::ParsedShaderPP(Engine::getInstance().getDevice());
-		m_I420ToRGB->LoadXML(gFileSystem.openFile("I420ToRGB.peff"));
+		{
+			m_I420ToRGB = new video::ParsedShaderPP(Engine::getInstance().getDevice());
+			m_I420ToRGB->LoadXML(gFileSystem.openFile("I420ToRGB.peff"));
 
 
-		video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
-		pp->LoadXML(gFileSystem.openFile("ProjectionCorrect.peff"));
-		m_undistortShader = pp;
+			video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
+			pp->LoadXML(gFileSystem.openFile("ProjectionCorrect.peff"));
+			m_undistortShader = pp;
+		}
 	}
 	return true;
 }
@@ -151,10 +155,15 @@ void HandsWindow::OnUpdate(float dt)
 
 }
 
+void HandsWindow::WindowPostRender(video::RenderWindow* wnd)
+{
+
+}
 void HandsWindow::onRenderDone(scene::ViewPort*vp)
 {
 	if (!IsActive())
 		return;
+	vp = m_handsViewPort;
 	gEngine.getDevice()->set2DMode();
 	video::TextureUnit tex;
 
@@ -163,7 +172,7 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 
 	math::vector2d txsz;
 	txsz.x = m_handsGrabber->GetTexture()->getSize().x;
-	txsz.y = m_handsGrabber->GetTexture()->getSize().y;
+	txsz.y = m_handsGrabber->GetTexture()->getSize().y/1.5f;
 	{
 		m_I420ToRGB->Setup(math::rectf(0, txsz));
 		m_I420ToRGB->render(&video::TextureRTWrap(tex.GetTexture()));
@@ -176,12 +185,14 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 	float w = txsz.x*r;
 	float c = txsz.x - w;
 
-
-	gEngine.getDevice()->useTexture(0, &tex);
-	m_undistortShader->Setup(math::rectf(0, txsz));
-	m_undistortShader->render(&video::TextureRTWrap(m_handsGrabber->GetTexture()));
-	tex.SetTexture(m_undistortShader->getOutput()->GetColorTexture());
-	gEngine.getDevice()->unuseShader();
+	if (false)
+	{
+		gEngine.getDevice()->useTexture(0, &tex);
+		m_undistortShader->Setup(math::rectf(0, txsz));
+		m_undistortShader->render(&video::TextureRTWrap(m_handsGrabber->GetTexture()));
+		tex.SetTexture(m_undistortShader->getOutput()->GetColorTexture());
+		gEngine.getDevice()->unuseShader();
+	}
 
 	gEngine.getDevice()->useTexture(0, &tex);/**/
 	math::rectf texCoords(0, 1, 1, 0);
@@ -190,6 +201,8 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 	texCoords.ULPoint.y = 1 - texCoords.ULPoint.y;
 	texCoords.BRPoint.y = 1 - texCoords.BRPoint.y;
 	gEngine.getDevice()->draw2DImage(math::rectf(0, vp->GetSize()), 1, 0, &texCoords);
+
+	gEngine.getDevice()->draw2DRectangle(math::rectf(0, 100), 1);
 	/*	*/
 }
 

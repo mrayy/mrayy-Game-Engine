@@ -30,7 +30,7 @@ public:
 
 	EServiceStatus m_status;
 	TBeeServiceContext* m_context;
-
+	uint m_handPort;
 	bool m_connected;
 public:
 
@@ -105,6 +105,8 @@ public:
 		{
 			m_status = EServiceStatus::Shutdown;
 		}
+		m_handsWindow->GetHandsWindow()->SetActiveWindow();
+		m_handsWindow->GetHandsWindow()->Render(true);
 	}
 	void DebugRender(ServiceRenderContext* context)
 	{
@@ -118,7 +120,6 @@ public:
 	virtual void OnUserConnected(const UserConnectionData& data)
 	{
 		m_connected = true;
-		m_handsWindow->OnConnected(data.address.toString(), data.handsPort, data.rtcp);
 	}
 	virtual void OnUserDisconnected()
 	{
@@ -126,6 +127,17 @@ public:
 	}
 	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
 	{
+		const int BufferLen = 128;
+		uchar buffer[BufferLen];
+		//tell the client if we are sending stereo or single video images
+		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
+		OS::StreamWriter wrtr(&stream);
+		std::vector<core::string> values = core::StringUtil::Split(value, ",");
+		if (msg == "HandPorts" && values.size() >= 1)
+		{
+			m_handPort = core::StringConverter::toInt(values[0]);
+			m_handsWindow->OnConnected(m_context->remoteAddr.toString(), m_handPort, 0);
+		}
 	}
 
 
