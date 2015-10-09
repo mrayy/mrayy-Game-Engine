@@ -34,6 +34,7 @@ using namespace mray;
 DWORD RobotSerialPort::timerThreadHead(RobotSerialPort *robot, LPVOID pdata){
 	int count = 0;
 	while (!isDone){
+		robot->_processData();
 		if (threadStart){
 			//printf("thread h: %d \r", count++);	
 			robot->head_control(-robot->pan*yAxis, robot->tilt*xAxis, -robot->roll*zAxis);
@@ -84,8 +85,10 @@ class RobotSerialPortImpl
 		MovAvg *mvRobot[2][3];		// 1 - base, 2 - head moving avarage 
 
 		ITelubeeRobotListener* listener;
-		RobotSerialPortImpl()
+		RobotSerialPort* m_owner;
+		RobotSerialPortImpl(RobotSerialPort* o)
 		{
+			m_owner = o;
 #ifdef ROOMBA_CONTROLLER
 			m_baseController = new mray::RoombaController;
 #else 
@@ -102,7 +105,7 @@ class RobotSerialPortImpl
 		{
 			if (listener)
 			{
-				listener->OnCollisionData(l, r);
+				listener->OnCollisionData(m_owner, l, r);
 			}
 		}
 };
@@ -143,8 +146,8 @@ class RobotSerialPortImpl
 
 RobotSerialPort::RobotSerialPort()
 {
-
-	m_impl = new RobotSerialPortImpl();
+	m_robotStatusProvider = 0;
+	m_impl = new RobotSerialPortImpl(this);
 	m_impl->listener = 0;
 	baseConnected = 0;
 	load_parameters();
@@ -159,7 +162,7 @@ RobotSerialPort::RobotSerialPort()
 
 	_status = ERobotControllerStatus::EStopped;
 
-	ConnectRobot();
+	//ConnectRobot();
 	_setupCaps();
 
 }
@@ -174,6 +177,14 @@ RobotSerialPort::~RobotSerialPort()
 	delete m_impl;
 }
 
+void RobotSerialPort::_processData()
+{
+	if (m_robotStatusProvider)
+	{
+		RobotStatus st;
+		m_robotStatusProvider->GetRobotStatus(st);
+	}
+}
 void RobotSerialPort::_setupCaps()
 {
 	m_caps.hasBattery = true;
@@ -212,6 +223,7 @@ std::string RobotSerialPort::ScanePorts()
 }
 void RobotSerialPort::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 {
+	m_robotStatusProvider = robotStatusProvider;
 	_status = EDisconnected;
 }
 void RobotSerialPort::ConnectRobot()

@@ -53,6 +53,7 @@ bool getIp()
 		ipaddress = addr;	
 	}
 	ipaddr=inet_ntoa(ipaddress);
+	printf("Local IP Address:%s\n", ipaddr.c_str());
 	return true;
 }
 
@@ -73,6 +74,66 @@ public:
 	}
 }gListener;
 
+class OptiTrackDataWriter :public animation::IOptiTrackClientListener
+{
+	core::string m_fileName;
+	OS::IStreamPtr m_file;
+	OS::StreamWriter m_writer;
+	bool m_isActive;
+public:
+	OptiTrackDataWriter()
+	{
+		m_isActive = false;
+	}
+	~OptiTrackDataWriter()
+	{
+		Stop();
+	}
+	void Start(core::string file)
+	{
+		m_fileName = file;
+		m_file = gFileSystem.openFile(m_fileName, OS::TXT_WRITE);
+		m_writer.setStream(m_file);
+		std::stringstream str;
+		str << "Name" << "\t" << "Position X" << "\t" << "Position Y" << "\t" << "Position Z" << "\t"
+			<< "Angles X" << "\t" << "Angles Y" << "\t" << "Angles Z" << "\n";
+		m_writer.writeString(str.str());
+		m_isActive = true;
+	}
+	void Stop()
+	{
+		m_isActive=false;
+		m_file->close();
+	}
+	void Pause()
+	{
+		printf("Writing data Paused\n");
+		m_isActive = false;
+	}
+	void Resume()
+	{
+		printf("Resume writing data\n");
+		m_isActive = true;
+	}
+
+	bool IsActive(){ return m_isActive; }
+	virtual void OnOptiTrackData(animation::OptiTrackClient*client, const animation::OptiTrackRigidBody& body)
+	{
+		//		printf("Opti Data:%s:%s\n",g_targetNames[body.GetID()].c_str(),core::StringConverter::toString(body.GetPosition()).c_str());
+
+		if (!m_isActive)
+			return;
+
+		math::vector3d angles;
+		body.GetOrintation().toEulerAngles(angles);
+
+		std::stringstream str;
+
+		str << body.GetName() << "\t" << body.GetPosition().x << "\t" << body.GetPosition().y << "\t" << body.GetPosition().z << "\t"
+			<< angles.x << "\t" << angles.y << "\t" << angles.z << "\n";
+		m_writer.writeString(str.str());
+	}
+};
 
 enum EUDPCommand
 {
@@ -105,19 +166,23 @@ int _tmain(int argc, _TCHAR* argv[])
 		return -1;
 
 	core::string pcIp=ipaddr;
+	core::string serverIp = ipaddr;
 	int port=1234;
-	if(argc<3)
+	if(argc<4)
 	{
-		printf("Usage: %s [IP Address] [port] \n",argv[0]);
+		printf("Usage: %s [OptiTrack IP] [IP Address] [port] \n",argv[0]);
 	}
-
-	if(argc>=2)
+	if (argc >= 2)
 	{
-		pcIp=argv[1];
+		serverIp = argv[1];
 	}
 	if(argc>=3)
 	{
-		port=atoi(argv[2]);
+		pcIp=argv[2];
+	}
+	if(argc>=4)
+	{
+		port=atoi(argv[3]);
 	}
 
 	printf("*************************************\n");
@@ -136,13 +201,19 @@ int _tmain(int argc, _TCHAR* argv[])
 	new WinErrorDialog();
 	Engine* e=new Engine(new OS::WinOSystem());
 
+	OptiTrackDataWriter* writer = new OptiTrackDataWriter();
+	writer->Start("WorkingSpace.txt");
+	writer->Pause();
 
 	Communicator::Instance()->Connec(pcIp,1234,"TelesarV");
 	{
 		animation::OptiTrackClient* tracker=new animation::OptiTrackClient();
-		if(!tracker->Connect(animation::Opti_Unicast,ipaddr,ipaddr,"239.255.42.99"))
+		if(!tracker->Connect(animation::Opti_Multicast,serverIp,ipaddr,"239.255.38.99"))
 		{
 			printf("Failed to connect to opti-Track\n");
+		}
+		else{
+			printf("Connected to OptiTrack Server!\n");
 		}
 
 		RGlove.Open(FD_HAND_RIGHT);
@@ -163,11 +234,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		RGlove.Init();
 		LGlove.Init();
 
+		printf("Starting Listening.\n");
 
 		// send scheme after we inited our targets
 		Communicator::Instance()->SendScheme();
 
 		tracker->AddListener(&gListener);
+		tracker->AddListener(writer);
 		bool done=false;
 		while (!done)
 		{
@@ -200,6 +273,12 @@ int _tmain(int argc, _TCHAR* argv[])
 					RGlove.Rescan();
 					LGlove.Rescan();
 					break;
+				case '0':
+					if (writer->IsActive())
+						writer->Pause();
+					else 
+						writer->Resume();
+					break;
 				}
 				for(int i=0;i<UDPCommandKeyCount;++i)
 				{
@@ -225,6 +304,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i=0;i<g_controllers.size();++i)
 		delete g_controllers[i];
 	g_controllers.clear();
+	writer->Stop();
+	delete writer;
 	delete e;
 	delete Communicator::Instance();
 

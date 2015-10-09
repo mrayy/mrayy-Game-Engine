@@ -97,6 +97,8 @@ protected:
 
 	GCPtr<CommandManager> m_commandManager;
 
+	//math::Point3d<bool> m_motionLock;
+
 	bool m_lockAxis[3];
 
 	math::vector3d m_ARPositionOffset; //used to offset the position of all AR objects, this is due to the low floating point precision at large values

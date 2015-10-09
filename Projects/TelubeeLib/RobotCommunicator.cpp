@@ -39,11 +39,12 @@ void RobotCommunicator::_HandleData(network::NetAddress* addr,const core::string
 		network::NetAddress addr = network::NetAddress(vals[0], videoPort);;*/
 		//if (addr.address != m_userStatus.address.address || addr.port!=m_userStatus.address.port)
 		{
-			m_userStatus.address = *addr;
+			m_userStatus.receivedAddress = *addr;
+			m_userStatus.clientAddress = *addr;// .setIP(vals[0]);
 			if (m_listener)
 			{
 				UserConnectionData data;
-				data.address = m_userStatus.address;
+				data.userData = m_userStatus;
 				/*data.videoPort = videoPort;
 				data.audioPort = audioPort;
 				data.handsPort = handsPort;
@@ -56,11 +57,11 @@ void RobotCommunicator::_HandleData(network::NetAddress* addr,const core::string
 	else if (name == "Disconnect" && vals.size() == 2)
 	{
 		network::NetAddress addr = network::NetAddress(vals[0], atoi(vals[1].c_str()));
-		if (addr.address == m_userStatus.address.address)
+		if (addr.address == m_userStatus.clientAddress.address)
 		{
 			if (m_listener)
 			{
-				m_listener->OnUserDisconnected(this, m_userStatus.address);
+				m_listener->OnUserDisconnected(this, m_userStatus.clientAddress);
 			}
 		}
 	}

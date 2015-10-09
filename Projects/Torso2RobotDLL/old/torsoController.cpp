@@ -14,9 +14,6 @@
 #include "vectors.h"
 #include <direct.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-
 
 #define GetCurrentDir _getcwd
 using namespace std;
@@ -24,7 +21,6 @@ using namespace std;
 bool threadStart = false;
 bool isDone = false;
 bool upCount = true;
-bool tuningEnabled = false; 
 
 
 
@@ -67,6 +63,11 @@ torsoController::torsoController()
 		m_posAvg[i] = new MovAvg(avgCnt);
 		m_rotAvg[i] = new MovAvg(avgCnt);
 	}
+
+	//change the roll value
+// 	delete m_rotAvg[0];
+// 	m_rotAvg[0] = new MovAvg(20);
+
 
 	robotState = EStopped;
 
@@ -133,6 +134,9 @@ bool torsoController::GetJointValues(std::vector<float>& values){
 	for (int i = 0; i<12; i++) 
 		values[i]=(robotJointData[i]);
 
+// 	printf("IK values      : %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[0], robotJointData[2], robotJointData[4], robotJointData[6], robotJointData[8], robotJointData[10]);
+// 	printf("Realtime values: %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f \n", robotJointData[1], robotJointData[3], robotJointData[5], robotJointData[7], robotJointData[9], robotJointData[11]);
+
 	return true; 
 }
 
@@ -140,7 +144,6 @@ bool torsoController::GetJointValues(std::vector<float>& values){
 void torsoController::ConnectRobot()
 {
 	manualMode = false;
-	tuningEnabled = false;
 
 	if ((robotState == EDisconnected) && torsoInitialized && ControlMode!=2)
 	{
@@ -154,7 +157,6 @@ void torsoController::ConnectRobot()
 void torsoController::ManualControlRobot()
 {
 	manualMode = true; 
-	tuningEnabled = false;
 
 	if ((robotState == EDisconnected) && torsoInitialized && ControlMode != 2)
 		ControlMode = 2;
@@ -164,8 +166,6 @@ void torsoController::ManualControlRobot()
 
 void torsoController::DisconnectRobot()
 {
-
-	tuningEnabled = false;
 	if (robotState == EConnected) ControlMode = 4;
 	
 	return;
@@ -173,18 +173,8 @@ void torsoController::DisconnectRobot()
 
 void torsoController::ShutdownRobot(){
 
-	tuningEnabled = false;
-
 	if (robotState == EDisconnected && ControlMode != 5)
 		ControlMode = 5;
-
-	return;
-}
-
-void torsoController::tuningMode(){
-
-	if (robotState == EStopped)
-		tuningEnabled = true; 
 
 	return;
 }
@@ -198,7 +188,23 @@ void torsoController::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 	return;
 }
 void QuatToEuler(float* q, float* euler)
-{
+{/*
+ float w, x, y, z;
+
+ w = quaternion.w;
+ x = quaternion.x;
+ y = quaternion.y;
+ z = quaternion.z;
+
+ double sqw = w*w;
+ double sqx = x*x;
+ double sqy = y*y;
+ double sqz = z*z;
+
+ euler.z = (float) math::toDeg(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)) );
+ euler.x = (float)math::toDeg(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)) );
+ euler.y = (float)math::toDeg(asin(-2.0 * (x*z - y*w)) );
+ */
 
 	float w = q[0];
 	float x = q[1];
@@ -215,7 +221,36 @@ void QuatToEuler(float* q, float* euler)
 	euler[2] = ((float)atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2*q2 + q3*q3)));
 
 }
+#if 0
+void QuatToEuler(float* q, float* euler)
+{
+// 	math::quaternion qq(q[0], q[1], q[2], q[3]);
+// 	return;
+	float w = q[0];
+	float x = q[1];
+	float y = q[2];
+	float z = q[3];
 
+	double sqw =w*w;
+	double sqx = x*x;
+	double sqy = y*y;
+	double sqz = z*z;
+
+	euler[0] = (float)(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)));
+	euler[1] = (float)(asin(-2.0 * (x*z - y*w)));
+	euler[2] = (float)(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)));
+	/*
+	// rotation about x-axis
+	euler[0] = (float)(atan2(2.0 * (y*z + x*w), (-sqx - sqy + sqz + sqw)));
+
+	// rotation about y-axis
+	euler[1] = (float)(asin(2.0 * (x*z + y*w)));
+
+	// rotation about z-axis
+	euler[2] = (float)(atan2(2.0 * (x*y + z*w), (sqx - sqy - sqz + sqw)));*/
+
+}
+#endif
 void torsoController::UpdateRobotStatus(const RobotStatus& st)
 
 {
@@ -349,7 +384,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	std::string Name_ParameterFile_M[6];
 
 	ifstream SetupDataFile,                 // Setup data file.
-	ParameterFile_M[6];
+		ParameterFile_M[6];
 	/*
 	FILE     *OutputDataFile;
 	OutputDataFile = fopen("LogLog.dat","wt");
@@ -435,65 +470,51 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	SetupDataFile.close();
 
 	printf("Initialize NCord Interface: ");
-	//-----[Step2] Initialize texArt_ncord.
-	texArt_ncord = new TexART_NCord000_Interface(0);
-	ret = texArt_ncord->Initialize();
+	//-----[Step2] Initialize Torso_02.
+
+	//Added by Yamen: Fix the initialization bug
+	int runCounter = 0;
+	for (int i = 0; i < 7; ++i)
+	{
+		printf("Test Run: %d/7\n", i);
+		Torso_02 = new TexART_NCord000_Interface(0);
+		ret = Torso_02->Initialize();
 		if (ret) {
 			printf("Initialize error = %d \n", ret);
 			motorForceShutdown();
 			Sleep(100);
 		}
 		else
-			printf("done.\n");
-
-		// added by charith, clearing previous driver commands in buffer. 
-		texArt_ncord->Free();
-		Sleep(100);
-
-		// resetting all terminals
-		for (int i = 0; i<8; i++)
-			texArt_ncord->ResetTerminal(i);
-
-	//int runCounter = 0;
-	//for (int i = 0; i < 7; ++i)
-	//{
-	//	printf("Test Run: %d/7\n", i);
-	//	texArt_ncord = new TexART_NCord000_Interface(0);
-	//	ret = texArt_ncord->Initialize();
-	//	if (ret) {
-	//		printf("Initialize error = %d \n", ret);
-	//		motorForceShutdown();
-	//		Sleep(100);
-	//	}
-	//	else
-	//	{
-	//		runCounter++;
-	//		if (runCounter<3)
-	//		{
-	//			printf("Purging data\n");
-	//			motorForceShutdown();
-	//			Sleep(100);
-	//		}
-	//		else
-	//		{
-	//			printf("done.\n");
-	//			break;
-	//		}
-	//	}
-	//}
-
+		{
+			runCounter++;
+			if (runCounter<3)
+			{
+				printf("Purging data\n");
+				motorForceShutdown();
+				Sleep(100);
+			}
+			else
+			{
+				printf("done.\n");
+				break;
+			}
+		}
+	}
+	if (!runCounter)
+	{
+		return false;
+	}
 
 	printf("Start NCord Interface: ");
-	//-----[Step3] Start the interface object texArt_ncord.
-	ret = texArt_ncord->Start();
-
+	//-----[Step3] Start the interface object Torso_02.
+	ret = Torso_02->Start();
 	if (ret)
 	{
-		printf("TexART Driver communication error #:%d\n", ret);
+		printf("Start error = %d \n", ret);
 		motorForceShutdown(); // danger overriding device diagnostic
 	}
 	else
-		printf("TexART Driver communication ok!\n");
+		printf("done.\n");
 
 	printf("Initialize ServoMotor Control: ");
 	//-----[Step4] Initialize ServoMotor.
@@ -507,7 +528,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	printf("done.\n");
 
 	ServoMotor = new TexART_ServoMotor2015[6];
-	for (int i = 0; i<6; i++) ServoMotor[i].Initialize(ParameterFile_M[i], 0, 0, 0, texArt_ncord); // Load initial data file.
+	for (int i = 0; i<6; i++) ServoMotor[i].Initialize(ParameterFile_M[i], 0, 0, 0, Torso_02); // Load initial data file.
 	for (int i = 0; i<6; i++) ParameterFile_M[i].close();                                      // Close initial data file.
 
 	//-----[Check stage] Search DeadendPotentioValue except J3 by manual motion.
@@ -518,6 +539,14 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	cout << "\n Search DeadendPotentioValue of J5 \n"; ServoMotor[4].SearchDeadendPotentioValue();
 	cout << "\n Search DeadendPotentioValue of J6 \n"; ServoMotor[5].SearchDeadendPotentioValue();*/
 
+	//switch (ControlMode) {
+	//case 0: cout << "Control Mode = 0 : Each joint displacement incremental by keyboard \n\n";  break;
+	//case 1: cout << "Control Mode = 1 : Head 6D incremental motion by keyboard \n\n";           break;
+	//case 2: cout << "Control Mode = 2 : Head 6D semi-absolute motion by 6D joystick \n\n";      break;
+	//case 3: cout << "Control Mode = 3 : Head 6D absolute motion following HMD. (to be determined) \n\n"; break;
+	//}
+	//cout << "Push  <i>  key to initialize. \nPush <Esc> key to exit from this program \n";
+
 	//-----[Step6] Calibrate AngularDisplacement for present position of each ServoMotor except M3.
 	printf("Calibrating Current Angular Displacement Except M3: ");
 	ServoMotor[0].CaliAngularDisplacementByPotentio();
@@ -527,6 +556,49 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	ServoMotor[5].CaliAngularDisplacementByPotentio();
 	printf("done.\n");
 
+	//-----[Check stage] Check JointDisplacement by manual motion.
+	// [Danger!] Cut the motor power.
+	/*
+	while(1) {
+	for(i=0; i<6; i++) ServoMotor[i].CalcPIDControl();
+	for(i=0; i<6; i++) ServoMotor[i].TorqueCut();
+	Torso_02->ContactPeriodic();
+	Console::locate(0,7);
+
+	cout << "ServoMotor[0].PotentioValue = " << ServoMotor[0].ReadPotentioValue() << " \n";
+	cout << "J1.AngularDisplacement_potentio = " << ServoMotor[0].ReadAngularDisplacement_potentio()/GearRatio_J[0]/PI*180 << " [deg]\n";
+	cout << "J1.AngularDisplacement_encoder  = " << ServoMotor[0].ReadAngularDisplacement_encoder() /GearRatio_J[0]/PI*180 << " [deg]\n";
+	cout << "ServoMotor[1].PotentioValue = " << ServoMotor[1].ReadPotentioValue() << " \n";
+	cout << "J2.AngularDisplacement_potentio = " << ServoMotor[1].ReadAngularDisplacement_potentio()/GearRatio_J[1]/PI*180 << " [deg]\n";
+	cout << "J2.AngularDisplacement_encoder  = " << ServoMotor[1].ReadAngularDisplacement_encoder() /GearRatio_J[1]/PI*180 << " [deg]\n";
+	cout << "ServoMotor[2].PotentioValue = No potentio \n";
+	cout << "J3.AngularDisplacement_potentio = " << ServoMotor[2].ReadAngularDisplacement_potentio()/GearRatio_J[2]/PI*180 << " [m]\n";
+	cout << "J3.AngularDisplacement_encoder  = " << ServoMotor[2].ReadAngularDisplacement_encoder() /GearRatio_J[2]/PI*180 << " [m]\n";
+	cout << "ServoMotor[3].PotentioValue = " << ServoMotor[3].ReadPotentioValue() << " \n";
+	cout << "J4.AngularDisplacement_potentio = " << ServoMotor[3].ReadAngularDisplacement_potentio()/GearRatio_J[3]/PI*180 << " [deg]\n";
+	cout << "J4.AngularDisplacement_encoder  = " << ServoMotor[3].ReadAngularDisplacement_encoder() /GearRatio_J[3]/PI*180 << " [deg]\n";
+	cout << "ServoMotor[4].PotentioValue = " << ServoMotor[4].ReadPotentioValue() << " \n";
+	cout << "J5.AngularDisplacement_potentio = " << ServoMotor[4].ReadAngularDisplacement_potentio()/GearRatio_J[4]/PI*180 << " [deg]\n";
+	cout << "J5.AngularDisplacement_encoder  = " << ServoMotor[4].ReadAngularDisplacement_encoder() /GearRatio_J[4]/PI*180 << " [deg]\n";
+	cout << "ServoMotor[5].PotentioValue = " << ServoMotor[5].ReadPotentioValue() << " \n";
+	cout << "J6.AngularDisplacement_potentio = " << ServoMotor[5].ReadAngularDisplacement_potentio()/GearRatio_J[5]/PI*180 << " [deg]\n";
+	cout << "J6.AngularDisplacement_encoder  = " << ServoMotor[5].ReadAngularDisplacement_encoder() /GearRatio_J[5]/PI*180 << " [deg]\n";
+
+	cout << "Displacement_J[0] = "
+	<< CalcJointDisplacement(&(ServoMotor[0]), LimitDisplacement_p_J[0], LimitDisplacement_n_J[0])/PI*180 << " [deg]      \n";
+	cout << "Displacement_J[1] = "
+	<< CalcJointDisplacement(&(ServoMotor[1]), LimitDisplacement_p_J[1], LimitDisplacement_n_J[1])/PI*180 << " [deg]      \n";
+	cout << "Displacement_J[2] = "
+	<< CalcJointDisplacement(&(ServoMotor[2]), LimitDisplacement_p_J[2], LimitDisplacement_n_J[2])        << " [m]        \n"
+	<< ServoMotor[2].AngularVelocity                                                                     << " [rad/s]    \n";
+	cout << "Displacement_J[3] = "
+	<< CalcJointDisplacement(&(ServoMotor[3]), LimitDisplacement_p_J[3], LimitDisplacement_n_J[3])/PI*180 << " [deg]      \n";
+	cout << "Displacement_J[4] = "
+	<< CalcJointDisplacement(&(ServoMotor[4]), LimitDisplacement_p_J[4], LimitDisplacement_n_J[4])/PI*180 << " [deg]      \n";
+	cout << "Displacement_J[5] = "
+	<< CalcJointDisplacement(&(ServoMotor[5]), LimitDisplacement_p_J[5], LimitDisplacement_n_J[5])/PI*180 << " [deg]      \n";
+	}
+	*/
 	//-----[Step7] Raise up Torso in 5 seconds, and calibrate AngularDisplacement of ServoMotor M3.
 	printf("Raising J3: Calibrating Current Angular Displacement For J3: ");
 
@@ -556,7 +628,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
 	> 0)
 	{
-		texArt_ncord->ContactPeriodic();
+		Torso_02->ContactPeriodic();
 		if (GetAsyncKeyState(0x1b) & 0x8000) break;
 	}
 	printf("done. \n");
@@ -584,7 +656,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 		ServoMotor[4].Fix2(AngularDisplacement_goal_M[4]);
 		ServoMotor[5].Fix2(AngularDisplacement_goal_M[5]);
 
-		texArt_ncord->ContactPeriodic();
+		Torso_02->ContactPeriodic();
 		if (GetAsyncKeyState(0x1b) & 0x8000) break;
 	}
 	printf("done.\n");
@@ -613,7 +685,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
 	> 0)
 	{
-		texArt_ncord->ContactPeriodic();
+		Torso_02->ContactPeriodic();
 	}
 	
 	printf("done.\n");
@@ -823,18 +895,16 @@ int torsoController::motorSafeShutdown(){
 	for (int i = 0; i<6; i++) 
 		ServoMotor[i].TorqueCut();
 
-	texArt_ncord->Contact();
+	Torso_02->Contact();
 
 	return true;
 }
 
 
 int torsoController::motorForceShutdown(){
-	texArt_ncord->Free();
-	delete texArt_ncord;
-	texArt_ncord = 0;
-
-	exit(0);
+	Torso_02->Free();
+	delete Torso_02;
+	Torso_02 = 0;
 
 	return true;
 }
@@ -843,33 +913,9 @@ int torsoController::motorForceShutdown(){
 
 int torsoController::controlStateMachine(){
 
-	controlLoop++;
-
 	if (!torsoInitialized)
-	{
-		if (tuningEnabled){
-		displayEncoderValues();
-		for (int i = 0; i<6; i++) ServoMotor[i].CalcPIDControl();
-		for (int i = 0; i<6; i++) ServoMotor[i].TorqueCut();
-		texArt_ncord->ContactPeriodic();
-
-		Sleep(10);
-		}
-		else
-			return false;
-	}
-			
-
-	if (controlLoop > 10000){
-		ServoMotor[0].CaliAngularDisplacementByPotentio();
-		ServoMotor[1].CaliAngularDisplacementByPotentio();
-		ServoMotor[3].CaliAngularDisplacementByPotentio();
-		ServoMotor[4].CaliAngularDisplacementByPotentio();
-		ServoMotor[5].CaliAngularDisplacementByPotentio();
-
-		controlLoop = 0;
-	}
-
+		return false;
+	
 
 	switch (ControlMode) {
 		case 0:		//parking mode
@@ -948,7 +994,7 @@ int torsoController::controlStateMachine(){
 				+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 2.0, Time_start, MothorCLK.Elapsed())
 			> 0)
 			{
-				texArt_ncord->ContactPeriodic();
+				Torso_02->ContactPeriodic();
 			}
 
 			for (int i = 0; i<6; i++) ServoMotor[i].ReloadLimitAngularDisplacement(); // Reload Limit Angles
@@ -975,10 +1021,10 @@ int torsoController::controlStateMachine(){
 			
 			
 			// initial J3 value
-#define  IK_height  0.655
+#define  J3MiddleValue  0.655
 
 			//DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + 0.6 + 0.055;
-			DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + IK_height;
+			DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + J3MiddleValue;
 
 			// limit DesiredCoordinate_Head.
 			if (DesiredCoordinate_Head[3] >  (25.0 + 25.0) / 180 * PI) DesiredCoordinate_Head[3] = (25.0 + 25.0) / 180 * PI;
@@ -1020,6 +1066,7 @@ int torsoController::controlStateMachine(){
 
 			AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
 			AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 30.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
+			//AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0 / 180.0*PI, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
 			AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.00, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
 			AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 			AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
@@ -1030,15 +1077,15 @@ int torsoController::controlStateMachine(){
 			Time_start = MothorCLK.Elapsed();
 
 			while (0
-				+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 3.0, Time_start, MothorCLK.Elapsed())
-				+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 3.0, Time_start, MothorCLK.Elapsed())
-				+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 3.0, Time_start, MothorCLK.Elapsed())
-				+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 3.0, Time_start, MothorCLK.Elapsed())
-				+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 3.0, Time_start, MothorCLK.Elapsed())
-				+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 3.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 5.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 5.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 5.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 5.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
 			> 0)
 			{
-				texArt_ncord->ContactPeriodic();
+				Torso_02->ContactPeriodic();
 			}
 
 			ControlMode = 0; // keep parking
@@ -1052,7 +1099,7 @@ int torsoController::controlStateMachine(){
 			robotState = EStopped;
 			goto contactNCord;
 
-			break;
+			break; 
 		}
 
 
@@ -1079,7 +1126,7 @@ int torsoController::controlStateMachine(){
 	}
  
 contactNCord:
-	texArt_ncord->ContactPeriodic();
+	Torso_02->ContactPeriodic();
 
 	int j = 0;
 
@@ -1091,7 +1138,7 @@ contactNCord:
 		robotJointData[j + 1] = ServoMotor[i].AngularDisplacement;
 		j+=2;
 	}
-
+	
 	return true; 
 
 }
@@ -1110,27 +1157,6 @@ int torsoController::printRealtimeInfo(){
 	}
 
 	return LoopCount;
-
-}
-
-
-
-int torsoController::displayEncoderValues(){
-
-	Console::locate(0, 12);
-
-	for (int i = 0; i < 2; i++)
-		printf("J[%d]\t 0x % 05X\t %4.2lf\t %4.2lf \n", i+1 , (int)ServoMotor[i].ReadPotentioValue(),
-		ServoMotor[i].ReadAngularDisplacement_potentio() / GearRatio_J[i] / PI * 180,
-		ServoMotor[i].ReadAngularDisplacement_encoder() / GearRatio_J[i] / PI * 180);
-	printf("J[%d]\t 0x % 05X\t %4.2lf\t %4.2lf \n", 2, 0, 0, 
-		ServoMotor[2].ReadAngularDisplacement_encoder() / GearRatio_J[2] / PI * 180);
-	for (int i = 3; i < 6; i++)
-		printf("J[%d]\t 0x % 05X\t %4.2lf\t %4.2lf \n", i+1, (int)ServoMotor[i].ReadPotentioValue(),
-		ServoMotor[i].ReadAngularDisplacement_potentio() / GearRatio_J[i] / PI * 180,
-		ServoMotor[i].ReadAngularDisplacement_encoder() / GearRatio_J[i] / PI * 180);
-
-	return true; 
 
 }
 

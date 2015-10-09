@@ -166,9 +166,9 @@ void Application::init(const OptionContainer &extraOptions)
 	m_guiRenderer->SetDevice(getDevice());
 
 	new video::FlyCameraManager();
-	//m_impl->camera = new video::DirectShowVideoGrabber();
-	m_impl->camera = new video::FlyCameraVideoGrabber();
-	m_impl->camera->InitDevice(0, 1280,720, 30);
+	m_impl->camera = new video::DirectShowVideoGrabber();
+	//m_impl->camera = new video::FlyCameraVideoGrabber();
+	m_impl->camera->InitDevice(0, 640,480, 30);
 	m_impl->grabber = new video::VideoGrabberTexture();
 	m_impl->grabber->Set(m_impl->camera, 0);
 	m_impl->chessboard.Setup(math::vector2di(10, 7),2.3);

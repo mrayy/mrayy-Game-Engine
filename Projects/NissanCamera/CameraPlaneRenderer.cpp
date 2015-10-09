@@ -79,19 +79,22 @@ bool CameraPlaneRenderer::OnEvent(Event* e)
 				m_wireframePass[1]->SetEnabled(enabled);
 				ok = true;
 			}
-			else if (evt->key == KEY_Y || evt->key == KEY_U)
+			else if (evt->ctrl)
 			{
+				if (evt->key == KEY_Y || evt->key == KEY_U)
+				{
 
-				m_surfaceParams.eyeConvergance += 0.1f*(evt->key == KEY_Y?1:-1);
-				m_car->Eyes[0]->setOrintation(math::quaternion(-m_surfaceParams.eyeConvergance/2.0f, math::vector3d::YAxis));
-				m_car->Eyes[1]->setOrintation(math::quaternion(m_surfaceParams.eyeConvergance / 2.0f, math::vector3d::YAxis));
-				ok = true;
-			}
-			else if (evt->key == KEY_I || evt->key == KEY_O)
-			{
+					m_surfaceParams.eyeConvergance += 0.1f*(evt->key == KEY_Y ? 1 : -1);
+					m_car->Eyes[0]->setOrintation(math::quaternion(-m_surfaceParams.eyeConvergance / 2.0f, math::vector3d::YAxis));
+					m_car->Eyes[1]->setOrintation(math::quaternion(m_surfaceParams.eyeConvergance / 2.0f, math::vector3d::YAxis));
+					ok = true;
+				}
+				else if (evt->key == KEY_I || evt->key == KEY_O)
+				{
 
-				m_surfaceParams.eyeDistance += 0.005f*(evt->key == KEY_I ? 1 : -1);
-				ok = true;
+					m_surfaceParams.eyeDistance += 0.005f*(evt->key == KEY_I ? 1 : -1);
+					ok = true;
+				}
 			}
 		}
 	}

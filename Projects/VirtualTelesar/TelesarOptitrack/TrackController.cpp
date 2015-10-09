@@ -93,7 +93,7 @@ void TrackController::Send()
 	controlVec[5]=m_lastOri.y;
 	controlVec[6]=m_lastOri.z;
 
-	printf("Sending %s:<%f,%f,%f>\n",m_name.c_str(),m_lastPos.x,m_lastPos.y,m_lastPos.z);
+	//printf("Sending %s:<%f,%f,%f>\n",m_name.c_str(),m_lastPos.x,m_lastPos.y,m_lastPos.z);
 	Communicator::Instance()->AddSendValue(m_name,controlVec,7);
 }
 

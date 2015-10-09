@@ -29,7 +29,7 @@ public:
 	IHeadController(){}
 	virtual~IHeadController(){}
 
-
+	virtual void SetLockPosition(bool x, bool y, bool z){};
 	virtual bool GetHeadOrientation(math::quaternion& q, bool abs) = 0;
 	virtual bool GetHeadPosition(math::vector3d& v,bool abs) = 0;
 

@@ -11,6 +11,7 @@ class torsoController :public IRobotController
 {
 protected:
 
+	char cCurrentPath[256];
 	double targetRotMat[16];
 	torsoControllerImpl* m_impl;
 	float robotX, robotY, robotZ;
@@ -20,6 +21,14 @@ protected:
 
 	bool m_connectFlag;
 	//bool m_isConnected;
+
+	enum EState
+	{
+		EInitlize,
+		EIdle
+	};
+
+	EState m_state;
 
 
 	ERobotControllerStatus robotState;
@@ -38,8 +47,8 @@ protected:
 
 	std::string ScanePorts();
 
-	int FirstMoving(void); 
-	int FinishMoving(void); 
+	int FirstMoving(void);
+	int FinishMoving(void);
 	int mainRoutine(int CalibSelect);
 	int debugRoutine(void);
 
@@ -47,17 +56,24 @@ protected:
 
 	void _setupCaps();
 
+	void _processData();
+
 public:
 	torsoController();
 	virtual~torsoController();
 
-	virtual void InitializeRobot(IRobotStatusProvider* robotStatusProvider) ;
+	virtual void InitializeRobot(IRobotStatusProvider* robotStatusProvider);
 	void SetListener(ITelubeeRobotListener* l);
 	int initRobot(bool debug);
 	void ConnectRobot();
 	void DisconnectRobot();
 	//bool IsConnected();
 	void UpdateRobotStatus(const RobotStatus& st);
+
+
+	virtual void ShutdownRobot() {}
+	virtual bool GetJointValues(std::vector<float>& values){ values.clear(); return false; }
+	virtual void ManualControlRobot() {};
 
 
 	static void ConvertToMatrix(const Quaternion& q, const float* pos, double* mat);

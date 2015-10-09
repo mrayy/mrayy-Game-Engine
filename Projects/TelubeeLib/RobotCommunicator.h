@@ -28,13 +28,14 @@ namespace TBee
 
 	struct UserStatus
 	{
-		network::NetAddress address;
+		network::NetAddress receivedAddress;	
+		network::NetAddress clientAddress;
 	};
 
 
 	struct UserConnectionData
 	{
-		network::NetAddress address;
+		UserStatus userData;
 		/*
 		uint videoPort;
 		uint audioPort;

@@ -34,6 +34,7 @@ protected:
 	float pan, tilt, roll;
 	bool baseConnected;
 	ERobotControllerStatus _status;
+	IRobotStatusProvider* m_robotStatusProvider;
 
 	HANDLE m_headThread;
 	HANDLE m_baseThread;
@@ -47,6 +48,8 @@ protected:
 	static DWORD WINAPI timerThreadBase(RobotSerialPort *robot, LPVOID pdata);
 
 	std::string ScanePorts();
+
+	void _processData();
 
 	void _setupCaps();
 public:

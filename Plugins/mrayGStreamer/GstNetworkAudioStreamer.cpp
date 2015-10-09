@@ -40,6 +40,7 @@ public:
 		m_ipAddr = "127.0.0.1";
 		m_audioPort = 5005;
 		m_clockPort = 5010;
+		m_rtcp = false;
 	}
 	virtual ~GstNetworkAudioStreamerImpl()
 	{
@@ -52,9 +53,10 @@ public:
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=8000,channels=1 ! audioconvert ! flacenc quality=2 ! rtpgstpay ";
 #else 
 #ifdef VORBIS_ENC
-		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=22000,channels=2   ! audioconvert ! "
-			"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
-			"vorbisenc quality=0.7 ! rtpvorbispay config-interval=3 ";
+		//actual-buffer-time=0 actual-latency-time=0
+		core::string audioStr = "directsoundsrc buffer-time=200  ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2   ! audioconvert ! "
+		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
+			"vorbisenc quality=1 ! rtpvorbispay config-interval=3 ";
 #else
 #ifdef SPEEX_ENC
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=22000,channels=2   ! speexenc ! rtpspeexpay";

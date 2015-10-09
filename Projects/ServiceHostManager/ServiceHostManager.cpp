@@ -164,7 +164,7 @@ void ServiceHostManager::Run()
 			char c = getch();
 			if (c == ' ')
 			{
-				m_memory->userConnectionData.address = mray::network::NetAddress("127.0.0.1", 1234);
+				m_memory->userConnectionData.userData.clientAddress= mray::network::NetAddress("127.0.0.1", 1234);
 				//m_memory->userConnectionData.videoPort = 7000;
 				m_memory->UserConnected = !m_memory->UserConnected;
 			}
@@ -252,53 +252,67 @@ bool ServiceHostManager::_ProcessPacket()
 	}
 	tinyxml2::XMLElement*root = doc.RootElement();
 
-	std::string msg = root->Attribute("Message");
-	if (msg == "Connect") //New service
+	if (root->Name() == "ServiceModule")
 	{
-		ServiceInfo ifo;
-		ifo.name = root->Attribute("Name");
-		ifo.address = src;
-
-
-		printf("New service was connected [%s]: %s:%d\n", ifo.name.c_str(), ifo.address.toString().c_str(), ifo.address.port);
-
-		int i = GetServiceByName(ifo.name);
-		ifo.lastTime = gEngine.getTimer()->getMilliseconds();
-		if (i != -1)
+		std::string msg = root->Attribute("Message");
+		if (msg == "Connect") //New service
 		{
+			ServiceInfo ifo;
+			ifo.name = root->Attribute("Name");
+			ifo.address = src;
 
-			m_dataMutex->lock();
-			m_serviceList[i].lastTime = ifo.lastTime;
-			m_serviceList[i].address = src;
-			m_dataMutex->unlock();
+
+			printf("New service was connected [%s]: %s:%d\n", ifo.name.c_str(), ifo.address.toString().c_str(), ifo.address.port);
+
+			int i = GetServiceByName(ifo.name);
+			ifo.lastTime = gEngine.getTimer()->getMilliseconds();
+			if (i != -1)
+			{
+
+				m_dataMutex->lock();
+				m_serviceList[i].lastTime = ifo.lastTime;
+				m_serviceList[i].address = src;
+				m_dataMutex->unlock();
+			}
+			else
+			{
+				m_dataMutex->lock();
+				m_serviceList.push_back(ifo);
+				m_dataMutex->unlock();
+			}
 		}
-		else
+		else if (msg == "Disconnect") //New service
 		{
-			m_dataMutex->lock();
-			m_serviceList.push_back(ifo);
-			m_dataMutex->unlock();
+			int i = GetServiceByAddress(&src);
+			if (i != -1)
+			{
+				printf("Service disconnected [%s]\n", m_serviceList[i].name.c_str());
+				m_dataMutex->lock();
+				m_serviceList.erase(m_serviceList.begin() + i);
+				m_dataMutex->unlock();
+			}
+		}
+		else if (msg == "Pong")
+		{
+			int i = GetServiceByAddress(&src);
+			if (i != -1)
+			{
+				//printf("Pong message recevied from :%s\n", m_serviceList[i].name.c_str());
+				m_dataMutex->lock();
+				m_serviceList[i].lastTime = gEngine.getTimer()->getMilliseconds();
+				m_serviceList[i].pingSent = false;
+				m_dataMutex->unlock();
+			}
 		}
 	}
-	else if (msg == "Disconnect") //New service
+	else if (root->Name() == "Broadcast") // broadcast message to all services
 	{
-		int i = GetServiceByAddress(&src);
-		if (i != -1)
+		for (int i = 0; i < m_serviceList.size(); ++i)
 		{
-			printf("Service disconnected [%s]\n", m_serviceList[i].name.c_str());
 			m_dataMutex->lock();
-			m_serviceList.erase(m_serviceList.begin() + i);
-			m_dataMutex->unlock();
-		}
-	}
-	else if (msg == "Pong")
-	{
-		int i = GetServiceByAddress(&src);
-		if (i != -1)
-		{
-			//printf("Pong message recevied from :%s\n", m_serviceList[i].name.c_str());
-			m_dataMutex->lock();
-			m_serviceList[i].lastTime = gEngine.getTimer()->getMilliseconds();
-			m_serviceList[i].pingSent = false;
+			if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port != 0 &&
+				m_serviceList[i].address.address != src.address && m_serviceList[i].address.port != src.port)
+				m_commLink->SendTo(&m_serviceList[i].address, buffer, len);
 			m_dataMutex->unlock();
 		}
 	}
@@ -352,11 +366,11 @@ void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const 
 {
 	if (!m_inited)
 		return;
-	if (m_memory->userConnectionData.address.address!= data.address.address)
-		printf("User Connected : %s\n", data.address.toString().c_str());
+	if (m_memory->userConnectionData.userData.clientAddress.address != data.userData.clientAddress.address)
+		printf("User Connected : %s\n", data.userData.clientAddress.toString().c_str());
 	//m_videoProvider->StreamDataTo(address,videoPort,audioPort);
 	int ip[4];
-	data.address.getIP(ip);
+	data.userData.clientAddress.getIP(ip);
 	core::string ipaddr = core::StringConverter::toString(ip[0]) + "." +
 		core::StringConverter::toString(ip[1]) + "." +
 		core::StringConverter::toString(ip[2]) + "." +
@@ -390,8 +404,8 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 	if (m.equals_ignore_case("commPort"))
 	{
 		TBee::SharedMemoryLock m(m_memory);
-		m_memory->userConnectionData.address.port = core::StringConverter::toInt(value);
-		m_memory->userCommPort = m_memory->userConnectionData.address.port;
+		m_memory->userConnectionData.userData.clientAddress.port = core::StringConverter::toInt(value);
+		m_memory->userCommPort = m_memory->userConnectionData.userData.clientAddress.port;
 	}
 	else if (m.equals_ignore_case("detect"))
 	{

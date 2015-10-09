@@ -190,7 +190,7 @@ public:
 
 				
 				videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / m_grabber.size()) +
-						" speed-preset=superfast pass=qual tune=zerolatency sync-lookahead=0  sliced-threads=true  "// 
+						" speed-preset=superfast pass=qual tune=zerolatency sync-lookahead=0 rc-lookahead=0  ip-factor=1.8 interlaced=true sliced-threads=true  "// 
 					" ! rtph264pay ";
 					/*
 				//videoStr += " ! vp8enc ! rtpvp8pay ";
@@ -263,7 +263,7 @@ public:
 		gst_buffer_unmap(outbuf, &map);
 		m_grabber[index]->Unlock();
 		*buffer = outbuf;
-		//OS::IThreadManager::getInstance().sleep(5);
+		OS::IThreadManager::getInstance().sleep(5);
 		return GST_FLOW_OK;
 	}
 

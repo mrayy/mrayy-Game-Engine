@@ -31,6 +31,7 @@ namespace TBee
 #define USE_WEBCAMERA 1
 #define USE_POINTGREY 1
 
+//#define FOVE_PEPPER
 
 IMPLEMENT_RTTI(AVStreamServiceModule, IServiceModule);
 
@@ -84,6 +85,14 @@ public:
 
 	uint m_VideoPorts[2];
 	uint m_AudioPort;
+	bool m_portsReceived;
+	bool m_isVideoStarted;
+	network::NetAddress m_remoteAddr;
+
+	float m_currentGain;
+	float m_lastGainUpdate;
+	float m_maxGain;
+	bool m_autoGain;
 
 	int m_quality;
 	CameraProfileManager* m_cameraProfileManager;
@@ -103,6 +112,17 @@ public:
 
 		m_streamers = new video::GstStreamBin();
 		LoadCameraSettings("StreamingProfiles.xml");
+
+		m_VideoPorts[0] = 7000;
+		m_VideoPorts[1] = 7001;
+
+		m_portsReceived = false;
+		m_isVideoStarted = false;
+
+		m_currentGain = 0;
+		m_lastGainUpdate = 0;
+		m_maxGain = 0.25;
+		m_autoGain = false;
 	}
 	~AVStreamServiceModuleImpl()
 	{
@@ -199,6 +219,7 @@ public:
 				gLogManager.log("Couldn't find camera configurations! : " + m_cameraProfile, ELL_WARNING);
 		}
 		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionByName("Quality")->getValue());
+		m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionByName("AutoGain")->getValue());
 		/*core::string res = context->appOptions.GetOptionByName("StreamResolution")->getValue();
 		
 		if (res == "0-VGA")
@@ -293,9 +314,10 @@ public:
 				}
 			}
 
+			m_currentGain =  core::StringConverter::toFloat(context->appOptions.GetOptionByName("Gain")->getValue());
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, context->appOptions.GetOptionByName("Gain")->getValue());
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, core::StringConverter::toString(m_currentGain));// context->appOptions.GetOptionByName("Gain")->getValue());
 
 			// Now close cameras
 			for (int i = 0; i < 2; ++i)
@@ -523,11 +545,10 @@ public:
 	}
 
 
-	void StartStream()
+	void _startVideoStream()
 	{
-		if (m_status != EServiceStatus::Inited && m_status != EServiceStatus::Stopped)
+		if (!m_portsReceived || m_status != EServiceStatus::Running)
 			return;
-
 		printf("Starting Stream at :%dx%d@%d\n", m_resolution.x, m_resolution.y, m_fps);
 		//  Begin the video stream
 
@@ -542,8 +563,26 @@ public:
 				m_cameraIfo[1].camera->Start();
 		}
 		m_streamers->Stream();
+
+		m_lastGainUpdate = gEngine.getTimer()->getSeconds() + 2000;
+
+		m_isVideoStarted = true;
+	}
+
+	void StartStream()
+	{
+		if (m_status != EServiceStatus::Inited && m_status != EServiceStatus::Stopped)
+			return;
+
 	//	Sleep(1000);
 		m_status = EServiceStatus::Running;
+#ifdef FOVE_PEPPER
+		m_VideoPorts[0] = 7000;
+		m_VideoPorts[1] = 7001;
+		m_portsReceived = true;
+		m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), m_VideoPorts, 2, 0, 0);
+#endif
+		_startVideoStream();
 	}
 
 	bool StopStream()
@@ -562,6 +601,7 @@ public:
 			m_cameraIfo[1].camera->Stop();
 
 		m_status = EServiceStatus::Stopped;
+		m_isVideoStarted = false;
 		return true;
 	}
 
@@ -571,6 +611,42 @@ public:
 
 		if (m_status != EServiceStatus::Running)
 			return;
+
+		if (!m_isVideoStarted)
+			_startVideoStream();
+		else
+		{
+			if (m_autoGain )
+			{
+				if (m_cameraIfo[0].camera && m_cameraIfo[0].camera->IsConnected())
+				{
+					float t = gEngine.getTimer()->getSeconds();
+					if (m_cameraIfo[0].camera->GetCaptureFrameRate() < m_currentSettings.fps-4 )
+					{
+						if (m_lastGainUpdate + 2000 < t)
+						{
+							if (m_currentGain < 0)
+								m_currentGain = 0;
+							else
+								m_currentGain += 0.02f;
+							SetCameraParameterValue("Gain", core::StringConverter::toString(m_currentGain));
+							m_lastGainUpdate = t;
+						}
+					}
+					else if (m_cameraIfo[0].camera->GetCaptureFrameRate() >= m_currentSettings.fps)
+					{
+						if (m_lastGainUpdate + 5000< t)
+						{
+							m_currentGain -= 0.01f;
+							if (m_currentGain < 0)
+								m_currentGain = -1;
+							SetCameraParameterValue("Gain", core::StringConverter::toString(m_currentGain));
+							m_lastGainUpdate = t;
+						}
+					}
+				}
+			}
+		}
 
 		//check camera condition if connected or not
 	//	if (m_cameraType == ECameraType::PointGrey)
@@ -595,6 +671,12 @@ public:
 
 		core::string msg = "[" + AVStreamServiceModule::ModuleName + "] Service Status: " + IServiceModule::ServiceStatusToString(m_status);
 
+		if (m_status == EServiceStatus::Running && m_portsReceived == false)
+		{
+
+			msg = "Started, but waiting for video connection.";
+			context->RenderText(msg, 0, 0,video::SColor(1,0,0,1));
+		}
 
 		msg = "Stream Settings:" ;
 		context->RenderText(msg, 0, 0);
@@ -613,6 +695,9 @@ public:
 
 			msg = "Capture FPS [" + core::StringConverter::toString(i) + "]: " + core::StringConverter::toString(m_cameraIfo[i].camera->GetCaptureFrameRate());
 			context->RenderText(msg, 0, 0);
+			msg = "Current Gain:" + core::StringConverter::toString(m_currentGain);
+			context->RenderText(msg, 0, 0);
+
 		}
 		//if (m_cameraType == ECameraType::PointGrey)
 		{
@@ -649,6 +734,8 @@ public:
 		//tell the client if we are sending stereo or single video images
 		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 		OS::StreamWriter wrtr(&stream);
+
+		_SendCameraSettings();
 		/*
 		if (false)
 		{
@@ -662,6 +749,13 @@ public:
 			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
 		}*/
 	}
+	virtual void OnUserDisconnected()
+	{
+		m_portsReceived = false;
+		m_VideoPorts[0] = 0;
+		m_VideoPorts[1] = 0;
+	}
+
 
 	void _SendCameraSettings()
 	{
@@ -710,10 +804,12 @@ public:
 
 			ports[0] = core::StringConverter::toInt(values[0]);
 			ports[1] = core::StringConverter::toInt(values[1]);
-			if (m_VideoPorts[0] == ports[0] && m_VideoPorts[1] == ports[1])
+			m_portsReceived = true;
+			if (m_VideoPorts[0] == ports[0] && m_VideoPorts[1] == ports[1] && m_remoteAddr==m_context->remoteAddr)
 				return;
 			m_VideoPorts[0] = ports[0];
 			m_VideoPorts[1] = ports[1];
+			m_remoteAddr = m_context->remoteAddr;
 			if (m_streamers)
 			{
 				printf("Starting video stream to: %s:%d,%d\n", m_context->remoteAddr.toString().c_str(), m_VideoPorts[0], m_VideoPorts[1]);
@@ -736,7 +832,7 @@ public:
 			int port;
 			port= core::StringConverter::toInt(values[0]);
 			if (port == m_AudioPort)return;
-			m_AudioPort - port;
+			m_AudioPort = port;
 			if (m_streamAudio)
 				m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort, 1, 0, 0);
 		}

@@ -568,7 +568,7 @@ void InterfaceCNTBoard::Get(DWORD *EncValue)
 }
 
 //Œ»İ‚Ì‚·‚×‚Ä‚ÌƒGƒ“ƒR[ƒ_’l‚ğ“¯‚É0‚Éİ’èB
-//ƒIƒvƒVƒ‡ƒ“‚Æ‚µ‚ÄƒIƒtƒZƒbƒg’l‚àˆø”‚Æ‚µ‚Äİ’è‰Â”
+//ƒIƒvƒVƒ‡ƒ“‚Æ‚µ‚ÄƒIƒtƒZƒbƒg’l‚àˆø”‚Æ‚µ‚Äİ’è‰ÂE
 
 void InterfaceCNTBoard::SetCount(DWORD Offset)
 {

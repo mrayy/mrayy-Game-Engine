@@ -58,7 +58,7 @@ namespace mray
 		virtual void Reset()
 		{
 			m_currPos = 0;
- 			Console::clear();
+ 		//	Console::clear();
  			Console::locate(m_currPos.x, m_currPos.y);
 		}
 	};
@@ -115,7 +115,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	Console::setColor(CONSOLE_CLR_INFO);
 	printf("Service Host: %s:%d\n", m_memory->hostAddress.toString().c_str(), m_memory->hostAddress.port);
 	
-
+	m_context.serviceLoader = this;
 	m_context.commChannel = network::INetwork::getInstance().createUDPClient();
 	m_context.commChannel->Open();
 	m_context.localAddr.address = network::INetwork::getInstance().getLocalAddress();
@@ -239,7 +239,7 @@ void ServiceLoader::_MonitorEvents()
 	if (!m_memory->UserConnected && m_oldMemory.UserConnected)
 	{
 		m_oldMemory.userConnectionData = m_memory->userConnectionData;
-		OnUserDisconnected(m_oldMemory.userConnectionData.address);
+		OnUserDisconnected(m_oldMemory.userConnectionData.userData.clientAddress);
 	}
 
 	m_oldMemory.UserConnected = m_memory->UserConnected;
@@ -318,7 +318,7 @@ void ServiceLoader::Run()
 
 void ServiceLoader::_RenderInfo()
 {
-
+	return;
 	m_renderContext->Reset();
 
 	m_renderContext->RenderText("Service Name: " + m_moduleName, 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
@@ -329,7 +329,11 @@ void ServiceLoader::_RenderInfo()
 	m_renderContext->RenderText(core::string("Status: ") + (m_memory->UserConnected? "User Connected":"User Disconnected"), 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
 	if (m_memory->UserConnected)
 	{
-		m_renderContext->RenderText("User IP Address:" + m_memory->userConnectionData.address.toString(), 0, 0, video::SColor(CONSOLE_CLR_SUCCESS, 1));
+		m_renderContext->RenderText("User IP Address:" + m_memory->userConnectionData.userData.clientAddress.toString(), 0, 0, video::SColor(CONSOLE_CLR_SUCCESS, 1));
+	}
+	if (_isProcessLocked())
+	{
+		m_renderContext->RenderText("Process is locked!", 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
 	}
 }
 
@@ -362,6 +366,22 @@ bool ServiceLoader::_ProcessPacket()
 		//printf("Recevied ping message\n");
 		_sendPongMessage();
 	}
+	else if (msg == "ServiceLock")
+	{
+		std::string requester=root->Attribute("Service");
+		if (requester != m_serviceModule->GetServiceName())
+		{
+			_lockProcess(requester);
+		}
+	}
+	else if (msg == "ServiceUnlock")
+	{
+		std::string requester = root->Attribute("Service");
+		if (requester != m_serviceModule->GetServiceName())
+		{
+			_unlockProcess(requester);
+		}
+	}
 	else
 	{
 		//printf("Message Arrived: %s\n", msg.c_str());
@@ -372,20 +392,91 @@ bool ServiceLoader::_ProcessPacket()
 	return 0;
 
 }
+bool ServiceLoader::_isProcessLocked()
+{
+	bool locked = false;
 
+	for (int i = 0; i < m_processLocks.size(); ++i)
+	{
+		if (m_processLocks[i].count>0)
+		{
+			locked = true;
+			break;
+		}
+	}
+
+	return locked;
+}
+void ServiceLoader::_lockProcess(const std::string& requester)
+{
+	//first, lock the process
+	if (!_isProcessLocked())
+	{
+		//lock here
+	}
+	for (int i = 0; i < m_processLocks.size(); ++i)
+	{
+		if (m_processLocks[i].process == requester)
+		{
+			m_processLocks[i].count++;
+			return;
+		}
+	}
+	ProcessLock l;
+	l.count = 1;
+	l.process = requester;
+	m_processLocks.push_back(l);
+}
+void ServiceLoader::_unlockProcess(const std::string& requester)
+{
+	if (!_isProcessLocked())
+		return;
+
+	for (int i = 0; i < m_processLocks.size(); ++i)
+	{
+		if (m_processLocks[i].process == requester)
+		{
+			m_processLocks[i].count--;
+			if (m_processLocks[i].count == 0)
+			{
+				m_processLocks.erase(m_processLocks.begin() + i);
+			}
+			break;
+		}
+	}
+	if (!_isProcessLocked())
+	{
+		//unlock process here
+	}
+}
+
+void ServiceLoader::RequestLock()
+{
+	core::string msg;
+	"<Broadcast Message=\"ServiceLock\" Service=\"" + m_serviceModule->GetServiceName() + "\"/>";
+	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
+
+}
+void ServiceLoader::RequestUnlock()
+{
+	core::string msg;
+	"<Broadcast Message=\"ServiceUnlock\" Service=\"" + m_serviceModule->GetServiceName() + "\"/>";
+	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
+
+}
 //////////////////////////////////////////////////////////////////////////
 
 void ServiceLoader::OnUserConnected( const TBee::UserConnectionData& data)
 {
-	if (m_context.remoteAddr.address != data.address.address)
+	if (m_context.remoteAddr.address != data.userData.clientAddress.address)
 	{
 		Console::setColor(CONSOLE_CLR_INFO);
-		printf("User Connected : %s\n", data.address.toString().c_str());
+		printf("User Connected : %s\n", data.userData.clientAddress.toString().c_str());
 	}
-	m_context.remoteAddr = data.address;
+	m_context.remoteAddr = data.userData.clientAddress;
 	//m_videoProvider->StreamDataTo(address,videoPort,audioPort);
 	int ip[4];
-	data.address.getIP(ip);
+	data.userData.clientAddress.getIP(ip);
 	core::string ipaddr = core::StringConverter::toString(ip[0]) + "." +
 		core::StringConverter::toString(ip[1]) + "." +
 		core::StringConverter::toString(ip[2]) + "." +

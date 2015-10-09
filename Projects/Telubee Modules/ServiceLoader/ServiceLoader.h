@@ -11,7 +11,7 @@
 namespace mray
 {
 	
-class ServiceLoader
+class ServiceLoader:public TBee::IServiceLoader
 {
 protected:
 	TBee::ModuleSharedMemory *m_memory;
@@ -30,6 +30,13 @@ protected:
 	std::string m_moduleName;
 	bool m_inited;
 
+	struct ProcessLock
+	{
+		std::string process;
+		int count;
+	};
+	std::vector<ProcessLock> m_processLocks;
+
 
 	void _MonitorEvents();
 	void _UpdateServiceStatus();
@@ -43,6 +50,10 @@ protected:
 
 	void _RenderInfo();
 
+	bool _isProcessLocked();
+	void _lockProcess(const std::string& requester);//request to lock this process until the requester finish its cpu usage
+	void _unlockProcess(const std::string& requester);
+
 	//////////////////////////////////////////////////////////////////////////
 	void OnUserConnected(const TBee::UserConnectionData& data);
 	void OnUserDisconnected(const network::NetAddress& address);
@@ -55,6 +66,10 @@ public:
 	void Run();
 	bool _ProcessPacket();
 
+
+	// when a service needs to utilize the cpu for a certain of time, then it can request to lock/unlock others
+	void RequestLock();
+	void RequestUnlock();
 
 };
 

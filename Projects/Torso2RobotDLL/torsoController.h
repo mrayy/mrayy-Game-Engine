@@ -31,6 +31,7 @@ protected:
 	float robotJointData[12];
 	bool torsoInitializatiion = false; 
 	bool torsoInitialized = false; 
+	int controlLoop = 0;
 
 	IRobotStatusProvider* m_robotStatusProvider;
 
@@ -43,7 +44,7 @@ protected:
 	void _processData();
 public:
 
-	TexART_NCord000_Interface  *Torso_02;   // Interface object for the machine hardware.
+	TexART_NCord000_Interface  *texArt_ncord;   // Interface object for the machine hardware.
 	TexART_ServoMotor2015      *ServoMotor; // Interface object for each servo motor.
 
 	int ControlMode = 0,				    
@@ -52,6 +53,7 @@ public:
 		// 2: fade connect
 		// 3: realtime mode
 		// 4: fade disconnect
+		// 5: shutdown
 
 		LoopCount = 0,
 		Display = 0,                   // Display data on the console or not (0 or 1).
@@ -91,6 +93,7 @@ public:
 
 	ERobotControllerStatus GetRobotStatus();
 	void ShutdownRobot();
+	void tuningMode();
 	bool GetJointValues(std::vector<float>& values);
 	virtual const mray::TBee::RobotCapabilities* GetRobotCaps()const { return &m_caps; }
 
@@ -102,6 +105,7 @@ public:
 	void AdaptComplexLimitation(double *AngularDisplacement_1, double *AngularDisplacement_2, double AngularDisplacement_limit); 
 	
 	int printRealtimeInfo(); 
+	int displayEncoderValues(); 
 	int controlStateMachine(); 
 	int motorSafeShutdown();
 	int motorForceShutdown();

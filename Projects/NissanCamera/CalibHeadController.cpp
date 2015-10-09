@@ -35,6 +35,7 @@ void CalibHeadController::CalibrationInfo::WriteToXML(xml::XMLElement* elem)
 
 CalibHeadController::CalibHeadController(IHeadController* o) :m_otherController(o)
 {
+	m_lock = false;
 	m_lostPos = 0;
 	m_lostOri = 0;
 }
@@ -96,6 +97,12 @@ bool CalibHeadController::GetHeadPosition(math::vector3d& v, bool abs)
 
 	if (!abs)
 		v = v - m_calibration.headPosition - m_calibration.staticHeadOffset;
+	if (m_lock.x)
+		v.x = 0;
+	if (m_lock.y)
+		v.y = 0;
+	if (m_lock.z)
+		v.z = 0;
 	return true;
 }
 

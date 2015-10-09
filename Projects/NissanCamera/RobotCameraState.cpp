@@ -55,7 +55,11 @@ namespace NCam
 		}
 		virtual bool GetHeadPosition(math::vector3d& v, bool abs)
 		{
+			float time = gEngine.getTimer()->getSeconds();
 			v = 0;
+			v.x = 70 * sin(time*0.005f);// 0 * sin(time*0.001f);
+			v.y = 32 * sin(time*0.003f);// 0 * sin(time*0.001f);
+			v.z = 12 * sin(time*0.02f);// 0 * sin(time*0.001f);
 			return 1;
 		}
 	};
@@ -496,6 +500,7 @@ void RobotCameraState::Update(float dt)
 {
 	Parent::Update(dt);
 	m_guimngr->Update(dt);
+	m_headController->SetLockPosition(m_lockAxis[0], m_lockAxis[1], m_lockAxis[2]);
 	m_robotConnector->UpdateStatus();
 	m_cameraRenderer->Update(dt);
 
@@ -527,13 +532,13 @@ void RobotCameraState::Update(float dt)
 // 	rot.x = -rot.x;
 // 	rot.z = -rot.z;
 	//rot = r;
-	
+	/*
 	if (m_lockAxis[0])
 		rot.x = 0;
 	if (m_lockAxis[1])
 		rot.y = 0;
 	if (m_lockAxis[2])
-		rot.z = 0;
+		rot.z = 0;*/
 
 	SetTransformation(pos, rot);
 

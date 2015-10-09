@@ -55,11 +55,13 @@ protected:
 	math::vector3d m_trackedPos;
 	math::quaternion m_trackedQuaternion;
 	CalibrationInfo m_calibration;
+
+	math::Point3d<bool> m_lock;
 public:
 	CalibHeadController(IHeadController* o);
 	virtual~CalibHeadController();
 
-
+	void SetLockPosition(bool x, bool y, bool z){ m_lock.set(x, y, z); }
 	virtual bool GetHeadOrientation(math::quaternion& q, bool abs);
 	virtual bool GetHeadPosition(math::vector3d &v,bool abs);
 

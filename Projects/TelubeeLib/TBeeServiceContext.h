@@ -26,6 +26,13 @@ namespace TBee
 		virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value){}
 	};
 	
+	class IServiceLoader
+	{
+	public:
+		virtual void RequestLock(){}
+		virtual void RequestUnlock(){}
+	};
+
 class TBeeServiceContext:public ServiceContext,public ListenerContainer<IServiceContextListener*>
 {
 protected:
@@ -34,8 +41,11 @@ public:
 	DECLARE_FIRE_METHOD(OnUserDisconnected, (), ())
 	DECLARE_FIRE_METHOD(OnUserMessage, (network::NetAddress* addr, const core::string& msg, const core::string& value), (addr,msg,value))
 public:
-	TBeeServiceContext(){}
+	TBeeServiceContext() :serviceLoader(0),app(0),commChannel(0),sharedMemory(0),netValueController(0)
+	{}
 	virtual ~TBeeServiceContext(){}
+
+	IServiceLoader* serviceLoader;
 
 	CMRayApplication* app;
 

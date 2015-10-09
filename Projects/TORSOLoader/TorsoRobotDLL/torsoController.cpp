@@ -11,12 +11,19 @@
 #include "interfaceboard.h"
 #include "variables.h"
 #include <conio.h>
+#include <direct.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 
+#define GetCurrentDir _getcwd
+using namespace std;
 bool threadStart = false;
 bool initDone = false; 
 bool isDone = false;
 bool upCount = true;
+bool userConnected = false;
 
 
 
@@ -24,18 +31,21 @@ bool upCount = true;
 class torsoControllerImpl
 {
 public:
-	MovAvg *mvRobot[6];		// 6 DoF moving avarage 
+	MovAvg *mvRobot[6];		// 6 DoF moving avarege 
 
 	ITelubeeRobotListener* listener;
-	torsoControllerImpl()
+
+	torsoController* owner;
+	torsoControllerImpl(torsoController* o)
 	{
+		owner = o;
 		listener = 0;
 	}
-	void NotifyCollision(float l, float r)
+	void NotifyCollision(float l,float r)
 	{
 		if (listener)
 		{
-			listener->OnCollisionData(l, r);
+			listener->OnCollisionData(owner,l,r);
 		}
 	}
 };
@@ -44,13 +54,22 @@ public:
 
 torsoController::torsoController()
 {
+
+	if (GetCurrentDir(cCurrentPath, sizeof(cCurrentPath)))
+	{
+		int len = strlen(cCurrentPath);
+		cCurrentPath[len] = '\\'; /* not really required */
+		cCurrentPath[len + 1] = '\0'; /* not really required */
+
+	}
+
 	m_connectFlag = false;
 	//m_isConnected = false;
 	robotState = ERobotControllerStatus::EStopped;
 	memset(m_headPos, 0, sizeof(m_headPos));
 	memset(m_offset, 0, sizeof(m_offset));
 
-	m_impl = new torsoControllerImpl();
+	m_impl = new torsoControllerImpl(this);
 	m_impl->listener = 0;
 	m_robotStatusProvider = 0;
 
@@ -61,11 +80,12 @@ torsoController::torsoController()
 		//m_impl->mvRobot[BASE][i] = new MovAvg();
 		//m_impl->mvRobot[HEAD][i] = new MovAvg();
 	//}
-	threadStart = true;
+	threadStart = false;
 	m_calibrated = false;
 	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadHead, this, NULL, NULL);
 	//CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadBase, this, NULL, NULL); 
 
+	m_state = EIdle;
 }
 
 torsoController::~torsoController()
@@ -111,12 +131,21 @@ void torsoController::DisconnectRobot()
 	return;
 }
 
+void torsoController::_processData()
+{
+	if (m_robotStatusProvider)
+	{
+		RobotStatus st;
+		m_robotStatusProvider->GetRobotStatus(st);
+	}
+}
 void torsoController::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 {
+	if (m_state == EInitlize || m_calibrated)
+		return;
 	m_robotStatusProvider = robotStatusProvider;
 	realTorso.SetProvider(robotStatusProvider);
-	initRobot(false);
-	printf("initialize end\n");
+	m_state = EInitlize;
 	return;
 }
 
@@ -226,9 +255,9 @@ void torsoController::UpdateRobotStatus(const RobotStatus& st)
 	p[2] = m_headPos[2] + m_offset[2];
 	
 	if (st.connected)
-		threadStart = true;
+		userConnected = true;
 	else
-		threadStart = false;
+		userConnected = true;
 
 
 	ConvertToMatrix(targetQuat, p, targetRotMat);
@@ -252,6 +281,9 @@ void torsoController::ConnectRobot()
 DWORD torsoController::timerThreadHead(torsoController *robot, LPVOID pdata){
 	int count = 0;
 	while (!isDone){
+		if (robot->m_calibrated)
+			robot->_processData();
+
 		if (threadStart){
 			robot->_innerProcessRobot();
 		}
@@ -279,7 +311,17 @@ DWORD torsoController::timerThreadBase(torsoController *robot, LPVOID pdata){
 
 void torsoController::_innerProcessRobot()
 {
-	if (!m_calibrated)
+
+	if (m_state == EInitlize)
+	{
+
+		initRobot(false);
+		robotState = EDisconnected;
+		printf("initialize end\n");
+		m_state = EIdle;
+	}
+
+	if (!m_calibrated || !userConnected)
 		return;
 	double tmp_tangles[Torso_DOF] = { 0 }, torque[Torso_DOF] = { 0 };	// テンポラリ目標角格納配列、トルク格納配列
 	double debug_tangles[Torso_DOF], debug_nangles[Torso_DOF];
@@ -398,9 +440,10 @@ void torsoController::_innerProcessRobot()
 int torsoController::initRobot(bool debug){
 	int  endflag = 0;				
 	char sel_key;					
-	const char *paramfile = "parameterfiles/Parameters.txt";
-
-	if (realTorso.InitTorso(paramfile) != 0) return -1;
+	//threadStart = false;
+	std::string paramfile = std::string(cCurrentPath) + "parameterfiles/Parameters.txt";
+	printf("Initializing Torso start:%s\n",paramfile.c_str());
+	if (realTorso.InitTorso(paramfile.c_str()) != 0) return -1;
 	MainTimer.Start();
 
 	if (!debug)
@@ -416,9 +459,11 @@ int torsoController::initRobot(bool debug){
 
 		printf("1. debug routine started...\n\n\n");
 	}
+	printf("Initializing Torso done\n");
 
-	robotState = ERobotControllerStatus::EStopped;
+	//robotState = ERobotControllerStatus::EStopped;
 	initDone = true;
+	//threadStart = true;
 
 	return 0;
 
@@ -579,8 +624,9 @@ int torsoController::FinishMoving(void)
 //---------- PD制御、マスタに合わせてスレーブを動かすだけ ---------------
 int torsoController::mainRoutine(int CalibSelect)
 {
+	printf("Starting main routine\n");
 	//m_isConnected = false;
-	robotState = ERobotControllerStatus::EDisconnected;
+	//robotState = ERobotControllerStatus::EDisconnected;
 	m_offset[0] = m_offset[1] = m_offset[2] = 0;
 	double tmp_tangles[Torso_DOF] = { 0 }, torque[Torso_DOF] = { 0 };	// テンポラリ目標角格納配列、トルク格納配列
 	int endflag, endflag2;							// 終了処理フラグ(メインループ/タームループ用)
@@ -590,7 +636,7 @@ int torsoController::mainRoutine(int CalibSelect)
 	double debug_tangles[Torso_DOF], debug_nangles[Torso_DOF];
 
 	for (i = 0; i<Torso_DOF; i++) torque[i] = 0.0;
-	realTorso.SetDAValue(torque);					// 全チャンネル0トルク出力
+	//realTorso.SetDAValue(torque);					// 全チャンネル0トルク出力
 
 	printf("Communication with HMD started ...");
 	// data aqusition									// 接続が安定するまで、待つ(適当)
@@ -695,7 +741,6 @@ int torsoController::mainRoutine(int CalibSelect)
 	}
 
 	m_calibrated = true;
-
 
 	return 1;
 }

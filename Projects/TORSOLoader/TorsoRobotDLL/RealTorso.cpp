@@ -273,11 +273,13 @@ void CRealTorso::GetCounterValue(void)
 
 void CRealTorso::SetCountOffset(void)
 {
+	printf("Setting Count Offset\n");
 	DWORD MeanCount;
 
 	MeanCount = realLink[0].Motor.ShowMeanCount();
 
 	PCICNT.SetCount(MeanCount);
+	printf("Setting Count Offset - done\n");
 }
 
 int CRealTorso::GetDIOValue(int channel)
@@ -307,6 +309,7 @@ void CRealTorso::SetDAValue(double *torque)
 
 	for(int i=0; i<Torso_DOF; i++) write[i] = realLink[i].Motor.CalcTorqueToDAData(torque[i]);
 
+	printf("Writing PCIDA DAOut\n");
 	PCIDA.DAOut(write);
 }
 
