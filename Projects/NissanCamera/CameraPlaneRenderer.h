@@ -44,10 +44,12 @@ protected:
 	video::RenderPass* m_screenMtrl[2];
 	video::RenderPass* m_wireframePass[2];
 
+	math::vector3d m_headPos;
 
 	TBee::ICameraVideoSource* m_videoSource;
 	float m_displayFov;
 	math::vector2d m_displaySize;
+	float m_displayRatio;
 
 	bool m_useLensCorrection;
 	GCPtr<video::ParsedShaderPP> m_lensCorrectionPP;
@@ -87,7 +89,7 @@ public:
 
 
 	math::vector3d GetUserOffset(){ return m_userOffset; }
-	void SetUserOffset(const math::vector3d& v){ m_userOffset = v; }
+	void SetUserOffset(const math::vector3d& v){ m_userOffset = v; printf("User Offsets: %f,%f,%f\n", m_userOffset.x, m_userOffset.y, m_userOffset.z); }
 
 	TBee::ICameraVideoSource* GetVideoSource(){ return  m_videoSource; }
 

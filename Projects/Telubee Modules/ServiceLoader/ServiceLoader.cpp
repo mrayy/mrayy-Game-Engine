@@ -58,7 +58,7 @@ namespace mray
 		virtual void Reset()
 		{
 			m_currPos = 0;
- 		//	Console::clear();
+ 			Console::clear();
  			Console::locate(m_currPos.x, m_currPos.y);
 		}
 	};
@@ -318,7 +318,6 @@ void ServiceLoader::Run()
 
 void ServiceLoader::_RenderInfo()
 {
-	return;
 	m_renderContext->Reset();
 
 	m_renderContext->RenderText("Service Name: " + m_moduleName, 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));

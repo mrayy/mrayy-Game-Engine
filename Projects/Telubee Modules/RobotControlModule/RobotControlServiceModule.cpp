@@ -409,7 +409,7 @@ public:
 		HANDLE thread = GetCurrentThread();
 		SetThreadPriority(thread, THREAD_PRIORITY_HIGHEST);
 		//Sleep until other threads loads
-		Sleep(1000);
+		Sleep(3000);
 		m_RobotHandler->Initialize();
 		// change it back to normal
 		SetThreadPriority(thread, THREAD_PRIORITY_NORMAL);

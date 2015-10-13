@@ -84,8 +84,8 @@ namespace TBee
 		ERobotControllerStatus status = m_robotController->GetRobotStatus();
 		if ((st.connected || m_localControl) && status != ERobotControllerStatus::EConnected)
 		{
-			if (status == ERobotControllerStatus::EStopped)
-				m_robotController->InitializeRobot(this);
+// 			if (status == ERobotControllerStatus::EStopped)
+// 				m_robotController->InitializeRobot(this);
 			if (status == ERobotControllerStatus::EDisconnected)
 				m_robotController->ConnectRobot();
 		}

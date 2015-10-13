@@ -174,7 +174,6 @@ void torsoController::DisconnectRobot()
 void torsoController::ShutdownRobot(){
 
 	tuningEnabled = false;
-
 	if (robotState == EDisconnected && ControlMode != 5)
 		ControlMode = 5;
 
@@ -848,12 +847,12 @@ int torsoController::controlStateMachine(){
 	if (!torsoInitialized)
 	{
 		if (tuningEnabled){
-		displayEncoderValues();
-		for (int i = 0; i<6; i++) ServoMotor[i].CalcPIDControl();
-		for (int i = 0; i<6; i++) ServoMotor[i].TorqueCut();
-		texArt_ncord->ContactPeriodic();
+			displayEncoderValues();
+			for (int i = 0; i < 6; i++) ServoMotor[i].CalcPIDControl();
+			for (int i = 0; i < 6; i++) ServoMotor[i].TorqueCut();
+			texArt_ncord->ContactPeriodic();
 
-		Sleep(10);
+			Sleep(10);
 		}
 		else
 			return false;
@@ -1051,6 +1050,8 @@ int torsoController::controlStateMachine(){
 			torsoInitialized = false;
 			robotState = EStopped;
 			goto contactNCord;
+
+			threadStart = false;
 
 			break;
 		}

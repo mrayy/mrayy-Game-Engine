@@ -33,7 +33,7 @@ DWORD RobotSerialPort::timerThreadHead(RobotSerialPort *robot, LPVOID pdata){
 	while (true){
 		if (threadStart){
 			//printf("thread h: %d \r", count++);
-			robot->head_control(-robot->roll, -robot->pan, robot->tilt);
+			robot->head_control(robot->roll, -robot->pan, robot->tilt);
 		}
 
 		
@@ -150,8 +150,8 @@ RobotSerialPort::RobotSerialPort()
 		m_impl->mvRobot[BASE][i] = new MovAvg(5);
 		m_impl->mvRobot[HEAD][i] = new MovAvg(5);
 
-		m_impl->mvRet[BASE][i] = new MovAvg(2);
-		m_impl->mvRet[HEAD][i] = new MovAvg(2);
+		m_impl->mvRet[BASE][i] = new MovAvg(10);
+		m_impl->mvRet[HEAD][i] = new MovAvg(10);
 	}
 
 	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadHead, this, NULL, NULL);

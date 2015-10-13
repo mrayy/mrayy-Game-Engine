@@ -507,7 +507,7 @@ void RobotCameraState::Update(float dt)
 
 	math::quaternion q;// = m_robotConnector->GetCurrentHeadRotation();// m_robotConnector->GetHeadRotation();
 	math::vector3d pos =  m_robotConnector->GetHeadPosition();
-
+	pos.y = 0;
 
 	math::vector3d rot,r ;
 	//q.toEulerAngles(r);
@@ -516,7 +516,7 @@ void RobotCameraState::Update(float dt)
 		//in the car
 		r = m_robotConnector->GetCurrentHeadRotation();
 		rot.x = r.y;
-		rot.y = -r.z;
+		rot.y = r.z;
 		rot.z = -r.x;
 	}
 	else
@@ -539,6 +539,11 @@ void RobotCameraState::Update(float dt)
 		rot.y = 0;
 	if (m_lockAxis[2])
 		rot.z = 0;*/
+
+	if (m_lockAxis[0])
+		pos.x = 0;
+	if (m_lockAxis[2])
+		pos.z = 0;
 
 	SetTransformation(pos, rot);
 

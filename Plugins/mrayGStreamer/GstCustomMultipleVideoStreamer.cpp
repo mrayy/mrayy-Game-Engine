@@ -160,7 +160,7 @@ public:
 
 				videoStr += "! videoconvert  ! video/x-raw,format=I420 ";// !videoflip method = 1  ";
 				//videoStr += "! videorate ";//  max-rate=" + core::StringConverter::toString(m_fps) + " ";
-				videoStr += " ! queue ";
+				//videoStr += " ! queue ";
 				//	if (m_grabber[i]->GetImageFormat()!=video::EPixel_YUYV)
 		}
 		else{
@@ -190,7 +190,7 @@ public:
 
 				
 				videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / m_grabber.size()) +
-						" speed-preset=superfast pass=qual tune=zerolatency sync-lookahead=0 rc-lookahead=0  ip-factor=1.8 interlaced=true sliced-threads=true  "// 
+						" speed-preset=superfast pass=qual tune=zerolatency sync-lookahead=0 rc-lookahead=0  ip-factor=1.8 interlaced=true sliced-threads=false  "// 
 					" ! rtph264pay ";
 					/*
 				//videoStr += " ! vp8enc ! rtpvp8pay ";
