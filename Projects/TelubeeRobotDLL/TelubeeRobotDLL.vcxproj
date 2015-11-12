@@ -63,7 +63,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TELUBEEROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
@@ -89,7 +89,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,13 +109,19 @@
   <ItemGroup>
     <ClInclude Include="agent.h" />
     <ClInclude Include="IBaseController.h" />
+    <ClInclude Include="IHeadController.h" />
+    <ClInclude Include="IRobotComponent.h" />
     <ClInclude Include="movingAverage.h" />
     <ClInclude Include="OmniBaseController.h" />
     <ClInclude Include="RobotSerialPort.h" />
     <ClInclude Include="RoombaController.h" />
+    <ClInclude Include="serial\serial.h" />
+    <ClInclude Include="serial\v8stdint.h" />
+    <ClInclude Include="serial\win.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TelubeeRobotDLL.h" />
+    <ClInclude Include="ThreeAxisHead.h" />
     <ClInclude Include="Tserial_event.h" />
   </ItemGroup>
   <ItemGroup>
@@ -128,15 +134,35 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="movingAverage.cpp" />
-    <ClCompile Include="OmniBaseController.cpp" />
-    <ClCompile Include="RobotSerialPort.cpp" />
+    <ClCompile Include="OmniBaseController.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
+    <ClCompile Include="RobotSerialPort.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
     <ClCompile Include="RoombaController.cpp" />
+    <ClCompile Include="serial\list_ports_win.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="serial\serial.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="serial\win.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TelubeeRobotDLL.cpp" />
-    <ClCompile Include="Tserial_event.cpp" />
+    <ClCompile Include="ThreeAxisHead.cpp" />
+    <ClCompile Include="Tserial_event.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

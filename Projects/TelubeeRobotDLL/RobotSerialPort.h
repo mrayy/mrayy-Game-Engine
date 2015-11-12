@@ -33,19 +33,19 @@ protected:
 	int robot_vx, robot_vy, robot_rot;
 	float pan, tilt, roll;
 	bool baseConnected;
+	int m_baseCounter;
 	ERobotControllerStatus _status;
 	IRobotStatusProvider* m_robotStatusProvider;
 
-	HANDLE m_headThread;
-	HANDLE m_baseThread;
+	HANDLE m_robotThread;
 
-	int omni_control(int velocity_x, int velocity_y, int rotation, int control);
+	int base_control(int velocity_x, int velocity_y, int rotation, int control);
 // 	int yamahaInitialize();
 // 	int yamahaXY_control(float pos_x, float pos_y, int control);
 	int head_control(float pan, float tilt, float roll);
 
-	static DWORD WINAPI timerThreadHead(RobotSerialPort *robot, LPVOID pdata);
-	static DWORD WINAPI timerThreadBase(RobotSerialPort *robot, LPVOID pdata);
+	void _ProcessRobot();
+	static DWORD WINAPI timerThreadRobot(RobotSerialPort *robot, LPVOID pdata);
 
 	std::string ScanePorts();
 
@@ -70,6 +70,8 @@ public:
 
 
 	virtual std::string ExecCommand(const std::string& cmd, const std::string& args);
+	virtual void ParseParameters(const std::map<std::string, std::string>& valueMap);
+
 };
 
 

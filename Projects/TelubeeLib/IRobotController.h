@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 
 namespace mray
@@ -96,6 +97,8 @@ public:
 	virtual void ManualControlRobot() {};
 
 	virtual const mray::TBee::RobotCapabilities* GetRobotCaps()const { return 0; }
+
+	virtual void ParseParameters(const std::map<std::string, std::string>& valueMap){}
 };
 
 

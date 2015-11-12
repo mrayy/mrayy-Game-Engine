@@ -51,6 +51,9 @@ public:
 
 	bool IsHoming();
 
+	void EnableLogging(bool e);
+	bool IsLoggingEnabled();
+
 	virtual void LoadFromXml(xml::XMLElement* e) ;
 };
 

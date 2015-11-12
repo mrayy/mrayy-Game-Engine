@@ -545,6 +545,14 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	ServoMotor[2].ChangePGain_V(0.0008);								// Give PGain_V to M3 for GoDeadEndPosition.
 	Time_start = MothorCLK.Elapsed();
 
+	while (ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
+	> 0)
+	{
+		texArt_ncord->ContactPeriodic();
+		//	if (GetAsyncKeyState(0x1b) & 0x8000) break;
+	}
+	Time_start = MothorCLK.Elapsed();
+
 	while (0
 		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 5.0, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
@@ -552,9 +560,10 @@ int torsoController::InitializeTorsoRobot(bool debug){
 		Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 5.0, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
+		//+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
 	> 0)
 	{
+		ServoMotor[5].Fix2(AngularDisplacement_goal_M[5]);
 		texArt_ncord->ContactPeriodic();
 		if (GetAsyncKeyState(0x1b) & 0x8000) break;
 	}
@@ -919,6 +928,11 @@ int torsoController::controlStateMachine(){
 				&(DesiredDisplacement_J[0]), &(DesiredDisplacement_J[1]), &(DesiredDisplacement_J[2]),
 				&(DesiredDisplacement_J[3]), &(DesiredDisplacement_J[4]), &(DesiredDisplacement_J[5]));
 
+			if (DesiredDisplacement_J[0] > (19.0)*PI / 180.0f)
+				DesiredDisplacement_J[0] = 19.0*PI / 180.0f;
+			else if (DesiredDisplacement_J[0] < (-19.0)*PI / 180.0f)
+				DesiredDisplacement_J[0] = -19.0*PI / 180.0f;
+
 			break;
 
 		case 2:		// fade connect
@@ -979,6 +993,8 @@ int torsoController::controlStateMachine(){
 			//DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + 0.6 + 0.055;
 			DesiredCoordinate_Head[2] = DesiredCoordinate_Head[2] + IK_height;
 
+
+
 			// limit DesiredCoordinate_Head.
 			if (DesiredCoordinate_Head[3] >  (25.0 + 25.0) / 180 * PI) DesiredCoordinate_Head[3] = (25.0 + 25.0) / 180 * PI;
 			else if (DesiredCoordinate_Head[3] < -(25.0 + 25.0) / 180 * PI) DesiredCoordinate_Head[3] = -(25.0 + 25.0) / 180 * PI;
@@ -1004,6 +1020,11 @@ int torsoController::controlStateMachine(){
 				&(DesiredDisplacement_J[4]),
 				&(DesiredDisplacement_J[5]));
 
+
+			if (DesiredDisplacement_J[0] > (19.0)*PI / 180.0f)
+				DesiredDisplacement_J[0] = 19.0*PI / 180.0f;
+			else if (DesiredDisplacement_J[0] < (-19.0)*PI / 180.0f)
+				DesiredDisplacement_J[0] = -19.0*PI / 180.0f;
 
 		//	DesiredDisplacement_J[2] = 0;
 		//	DesiredDisplacement_J[2] = 0.0;

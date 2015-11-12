@@ -75,7 +75,8 @@ namespace NCam
 		Calibrate,
 		Homing,
 		Console,
-		ARVisibility
+		ARVisibility,
+		LogEnable
 	};
 
 
@@ -200,6 +201,7 @@ void RobotCameraState::InitState()
 		keys.RegisterKey((uint)ERobotCameraKeyMap::LockZ, KEY_Z, false, false, "Lock Robot Z Axis");
 		keys.RegisterKey((uint)ERobotCameraKeyMap::Console, KEY_TAB, false, false, "Show/Hide Console");
 		keys.RegisterKey((uint)ERobotCameraKeyMap::ARVisibility, KEY_V, true, false, "Show/Hide AR Objects");
+		keys.RegisterKey((uint)ERobotCameraKeyMap::LogEnable, KEY_F9, false, false, "Enable/Disable Logging");
 	}
 
 	{
@@ -452,6 +454,10 @@ bool RobotCameraState::OnEvent(Event* e, const math::rectf& rc)
 				break;
 			case mray::NCam::ERobotCameraKeyMap::ARVisibility:
 				m_arRoot->setVisible(!m_arRoot->isVisible(), true);
+				ok = true;
+				break;
+			case mray::NCam::ERobotCameraKeyMap::LogEnable:
+				m_robotComm->EnableLogging(!m_robotComm->IsLoggingEnabled());
 				ok = true;
 				break;
 			default:
@@ -709,7 +715,6 @@ void RobotCameraState::onRenderDone(scene::ViewPort*vp)
 		b.z = m_cameraRenderer->GetUserOffset().z;
 		device->draw3DLine(a, b, video::SColor(strength, 0, 0, 1));
 	}
-
 	device->useRenderPass(0);
 
 }
@@ -726,31 +731,45 @@ void RobotCameraState::_RenderUI(const math::rectf& rc)
 	m_guimngr->DrawAll(&rc);
 	m_guiRenderer->Flush();
 
+#define PRINT_LOG(msg)\
+	font->print(r, &attr, 0, msg, m_guiRenderer); \
+	r.ULPoint.y += 2 * attr.fontSize;
+
+	attr.fontColor.Set(1, 1, 1, 1);
+	attr.fontAligment = GUI::EFA_MiddleLeft;
+	attr.fontSize = 18;
+	attr.hasShadow = true;
+	attr.shadowColor.Set(0, 0, 0, 1);
+	attr.shadowOffset = math::vector2d(2);
+	attr.spacing = 2;
+	attr.wrap = 0;
+	attr.RightToLeft = 0;
+
+	math::rectf r = rc;
+	core::string msg;
+
+	if (m_robotComm->IsLoggingEnabled())
+	{
+		msg = "Rec";
+		attr.fontColor.Set(1, 0, 0, 1);
+		PRINT_LOG(msg);
+		attr.fontColor.Set(1, 1, 1, 1);
+	}
+
+
 	if (!TBee::AppData::Instance()->IsDebugging)
+	{
+		m_guiRenderer->Flush();
 		return;
+	}
 
 	m_cameraRenderer->DebugRender(m_guiRenderer);
 
 	if (font)
 	{
-#define PRINT_LOG(msg)\
-	font->print(r, &attr, 0, msg, m_guiRenderer); \
-	r.ULPoint.y += 2*attr.fontSize  ;
-
-		attr.fontColor.Set(1, 1, 1, 1);
-		attr.fontAligment = GUI::EFA_MiddleLeft;
-		attr.fontSize = 18;
-		attr.hasShadow = true;
-		attr.shadowColor.Set(0, 0, 0, 1);
-		attr.shadowOffset = math::vector2d(2);
-		attr.spacing = 2;
-		attr.wrap = 0;
-		attr.RightToLeft = 0;
-
-		math::rectf r = rc;
 
 		{
-			core::string msg = "Axis Lock: ";
+			msg = "Axis Lock: ";
 			if (m_lockAxis[0])
 				msg += "[X]";
 			else msg += "X";

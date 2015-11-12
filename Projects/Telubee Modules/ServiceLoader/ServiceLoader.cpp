@@ -130,8 +130,11 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 
 	m_renderContext = new ServiceLoaderRenderContext();
 
+	m_thread = OS::IThreadManager::getInstance().createThread(new ServiceLoaderThread(this));
+	m_thread->start(0);
+
 	core::string path;
-	gFileSystem.getCorrectFilePath(m_moduleName, path);
+	gFileSystem.getCorrectFilePath(gFileSystem.getAppPath()+ m_moduleName, path);
 	m_moduleLib = OS::IDllManager::getInstance().getLibrary( path);
 	if (m_moduleLib)
 	{
@@ -156,8 +159,6 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 // 	m_serviceClient = network::INetwork::getInstance().createUDPClient();
 // 	m_serviceClient->Open();
 
-	m_thread = OS::IThreadManager::getInstance().createThread(new ServiceLoaderThread(this));
-	m_thread->start(0);
 
 	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 
@@ -279,7 +280,7 @@ void ServiceLoader::_destroy()
 		delete m_dataMutex;
 
 		m_sharedMemory.Detach();
-		delete Engine::getInstancePtr();
+	//	delete Engine::getInstancePtr();
 
 	}
 }

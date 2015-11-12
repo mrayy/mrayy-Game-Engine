@@ -67,6 +67,9 @@
     <Filter Include="Source Files\User">
       <UniqueIdentifier>{f3a94f53-5490-4369-9614-1895e3c5164c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\OS">
+      <UniqueIdentifier>{a619607e-4e0e-487d-8c24-5f36ce422ffb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -279,6 +282,12 @@
     <ClInclude Include="IXMLNetMessageHandler.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
+    <ClInclude Include="StackWalker.h">
+      <Filter>Source Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="CrashHandler.h">
+      <Filter>Source Files\OS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -436,6 +445,12 @@
     </ClCompile>
     <ClCompile Include="IXMLNetMessageHandler.cpp">
       <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="StackWalker.cpp">
+      <Filter>Source Files\OS</Filter>
+    </ClCompile>
+    <ClCompile Include="CrashHandler.cpp">
+      <Filter>Source Files\OS</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

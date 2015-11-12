@@ -340,27 +340,12 @@ public:
 		{
 			msg = "Robot Started: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
 			context->RenderText(msg, 100, 0);
-			if (false)
+
+			int sensorsCount = core::StringConverter::toInt(m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorCount, ""));
+			for (int i = 0; i < sensorsCount;++i)
 			{
-				msg = "Bump Left: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "0");
-				context->RenderText(msg, 100, 0);
-				msg = "Bump Right: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "1");
-				context->RenderText(msg, 100, 0);
-				msg = "Sensor Light Left: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "2");
-				context->RenderText(msg, 100, 0);
-				msg = "Sensor Light Front Left: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "3");
-				context->RenderText(msg, 100, 0);
-				msg = "Sensor Light Center Left: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "4");
-				context->RenderText(msg, 100, 0);
-				msg = "Sensor Light Center Right: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "5");
-				context->RenderText(msg, 100, 0);
-				msg = "Sensor Light Front Right: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "6");
-				context->RenderText(msg, 100, 0);
-				msg = "Sensor Light Right: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, "7");
-				context->RenderText(msg, 100, 0);
-				msg = "Battery Level: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryLevel, "");
-				context->RenderText(msg, 100, 0);
-				msg = "Battery Status: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetBatteryCharge, "");
+				msg = "Sensor[" + core::StringConverter::toString(i) + "]: " + 
+					m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, core::StringConverter::toString(i));
 				context->RenderText(msg, 100, 0);
 			}
 			std::vector<float> jvalues;
@@ -409,7 +394,7 @@ public:
 		HANDLE thread = GetCurrentThread();
 		SetThreadPriority(thread, THREAD_PRIORITY_HIGHEST);
 		//Sleep until other threads loads
-		Sleep(3000);
+	//	Sleep(3000);
 		m_RobotHandler->Initialize();
 		// change it back to normal
 		SetThreadPriority(thread, THREAD_PRIORITY_NORMAL);
@@ -419,6 +404,7 @@ public:
 	{
 		RobotStatus st;
 		m_connected = false;
+		m_robotData.connected = 0;
 		//m_RobotHandler->SetRobotData(st);
 		if (m_RobotHandler->GetRobotController() != 0)
 		{
@@ -459,9 +445,17 @@ public:
 			m_robotData.speed[0] = atof(vals[0].c_str());
 			m_robotData.speed[1] = atof(vals[1].c_str());
 			//limit the speed
-			m_robotData.speed[0] = -math::clamp<float>(m_robotData.speed[0], -1, 1);
+			m_robotData.speed[0] = math::clamp<float>(m_robotData.speed[0], -1, 1);
 			m_robotData.speed[1] = math::clamp<float>(m_robotData.speed[1], -1, 1);
+			m_robotData.speed[0] = (m_robotData.speed[0] ) ;
+			m_robotData.speed[1] = (m_robotData.speed[1] ) ;
 
+		}
+		else if (msg.equals_ignore_case("Rotation") && vals.size() == 1)
+		{
+			OS::ScopedLock l(m_dataMutex);
+			m_robotData.rotation = atof(vals[0].c_str());
+			m_robotData.rotation = math::clamp<float>(m_robotData.rotation, -1, 1);
 		}
 		else if (msg.equals_ignore_case("HeadRotation") && vals.size() == 4)
 		{
@@ -484,12 +478,6 @@ public:
 			m_robotData.headPos[1] = atof(vals[1].c_str());
 			m_robotData.headPos[2] = atof(vals[2].c_str());
 
-		}
-		else if (msg.equals_ignore_case("Rotation") && vals.size() == 1)
-		{
-			OS::ScopedLock l(m_dataMutex);
-			m_robotData.rotation = atof(vals[0].c_str());
-			m_robotData.rotation = math::clamp<float>(m_robotData.rotation, -1, 1);
 		}
 		else if (msg.equals_ignore_case("jointVals"))
 		{

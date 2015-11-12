@@ -108,7 +108,7 @@ public:
 		else
 		{
 			m_pipeLineString =
-				"myudpsrc name=audioSrc " + audiocaps +"!"+ audioStr  + " !directsoundsink ";
+				"myudpsrc name=audioSrc " + audiocaps +" ! "+ audioStr  + " ! directsoundsink ";
 
 		}
 

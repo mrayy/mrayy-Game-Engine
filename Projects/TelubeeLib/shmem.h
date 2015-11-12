@@ -25,7 +25,7 @@
 class shmem {
 
 public:
-	shmem() :data(0), size(0)
+	shmem() :data(0), size(0), hMap(0), pMap(0)
 	{
 	}
 	shmem(const std::string& name, unsigned int size)

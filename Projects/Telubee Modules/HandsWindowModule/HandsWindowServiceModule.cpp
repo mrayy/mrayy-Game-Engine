@@ -120,6 +120,7 @@ public:
 	virtual void OnUserConnected(const UserConnectionData& data)
 	{
 		m_connected = true;
+		m_handsWindow->OnConnected(m_context->remoteAddr.toString(), 7010, 0);
 	}
 	virtual void OnUserDisconnected()
 	{
@@ -136,7 +137,7 @@ public:
 		if (msg == "HandPorts" && values.size() >= 1)
 		{
 			m_handPort = core::StringConverter::toInt(values[0]);
-			m_handsWindow->OnConnected(m_context->remoteAddr.toString(), m_handPort, 0);
+			//m_handsWindow->OnConnected(m_context->remoteAddr.toString(), m_handPort, 0);
 		}
 	}
 

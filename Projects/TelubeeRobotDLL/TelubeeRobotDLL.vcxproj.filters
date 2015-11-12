@@ -54,6 +54,24 @@
     <ClInclude Include="OmniBaseController.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
+    <ClInclude Include="serial\win.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\serial.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\v8stdint.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="IHeadController.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreeAxisHead.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="IRobotComponent.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -78,6 +96,18 @@
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
     <ClCompile Include="OmniBaseController.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\list_ports_win.cc">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\serial.cc">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\win.cc">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreeAxisHead.cpp">
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>

@@ -116,6 +116,10 @@ int  Tserial_event::connect (char *port_arg, int  rate_arg,  int parity_arg,
 		CloseHandle(serial_handle);
 	serial_handle = INVALID_HANDLE_VALUE;
 
+	if (strcmp(port_arg, "") == 0)
+	{
+		return -1;
+	}
 	if (port_arg!=0)
 	{
 		strncpy(port, port_arg, 10);
@@ -321,6 +325,29 @@ void Tserial_event::sendData (char *buffer, int size)
 		tx_size = size;
 		SetEvent(serial_events[SIG_DATA_TO_TX]);
 		// indicating data to be sent
+		DWORD result_nbr;
+		char success = (char)WriteFile(serial_handle, txBuffer, tx_size,
+			&result_nbr, &ovWriter);
+		if (!success)
+		{
+			if (GetLastError() != ERROR_IO_PENDING)
+			{
+			//	done = true;
+#ifdef DEBUG_EVENTS
+				printf("WriteFile error (not pending)\n");
+#endif DEBUG_EVENTS
+			}
+#ifdef DEBUG_EVENTS
+			else
+				printf("WriteFile pending\n");
+#endif DEBUG_EVENTS
+		}
+#ifdef DEBUG_EVENTS
+		else
+		{
+			printf("WriteFile immediate success\n");
+		}
+#endif
 	}
 }
 void Tserial_event::OnEvent (unsigned long events)
@@ -439,28 +466,6 @@ void Tserial_event::run(void)
 				break;
 
 			case SIG_DATA_TO_TX:
-				success = (char) WriteFile(serial_handle, txBuffer, tx_size,
-					&result_nbr, &ovWriter);
-				if (!success)
-				{
-					if(GetLastError() != ERROR_IO_PENDING )
-					{
-						done = true;
-#ifdef DEBUG_EVENTS
-						printf("WriteFile error (not pending)\n");
-#endif DEBUG_EVENTS
-					}
-#ifdef DEBUG_EVENTS
-					else
-						printf("WriteFile pending\n");
-#endif DEBUG_EVENTS
-				}
-#ifdef DEBUG_EVENTS
-				else
-				{
-					printf("WriteFile immediate success\n");
-				}
-#endif
 				break;
 			case SIG_WRITER:
 				if (GetOverlappedResult(serial_handle, &ovWriter,

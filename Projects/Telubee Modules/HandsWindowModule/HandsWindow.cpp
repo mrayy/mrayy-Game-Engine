@@ -91,6 +91,12 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 		m_handsWnd = gEngine.getDevice()->CreateRenderWindow("Hands Window", monitor->GetSize(), false, opt, 0);
 		m_handsViewPort = m_handsWnd->CreateViewport(mT("Main"), 0, 0, math::rectf(0, 0, 1, 1), 0);
 		//context->app->AddRenderWindow(m_handsWnd);
+		//force the window to remain on top
+		{
+			HWND hWnd;
+			m_handsWnd->GetCustomParam("WINDOW", &hWnd);
+			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		}
 		m_handsViewPort->AddListener(this);
 		video::RenderWindowUtils::AddListener(m_handsWnd, this);
 
@@ -198,11 +204,10 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 	math::rectf texCoords(0, 1, 1, 0);
 
 	texCoords = m_projectionRect;
-	texCoords.ULPoint.y = 1 - texCoords.ULPoint.y;
-	texCoords.BRPoint.y = 1 - texCoords.BRPoint.y;
+// 	texCoords.ULPoint.y = 1 - texCoords.ULPoint.y;
+// 	texCoords.BRPoint.y = 1 - texCoords.BRPoint.y;
 	gEngine.getDevice()->draw2DImage(math::rectf(0, vp->GetSize()), 1, 0, &texCoords);
 
-	gEngine.getDevice()->draw2DRectangle(math::rectf(0, 100), 1);
 	/*	*/
 }
 

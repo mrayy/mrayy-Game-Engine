@@ -24,9 +24,6 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AudioVideoModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AVStreamServiceModule.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -34,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GstVideoProvider.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioVideoModule.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

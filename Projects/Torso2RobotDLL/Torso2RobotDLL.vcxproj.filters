@@ -28,6 +28,9 @@
     <ClCompile Include="movingAverage.cpp">
       <Filter>Source\GeneralClass</Filter>
     </ClCompile>
+    <ClCompile Include="MMTimer.cpp">
+      <Filter>Source\GeneralClass\TimerClass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -53,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="movingAverage.h">
       <Filter>Source\GeneralClass</Filter>
+    </ClInclude>
+    <ClInclude Include="MMTimer.h">
+      <Filter>Source\GeneralClass\TimerClass</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

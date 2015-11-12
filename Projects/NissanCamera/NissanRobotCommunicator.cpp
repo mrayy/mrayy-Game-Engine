@@ -3,6 +3,7 @@
 #include "NissanRobotCommunicator.h"
 
 #include "NissanRobotDLL.h"
+#include "DateTime.h"
 //#include "IRobotController.h"
 #include "StringUtil.h"
 
@@ -46,42 +47,114 @@ namespace NCam
 		OS::IStreamPtr m_targetFile;
 		OS::StreamWriter m_targetWrtr;
 
+		math::vector3d targetPosition;
 		math::vector3d targetValue;
 		math::vector3d currentValue;
+
+		bool posSet;
+		bool rotSet;
+		bool crotSet;
+
 	public:
 
 		CDebugRobot()
 		{
-			m_targetFile = gFileSystem.createTextFileWriter("TargetAngles.xls");
-
-			m_targetWrtr.setStream(m_targetFile);
+			posSet = rotSet = crotSet = 0;
+			m_targetFile = 0;
 		}
 
 		~CDebugRobot()
 		{
-			m_targetFile->close();
+			if (m_targetFile)
+				m_targetFile->close();
 		}
 
 		void Output()
 		{
+			if (!m_targetFile)
+				return;
+
+			if (!posSet || !rotSet || !crotSet)
+				return;
 			std::stringstream ss;
 			float t = gEngine.getTimer()->getSeconds();
-			ss << t << "\t" << targetValue.x << "\t" << targetValue.y << "\t" << targetValue.z 
+			ss << t << "\t" << core::CTime::ToString(core::DateTime::Now().GetTime()) 
+				<< "\t" << targetPosition.x << "\t" << targetPosition.y << "\t" << targetPosition.z
+				<< "\t" << targetValue.x << "\t" << targetValue.y << "\t" << targetValue.z
 				<< "\t" << currentValue.x << "\t" << currentValue.y << "\t" << currentValue.z << "\n";;
 			m_targetWrtr.writeString(ss.str());
+			posSet = false;
+			rotSet = false;
+			crotSet = false;
 		}
-
-		void TargetAngles(math::vector3d a)
+		void SetData(const math::vector3d& pos, const math::vector3d& trot, const math::vector3d& crot)
 		{
+			posSet = rotSet = crotSet = true;
+			targetPosition = pos;
+			targetValue = trot;
+			currentValue = crot;
+			Output();
+		}
+		void TargetPos(const math::vector3d& a)
+		{
+			posSet = true;
+			targetPosition = a;
+			Output();
+		}
+		void TargetAngles(const math::vector3d& a)
+		{
+			rotSet = true;
 			targetValue = a;
 			Output();
 		}
 
-		void CurrentAngles(math::vector3d a)
+		void CurrentAngles(const math::vector3d& a)
 		{
+			crotSet = true;
 			currentValue = a;
 			Output();
 		}
+
+		void Start(bool s)
+		{
+			if (s)
+			{
+				if (!m_targetFile)
+				{
+					core::DateTime ts=core::DateTime::Now();
+
+					char buffer[512];
+					sprintf(buffer, "TargetAngles_%d%d%d_%d_%d.xls", ts.GetDate().GetYear(), ts.GetDate().GetMonth(), ts.GetDate().GetDay(),
+						ts.GetTime().GetHour(true), ts.GetTime().GetMinute());
+					core::string path = gFileSystem.getAppPath() + buffer;
+						
+					printf("%s\n", path.c_str());
+					
+					m_targetFile = gFileSystem.createTextFileWriter(path);
+					m_targetWrtr.setStream(m_targetFile);
+					std::stringstream ss;
+					float t = gEngine.getTimer()->getSeconds();
+					ss << "Timestamp" << "\t" << "Time/Date"
+						<< "\t" << "PosX" << "\t" << "PosY" << "\t" << "PosZ" 
+						<< "\t" << "TargetRotX" << "\t" << "TargetRotY"  << "\t" << "TargetRotZ" 
+						<< "\t" << "RobotRotX" << "\t" << "RobotRotY" << "\t" << "RobotRotZ" << "\n";;
+					m_targetWrtr.writeString(ss.str());
+				}
+			}
+			else {
+				if ( m_targetFile)
+				{
+					m_targetFile->close();
+					m_targetFile = 0;
+				}
+			}
+		}
+
+		bool IsStarted()
+		{
+			return m_targetFile;
+		}
+		
 	};
 
 class NissanRobotCommunicatorImpl:public ITelubeeRobotListener
@@ -212,6 +285,7 @@ public:
 			m_robotStatus.Y = atof(vals[1].c_str());
 			m_robotStatus.Z = atof(vals[2].c_str());
 
+			m_debugger.TargetPos(math::vector3d(m_robotStatus.X, m_robotStatus.Y, m_robotStatus.Z));
 		}
 		else if (name == "Rotation" && vals.size() == 1)
 		{
@@ -242,6 +316,14 @@ public:
 	}
 	void ClearData(bool statusValues)
 	{
+	}
+	void EnableLogging(bool e)
+	{
+		m_debugger.Start(e);
+	}
+	bool IsLoggingEnabled()
+	{
+		return m_debugger.IsStarted();
 	}
 };
 
@@ -315,6 +397,16 @@ bool NissanRobotCommunicator::IsHoming()
 {
 	return m_impl->IsHoming();
 }
+void NissanRobotCommunicator::EnableLogging(bool e)
+{
+	m_impl->EnableLogging(e);
+}
+
+bool NissanRobotCommunicator::IsLoggingEnabled()
+{
+	return m_impl->IsLoggingEnabled();
+}
+
 }
 }
 

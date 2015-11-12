@@ -133,7 +133,7 @@ void Application::onEvent(Event* event)
 		{
 			m_drawUI=!m_drawUI;
 		}
-		if (e->press && e->key == KEY_F9)
+		if (e->press && e->key == KEY_F9 && e->ctrl)
 		{
 			AppData::Instance()->IsDebugging = !AppData::Instance()->IsDebugging;
 		}

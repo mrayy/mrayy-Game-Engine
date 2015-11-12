@@ -41,7 +41,6 @@ protected:
 	std::string ScanePorts();
 
 	void _setupCaps();
-	void _processData();
 public:
 
 	TexART_NCord000_Interface  *texArt_ncord;   // Interface object for the machine hardware.
@@ -125,6 +124,10 @@ public:
 		double *Theta_4,      // AngularDisplacement of J4      [rad]
 		double *Theta_5,      // AngularDisplacement of J5      [rad]
 		double *Theta_6);      // AngularDisplacement of J6      [rad]
+
+
+
+	void _processData();
 };
 
 

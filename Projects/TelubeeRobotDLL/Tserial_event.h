@@ -150,15 +150,18 @@ public:
                  ~Tserial_event();
     int           connect          (char *port, int rate, int parity,
 		char ByteSize, bool modem_events, bool flowControl);
-	bool isconnected(){ return serial_handle != 0; }
+	bool isconnected(){ return serial_handle != 0 && serial_handle != INVALID_HANDLE_VALUE; }
+	bool isOpen(){ return isconnected(); }
     void          setManager       (type_myCallBack manager);
     void          setRxSize        (int size);
     void          sendData         (char *buffer, int size);
+	void write(const std::string&cmd){ sendData((char*)cmd.c_str(), cmd.length()); }
     int           getNbrOfBytes    (void);
     int           getDataInSize    (void);
     char *        getDataInBuffer  (void);
     void          dataHasBeenRead  (void);
     void          disconnect       (void);
+	void close(){ disconnect(); }
 };
 /* -------------------------------------------------------------------- */
 

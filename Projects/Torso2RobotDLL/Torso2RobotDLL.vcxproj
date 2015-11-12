@@ -100,7 +100,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TorsoROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>.\;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Projects\TelubeeLib;include/TexARTNCord/;include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Projects\TelubeeLib;include/TexARTNCord/;include/;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -195,6 +195,7 @@
     <ClInclude Include="include\TexARTNCord\TexART_MothorCLK.h" />
     <ClInclude Include="include\TexARTNCord\TexART_ServoMotor2015.h" />
     <ClInclude Include="IRobotController.h" />
+    <ClInclude Include="MMTimer.h" />
     <ClInclude Include="movingAverage.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -228,6 +229,7 @@
     </ClCompile>
     <ClCompile Include="include\TexARTNCord\TexART_ServoMotor2015.cpp" />
     <ClCompile Include="console.cpp" />
+    <ClCompile Include="MMTimer.cpp" />
     <ClCompile Include="movingAverage.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

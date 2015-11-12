@@ -32,8 +32,8 @@
 #define RADTODEG	57.2957795131
 #define	DEGTORAD	0.0174532925199
 
-char robotCOM[5], headCOM[5]; 
-int robot_baudRate, head_baudRate; 
+char headCOM[10], robotCOM[10];
+int robot_baudRate = 115200, head_baudRate = 115200;
 int xAxis = 1, yAxis = 1, zAxis = 1;
 
 clock_t startT, endT;
@@ -118,25 +118,25 @@ void load_parameters(){
 					token[n] = strtok(0, DELIMITER); // subsequent tokens
 					if (!token[n]) break; // no more tokens
 				}
-
-				if(strcmp (token[0], "ROBOT_COM_PORT") == 0)
-					strcpy (robotCOM, token[1]);
-
-				else if(strcmp (token[0], "ROBOT_BAUD") == 0)
+				
+ 				if(strcmp (token[0], "ROBOT_COM_PORT") == 0)
+ 					strcpy (robotCOM, token[1]);
+				
+				 if(strcmp (token[0], "ROBOT_BAUD") == 0)
 					robot_baudRate = atoi(token[1]);
 
 				else if(strcmp (token[0], "HEAD_COM_PORT") == 0)
 					strcpy (headCOM, token[1]);
 
 				else if(strcmp (token[0], "HEAD_BAUD") == 0)
-					head_baudRate = atoi(token[1]);
-
+					head_baudRate = atoi(token[1]);/**/
+				/*
 				else if (strcmp(token[0], "X") == 0)
 					xAxis = atoi(token[1]);
 				else if (strcmp(token[0], "Y") == 0)
 					yAxis = atoi(token[1]);
 				else if (strcmp(token[0], "Z") == 0)
-					zAxis = atoi(token[1]);
+					zAxis = atoi(token[1]);*/
 
 			}
 

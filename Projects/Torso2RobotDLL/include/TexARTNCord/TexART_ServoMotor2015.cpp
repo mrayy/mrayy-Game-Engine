@@ -1400,12 +1400,12 @@ double Time_present)
 
   Time_elapsed = Time_present - Time_start;
   if(Time_elapsed < 0.0) Time_elapsed = 0.0;
-
+  
   // When AngularDisplacement_goal is over range, return with no motion.
-  if ((AngularDisplacement_goal > LimitAngularDisplacement_p) ||
-	  (AngularDisplacement_goal < LimitAngularDisplacement_n)){
-	  cout << "ID=" << IDNumber << " GoNextPositionOnTime : Error in AngularDisplacement_goal = " << AngularDisplacement_goal << "\n";
-	  return(0);
+  if((AngularDisplacement_goal > LimitAngularDisplacement_p) ||
+     (AngularDisplacement_goal < LimitAngularDisplacement_n)){
+    cout << "ID=" << IDNumber << " GoNextPositionOnTime : Error in AngularDisplacement_goal = " << AngularDisplacement_goal << "\n";
+    return(0);
   }
   // Release the velocity control temporarily.
   ZeroGain_V();

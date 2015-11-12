@@ -12,6 +12,7 @@
 #include "StringUtil.h"
 #include "MutexLocks.h"
 #include "CommunicationMessages.h"
+#include "LogManager.h"
 
 #include <tinyxml2.h>
 #include <windows.h>
@@ -59,6 +60,10 @@ ServiceHostManager::ServiceHostManager()
 	m_inited = false;
 	m_robotCommunicator = 0;
 	m_autoRestartService = false;
+	m_commLink = 0;
+	m_commThread = 0;
+	m_serviceThread = 0;
+	m_dataMutex = 0;
 }
 ServiceHostManager::~ServiceHostManager()
 {
@@ -74,8 +79,8 @@ void ServiceHostManager::_destroy()
 		CloseHandle(m_serviceList[i].threadHandle);
 	}
 	m_sharedMemory.Detach();
-
-	m_commLink->Close();
+	if (m_commLink)
+		m_commLink->Close();
 
 	OS::IThreadManager::getInstance().killThread(m_commThread);
 	delete m_commThread;
@@ -95,6 +100,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	new Engine(new OS::WinOSystem());
 	gEngine.loadPlugins("plugins.stg");
 	gEngine.createDevice("OpenGL");
+
+	StreamLogger *log = new StreamLogger(true);
+	log->setStream(gFileSystem.createTextFileWriter("ServiceHostManager.log"));
+	gLogManager.addLogDevice(log);
+	gLogManager.log("Service Host Manager Started", ELL_INFO);
 
 	network::createWin32Network();
 
@@ -117,17 +127,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_memory->hostAddress.port = m_commLink->Port();
 	printf("Service Host: %s:%d\n\n", m_memory->hostAddress.toString().c_str(), m_memory->hostAddress.port);
 
-
-	m_commThread = OS::IThreadManager::getInstance().createThread(new ServiceHostManagerThread(this, &ServiceHostManager::_ProcessPacket));
-	m_commThread->start(0);
-
-	m_serviceThread = OS::IThreadManager::getInstance().createThread(new ServiceHostManagerThread(this, &ServiceHostManager::_ProcessServices,100));
-	m_serviceThread->start(0);
-
 	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 
 
 	printf("Initializing RobotCommunicator\n");
+	gLogManager.log("Initializing RobotCommunicator", ELL_INFO);
 	m_robotCommunicator = new TBee::RobotCommunicator();
 	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
 	m_robotCommunicator->SetListener(this);
@@ -135,6 +139,7 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_info.IP = m_memory->hostAddress.toString();
 	m_info.name = "Telexistence Robot";
 
+	gLogManager.log("Starting Services", ELL_INFO);
 	for (int i = 1; i < argc; ++i)
 	{
 		if (strcmp(argv[i] ,"-r")==0)
@@ -149,6 +154,12 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	}
 //  	RunLocalService("AVStreamServiceModule");
 //  	RunLocalService("RobotControlServiceModule");
+
+	m_commThread = OS::IThreadManager::getInstance().createThread(new ServiceHostManagerThread(this, &ServiceHostManager::_ProcessPacket));
+	m_commThread->start(0);
+
+	m_serviceThread = OS::IThreadManager::getInstance().createThread(new ServiceHostManagerThread(this, &ServiceHostManager::_ProcessServices, 100));
+	m_serviceThread->start(0);
 
 	m_inited = true;
 	return true;
@@ -176,6 +187,9 @@ void ServiceHostManager::Run()
 }
 bool ServiceHostManager::RunLocalService(const core::string& name)
 {
+
+	gLogManager.log("Creating Service: " + name, ELL_INFO);
+	OS::ScopedLock lock(m_dataMutex);
 	core::string lpApplicationName = core::string(".\\ServiceLoader.exe"); /* The program to be executed */
 	core::string args = lpApplicationName+" "+(name + ".dll");
 
@@ -204,6 +218,7 @@ bool ServiceHostManager::RunLocalService(const core::string& name)
 	m_serviceList.push_back(ifo);
 
 	printf("Service [%s] process was created\n",name.c_str());
+	gLogManager.log("Service Created: " + name, ELL_INFO);
 
 	return true;
 }
@@ -251,8 +266,8 @@ bool ServiceHostManager::_ProcessPacket()
 		return 0;
 	}
 	tinyxml2::XMLElement*root = doc.RootElement();
-
-	if (root->Name() == "ServiceModule")
+	core::string rootName = root->Name();
+	if (rootName == "ServiceModule")
 	{
 		std::string msg = root->Attribute("Message");
 		if (msg == "Connect") //New service
@@ -305,7 +320,7 @@ bool ServiceHostManager::_ProcessPacket()
 			}
 		}
 	}
-	else if (root->Name() == "Broadcast") // broadcast message to all services
+	else if (rootName == "Broadcast") // broadcast message to all services
 	{
 		for (int i = 0; i < m_serviceList.size(); ++i)
 		{

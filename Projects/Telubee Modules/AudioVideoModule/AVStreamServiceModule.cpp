@@ -14,6 +14,7 @@
 #include "DirectShowVideoGrabber.h"
 #include "GstCustomVideoStreamer.h"
 #include "GstCustomMultipleVideoStreamer.h"
+#include "GstNetworkAudioPlayer.h"
 #include "FlyCameraManager.h"
 #include "DirectSoundInputStream.h"
 #include "CommunicationMessages.h"
@@ -102,6 +103,8 @@ public:
 
 	TBeeServiceContext* m_context;
 
+	video::GstNetworkAudioPlayer* m_audioPlayer;
+
 public:
 	AVStreamServiceModuleImpl()
 	{
@@ -112,6 +115,8 @@ public:
 
 		m_streamers = new video::GstStreamBin();
 		LoadCameraSettings("StreamingProfiles.xml");
+
+		m_audioPlayer = 0;
 
 		m_VideoPorts[0] = 7000;
 		m_VideoPorts[1] = 7001;
@@ -433,6 +438,11 @@ public:
 			streamer = new video::GstNetworkAudioStreamer();
 			m_streamers->AddStream(streamer, "Audio");
 		}
+
+		{
+			m_audioPlayer = new video::GstNetworkAudioPlayer();
+			m_audioPlayer->CreateStream();
+		}
 		printf("Finished streams\n");
 
 
@@ -541,6 +551,12 @@ public:
 			m_cameraIfo[1].camera = 0;
 		}
 
+		if (m_audioPlayer)
+		{
+			m_audioPlayer->Close();
+			delete m_audioPlayer;
+		}
+
 		m_status = EServiceStatus::Idle;
 	}
 
@@ -582,6 +598,11 @@ public:
 		m_portsReceived = true;
 		m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), m_VideoPorts, 2, 0, 0);
 #endif
+		if (m_audioPlayer)
+		{
+			m_audioPlayer->SetIPAddress(m_context->remoteAddr.toString(), 7010, 0, 0);
+			m_audioPlayer->Play();
+		}
 		_startVideoStream();
 	}
 
@@ -599,6 +620,12 @@ public:
 			m_cameraIfo[0].camera->Stop();
 		if (m_cameraIfo[1].camera)
 			m_cameraIfo[1].camera->Stop();
+
+		if (m_audioPlayer)
+		{
+// 			printf("Stopping Audio.\n");
+// 			m_audioPlayer->Pause();
+		}
 
 		m_status = EServiceStatus::Stopped;
 		m_isVideoStarted = false;
