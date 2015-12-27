@@ -26,7 +26,7 @@ public:
 
 	// addr: target address to stream video to
 	// videoport: port for the video stream, video rtcp is allocated as videoPort+1/videoPort+2
-	void BindPorts(const core::string& addr, uint* videoPort,uint count, uint clockPort, bool rtcp);
+	void BindPorts(const std::string& addr, uint* videoPort,uint count, uint clockPort, bool rtcp);
 	void SetCameraResolution(int width, int height, int fps = 30);
 	void SetFrameResolution(int width, int height);
 	void SetBitRate(int bitRate);

@@ -1,6 +1,7 @@
 
-
 #include "stdafx.h"
+
+#if 0
 #include "OculusBaseController.h"
 #include "AppData.h"
 #include "OculusDevice.h"
@@ -84,3 +85,4 @@ void OculusBaseController::Recalibrate()
 }
 
 
+#endif

@@ -26,12 +26,12 @@ namespace video
 class GStreamerFilePlayer:public IGStreamerPlayer
 {
 protected:
-	core::string& m_videoPath;
+	std::string& m_videoPath;
 public:
 	GStreamerFilePlayer();
 	virtual~GStreamerFilePlayer();
 
-	bool LoadMovie(const core::string& path);
+	bool LoadMovie(const std::string& path);
 };
 
 }

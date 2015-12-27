@@ -15,6 +15,7 @@
 #ifndef __OpenNICaptureDevice__
 #define __OpenNICaptureDevice__
 
+#ifdef USE_OPENNI
 #include <NITE.h>
 
 
@@ -60,5 +61,6 @@ public:
 
 }
 
+#endif
 
 #endif

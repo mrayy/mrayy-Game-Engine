@@ -110,6 +110,8 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppSrcVideoSrc.h" />
+    <ClInclude Include="CameraVideoSrc.h" />
     <ClInclude Include="CMySink.h" />
     <ClInclude Include="CMySrc.h" />
     <ClInclude Include="CMyUDPSink.h" />
@@ -129,6 +131,7 @@
     <ClInclude Include="GstNetworkVideoPlayer.h" />
     <ClInclude Include="GStreamerPlayback.h" />
     <ClInclude Include="GstStreamBin.h" />
+    <ClInclude Include="ICustomVideoSrc.h" />
     <ClInclude Include="IGStreamerPlayer.h" />
     <ClInclude Include="IGstAppListener.h" />
     <ClInclude Include="GstUtils.h" />
@@ -140,6 +143,8 @@
     <ClInclude Include="VideoAppSinkHandler.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AppSrcVideoSrc.cpp" />
+    <ClCompile Include="CameraVideoSrc.cpp" />
     <ClCompile Include="CMySink.cpp" />
     <ClCompile Include="CMySrc.cpp" />
     <ClCompile Include="CMyUDPSink.cpp" />

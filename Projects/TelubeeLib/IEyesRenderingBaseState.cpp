@@ -5,7 +5,7 @@
 
 #include "RemoteRobotCommunicator.h"
 #include "AppData.h"
-#include "OculusDevice.h"
+//#include "OculusDevice.h"
 #include "InputManager.h"
 #include "FontResourceManager.h"
 #include "JoystickDefinitions.h"
@@ -437,7 +437,7 @@ video::IRenderTarget* IEyesRenderingBaseState::Render(const math::rectf& rc, ETa
 
 void IEyesRenderingBaseState::Update(float dt)
 {
-
+	/*
 	if (m_enablePanning)
 	{
 		if (AppData::Instance()->oculusDevice)
@@ -457,7 +457,7 @@ void IEyesRenderingBaseState::Update(float dt)
 			// 		m_headPan = m_headPan*0.5 + 0.5;
 			// 		m_headTilt = m_headTilt*0.5 + 0.5;
 		}
-	}
+	}*/
 }
 
 

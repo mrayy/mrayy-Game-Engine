@@ -7,6 +7,7 @@
 #include "TBeeServiceContext.h"
 #include "IServiceModule.h"
 #include "IUDPClient.h"
+#include "XMLTree.h"
 
 namespace mray
 {
@@ -26,6 +27,8 @@ protected:
 	OS::IThread* m_thread;
 	TBee::ServiceRenderContext* m_renderContext;
 	TBee::TBeeServiceContext m_context;
+	xml::XMLTree m_valueTree;
+	xml::XMLElement* m_valueRootElement;
 
 	std::string m_moduleName;
 	bool m_inited;

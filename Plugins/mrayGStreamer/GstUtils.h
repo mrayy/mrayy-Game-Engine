@@ -33,7 +33,7 @@ public:
 	GstUtils();
 	virtual ~GstUtils();
 
-	bool 	setPipelineWithSink(const core::string& pipeline, const core::string& sinkname = "sink", bool isStream = false);
+	bool 	setPipelineWithSink(const std::string& pipeline, const std::string& sinkname = "sink", bool isStream = false);
 	bool 	setPipelineWithSink(GstElement * pipeline, GstElement * sink, bool isStream = false);
 	bool	startPipeline();
 
@@ -106,7 +106,7 @@ public:
 	GstVideoUtils();
 	virtual ~GstVideoUtils();
 
-	bool 			setPipeline(const core::string& pipeline, int bpp = 24, bool isStream = false, int w = -1, int h = -1);
+	bool 			setPipeline(const std::string& pipeline, int bpp = 24, bool isStream = false, int w = -1, int h = -1);
 
 	bool 			allocate(int w, int h, int bpp);
 

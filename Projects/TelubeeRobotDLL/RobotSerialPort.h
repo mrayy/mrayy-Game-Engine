@@ -72,6 +72,8 @@ public:
 	virtual std::string ExecCommand(const std::string& cmd, const std::string& args);
 	virtual void ParseParameters(const std::map<std::string, std::string>& valueMap);
 
+	virtual void tuningMode() {};
+
 };
 
 

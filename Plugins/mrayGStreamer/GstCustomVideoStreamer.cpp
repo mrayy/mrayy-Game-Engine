@@ -405,7 +405,7 @@ public:
 
 	}
 
-	void BindPorts(const core::string& addr, int videoPort, uint clockPort, bool rtcp)
+	void BindPorts(const std::string& addr, int videoPort, uint clockPort, bool rtcp)
 	{
 		if (m_ipAddr == addr && m_videoPort == videoPort && m_rtcp == rtcp)
 			return;
@@ -473,7 +473,7 @@ void GstCustomVideoStreamer::Stop()
 }
 
 
-void GstCustomVideoStreamer::BindPorts(const core::string& addr, uint* videoPort, uint count, uint clockPort, bool rtcp)
+void GstCustomVideoStreamer::BindPorts(const std::string& addr, uint* videoPort, uint count, uint clockPort, bool rtcp)
 {
 	m_impl->BindPorts(addr, videoPort[0], clockPort, rtcp);
 }

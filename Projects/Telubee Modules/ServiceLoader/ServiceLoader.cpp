@@ -66,6 +66,7 @@ namespace mray
 ServiceLoader::ServiceLoader()
 {
 	m_inited = false;
+	m_valueRootElement = 0;
 }
 ServiceLoader::~ServiceLoader()
 {
@@ -155,6 +156,9 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 		return false;
 	}
 
+	if (m_valueRootElement)
+		m_serviceModule->LoadServiceSettings(m_valueRootElement);
+
 
 // 	m_serviceClient = network::INetwork::getInstance().createUDPClient();
 // 	m_serviceClient->Open();
@@ -178,7 +182,8 @@ void ServiceLoader::_sendConnectMessage()
 	e->addAttribute("Message", "Connect");
 	e->addAttribute("Name", m_serviceModule->GetServiceName());
 // 	e->addAttribute("IP", m_context.localAddr.toString());
- 	e->addAttribute("Port",core::StringConverter::toString(m_context.localAddr.port));
+	e->addAttribute("Port", core::StringConverter::toString(m_context.localAddr.port));
+	e->addAttribute("NetValue", core::StringConverter::toString(m_context.netValueController->GetPort()));
 	w.addElement(e);
 	core::string msg= w.flush();
 
@@ -202,13 +207,13 @@ void ServiceLoader::_sendPongMessage()
 }
 void ServiceLoader::_loadSettings()
 {
-	xml::XMLTree tree;
 	core::string path,name,ext;
 //	core::StringUtil::SplitPathFileName(m_moduleName, path, name);
 	core::StringUtil::SplitPathExt(m_moduleName, name, ext);
-	if (tree.load("Modules\\" + name + ".xml"))
+	if (m_valueTree.load("Modules\\" + name + ".xml"))
 	{
-		xml::XMLElement* e = tree.getSubElement(name);
+		xml::XMLElement* e = m_valueTree.getSubElement(name);
+		m_valueRootElement = e;
 		if (!e)
 			return;
 		e = e->getSubElement("Parameters");

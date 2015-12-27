@@ -26,6 +26,7 @@ class RobotControlServiceModuleImpl :public IServiceContextListener, public IRob
 {
 public:
 
+/*
 
 	class RobotControlThread :public OS::IThreadFunction
 	{
@@ -45,18 +46,6 @@ public:
 			}
 		}
 	};
-	RobotStatus m_robotData;
-
-	math::vector2d m_collision;
-	RobotHandler* m_RobotHandler;
-
-	EServiceStatus m_status;
-	TBeeServiceContext* m_context;
-	OS::IThreadPtr m_thread;
-	OS::IMutex* m_dataMutex;
-
-	bool m_connected;
-
 
 	bool _ProcessThread()
 	{
@@ -70,7 +59,20 @@ public:
 
 		m_RobotHandler->SetRobotData(m_robotData);
 		return true;
-	}
+	}*/
+	RobotStatus m_robotData;
+
+	math::vector2d m_collision;
+	RobotHandler* m_RobotHandler;
+
+	EServiceStatus m_status;
+	TBeeServiceContext* m_context;
+	OS::IThreadPtr m_thread;
+	OS::IMutex* m_dataMutex;
+	std::map<std::string, std::string> m_robotValueMap;
+	bool m_connected;
+
+
 
 	virtual bool RequestData(RobotHandler* r, RobotStatus& status)
 	{
@@ -149,6 +151,7 @@ public:
 
 		//gLogManager.log("Initializing RobotHandler",ELL_INFO);
 		m_RobotHandler = new RobotHandler();
+		m_RobotHandler->GetRobotController()->ParseParameters(m_robotValueMap);
 		m_RobotHandler->SetListener(this);
 
 		m_dataMutex = OS::IThreadManager::getInstance().createMutex();
@@ -390,14 +393,7 @@ public:
 	/// Listeners
 	virtual void OnUserConnected(const UserConnectionData& data)
 	{
-		// change main thread priority to max
-		HANDLE thread = GetCurrentThread();
-		SetThreadPriority(thread, THREAD_PRIORITY_HIGHEST);
-		//Sleep until other threads loads
-	//	Sleep(3000);
 		m_RobotHandler->Initialize();
-		// change it back to normal
-		SetThreadPriority(thread, THREAD_PRIORITY_NORMAL);
 		m_connected = true;
 	}
 	virtual void OnUserDisconnected()
@@ -564,8 +560,19 @@ void RobotControlServiceModule::DebugRender(ServiceRenderContext* contex)
 	m_impl->DebugRender(contex);
 }
 
-bool RobotControlServiceModule::LoadServiceSettings(xml::XMLElement* e)
+bool RobotControlServiceModule::LoadServiceSettings(xml::XMLElement* elem)
 {
+	xml::XMLElement* e = elem->getSubElement("RobotParameters");
+	if (e)
+	{
+		e = e->getSubElement("Value");
+		while (e)
+		{
+			m_impl->m_robotValueMap[e->getAttribute("Name")->value] = e->getAttribute("Value")->value;
+			e = e->nextSiblingElement("Value");
+		}
+	}
+
 	return true;
 }
 

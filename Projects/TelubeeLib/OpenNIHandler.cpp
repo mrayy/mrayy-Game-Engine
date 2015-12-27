@@ -1,6 +1,8 @@
 
 
 #include "stdafx.h"
+#ifdef USE_OPENNI
+
 #include "OpenNIHandler.h"
 #include "OpenNIManager.h"
 #include "OpenNIUtils.h"
@@ -160,3 +162,4 @@ bool OpenNIHandler::ConvertToImageSpace(const math::vector2d& pos, math::vector2
 }
 }
 
+#endif

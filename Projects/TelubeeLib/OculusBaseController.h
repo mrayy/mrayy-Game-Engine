@@ -14,6 +14,7 @@ purpose:
 #ifndef __OculusBaseController__
 #define __OculusBaseController__
 
+#if 0
 
 #include "IInputController.h"
 
@@ -44,5 +45,6 @@ public:
 }
 }
 
+#endif
 
 #endif

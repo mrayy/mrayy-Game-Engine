@@ -250,10 +250,10 @@ void CRobotConnector::InitController(CRobotConnector* c)
 	{
 	case EHeadControllerType::Keyboard:
 		c->SetHeadController(new KeyboardHeadController);
-		break;;
+		break;;/*
 	case EHeadControllerType::Oculus:
 		c->SetHeadController(new OculusHeadController);
-		break;;
+		break;;*/
 	case EHeadControllerType::OptiTrack:
 		c->SetHeadController(new OptiTrackHeadController(1));
 		break;;
@@ -268,9 +268,9 @@ void CRobotConnector::InitController(CRobotConnector* c)
 	{
 	case ERobotControllerType::Keyboard:
 		break;;
-	case ERobotControllerType::Oculus:
+	/*case ERobotControllerType::Oculus:
 		c->SetRobotController(new OculusBaseController);
-		break;;
+		break;;*/
 	case ERobotControllerType::Joystick:
 		c->SetRobotController(new JoystickInputController);
 		break;;

@@ -29,6 +29,8 @@ protected:
 	OS::IThread* m_commThread;
 	OS::IThread* m_serviceThread;
 
+	OS::ITimer* m_timer;
+
 	TBee::TBRobotInfo m_info;
 
 	TBee::RobotCommunicator* m_robotCommunicator;
@@ -41,9 +43,11 @@ protected:
 			threadHandle = 0;
 			lastTime = 0;
 			pingSent = false;
+			netValuePort = 0;
 		}
 		core::string name;
 		network::NetAddress address;
+		int netValuePort;
 		TBee::EServiceStatus status;
 
 		HANDLE processHandle;
@@ -55,6 +59,8 @@ protected:
 
 	typedef std::vector<ServiceInfo> ServiceList;
 	ServiceList m_serviceList;
+
+	void _sendNetValuePort(const ServiceInfo& ifo,const network::NetAddress& addr);
 
 	int GetServiceByName(const core::string &name);
 	int GetServiceByAddress(const network::NetAddress* addr);

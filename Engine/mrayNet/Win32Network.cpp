@@ -509,6 +509,7 @@ int Win32Network::inner_receivefrom(SOCKET s,void*data,int len,
 	if (recvLength == SOCKET_ERROR)
 	{
 		int err=WSAGetLastError ();
+		printf("ReceiveFrom Error: %d\n", err);
 		if (err == WSAEWOULDBLOCK || err == WSAECONNRESET){
 
 			return 0;

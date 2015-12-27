@@ -127,7 +127,7 @@ public:
 
 	}
 
-	void SetIPAddress(const core::string& ip, uint audioPort,uint clockPort, bool rtcp)
+	void SetIPAddress(const std::string& ip, uint audioPort,uint clockPort, bool rtcp)
 	{
 		m_ipAddr = ip;
 		m_audioPort = audioPort;
@@ -199,7 +199,7 @@ GstNetworkAudioPlayer::~GstNetworkAudioPlayer()
 {
 	delete m_impl;
 }
-void GstNetworkAudioPlayer::SetIPAddress(const core::string& ip, uint audioPort,uint clockPort,bool rtcp)
+void GstNetworkAudioPlayer::SetIPAddress(const std::string& ip, uint audioPort,uint clockPort,bool rtcp)
 {
 	m_impl->SetIPAddress(ip, audioPort, clockPort, rtcp);
 }

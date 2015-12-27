@@ -190,7 +190,7 @@ public:
 
 	}
 
-	void SetIPAddress(const core::string& ip, uint videoPort, uint clockPort, bool rtcp)
+	void SetIPAddress(const std::string& ip, uint videoPort, uint clockPort, bool rtcp)
 	{
 		m_ipAddr = ip;
 		m_videoPort = videoPort;
@@ -356,7 +356,7 @@ GstNetworkVideoPlayer::~GstNetworkVideoPlayer()
 {
 	delete m_impl;
 }
-void GstNetworkVideoPlayer::SetIPAddress(const core::string& ip, uint videoPort, uint clockPort, bool rtcp)
+void GstNetworkVideoPlayer::SetIPAddress(const std::string& ip, uint videoPort, uint clockPort, bool rtcp)
 {
 	m_impl->SetIPAddress(ip, videoPort, clockPort,rtcp);
 }

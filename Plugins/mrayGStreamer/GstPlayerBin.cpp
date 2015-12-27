@@ -18,25 +18,25 @@ GstPlayerBin::~GstPlayerBin()
 	ClearPlayers(true);
 }
 
-void GstPlayerBin::AddPlayer(IGStreamerPlayer* player, const core::string& name)
+void GstPlayerBin::AddPlayer(IGStreamerPlayer* player, const std::string& name)
 {
 	m_players[name] = player;
 }
-IGStreamerPlayer* GstPlayerBin::GetPlayer(const core::string& name)
+IGStreamerPlayer* GstPlayerBin::GetPlayer(const std::string& name)
 {
 	PlayerMap::iterator it = m_players.find(name);
 	if (it == m_players.end())
 		return 0;
 	return it->second;
 }
-void GstPlayerBin::StartPlayer(const core::string& name)
+void GstPlayerBin::StartPlayer(const std::string& name)
 {
 	PlayerMap::iterator it = m_players.find(name);
 	if (it == m_players.end())
 		return ;
 	it->second->Play();
 }
-void GstPlayerBin::StopPlayer(const core::string& name)
+void GstPlayerBin::StopPlayer(const std::string& name)
 {
 	PlayerMap::iterator it = m_players.find(name);
 	if (it == m_players.end())
@@ -70,7 +70,7 @@ void GstPlayerBin::CloseAll()
 		it->second->Close();
 	}
 }
-IGStreamerPlayer* GstPlayerBin::RemovePlayer(const core::string& name,bool close)
+IGStreamerPlayer* GstPlayerBin::RemovePlayer(const std::string& name,bool close)
 {
 	PlayerMap::iterator it = m_players.find(name);
 	if (it == m_players.end())

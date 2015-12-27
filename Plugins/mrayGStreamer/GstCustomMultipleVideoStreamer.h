@@ -18,6 +18,7 @@
 #define GstCustomMultipleVideoStreamer_h__
 
 #include "IGStreamerStreamer.h"
+#include "ICustomVideoSrc.h"
 
 namespace mray
 {
@@ -40,17 +41,16 @@ public:
 
 	// addr: target address to stream video to
 	// baseVideoPort: base port for the video streams, 
-	void BindPorts(const core::string& addr, uint *videoPorts,uint count,uint clockPort, bool rtcp);
-	void SetBitRate(int bitRate);
-	void SetResolution(int width, int height,int fps,bool freeSize);
+	void BindPorts(const std::string& addr, uint *videoPorts,uint count,uint clockPort, bool rtcp);
+
+	void SetVideoSrc(ICustomVideoSrc* src);
+
 
 	bool CreateStream();
 	void Stream();
 	bool IsStreaming();
 	void Stop();
 	virtual void Close();
-
-	void SetVideoGrabber(const std::vector<IVideoGrabber*> &grabbers);
 
 	virtual void SetPaused(bool paused);
 	virtual bool IsPaused();

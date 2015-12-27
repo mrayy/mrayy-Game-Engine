@@ -27,7 +27,7 @@ float testPosy = 100.00;
 
 #define ROBOT_CENTER 325
 
-bool debug_print = true;
+bool debug_print = false;
 bool threadStart = false;
 bool isDone = false;
 bool upCount = true;
@@ -255,10 +255,10 @@ void RobotSerialPort::_setupCaps()
 	m_caps.bumpSensorCount = 2;
 	m_caps.bodyJointsCount = 2 + 3;	//Base: 2 , Head: 3
 
-	m_caps.enabledMotion.set(false, false, true);
-	m_caps.enabledRotation.set(false, true, false);
-	m_caps.headLimits[0].set(-180, -180, -180);
-	m_caps.headLimits[1].set(180, 180, 180);
+//	m_caps.enabledMotion.set(false, false, true);
+//	m_caps.enabledRotation.set(false, true, false);
+//	m_caps.headLimits[0].set(-180, -180, -180);
+//	m_caps.headLimits[1].set(180, 180, 180);
 }
 
 

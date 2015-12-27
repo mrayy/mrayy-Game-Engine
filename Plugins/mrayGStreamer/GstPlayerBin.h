@@ -21,16 +21,16 @@ public:
 	GstPlayerBin();
 	virtual ~GstPlayerBin();
 
-	void AddPlayer(IGStreamerPlayer* player, const core::string& name);
-	IGStreamerPlayer* GetPlayer(const core::string& name);
+	void AddPlayer(IGStreamerPlayer* player, const std::string& name);
+	IGStreamerPlayer* GetPlayer(const std::string& name);
 
 	void Play();
 	void Stop();
 	void CloseAll();
 
-	void StartPlayer(const core::string& name);
-	void StopPlayer(const core::string& name);
-	IGStreamerPlayer* RemovePlayer(const core::string& name, bool close);
+	void StartPlayer(const std::string& name);
+	void StopPlayer(const std::string& name);
+	IGStreamerPlayer* RemovePlayer(const std::string& name, bool close);
 	void ClearPlayers(bool stop);
 };
 

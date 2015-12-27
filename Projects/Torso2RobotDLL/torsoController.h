@@ -11,6 +11,14 @@
 #include "movingAverage.h"
 #include "RobotCapabilities.h"
 
+
+typedef struct {
+	unsigned short errcode;
+	char errdesc_en[128];
+	char errdesc_jp[128];
+} TORSO_ERRMAP;
+
+
 class torsoControllerImpl;
 class torsoController :public IRobotController
 {
@@ -21,9 +29,11 @@ protected:
 
 	MovAvg *m_posAvg[3];
 	MovAvg *m_rotAvg[3];
+	MovAvg *m_mCurrentAvg[6];
 	
 	torsoControllerImpl* m_impl;
 	HANDLE hThread;
+	HANDLE pThread;
 	ERobotControllerStatus robotState; 
 	mray::TBee::RobotCapabilities m_caps;
 	float torsoHeadPos[3];
@@ -32,6 +42,7 @@ protected:
 	bool torsoInitializatiion = false; 
 	bool torsoInitialized = false; 
 	int controlLoop = 0;
+	bool overCurrent = false;
 
 	IRobotStatusProvider* m_robotStatusProvider;
 
@@ -59,6 +70,9 @@ public:
 		ret;
 	
 	bool manualMode = false; 
+
+	float motorCurrent[6];
+	float jointTorque[6];
 
 	double DesiredCoordinate_Head[6],       // Head 6D coordinate.                        [rad or m]
 		StepCoordinate_Head[6],          // Control step of Head 6D coordinate.           [rad or m]
@@ -108,6 +122,9 @@ public:
 	int controlStateMachine(); 
 	int motorSafeShutdown();
 	int motorForceShutdown();
+	bool softCurrentSense();
+	bool softInterlockProcess(); 
+	bool writeRobotData();
 
 	void InverseKinematicsTORSO_RPY(
 		double G_X,           // X-coordinate of point Glabella [m]
@@ -130,5 +147,9 @@ public:
 	void _processData();
 };
 
+
+
+
+extern TORSO_ERRMAP t_errmap[];
 
 #endif

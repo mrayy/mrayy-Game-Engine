@@ -18,7 +18,7 @@
 
 #include "IHeadController.h"
 
-
+#if 0
 namespace mray
 {
 
@@ -41,5 +41,6 @@ public:
 }
 }
 
+#endif
 
 #endif

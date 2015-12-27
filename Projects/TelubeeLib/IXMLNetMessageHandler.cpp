@@ -47,6 +47,7 @@ IXMLNetMessageHandler::IXMLNetMessageHandler()
 
 	m_client = network::INetwork::getInstance().createUDPClient();
 	m_thread = 0;
+	m_port = 0;
 
 	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 }
@@ -63,6 +64,7 @@ void IXMLNetMessageHandler::StartHandler(int port)
 {
 	StopHandler();
 	m_client->Open(port);
+	m_port = m_client->Port();
 	m_thread = OS::IThreadManager::getInstance().createThread(new IXMLNetMessageHandlerThread(this));
 	m_thread->start(0);
 	printf("Communication Channel started - Port : %d\n", port);

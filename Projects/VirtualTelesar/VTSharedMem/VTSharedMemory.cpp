@@ -189,13 +189,17 @@ VTSharedMemoryImpl::VTSharedMemoryImpl(const core::string& n,VTSharedMemory* o)
 		{"JointLF_1_3"		,&m_data->jointsData->kin_hand.left[HandMapping[2]] ,&m_data->jointsData->rt_hand.left[HandMapping[2]] },
 		{"JointLF_1_4"		,&m_data->jointsData->kin_hand.left[HandMapping[3]] ,&m_data->jointsData->rt_hand.left[HandMapping[3]] },
 		{"JointLF_1_5"		,&m_data->jointsData->kin_hand.left[HandMapping[4]] ,&m_data->jointsData->rt_hand.left[HandMapping[4]] },
+	
 		{"JointLF_2_3"		,&m_data->jointsData->kin_hand.left[HandMapping[5]] ,&m_data->jointsData->rt_hand.left[HandMapping[5]] },
 		{"JointLF_2_4"		,&m_data->jointsData->kin_hand.left[HandMapping[6]] ,&m_data->jointsData->rt_hand.left[HandMapping[6]] },
+	
 		{"JointLF_3_3"		,&m_data->jointsData->kin_hand.left[HandMapping[7]] ,&m_data->jointsData->rt_hand.left[HandMapping[7]] },
 		{"JointLF_3_4"		,&m_data->jointsData->kin_hand.left[HandMapping[8]] ,&m_data->jointsData->rt_hand.left[HandMapping[8]] },
+	
 		{"JointLF_4_1"		,&m_data->jointsData->kin_hand.left[HandMapping[9]] ,&m_data->jointsData->rt_hand.left[HandMapping[9]] },
 		{"JointLF_4_3"		,&m_data->jointsData->kin_hand.left[HandMapping[10]],&m_data->jointsData->rt_hand.left[HandMapping[10]]},
 		{"JointLF_4_4"		,&m_data->jointsData->kin_hand.left[HandMapping[11]],&m_data->jointsData->rt_hand.left[HandMapping[11]]},
+	
 		{"JointLF_5_3"		,&m_data->jointsData->kin_hand.left[HandMapping[12]],&m_data->jointsData->rt_hand.left[HandMapping[12]]},//12
 		{"JointLF_5_4"		,&m_data->jointsData->kin_hand.left[HandMapping[13]],&m_data->jointsData->rt_hand.left[HandMapping[13]]},//13
 		 

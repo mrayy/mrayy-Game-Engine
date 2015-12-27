@@ -55,7 +55,7 @@ bool ThreeAxisHead::Connect(const core::string& port)
 	connected = comROBOT->connect((char*)port.c_str(), 115200, SERIAL_PARITY_ODD, 8, FALSE, TRUE) == 0;
 	if (!comROBOT->isconnected())
 	{
-		printf("Failed to connect robot\n");
+	//	printf("Failed to connect robot\n");
 		delete comROBOT;
 		comROBOT = 0;
 	}

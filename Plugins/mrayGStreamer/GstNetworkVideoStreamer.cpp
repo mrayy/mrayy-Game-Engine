@@ -207,7 +207,7 @@ public:
 
 	}
 
-	void BindPorts(const core::string& addr, uint videoPort,uint clockPort, bool rtcp)
+	void BindPorts(const std::string& addr, uint videoPort,uint clockPort, bool rtcp)
 	{
 		m_ipAddr = addr;
 		m_videoPort = videoPort;
@@ -273,7 +273,7 @@ void GstNetworkVideoStreamer::Stop()
 }
 
 
-void GstNetworkVideoStreamer::BindPorts(const core::string& addr, uint* videoPort, uint count, uint clockPort, bool rtcp)
+void GstNetworkVideoStreamer::BindPorts(const std::string& addr, uint* videoPort, uint count, uint clockPort, bool rtcp)
 {
 	m_impl->BindPorts(addr,videoPort[0],clockPort ,rtcp);
 }

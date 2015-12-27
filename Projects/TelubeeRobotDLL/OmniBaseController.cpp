@@ -117,7 +117,7 @@ bool OmniBaseController::Connect(const core::string& port)
 	connected = comPort->connect((char*)port.c_str(), 115200, SERIAL_PARITY_NONE, 8, FALSE, TRUE) == 0;
 	if (!comPort->isconnected())
 	{
-		printf("Failed to connect robot\n");
+		//printf("Failed to connect robot\n");
 		delete comPort;
 		comPort = 0;
 	}

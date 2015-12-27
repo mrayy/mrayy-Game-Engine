@@ -41,11 +41,12 @@ public:
 	virtual ~GstPipelineHandler();
 
 	//set isMasterClock to true if 
-	virtual bool CreatePipeline(bool isMasterClock,const core::string& clockIP="",uint clockPort=7010);
+	virtual bool CreatePipeline(bool isMasterClock,const std::string& clockIP="",uint clockPort=7010);
 	virtual void SetPaused(bool p);
 	virtual void Stop();
 	virtual bool IsLoaded();
 	virtual bool IsPlaying();
+	virtual bool IsPaused();
 	virtual void Close();
 	virtual bool HandleMessage(GstBus * bus, GstMessage * msg);
 

@@ -99,7 +99,7 @@ bool 	GstVideoPlayer::loadMovie(const core::string &uri)
 	*/
 	return StartPipeline(gstString, stream);
 }
-bool 	GstVideoPlayer::loadSideBySideMovie(const core::string& left, const core::string& right)
+bool 	GstVideoPlayer::loadSideBySideMovie(const std::string& left, const std::string& right)
 {
 	core::string message = "GstVideoPlayer - loadMovie(): loading sidebyside \"" + left + ", " + right + "\"";
 	gLogManager.log(message, ELL_INFO, EVL_Heavy);
@@ -136,7 +136,7 @@ bool 	GstVideoPlayer::loadSideBySideMovie(const core::string& left, const core::
 
 	return StartPipeline(gstString, stream);
 }
-bool GstVideoPlayer::StartPipeline(const core::string& pipeline, bool stream){
+bool GstVideoPlayer::StartPipeline(const std::string& pipeline, bool stream){
 	close();
 	bIsStream = stream;
 
@@ -288,7 +288,7 @@ static void
 		gst_object_unref(sinkpad);
 	}
 #ifdef OLD_IMPL
-bool	GstVideoPlayer::Connect(const core::string& ip, int remotePort, int localPort)
+bool	GstVideoPlayer::Connect(const std::string& ip, int remotePort, int localPort)
 {
 
 	GstElement * gstPipeline, *rtp_src, *rtcp_src, *rtcp_sink, *depayloader, *h264_decoder, *csp_filter, *screen_sink, *rtp_bin;
@@ -536,7 +536,7 @@ static void on_pad_added(GstElement *element, GstPad *pad, gpointer data)
 
 }
 
-void GstVideoPlayer::SetElementsAttribute(const core::string& elem, ...)
+void GstVideoPlayer::SetElementsAttribute(const std::string& elem, ...)
 {
 	if (!videoUtils->getPipeline())
 		return;
@@ -584,7 +584,7 @@ static GstFlowReturn new_audiobuffer(GstMySink * sink, gpointer data, GstBuffer*
 	}
 	return GST_FLOW_OK;
 }
-bool	GstVideoPlayer::Connect(const core::string& ip, int videoPort, int audioPort, int localAudioPort)
+bool	GstVideoPlayer::Connect(const std::string& ip, int videoPort, int audioPort, int localAudioPort)
 {
 	GstElement * gstPipeline, *src, *mpg, *depay, *dec, *sink;
 	GstCaps* caps;

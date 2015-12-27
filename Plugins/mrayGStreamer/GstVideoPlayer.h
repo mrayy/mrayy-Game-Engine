@@ -28,14 +28,14 @@ public:
 	~GstVideoPlayer();
 
 
-	bool	StartPipeline(const core::string& pipeline, bool stream);
+	bool	StartPipeline(const std::string& pipeline, bool stream);
 
 	bool 	loadMovie(const core::string &uri);
-	bool 	loadSideBySideMovie(const core::string& left, const core::string& right);
-	bool	Connect(const core::string& ip, int videoPort, int audioPort, int localAudioPort);
+	bool 	loadSideBySideMovie(const std::string& left, const std::string& right);
+	bool	Connect(const std::string& ip, int videoPort, int audioPort, int localAudioPort);
 	bool	Open2Streams( int videoPort1, int videoPort2);
 
-	void	SetElementsAttribute(const core::string& elem, ...);
+	void	SetElementsAttribute(const std::string& elem, ...);
 
 	bool 	GrabFrame();
 

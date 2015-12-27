@@ -24,6 +24,11 @@
 #include "NetworkValueController.h"
 #include "CameraConfigurationManager.h"
 #include "StringUtil.h"
+#include "AppSrcVideoSrc.h"
+#include "CameraVideoSrc.h"
+#include "CameraStreamController.h"
+
+#include <conio.h>
 
 namespace mray
 {
@@ -43,12 +48,6 @@ class AVStreamServiceModuleImpl :public video::IGStreamerStreamerListener, publi
 {
 public:
 
-
-	enum class ECameraType
-	{
-		Webcam,
-		PointGrey
-	};
 	GCPtr<video::GstStreamBin> m_streamers;
 	ECameraType m_cameraType;
 	math::vector2di m_resolution;
@@ -76,13 +75,9 @@ public:
 	};
 	std::vector<CameraSettings> m_cameraSettings;
 	CameraSettings m_currentSettings;
-	struct _CameraInfo
-	{
-		CameraInfo ifo;
-		int w, h, fps;
-		GCPtr<video::ICameraVideoGrabber> camera;
-		math::vector2di offsets;
-	}m_cameraIfo[2];
+	//std::vector<_CameraInfo> m_cameraIfo;
+
+	ICameraSrcController* m_cameraController;
 
 	uint m_VideoPorts[2];
 	uint m_AudioPort;
@@ -169,7 +164,7 @@ public:
 			e = e->nextSiblingElement("Setting");
 		}
 	}
-
+	/*
 	void SetCameraParameterValue(const core::string& name, const core::string& value)
 	{
 
@@ -191,7 +186,7 @@ public:
 			return m_cameraIfo[i].camera->GetParameter(name);
 		}
 		return core::string::Empty;
-	}
+	}*/
 
 	void Init(TBeeServiceContext* context)
 	{
@@ -199,10 +194,6 @@ public:
 			return;
 
 		m_context = context;
-
-		m_cameraIfo[0].w = m_cameraIfo[1].w = 1280;
-		m_cameraIfo[0].h = m_cameraIfo[1].h = 720;
-		m_cameraIfo[0].fps = m_cameraIfo[1].fps = 45;
 		m_resolution.set(1280, 720);
 
 #if USE_POINTGREY && USE_WEBCAMERA
@@ -221,10 +212,25 @@ public:
 
 			m_camConfig = m_camConfigMngr->GetCameraConfiguration(m_cameraProfile);
 			if (!m_camConfig)
-				gLogManager.log("Couldn't find camera configurations! : " + m_cameraProfile, ELL_WARNING);
+				gLogManager.log("Couldn't find camera configurations! : " + m_cameraProfile, ELL_ERROR);
+
+			gLogManager.log("Capture Type:" + core::StringConverter::toString(m_camConfig->captureType), ELL_INFO);
+
+			//Create Camera Controller
+			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
+			{
+				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
+				m_cameraController = new CameraGrabberController();
+			}else 
+			{
+				gLogManager.log("Creating Encoded Capture Camera", ELL_INFO);
+				m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType);
+			}
 		}
 		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionByName("Quality")->getValue());
-		m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionByName("AutoGain")->getValue());
+		if (context->appOptions.GetOptionByName("AutoGain"))
+			m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionByName("AutoGain")->getValue());
+		else m_autoGain = false;
 		/*core::string res = context->appOptions.GetOptionByName("StreamResolution")->getValue();
 		
 		if (res == "0-VGA")
@@ -235,15 +241,30 @@ public:
 			m_resolution.set(1920, 1080);*/
 		m_streamAudio = context->appOptions.GetOptionByName("Audio")->getValue() == "Yes";
 
+		std::vector<_CameraInfo> m_cameraIfo;
 
+#ifdef USE_WEBCAMERA
 		if (m_cameraType == ECameraType::Webcam)
 		{
 			// -1 for the None index
-			m_cameraIfo[0].ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Left")->getValue());
-			m_cameraIfo[1].ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Right")->getValue());
+			_CameraInfo ifo;
+			ifo.ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Left")->getValue());
+			if (ifo.ifo.index>= 0)
+			{
+				m_cameraIfo.push_back(ifo);
+			}
+			ifo.ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Right")->getValue());
+			if (ifo.ifo.index >= 0)
+			{
+				m_cameraIfo.push_back(ifo);
+			}
 		}
-		else
+#endif
+#ifdef USE_POINTGREY 
+		if (m_cameraType == ECameraType::PointGrey)
 		{
+			_CameraInfo ifo;
+
 			//create flycapture manager
 			new video::FlyCameraManager();
 
@@ -257,16 +278,18 @@ public:
 				video::FlyCameraManager::getInstance().GetCameraSerialNumber(i, sp);
 				if (sp == c1)
 				{
-					m_cameraIfo[0].ifo.index = i;
+					ifo.ifo.index = i;
+					m_cameraIfo.push_back(ifo);
 				}
 				if (sp == c2)
 				{
-					m_cameraIfo[1].ifo.index = i;
+					ifo.ifo.index = i;
+					m_cameraIfo.push_back(ifo);
 				}
 
 			}
 		}
-
+#endif
 
 
 		{
@@ -297,7 +320,7 @@ public:
 		math::vector2d capRes = m_resolution = m_currentSettings.size;
 		int fps = m_fps = m_currentSettings.fps;
 
-		for (int i = 0; i < 2; ++i)
+		for (int i = 0; i < m_cameraIfo.size(); ++i)
 		{
 			m_cameraIfo[i].fps = fps;
 			m_cameraIfo[i].w = capRes.x;
@@ -307,125 +330,52 @@ public:
 		if (m_cameraType == ECameraType::Webcam)
 		{
 			video::GstNetworkVideoStreamer* vstreamer;
-
-			for (int i = 0; i < 2; ++i)
-			{
-				if (m_cameraIfo[i].ifo.index >= 0)
-				{
-					m_cameraIfo[i].camera = new video::DirectShowVideoGrabber();
-					m_cameraIfo[i].camera->InitDevice(m_cameraIfo[i].ifo.index, m_cameraIfo[i].w, m_cameraIfo[i].h, m_cameraIfo[i].fps);//1280, 720
-					m_cameraIfo[i].ifo.guidPath = m_cameraIfo[i].camera->GetDeviceName(m_cameraIfo[i].ifo.index);
-
-				}
-			}
+			//Init Cameras
+			m_cameraController->SetCameras(m_cameraIfo,m_cameraType);
 
 			m_currentGain =  core::StringConverter::toFloat(context->appOptions.GetOptionByName("Gain")->getValue());
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
-			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, core::StringConverter::toString(m_currentGain));// context->appOptions.GetOptionByName("Gain")->getValue());
+			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
+			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
+			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, core::StringConverter::toString(m_currentGain));// context->appOptions.GetOptionByName("Gain")->getValue());
 
 			// Now close cameras
-			for (int i = 0; i < 2; ++i)
-			{
- 				if (m_cameraIfo[i].camera)
- 					m_cameraIfo[i].camera->Stop();
-			}
+			m_cameraController->Stop();
 
 			printf("Creating Video Streamer\n");
-			if (true)
-			{
 
-				video::GstCustomMultipleVideoStreamer* hs = new video::GstCustomMultipleVideoStreamer();
-				hs->AddListener(this);
+			video::GstCustomMultipleVideoStreamer* hs = new video::GstCustomMultipleVideoStreamer();
+			hs->AddListener(this);
 
-				std::vector<video::IVideoGrabber*> grabbers;
-				grabbers.push_back(m_cameraIfo[0].camera);
-				grabbers.push_back(m_cameraIfo[1].camera);
-				hs->SetVideoGrabber(grabbers);//
-				hs->SetResolution(m_resolution.x, m_resolution.y, fps, true);
-				hs->SetBitRate(m_currentSettings.bitrate);
-				m_streamers->AddStream(hs, "Video");
-			}else if (false)
-			{
-				vstreamer = new video::GstNetworkVideoStreamer();
-				vstreamer->AddListener(this);
+			
+			video::ICustomVideoSrc* src = m_cameraController->CreateVideoSrc();
+			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);
+			src->SetBitRate(m_currentSettings.bitrate);
 
-				vstreamer->SetCameraResolution(m_cameraIfo[0].w, m_cameraIfo[0].h, fps);
-				vstreamer->SetFrameResolution(m_resolution.x, m_resolution.y);
-				vstreamer->SetCameras(m_cameraIfo[0].ifo.index, m_cameraIfo[1].ifo.index);
-				vstreamer->SetBitRate(m_currentSettings.bitrate);
+			hs->SetVideoSrc(src);
 
-
-				m_streamers->AddStream(vstreamer, "Video");
-
-			}
-			else if (false)
-			{
-				// 				m_cameraIfo[0].camera->Start();
-				// 				m_cameraIfo[1].camera->Start();
-
-
-				video::GstCustomVideoStreamer* hs = new video::GstCustomVideoStreamer();
-
-				hs->AddListener(this);
-				hs->SetVideoGrabber(m_cameraIfo[0].camera, m_cameraIfo[1].camera);//
-				hs->SetBitRate(m_currentSettings.bitrate);
-				hs->SetResolution(m_resolution.x, m_resolution.y, fps);
-				m_streamers->AddStream(hs, "Video");
-			}
+			m_streamers->AddStream(hs, "Video");
 
 		}
 #endif
-#if USE_POINTGREY && USE_WEBCAMERA
-		else
-#endif
 #if USE_POINTGREY
+		if (m_cameraType == ECameraType::PointGrey)
 		{
-			if (m_cameraIfo[0].ifo.index != -1)
-			{
-				printf("Initializing Pointgrey Camera\n");
-				video::FlyCameraVideoGrabber* c = 0;
-				m_cameraIfo[0].camera = (c = new video::FlyCameraVideoGrabber());
-				c->SetCroppingOffset(m_cameraIfo[0].offsets.x, m_cameraIfo[0].offsets.y);
-				m_cameraIfo[0].camera->InitDevice(m_cameraIfo[0].ifo.index, m_cameraIfo[0].w, m_cameraIfo[0].h, fps);
-				m_cameraIfo[0].camera->SetImageFormat(video::EPixel_R8G8B8);
-				//	m_cameraIfo[0].camera->Start();
-			}
-
-			if (m_cameraIfo[1].ifo.index != -1
-				&& m_cameraIfo[0].ifo.index != m_cameraIfo[1].ifo.index)
-			{
-				printf("Initializing Pointgrey Camera\n");
-				video::FlyCameraVideoGrabber* c = 0;
-				m_cameraIfo[1].camera = (c = new video::FlyCameraVideoGrabber());
-				c->SetCroppingOffset(m_cameraIfo[1].offsets.x, m_cameraIfo[1].offsets.y);
-				m_cameraIfo[1].camera->InitDevice(m_cameraIfo[1].ifo.index, m_cameraIfo[1].w, m_cameraIfo[1].h, fps);
-				m_cameraIfo[1].camera->SetImageFormat(video::EPixel_R8G8B8);
-				//	m_cameraIfo[1].camera->Start();
-			}
-
 			//Bug: Open and close the cameras once, needed to make the camera run next time
-			for (int i = 0; i < 2; ++i)
-			{
-				if (m_cameraIfo[i].camera)
-				{
-					m_cameraIfo[i].camera->Start();
-					m_cameraIfo[i].camera->Stop();
-				}
-			}
+			m_cameraController->SetCameras(m_cameraIfo, m_cameraType);
+			m_cameraController->Start();
+			m_cameraController->Stop();
 
 			printf("Creating Video Streamer\n");
 			video::GstCustomMultipleVideoStreamer* hs = new video::GstCustomMultipleVideoStreamer();
 			hs->AddListener(this);
 
-			std::vector<video::IVideoGrabber*> grabbers;
-			grabbers.push_back(m_cameraIfo[0].camera);
-			grabbers.push_back(m_cameraIfo[1].camera);
 
 			printf("Setting Streaming Settings: %dx%d@%d - %d kbps\n", m_resolution.x, m_resolution.y, fps, m_currentSettings.bitrate);
-			hs->SetVideoGrabber(grabbers);//
-			hs->SetResolution(m_resolution.x, m_resolution.y, fps, true);
-			hs->SetBitRate(m_currentSettings.bitrate);
+			video::ICustomVideoSrc* src = m_cameraController->CreateVideoSrc();
+			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);
+			src->SetBitRate(m_currentSettings.bitrate);
+			hs->SetVideoSrc(src);
+
 			m_streamers->AddStream(hs, "Video");
 		}
 #endif
@@ -467,30 +417,6 @@ public:
 		};
 		int count = sizeof(camParams) / sizeof(core::string);
 		//init cameras
-		CameraProfile* prof = m_cameraProfileManager->GetProfile(m_cameraProfile);
-		if (false)
-		{
-			for (int i = 0; i < 2; ++i)
-			{
-
-				if (prof && false)
-				{
-					for (int j = 0; j < count; ++j)
-					{
-						core::string v;
-						if (prof->GetValue(camParams[j], v))
-							m_cameraIfo[i].camera->SetParameter(camParams[j], v);
-					}
-				}
-				//	if (!m_debugData.debug)
-				if (m_cameraType == ECameraType::Webcam)
-				{
-					//	m_cameraIfo[i].camera->Stop();
-				}
-				//m_cameraTextures[i].Set(m_cameraIfo[i].camera, gEngine.getDevice()->createEmptyTexture2D(true));
-
-			}
-		}
 		_RegisterValues();
 
 		context->AddListener(this);
@@ -506,7 +432,7 @@ public:
 		m_context->netValueController->GetValues()->AddValueGroup(g);
 		core::string value;
 		IValue* tmpV;
-#define GET_VALUE(X) (GetCameraParameterValue(X,0))
+#define GET_VALUE(X) (m_cameraController->GetCameraParameterValue(X,0))
 #define ADD_CAMERA_VALUE(Type,Name)\
 	value = GET_VALUE(Name); \
 	tmpV = g->AddValue(new Type(Name, 0)); \
@@ -525,7 +451,7 @@ public:
 	}
 	void _OnCameraPropertyChanged(IValue* v)
 	{
-		SetCameraParameterValue(v->getName(), v->toString());
+		m_cameraController->SetCameraParameterValue(v->getName(), v->toString());
 	}
 	void Destroy()
 	{
@@ -540,16 +466,9 @@ public:
 
 		m_context->RemoveListener(this);
 		m_streamers->ClearStreams(true);
-		if (m_cameraIfo[0].camera)
-		{
-			m_cameraIfo[0].camera->Stop();
-			m_cameraIfo[0].camera = 0;
-		}
-		if (m_cameraIfo[1].camera)
-		{
-			m_cameraIfo[1].camera->Stop();
-			m_cameraIfo[1].camera = 0;
-		}
+		m_cameraController->Stop();
+		delete m_cameraController;
+		m_cameraController = 0;
 
 		if (m_audioPlayer)
 		{
@@ -572,11 +491,7 @@ public:
 		{
 			//Pointgrey cameras need to be started manually
 			printf("Starting Cameras.\n");
-			if (m_cameraIfo[0].camera)
-				m_cameraIfo[0].camera->Start();
-
-			if (m_cameraIfo[1].camera)
-				m_cameraIfo[1].camera->Start();
+			m_cameraController->Start();
 		}
 		m_streamers->Stream();
 
@@ -616,10 +531,7 @@ public:
 		Sleep(1000);
 
 		printf("Stopping Cameras.\n");
-		if (m_cameraIfo[0].camera)
-			m_cameraIfo[0].camera->Stop();
-		if (m_cameraIfo[1].camera)
-			m_cameraIfo[1].camera->Stop();
+		m_cameraController->Stop();
 
 		if (m_audioPlayer)
 		{
@@ -642,7 +554,7 @@ public:
 		if (!m_isVideoStarted)
 			_startVideoStream();
 		else
-		{
+		{/*
 			if (m_autoGain )
 			{
 				if (m_cameraIfo[0].camera && m_cameraIfo[0].camera->IsConnected())
@@ -672,24 +584,19 @@ public:
 						}
 					}
 				}
-			}
+			}*/
 		}
 
-		//check camera condition if connected or not
-	//	if (m_cameraType == ECameraType::PointGrey)
+		m_cameraController->Update();
+
+		if (kbhit())
 		{
-			for (int i = 0; i < 2; ++i)
+			if (getch() == 'v')
 			{
-				if (m_cameraIfo[i].camera && m_cameraIfo[i].camera->IsConnected() == false)
-				{
-					//	printf("Camera %d has stopped, restarting it\n", i);
-					m_cameraIfo[i].camera->Start();
-
-					//give the camera sometime to start
-					OS::IThreadManager::getInstance().sleep(30);
-				}
+				m_streamers->GetStream("Video")->SetPaused(!m_streamers->GetStream("Video")->IsPaused());
 			}
 		}
+
 	}
 
 
@@ -716,27 +623,7 @@ public:
 
 		if (m_status != EServiceStatus::Running)
 			return;
-		for (int i = 0; i < 2;++i)
-		if (m_cameraIfo[i].camera)
-		{
-
-			msg = "Capture FPS [" + core::StringConverter::toString(i) + "]: " + core::StringConverter::toString(m_cameraIfo[i].camera->GetCaptureFrameRate());
-			context->RenderText(msg, 0, 0);
-			msg = "Current Gain:" + core::StringConverter::toString(m_currentGain);
-			context->RenderText(msg, 0, 0);
-
-		}
-		//if (m_cameraType == ECameraType::PointGrey)
-		{
-			for (int i = 0; i < 2; ++i)
-			{
-				if (m_cameraIfo[i].camera && m_cameraIfo[i].camera->IsConnected() == false)
-				{
-					msg = "Camera: " + core::StringConverter::toString(i) + " is not open!";
-					context->RenderText(msg, 100, 0, video::SColor(1, 0, 0, 1));
-				}
-			}
-		}
+		m_cameraController->DebugRender(context);
 	}
 	void Render(ServiceRenderContext* context)
 	{
@@ -763,6 +650,11 @@ public:
 		OS::StreamWriter wrtr(&stream);
 
 		_SendCameraSettings();
+		/*
+		m_portsReceived = true;
+		uint videoPorts[] = { 5000, 5001 };
+		m_streamers->GetStream("Video")->BindPorts("192.168.100.105", videoPorts, 2, 0, 0);
+		*/
 		/*
 		if (false)
 		{
@@ -846,8 +738,7 @@ public:
 
 				int reply = (int)EMessages::IsStereo;
 				int len = stream.write(&reply, sizeof(reply));
-				bool stereo = m_cameraIfo[0].ifo.index != m_cameraIfo[1].ifo.index &&
-					m_cameraIfo[0].ifo.index != -1 && m_cameraIfo[1].ifo.index != -1;// ((video::GstNetworkVideoStreamer*)m_streamers->GetStream("Video"))->IsStereo();
+				bool stereo = m_cameraController->IsStereo();// ((video::GstNetworkVideoStreamer*)m_streamers->GetStream("Video"))->IsStereo();
 				len += stream.write(&stereo, sizeof(stereo));
 				m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
 
@@ -862,6 +753,13 @@ public:
 			m_AudioPort = port;
 			if (m_streamAudio)
 				m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort, 1, 0, 0);
+		}
+		else if (msg == "Stream" && values.size() >= 1)
+		{
+			bool enabled=core::StringConverter::toBool(values[0]);
+			if (m_streamAudio)
+				m_streamers->GetStream("Audio")->SetPaused(!enabled);
+			m_streamers->GetStream("Video")->SetPaused(!enabled);
 		}
 	}
 

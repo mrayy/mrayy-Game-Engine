@@ -1,6 +1,7 @@
 
 
 #include "stdafx.h"
+#ifdef USE_OPENNI
 #include "OpenNICaptureDevice.h"
 #include "ILogManager.h"
 
@@ -132,4 +133,4 @@ bool OpenNICaptureDevice::Update()
 }
 
 
-
+#endif

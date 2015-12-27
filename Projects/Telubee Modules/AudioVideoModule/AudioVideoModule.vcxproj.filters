@@ -36,6 +36,9 @@
     <ClInclude Include="AudioVideoModule.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="CameraStreamController.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

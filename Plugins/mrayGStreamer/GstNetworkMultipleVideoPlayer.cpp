@@ -112,6 +112,47 @@ public:
 		}
 		return videoStr;
 	}
+	core::string _BuildPipelineVP8(int i)
+	{
+		core::string videoStr =
+			//video rtp
+			"myudpsrc name=videoSrc" + core::StringConverter::toString(i) + " !"
+			//"udpsrc port=7000 buffer-size=2097152 do-timestamp=true !"
+			"application/x-rtp ";
+		if (m_rtcp)
+		{
+			videoStr =
+				"rtpbin "
+				"name=rtpbin "
+				+ videoStr +
+				"! rtpbin.recv_rtp_sink_0 "
+				"rtpbin. ! rtph264depay !  avdec_h264 ! "
+				"videoconvert ! video/x-raw,format=RGB  !"
+				" appsink name=videoSink" + core::StringConverter::toString(i) +
+
+				//video rtcp
+				"myudpsrc name=videoRtcpSrc ! rtpbin.recv_rtcp_sink_0 "
+				"rtpbin.send_rtcp_src_0 !  myudpsink name=videoRtcpSink sync=false async=false ";
+		}
+		else
+		{
+			videoStr = videoStr + "! queue !"
+				"rtpjitterbuffer !  "
+				"rtph264depay ! h264parse !  avdec_h264 ! "
+				// " videorate  ! "//"video/x-raw,framerate=60/1 ! "
+				//	"videoconvert ! video/x-raw,format=RGB  !" // Very slow!!
+				"videorate ! videoconvert ! video/x-raw,format=I420  !"
+				//	" timeoverlay halignment=right text=\"Local Time =\"! "
+				" appsink name=videoSink" + core::StringConverter::toString(i) + " sync=false  emit-signals=false ";
+			//"fpsdisplaysink sync=false";
+
+		}
+		/* ksvideosrc ! video/x-raw,width=1280,height=720 !
+ videorate max-rate=40 ! videoconvert ! x264enc bitrate=1024 speed-preset=superf
+ ast pass=cbr tune=zerolatency sync-lookahead=0 rc-lookahead=0 sliced-threads=tru
+ e key-int-max=20 ! rtph264pay ! udpsink port=5001 host=127.0.0.1 sync=false -v*/
+		return videoStr;
+	}
 
 
 	core::string _BuildPipelineMJPEG(int i)
@@ -171,7 +212,7 @@ public:
 		}
 	}
 
-	void SetIPAddress(const core::string& ip, uint videoPort, int count,uint clockPort, bool rtcp)
+	void SetIPAddress(const std::string& ip, uint videoPort, int count,uint clockPort, bool rtcp)
 	{
 		m_playersCount = count;
 		m_ipAddr = ip;
@@ -380,7 +421,7 @@ GstNetworkMultipleVideoPlayer::~GstNetworkMultipleVideoPlayer()
 {
 	delete m_impl;
 }
-void GstNetworkMultipleVideoPlayer::SetIPAddress(const core::string& ip, uint videoPort, uint count, uint clockPort, bool rtcp)
+void GstNetworkMultipleVideoPlayer::SetIPAddress(const std::string& ip, uint videoPort, uint count, uint clockPort, bool rtcp)
 {
 	m_impl->SetIPAddress(ip, videoPort,count, clockPort,rtcp);
 }

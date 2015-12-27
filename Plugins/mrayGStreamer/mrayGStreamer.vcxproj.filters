@@ -61,6 +61,12 @@
     <ClCompile Include="GstNetworkMultipleVideoPlayer.cpp">
       <Filter>StreamType\Player</Filter>
     </ClCompile>
+    <ClCompile Include="AppSrcVideoSrc.cpp">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraVideoSrc.cpp">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -131,6 +137,15 @@
     <ClInclude Include="GstNetworkMultipleVideoPlayer.h">
       <Filter>StreamType\Player</Filter>
     </ClInclude>
+    <ClInclude Include="ICustomVideoSrc.h">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSrcVideoSrc.h">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraVideoSrc.h">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -156,6 +171,9 @@
     </Filter>
     <Filter Include="Handlers">
       <UniqueIdentifier>{6812035b-b5ea-4dcc-92ea-c3208a262540}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StreamType\Streamer\CustomSrc">
+      <UniqueIdentifier>{5cab6854-0d3e-4da6-9ca4-d44b78c79800}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

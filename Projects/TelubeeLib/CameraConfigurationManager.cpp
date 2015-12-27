@@ -15,6 +15,8 @@ namespace TBee
 TelubeeCameraConfiguration::TelubeeCameraConfiguration() :fov(60), cameraOffset(0), stereoOffset(0.065), OpticalCenter(0.5), FocalCoeff(1), KPCoeff(0)
 {
 	cameraRotation[0] = cameraRotation[1] = None;
+	cameraType = ECameraType::POVCamera;
+	captureType = ECameraCaptureType::CaptureRaw;
 }
 
 void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
@@ -55,6 +57,28 @@ void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
 				cameraRotation[i] = Flipped;
 		}
 	}
+
+	cameraType = ECameraType::POVCamera;
+	captureType = ECameraCaptureType::CaptureRaw;
+
+	attr = e->getAttribute("Type");
+	if (attr)
+	{
+		if (attr->value == "POV")
+			cameraType = ECameraType::POVCamera;
+		else if (attr->value == "OMNI")
+			cameraType = ECameraType::POVCamera;
+	}
+	attr = e->getAttribute("CaptureMedia");
+	if (attr)
+	{
+		if (attr->value == "RAW")
+			captureType = ECameraCaptureType::CaptureRaw;
+		else if (attr->value == "H264")
+			captureType = ECameraCaptureType::CaptureH264;
+		else if (attr->value == "JPEG")
+			captureType = ECameraCaptureType::CaptureJpeg;
+	}
 }
 
 
@@ -89,6 +113,17 @@ xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
 			e->addAttribute("RightRotation", v);
 	}
 
+	switch (cameraType)
+	{
+	case mray::TBee::TelubeeCameraConfiguration::POVCamera:
+		e->addAttribute("Type", "POV");
+		break;
+	case mray::TBee::TelubeeCameraConfiguration::OmniCamera:
+		e->addAttribute("Type", "OMNI");
+		break;
+	default:
+		break;
+	}
 	return e;
 }
 

@@ -64,6 +64,7 @@ protected:
 
 	IRobotCommunicatorListener* m_listener;
 
+
 public:
 	RobotCommunicator();
 	virtual~RobotCommunicator();
@@ -72,6 +73,7 @@ public:
 	void StartServer(int port);
 	void StopServer();
 
+	int GetServerPort(){ return GetPort(); }
 
 	void SetListener(IRobotCommunicatorListener* l){ m_listener = l; }
 

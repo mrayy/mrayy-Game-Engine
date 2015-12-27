@@ -363,8 +363,8 @@ mrayOISInputManager::~mrayOISInputManager(){
 
 	if (m_mouse)
 		delete m_mouse;
-	if (m_keyboard)
-		delete m_keyboard;
+	//if (m_keyboard)
+	//	delete m_keyboard;
 	for (int i = 0; i < m_joystics.size(); ++i)
 		delete m_joystics[i];
 	m_joystics.clear();

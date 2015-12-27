@@ -25,7 +25,7 @@ public:
 	{
 	}
 
-	void SetPipeline(const core::string& desc)
+	void SetPipeline(const std::string& desc)
 	{
 		m_pipeLineDesc=desc;
 		GError *e=0;

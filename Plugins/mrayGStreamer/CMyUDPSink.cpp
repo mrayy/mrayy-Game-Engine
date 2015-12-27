@@ -22,6 +22,8 @@
 #include <netinet/in.h>
 #endif
 
+#include "ILogManager.h"
+
 #include <gst/gstelement.h>
 
 #define UDP_DEFAULT_HOST        "localhost"
@@ -153,6 +155,7 @@ gst_MyUDPSink_render(GstBaseSink * bsink, GstBuffer * buffer)
 	gst_buffer_map(buffer, &map, GST_MAP_READ);
 	unsigned int len = 0;
 	network::NetAddress addr(sink->host, sink->port);
+	//printf("%s:%d\n", sink->host.c_str(), sink->port);
 	sink->m_client->SendTo(&addr, (const char*)map.data, map.size, &len);
 	gst_buffer_unmap(buffer, &map);
 
@@ -273,15 +276,19 @@ gst_MyUDPSink_start(GstBaseSink * bsink)
 
 	if (sink->m_client )
 	{
+		if (sink->m_client->IsOpen())
+			sink->m_client->Close();
 		sink->m_client->Open();
 		GST_DEBUG_OBJECT(sink, "creating socket");
 		if (sink->m_client->Connect(network::NetAddress(sink->host, sink->port)))
 		{
-			GST_DEBUG_OBJECT(sink, "UDP Socket connected to (%s:%d)", sink->host, sink->port);
+			GST_DEBUG_OBJECT(sink, "UDP Socket connected to (%s:%d)", sink->host.c_str(), sink->port);
+			gLogManager.log("GST UDP Socket connected to (" + sink->host +","+ core::StringConverter::toString(sink->m_client->Port()) + ")",ELL_INFO);
 		}
 		else
 		{
 			GST_DEBUG_OBJECT(sink, "Failed to connect UDP Socket to (%s:%d)", sink->host, sink->port);
+			gLogManager.log("GST UDP Failed to connect to (" + sink->host + "," + core::StringConverter::toString(sink->port) + ")", ELL_WARNING);
 			//return FALSE;
 		}
 	}

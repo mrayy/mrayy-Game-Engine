@@ -172,7 +172,7 @@ void GstUtilsImpl::eos_cb(){
 	if (appsink) appsink->OnEOS();
 }
 
-bool GstUtils::setPipelineWithSink(const core::string& pipeline, const core::string& sinkname, bool isStream){
+bool GstUtils::setPipelineWithSink(const std::string& pipeline, const std::string& sinkname, bool isStream){
 	if (isPlaying())
 	{
 		stop();
@@ -929,7 +929,7 @@ float GstVideoUtils::getWidth(){
 	return pixels.Size.x;
 }
 
-bool GstVideoUtils::setPipeline(const core::string& pipeline, int bpp, bool isStream, int w, int h){
+bool GstVideoUtils::setPipeline(const std::string& pipeline, int bpp, bool isStream, int w, int h){
 	core::string caps;
 
 #if GST_VERSION_MAJOR==0

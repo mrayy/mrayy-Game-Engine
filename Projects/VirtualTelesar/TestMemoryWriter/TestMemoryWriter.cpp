@@ -88,6 +88,17 @@ void ProcessKey(char c,float dt)
 
 int main(int argc, char *argv[])
 {
+	printf("Size of shared memory: %d bytes\n", sizeof(shmem_data_t));
+	printf("\t: %d bytes\n", sizeof(shmem_target_t));
+	printf("\t: %d bytes\n", sizeof(shmem_hw_data_t));
+	printf("\t: %d bytes\n", sizeof(shmem_shoulder_t));
+	printf("\t: %d bytes\n", sizeof(shmem_glove_t));
+	printf("\t: %d bytes\n", sizeof(shmem_joints_t));
+	printf("\t: %d bytes\n", sizeof(shmem_sensors_t));
+	printf("\t: %d bytes\n", sizeof(shmem_status_t));
+
+	printf("bool: %d bytes\n", sizeof(bool));
+
 	m_agent=new shmem();
 	m_agent->createWrite();
 	m_agent->openWrite();

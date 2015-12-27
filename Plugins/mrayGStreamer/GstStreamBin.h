@@ -6,7 +6,7 @@
 
 #include "IGStreamerStreamer.h"
 #include "GCPtr.h"
-#include "mstring.h"
+#include <string>
 #include <map>
 
 namespace mray
@@ -17,22 +17,22 @@ namespace video
 class GstStreamBin
 {
 protected:
-	typedef std::map<core::string, GCPtr<IGStreamerStreamer>> StreamMap;
+	typedef std::map<std::string, GCPtr<IGStreamerStreamer>> StreamMap;
 	StreamMap m_Streamers;
 public:
 	GstStreamBin();
 	virtual ~GstStreamBin();
 
-	void AddStream(IGStreamerStreamer* Streamer, const core::string& name);
-	IGStreamerStreamer* GetStream(const core::string& name);
+	void AddStream(IGStreamerStreamer* Streamer, const std::string& name);
+	IGStreamerStreamer* GetStream(const std::string& name);
 
 	void Stream();
 	void Stop();
 	void CloseAll();
 
-	void StartStream(const core::string& name);
-	void StopStream(const core::string& name);
-	IGStreamerStreamer* RemoveStream(const core::string& name, bool close);
+	void StartStream(const std::string& name);
+	void StopStream(const std::string& name);
+	IGStreamerStreamer* RemoveStream(const std::string& name, bool close);
 	void ClearStreams(bool stop);
 };
 

@@ -80,7 +80,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\Engine\mrayEngine\include;..\..\Engine\mrayWinApp\;..\..\Engine\mrayMath;..\..\Plugins\mrayTheora;..\..\Engine\mrayGUI;..\..\Plugins\mrayPhysx;..\..\Plugins\mraySound;..\..\ENgine\mrayGameLayer\;..\..\Engine\regex;..\..\Engine\mrayNet;..\..\Dependencies\include;..\VTLib\;..\VTSharedMem\;..\..\Plugins\mrayFSM;..\..\Plugins\DirectShowVideo;..\..\Plugins\FlyCaptureLibrary;..\..\plugins\mrayOptiTrack;..\..\plugins\mrayBerkelium;..\..\plugins\mySqlDBConnection;..\..\plugins\mrayOculusVR-DK2;..\..\Dependencies\include\LibOVR2\include;..\..\Engine\mrayOIS;..\..\Plugins\mrayGStreamer;..\..\plugins\WiimoteController;..\..\Plugins\mrayOpenNI;..\TelubeeRobotDLL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Engine\mrayEngine\include;..\..\Engine\mrayWinApp\;..\..\Engine\mrayMath;..\..\Plugins\mrayTheora;..\..\Engine\mrayGUI;..\..\Plugins\mrayPhysx;..\..\Plugins\mraySound;..\..\Engine\regex;..\..\Engine\mrayNet;..\..\Dependencies\include;..\VTLib\;..\VTSharedMem\;..\..\Plugins\mrayFSM;..\..\Plugins\DirectShowVideo;..\..\Plugins\FlyCaptureLibrary;..\..\plugins\mrayOptiTrack;..\..\plugins\mrayBerkelium;..\..\plugins\mySqlDBConnection;..\..\Engine\mrayOIS;..\..\plugins\WiimoteController;..\..\Plugins\mrayOpenNI;..\TelubeeRobotDLL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -106,11 +106,26 @@
     <ClInclude Include="CommunicationMessages.h" />
     <ClInclude Include="CrashHandler.h" />
     <ClInclude Include="FlyingTelubeeRobotCommunicator.h" />
-    <ClInclude Include="GstLocalCameraVideoSource.h" />
-    <ClInclude Include="GstSingleNetVideoSource.h" />
-    <ClInclude Include="GstStereoStreamVideoSource.h" />
-    <ClInclude Include="GstStreamerMultipleVideoSource.h" />
-    <ClInclude Include="GstStreamerVideoSource.h" />
+    <ClInclude Include="GstLocalCameraVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GstSingleNetVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GstStereoStreamVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GstStreamerMultipleVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GstStreamerVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="IDepthProvider.h" />
     <ClInclude Include="IRobotController.h" />
     <ClInclude Include="IRobotControllerDLL.h" />
@@ -128,13 +143,25 @@
     <ClInclude Include="DepthVisualizer.h" />
     <ClInclude Include="GeomDepthCalculator.h" />
     <ClInclude Include="GeomDepthRect.h" />
-    <ClInclude Include="LocalSingleCameraVideoSource.h" />
+    <ClInclude Include="LocalSingleCameraVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="NodeHeadController.h" />
     <ClInclude Include="OculusBaseController.h" />
     <ClInclude Include="RemoteCameraRenderingState.h" />
-    <ClInclude Include="GstFileVideoSource.h" />
-    <ClInclude Include="GstStereoNetVideoSource.h" />
-    <ClInclude Include="GStreamVideoProvider.h" />
+    <ClInclude Include="GstFileVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GstStereoNetVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GStreamVideoProvider.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="IApplicationState.h" />
     <ClInclude Include="IEyesRenderingBaseState.h" />
     <ClInclude Include="IHeadController.h" />
@@ -143,10 +170,16 @@
     <ClInclude Include="IRobotCommunicator.h" />
     <ClInclude Include="ITransitionBlender.h" />
     <ClInclude Include="IVideoProvider.h" />
-    <ClInclude Include="ICameraVideoSource.h" />
+    <ClInclude Include="ICameraVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="JoystickDefinitions.h" />
     <ClInclude Include="JoystickInputController.h" />
-    <ClInclude Include="LocalCameraVideoSource.h" />
+    <ClInclude Include="LocalCameraVideoSource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="multicast.h" />
     <ClInclude Include="NullRenderState.h" />
     <ClInclude Include="OculusHeadController.h" />
@@ -181,11 +214,26 @@
     <ClCompile Include="CommunicationMessages.cpp" />
     <ClCompile Include="CrashHandler.cpp" />
     <ClCompile Include="FlyingTelubeeRobotCommunicator.cpp" />
-    <ClCompile Include="GstLocalCameraVideoSource.cpp" />
-    <ClCompile Include="GstSingleNetVideoSource.cpp" />
-    <ClCompile Include="GstStereoStreamVideoSource.cpp" />
-    <ClCompile Include="GstStreamerMultipleVideoSource.cpp" />
-    <ClCompile Include="GstStreamerVideoSource.cpp" />
+    <ClCompile Include="GstLocalCameraVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GstSingleNetVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GstStereoStreamVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GstStreamerMultipleVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GstStreamerVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="IRobotController.cpp" />
     <ClCompile Include="IServiceModule.cpp" />
     <ClCompile Include="IXMLNetMessageHandler.cpp" />
@@ -196,19 +244,34 @@
     <ClCompile Include="GeomDepthCalculator.cpp" />
     <ClCompile Include="GeomDepthRect.cpp" />
     <ClCompile Include="LocalDLLRobotController.cpp" />
-    <ClCompile Include="LocalSingleCameraVideoSource.cpp" />
+    <ClCompile Include="LocalSingleCameraVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="NetworkValueController.cpp" />
     <ClCompile Include="NodeHeadController.cpp" />
     <ClCompile Include="OculusBaseController.cpp" />
     <ClCompile Include="RemoteCameraRenderingState.cpp" />
-    <ClCompile Include="GstFileVideoSource.cpp" />
-    <ClCompile Include="GstStereoNetVideoSource.cpp" />
-    <ClCompile Include="GStreamVideoProvider.cpp" />
+    <ClCompile Include="GstFileVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GstStereoNetVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GStreamVideoProvider.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="IEyesRenderingBaseState.cpp" />
     <ClCompile Include="IRenderingState.cpp" />
     <ClCompile Include="JoystickDefinitions.cpp" />
     <ClCompile Include="JoystickInputController.cpp" />
-    <ClCompile Include="LocalCameraVideoSource.cpp" />
+    <ClCompile Include="LocalCameraVideoSource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="multicast.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

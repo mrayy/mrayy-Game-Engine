@@ -18,11 +18,11 @@ GstStreamBin::~GstStreamBin()
 	ClearStreams(true);
 }
 
-void GstStreamBin::AddStream(IGStreamerStreamer* Stream, const core::string& name)
+void GstStreamBin::AddStream(IGStreamerStreamer* Stream, const std::string& name)
 {
 	m_Streamers[name] = Stream;
 }
-IGStreamerStreamer* GstStreamBin::GetStream(const core::string& name)
+IGStreamerStreamer* GstStreamBin::GetStream(const std::string& name)
 {
 	StreamMap::iterator it = m_Streamers.find(name);
 	if (it == m_Streamers.end())
@@ -56,21 +56,21 @@ void GstStreamBin::CloseAll()
 	}
 
 }
-void GstStreamBin::StartStream(const core::string& name)
+void GstStreamBin::StartStream(const std::string& name)
 {
 	StreamMap::iterator it = m_Streamers.find(name);
 	if (it == m_Streamers.end())
 		return;
 	it->second->Stream();
 }
-void GstStreamBin::StopStream(const core::string& name)
+void GstStreamBin::StopStream(const std::string& name)
 {
 	StreamMap::iterator it = m_Streamers.find(name);
 	if (it == m_Streamers.end())
 		return;
 	it->second->Stop();
 }
-IGStreamerStreamer* GstStreamBin::RemoveStream(const core::string& name, bool close)
+IGStreamerStreamer* GstStreamBin::RemoveStream(const std::string& name, bool close)
 {
 	StreamMap::iterator it = m_Streamers.find(name);
 	if (it == m_Streamers.end())

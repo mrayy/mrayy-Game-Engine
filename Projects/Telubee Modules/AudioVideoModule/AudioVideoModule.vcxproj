@@ -100,6 +100,7 @@
     <ClInclude Include="AudioVideoModule.h" />
     <ClInclude Include="AVStreamServiceModule.h" />
     <ClInclude Include="CameraProfile.h" />
+    <ClInclude Include="CameraStreamController.h" />
     <ClInclude Include="GstVideoProvider.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

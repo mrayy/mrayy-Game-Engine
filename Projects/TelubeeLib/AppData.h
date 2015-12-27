@@ -25,7 +25,7 @@ namespace mray
 	class InputManager;
 	namespace video
 	{
-		class OculusDevice;
+	//	class OculusDevice;
 	}
 namespace TBee
 {
@@ -51,7 +51,7 @@ public:
 	EHeadControllerType headController;
 	ERobotControllerType robotController;
 
-	video::OculusDevice* oculusDevice;
+	//video::OculusDevice* oculusDevice;
 	InputManager* inputMngr;
 	RobotInfoManager* robotInfoManager;
 

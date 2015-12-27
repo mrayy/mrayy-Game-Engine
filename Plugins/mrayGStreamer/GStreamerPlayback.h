@@ -32,7 +32,7 @@ public:
 	GStreamerPlayback();
 	virtual~GStreamerPlayback();
 
-	void SetPipeline(const core::string& desc);
+	void SetPipeline(const std::string& desc);
 };
 */
 }

@@ -1,6 +1,7 @@
 
 
 #include "stdafx.h"
+#ifdef USE_OPENNI
 #include "GeomDepthCalculator.h"
 #include "GeomDepthRect.h"
 #include "OpenNIUtils.h"
@@ -209,3 +210,4 @@ math::vector3d* GeomDepthCalculator::GetNormalData()
 }
 }
 
+#endif

@@ -24,7 +24,8 @@ enum class EMessages
 	RobotStatus = 12,
 	JointValues = 13,
 	Detect = 14,
-	Presence = 15
+	Presence = 15,
+	NetValue = 16,
 
 };
 

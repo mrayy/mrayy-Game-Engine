@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "OculusHeadController.h"
 #include "AppData.h"
+#if 0
 #include "OculusDevice.h"
 
 namespace mray
@@ -56,3 +57,4 @@ void OculusHeadController::Recalibrate()
 }
 }
 
+#endif

@@ -18,7 +18,7 @@ AppData::AppData()
 	s_instance = this;
 	MajorVer = 1;
 	MinorVer = 0;
-	oculusDevice = 0;
+//	oculusDevice = 0;
 	headController = EHeadControllerType::Oculus;
 	robotController = ERobotControllerType::Joystick;
 	IsDebugging=0;

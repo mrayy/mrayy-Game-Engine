@@ -21,6 +21,18 @@ public:
 		Flipped //180 degrees flipped
 	};
 
+	enum ECameraType
+	{
+		POVCamera,
+		OmniCamera,
+	};
+	enum ECameraCaptureType
+	{
+		CaptureRaw,
+		CaptureJpeg,
+		CaptureH264
+	};
+
 	//http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
 	float fov;			//horizontal field of view for the camera measured in degrees
 	float cameraOffset;	//physical offset from human eye
@@ -33,6 +45,9 @@ public:
 	math::vector4d KPCoeff;
 	math::vector4d PixelShift;
 	core::string name;
+
+	ECameraCaptureType captureType;//RAW,JPEG,H264
+	ECameraType  cameraType; //FOV,OMNI
 
 public:
 	TelubeeCameraConfiguration();

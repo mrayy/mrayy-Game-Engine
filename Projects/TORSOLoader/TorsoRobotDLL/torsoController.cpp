@@ -127,6 +127,7 @@ ERobotControllerStatus torsoController::GetRobotStatus() {
 
 void torsoController::DisconnectRobot()
 {
+	
 	m_connectFlag = false;
 	return;
 }

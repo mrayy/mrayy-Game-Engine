@@ -103,7 +103,7 @@ public:
 
 	// addr: target address to stream video to
 	// audioport: port for the audio stream , audio rtcp is allocated as audioPort+1 and audioPort+2
-	void BindPorts(const core::string& addr, uint audioPort,uint clockPort, bool rtcp)
+	void BindPorts(const std::string& addr, uint audioPort, uint clockPort, bool rtcp)
 	{
 		m_ipAddr = addr;
 		m_audioPort = audioPort;
@@ -167,7 +167,7 @@ GstPipelineHandler* GstNetworkAudioStreamer::GetPipeline()
 	return m_impl;
 }
 
-void GstNetworkAudioStreamer::BindPorts(const core::string& addr, uint* ports, uint count, uint clockPort, bool rtcp)
+void GstNetworkAudioStreamer::BindPorts(const std::string& addr, uint* ports, uint count, uint clockPort, bool rtcp)
 {
 	m_impl->BindPorts(addr, ports[0], clockPort, rtcp);
 }

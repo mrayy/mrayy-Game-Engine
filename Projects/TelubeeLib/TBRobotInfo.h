@@ -28,10 +28,22 @@ class TBRobotInfo
 {
 protected:
 public:
-	TBRobotInfo(){}
+	TBRobotInfo(){
+		Type = EConnectionType::RTP;
+		CommunicationPort = 6000;
+	}
 	virtual~TBRobotInfo(){}
 
+	enum EConnectionType
+	{
+		RTP,
+		WebRTC
+	};
+
+
 	long ID;
+	EConnectionType Type;
+	int CommunicationPort;
 	core::string name;
 	core::string IP;
 	core::string Location;
@@ -46,6 +58,8 @@ public:
 		xml::XMLElement* e = new xml::XMLElement("RobotInfo");
 
 		e->addAttribute("ID", core::StringConverter::toString(ID));
+		e->addAttribute("Type", Type==EConnectionType::WebRTC?"WebRTC":"RTP");
+		e->addAttribute("CommunicationPort", core::StringConverter::toString(CommunicationPort));
 		e->addAttribute("Name", name);
 		e->addAttribute("IP", IP);
 		e->addAttribute("Location", Location);
@@ -60,6 +74,8 @@ public:
 	{
 		int len = 0;
 		len += w->writeValue(ID);
+		len += w->binWriteInt(Type);
+		len += w->binWriteInt(CommunicationPort);
 		len += w->binWriteString(name);
 		len += w->binWriteString(IP);
 		len += w->binWriteString(Location);
@@ -72,6 +88,8 @@ public:
 	void Read(OS::StreamReader* w)
 	{
 		w->readValue(ID);
+		Type = (EConnectionType)w->binReadInt();
+		CommunicationPort = w->binReadInt();
 		name = w->readString();
 		IP = w->readString();
 		Location = w->readString();

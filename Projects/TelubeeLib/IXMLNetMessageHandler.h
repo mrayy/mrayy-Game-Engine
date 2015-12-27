@@ -18,6 +18,7 @@ protected:
 	void ProcessPacket(network::NetAddress* addr, const char* buffer);
 
 	network::IUDPClient* m_client;
+	int m_port;
 
 	OS::IMutex* m_dataMutex;
 	OS::IThread* m_thread;
@@ -27,6 +28,7 @@ public:
 
 	virtual void StartHandler(int port);
 	virtual void StopHandler();
+	int GetPort(){ return m_port; }
 
 	int _Process();
 };

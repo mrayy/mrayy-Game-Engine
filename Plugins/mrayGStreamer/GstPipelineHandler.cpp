@@ -61,7 +61,7 @@ namespace video
 		delete m_data;
 	}
 
-	bool GstPipelineHandler::CreatePipeline(bool isMasterClock, const core::string& clockIP, uint clockPort)
+	bool GstPipelineHandler::CreatePipeline(bool isMasterClock, const std::string& clockIP, uint clockPort)
 	{
 		if (!m_data->gstPipeline)
 			return false;
@@ -133,7 +133,7 @@ namespace video
 		m_data->paused = p;
 		if (m_data->Loaded)
 		{
-			if (m_data->playing)
+			if (m_data->playing )
 			{
 				if (m_data->paused)
 				{
@@ -174,6 +174,10 @@ namespace video
 	bool GstPipelineHandler::IsLoaded()
 	{
 		return m_data->Loaded;
+	}
+	bool GstPipelineHandler::IsPaused()
+	{
+		return m_data->paused;
 	}
 	bool GstPipelineHandler::IsPlaying()
 	{

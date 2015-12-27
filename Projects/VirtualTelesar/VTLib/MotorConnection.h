@@ -58,7 +58,7 @@ public:
 	{
 		m_connected=c;
 		//FIRE_LISTENR_METHOD(OnConnectionChanged,(this,c));
-		OnConnectionChanged,(this,c);
+		OnConnectionChanged(this,c);
 	}
 	bool IsConnected()
 	{
@@ -69,7 +69,7 @@ public:
 	{
 		m_sourceJoint=joint;
 		//FIRE_LISTENR_METHOD(OnSourceJointChanged,(this,joint));
-		OnSourceJointChanged,(this,joint);
+		OnSourceJointChanged(this,joint);
 	}
 	const core::string&  GetSourceJoint()
 	{
@@ -80,7 +80,7 @@ public:
 	{
 		m_targetJoint=joint;
 		//FIRE_LISTENR_METHOD(OnTargetJointChanged,(this,joint));
-		OnTargetJointChanged,(this,joint);
+		OnTargetJointChanged(this,joint);
 	}
 	const core::string& GetTargetJoint()
 	{

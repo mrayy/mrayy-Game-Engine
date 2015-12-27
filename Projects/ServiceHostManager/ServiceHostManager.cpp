@@ -14,6 +14,7 @@
 #include "CommunicationMessages.h"
 #include "LogManager.h"
 
+#include "picojson.h"
 #include <tinyxml2.h>
 #include <windows.h>
 #include <conio.h>
@@ -96,10 +97,13 @@ void ServiceHostManager::_destroy()
 
 bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 {
-	new OS::WinFileSystem();
-	new Engine(new OS::WinOSystem());
-	gEngine.loadPlugins("plugins.stg");
-	gEngine.createDevice("OpenGL");
+	new OS::WinOSystem();
+	new LogManager();
+	m_timer = OS::WinOSystem::getInstance().createTimer();
+	//new OS::WinFileSystem();
+	//new Engine(new OS::WinOSystem());
+	//gEngine.loadPlugins("plugins.stg");
+	//gEngine.createDevice("OpenGL");
 
 	StreamLogger *log = new StreamLogger(true);
 	log->setStream(gFileSystem.createTextFileWriter("ServiceHostManager.log"));
@@ -138,6 +142,7 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 
 	m_info.IP = m_memory->hostAddress.toString();
 	m_info.name = "Telexistence Robot";
+	m_info.CommunicationPort = m_robotCommunicator->GetServerPort();
 
 	gLogManager.log("Starting Services", ELL_INFO);
 	for (int i = 1; i < argc; ++i)
@@ -214,7 +219,7 @@ bool ServiceHostManager::RunLocalService(const core::string& name)
 	ifo.name = name;
 	ifo.processHandle = lpProcessInfo.hProcess;
 	ifo.threadHandle = lpProcessInfo.hThread;
-	ifo.lastTime = gEngine.getTimer()->getMilliseconds();
+	ifo.lastTime = m_timer->getMilliseconds();
 	m_serviceList.push_back(ifo);
 
 	printf("Service [%s] process was created\n",name.c_str());
@@ -245,6 +250,9 @@ int ServiceHostManager::GetServiceByName(const core::string &name)
 }
 
 
+//#define USE_JSON_PARSER
+#define USE_XML_PARSER
+
 bool ServiceHostManager::_ProcessPacket()
 {
 	if (!m_commLink->IsOpen())
@@ -258,6 +266,17 @@ bool ServiceHostManager::_ProcessPacket()
 
 	buffer[len] = 0;
 
+#ifdef USE_JSON_PARSER
+	picojson::value jsonVal;
+	std::string err = picojson::parse(jsonVal,buffer);
+	if (!err.empty())
+	{
+		printf("Error parsing JSON data: %s\n", err.c_str());
+		return 0;
+	}
+	core::string rootName = jsonVal.get();
+#else 
+#ifdef USE_XML_PARSER
 
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError err = doc.Parse(buffer);
@@ -267,6 +286,8 @@ bool ServiceHostManager::_ProcessPacket()
 	}
 	tinyxml2::XMLElement*root = doc.RootElement();
 	core::string rootName = root->Name();
+#endif
+#endif
 	if (rootName == "ServiceModule")
 	{
 		std::string msg = root->Attribute("Message");
@@ -275,18 +296,25 @@ bool ServiceHostManager::_ProcessPacket()
 			ServiceInfo ifo;
 			ifo.name = root->Attribute("Name");
 			ifo.address = src;
+			ifo.netValuePort = root->IntAttribute("NetValue");
 
+			printf("New service was connected [%s]: %s:%d. NetValue Port:%d\n", ifo.name.c_str(), ifo.address.toString().c_str(), ifo.address.port,ifo.netValuePort);
 
-			printf("New service was connected [%s]: %s:%d\n", ifo.name.c_str(), ifo.address.toString().c_str(), ifo.address.port);
+			//let know the user the new net value port
+			if (m_memory->UserConnected)
+			{
+
+			}
 
 			int i = GetServiceByName(ifo.name);
-			ifo.lastTime = gEngine.getTimer()->getMilliseconds();
+			ifo.lastTime = m_timer->getMilliseconds();
 			if (i != -1)
 			{
 
 				m_dataMutex->lock();
 				m_serviceList[i].lastTime = ifo.lastTime;
 				m_serviceList[i].address = src;
+				m_serviceList[i].netValuePort = ifo.netValuePort;
 				m_dataMutex->unlock();
 			}
 			else
@@ -314,7 +342,7 @@ bool ServiceHostManager::_ProcessPacket()
 			{
 				//printf("Pong message recevied from :%s\n", m_serviceList[i].name.c_str());
 				m_dataMutex->lock();
-				m_serviceList[i].lastTime = gEngine.getTimer()->getMilliseconds();
+				m_serviceList[i].lastTime = m_timer->getMilliseconds();
 				m_serviceList[i].pingSent = false;
 				m_dataMutex->unlock();
 			}
@@ -340,7 +368,7 @@ bool ServiceHostManager::_ProcessServices()
 {
 	std::vector<ServiceList::iterator> toRemove;
 	std::vector<core::string> servicesToRun;
-	ulong t=gEngine.getTimer()->getMilliseconds();
+	ulong t=m_timer->getMilliseconds();
 	for (int i = 0; i < m_serviceList.size(); ++i)
 	{
 		if (!m_serviceList[i].pingSent && (t - m_serviceList[i].lastTime) > PingTime)
@@ -433,6 +461,24 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 		retAddr.address = addr->address;
 		retAddr.port = core::StringConverter::toInt(value);
 		m_commLink->SendTo(&retAddr, (char*)buffer, len);
+	}
+	else if (m.equals_ignore_case("NetValuePort"))
+	{
+		//check the requested service name
+		printf("Requesting net value port for :%s\n", vals[0].c_str());
+		int i=GetServiceByName(vals[0]);
+		if (i != -1)
+		{
+			printf("Sending net value port for %s : %d\n", m_serviceList[i].name.c_str(), m_serviceList[i].netValuePort);
+			int reply = (int)TBee::EMessages::NetValue;
+			int len = stream.write(&reply, sizeof(reply));
+			len += wrtr.binWriteString(m_serviceList[i].name);		//write service name
+			len += wrtr.writeValue(m_serviceList[i].netValuePort);	//write service net value port number
+			network::NetAddress retAddr;
+			retAddr.address = addr->address;
+			retAddr.port = core::StringConverter::toInt(vals[1]);
+			m_commLink->SendTo(&retAddr, (char*)buffer, len);
+		}
 	}
 	else
 	{

@@ -4,9 +4,9 @@
 #include "TBeeRenderer.h"
 
 #include "AppData.h"
-#include "OculusCameraComponent.h"
-#include "OculusDevice.h"
-#include "OculusManager.h"
+//#include "OculusCameraComponent.h"
+//#include "OculusDevice.h"
+//#include "OculusManager.h"
 #include "RenderWindow.h"
 #include "Viewport.h"
 #include "ParsedShaderPP.h"
@@ -21,10 +21,10 @@ namespace TBee
 public:
 
 	TBeeRenderer* owner;
-
+	/*
 	GCPtr<video::OculusManager> oculusManager;
 	GCPtr<video::ParsedShaderPP> oculusRenderer[2];
-	game::OculusCameraComponent* oculusComponents[2];
+	game::OculusCameraComponent* oculusComponents[2];*/
 	video::ITexturePtr rtTexture;
 	video::IRenderTargetPtr renderTarget;;
 
@@ -49,11 +49,11 @@ public:
 		m_directRender = false;
 	}
 	~TBeeRendererData()
-	{
+	{/*
 		oculusRenderer[0] = 0;
 		oculusRenderer[1] = 0;
 		AppData::Instance()->oculusDevice = 0;
-		oculusManager = 0;
+		oculusManager = 0;*/
 	}
 
 	void SetDirectRender(bool dr)
@@ -127,6 +127,7 @@ public:
 		}
 
 		// check for Oculus
+#if 0
 		if (AppData::Instance()->headController == EHeadControllerType::Oculus || AppData::Instance()->stereoMode == ERenderStereoMode::Oculus)
 		{
 			gLogManager.log("Initing Oculus", ELL_INFO);
@@ -180,6 +181,7 @@ public:
 				}
 			}
 		}
+#endif
 	}
 	
 
@@ -204,6 +206,7 @@ public:
 		{
 			rtTexture->createTexture(math::vector3di(rc.getSize().x, rc.getSize().y, 1), rtTexture->getImageFormat());
 		}
+#if 0
 		if (AppData::Instance()->stereoMode == ERenderStereoMode::Oculus && oculusRenderer[i])
 		{
 			device->set2DMode();
@@ -231,6 +234,7 @@ public:
 			device->setRenderTarget(0, false, true, video::SColor(1, 1, 1, 0));
 		}
 		else
+#endif
 		{
 			texU.SetTexture(m_preFinalRT[i]->GetColorTexture());
 			device->setRenderTarget(m_finalRT[i], false, true, video::SColor(1, 1, 1, 0));
@@ -329,7 +333,7 @@ public:
 
 	void Update(float dt)
 	{
-
+#if 0
 		if ( AppData::Instance()->oculusDevice)
 		{
 			oculusManager->Update(dt);
@@ -338,6 +342,7 @@ public:
 			oculusComponents[0]->Update(dt);
 			oculusComponents[1]->Update(dt);
 		}
+#endif
 	}
 };
 
