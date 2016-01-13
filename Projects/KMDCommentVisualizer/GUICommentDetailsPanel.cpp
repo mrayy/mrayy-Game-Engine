@@ -37,10 +37,27 @@ GUICommentDetailsPanel::GUICommentDetailsPanel(IGUIManager* m) :
 	if (o)
 	{
 		o->CreateElements(m, this, this, this);
+		Details->GetFontAttributes()->fontSize = core::StringConverter::toInt(gAppData.GetValue("UI", "CommentSize", "18"));
+		ProjectID->GetFontAttributes()->fontSize = core::StringConverter::toInt(gAppData.GetValue("UI", "ProjectIDSize", "18"));
+
+
+		math::vector2d sz = TwitterImage->GetSize();
+		sz = core::StringConverter::toInt(gAppData.GetValue("UI", "UserImageSize", core::StringConverter::toString(sz.x)));
+		TwitterImage->SetSize(sz);
+
+		math::vector2d pos = Details->GetPosition();
+		pos.x = TwitterImage->GetPosition().x + sz.x + 10;
+		Details->SetPosition(pos);
+
 	}
 }
 GUICommentDetailsPanel::~GUICommentDetailsPanel()
 {
+}
+void GUICommentDetailsPanel::LoadXMLSettings(xml::XMLElement*e)
+{
+	IGUIPanelElement::LoadXMLSettings(e);
+
 }
 
 void GUICommentDetailsPanel::SetComment(kmd::KMDComment* t)
@@ -111,6 +128,7 @@ void GUICommentDetailsPanel::Draw(const math::rectf*vp)
 	if (!IsVisible())
 		return;
 	video::IVideoDevice* dev = Engine::getInstance().getDevice();
+
 
 	const GUIElementRegion* r = GetDefaultRegion();
 

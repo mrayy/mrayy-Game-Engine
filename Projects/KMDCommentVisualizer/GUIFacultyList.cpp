@@ -8,6 +8,7 @@
 #include "GUIOverlay.h"
 #include "GUIElementRegion.h"
 #include "SessionDetails.h"
+#include "AppData.h"
 
 namespace mray
 {
@@ -28,6 +29,7 @@ GUIFacultyList::GUIFacultyList(IGUIManager* m)
 
 		Advisers->SetUseScroll(false);
 		Committee->SetUseScroll(false);
+
 	}
 }
 
@@ -84,6 +86,18 @@ void GUIFacultyList::Update(float dt)
 		return;
 	UpdateDocking();
 	IGUIPanelElement::Update(dt);
+}
+void GUIFacultyList::LoadXMLSettings(xml::XMLElement*e)
+{
+	IGUIPanelElement::LoadXMLSettings(e);
+
+	math::vector2d sz;
+	sz = this->GetSize();
+	sz.y = core::StringConverter::toInt(gAppData.GetValue("UI", "FacultyHeight", core::StringConverter::toString(sz.y)));
+	this->SetSize(sz);
+
+	AdvisersLbl->GetFontAttributes()->fontSize = sz.y / 3;
+	committeeLbl->GetFontAttributes()->fontSize = sz.y / 3;
 }
 
 IMPLEMENT_ELEMENT_FACTORY(GUIFacultyList);

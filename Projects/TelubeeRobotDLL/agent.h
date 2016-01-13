@@ -32,9 +32,17 @@
 #define RADTODEG	57.2957795131
 #define	DEGTORAD	0.0174532925199
 
-char headCOM[10], robotCOM[10];
-int robot_baudRate = 115200, head_baudRate = 115200;
-int xAxis = 1, yAxis = 1, zAxis = 1;
+class RobotConfig
+{
+public:
+	char headCOM[10], robotCOM[10];
+	int robot_baudRate = 115200, head_baudRate = 115200;
+	float xAxis = 1, yAxis = 1, zAxis = 1;
+	float xSpeed = 1, ySpeed = 1, Rotation = 1;
+	bool BaseEnabled = true, HeadEnabled = true;
+};
+
+RobotConfig _config;
 
 clock_t startT, endT;
 
@@ -93,6 +101,15 @@ void load_parameters(){
 
 	ifstream confFile(path);
 
+	_config.xAxis = 1;
+	_config.yAxis = 1;
+	_config.zAxis = 1;
+	_config.xSpeed = 1;
+	_config.ySpeed = 1;
+	_config.Rotation = 1;
+	_config.BaseEnabled = true;
+	_config.HeadEnabled = true;
+
 	if ( !confFile.is_open() ){
 		cout << " FileOpenError(robotconf.ini)" << endl;
 	}
@@ -120,23 +137,33 @@ void load_parameters(){
 				}
 				
  				if(strcmp (token[0], "ROBOT_COM_PORT") == 0)
- 					strcpy (robotCOM, token[1]);
+					strcpy(_config.robotCOM, token[1]);
 				
 				 if(strcmp (token[0], "ROBOT_BAUD") == 0)
-					robot_baudRate = atoi(token[1]);
+					 _config.robot_baudRate = atoi(token[1]);
 
 				else if(strcmp (token[0], "HEAD_COM_PORT") == 0)
-					strcpy (headCOM, token[1]);
+					strcpy(_config.headCOM, token[1]);
 
 				else if(strcmp (token[0], "HEAD_BAUD") == 0)
-					head_baudRate = atoi(token[1]);/**/
-				/*
+					_config.head_baudRate = atoi(token[1]);/**/
+				
 				else if (strcmp(token[0], "X") == 0)
-					xAxis = atoi(token[1]);
+					_config.xAxis = atof(token[1]);
 				else if (strcmp(token[0], "Y") == 0)
-					yAxis = atoi(token[1]);
+					_config.yAxis = atof(token[1]);
 				else if (strcmp(token[0], "Z") == 0)
-					zAxis = atoi(token[1]);*/
+					_config.zAxis = atof(token[1]);
+				else if (strcmp(token[0], "XSpeed") == 0)
+					_config.xSpeed = atof(token[1]);
+				else if (strcmp(token[0], "YSpeed") == 0)
+					_config.ySpeed = atof(token[1]);
+				else if (strcmp(token[0], "Rotation") == 0)
+					_config.Rotation = atof(token[1]);
+				else if (strcmp(token[0], "HeadEnabled") == 0)
+					_config.HeadEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "BaseEnabled") == 0)
+					_config.BaseEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 
 			}
 
@@ -146,12 +173,6 @@ void load_parameters(){
 			//cout << endl;
 
 		}
-		if (!xAxis)
-			xAxis = 1;
-		if (!yAxis)
-			yAxis = 1;
-		if (!zAxis)
-			zAxis = 1;
 
 	}
 

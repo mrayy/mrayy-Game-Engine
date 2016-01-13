@@ -2,7 +2,8 @@
 
 #include "stdafx.h"
 #include "PhantomCommunicator.h"
-
+#include "ILogManager.h"
+#include <Windows.h>
 extern "C" {
 #include "hidsdi.h"
 #include <setupapi.h>
@@ -37,13 +38,9 @@ protected:
 	float m_lastRotation;
 public:
 
-	ITelubeeRobotListener* listener;
-
-public:
 	PhantomCommunicatorImpl()
 	{
 		DeviceHandle = 0;
-		listener = 0;
 		isDone = false;
 		m_baseThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadBase, this, NULL, NULL);
 
@@ -74,6 +71,23 @@ public:
 
 	}
 
+	virtual bool Connect(const core::string& port)
+	{
+		return Connect();
+	}
+
+	virtual void Start()
+	{
+		threadStart = true;
+	}
+	virtual void Stop()
+	{
+		threadStart = false;
+	}
+	virtual bool IsStarted()
+	{
+		return threadStart;
+	}
 	bool Send(int delay1, int mul1, int delay2, int mul2, int delay3, int mul3, int delay4, int mul4, int delay5, int mul5, int delay6, int mul6,
 		int delay7, int mul7, int delay8, int mul8, int delay9, int mul9)
 	{
@@ -101,6 +115,7 @@ public:
 		OutputReport[18] = mul9;
 
 		if (!WriteFile(DeviceHandle, OutputReport, Capabilities.OutputReportByteLength, &BytesWritten, NULL)) {
+			gLogManager.log("Phantom Controller - Failed to send command!. ", ELL_WARNING);
 			CloseHandle(DeviceHandle);
 			DeviceHandle = 0;
 			return false;
@@ -122,6 +137,8 @@ public:
 		ULONG								Required;
 		HIDD_ATTRIBUTES						Attributes;
 		PHIDP_PREPARSED_DATA				PreparsedData;
+		
+		gLogManager.log(" Connecting Phantom Controller. ", ELL_INFO);
 
 		// Get the GUID for all system HIDs
 		HidD_GetHidGuid(&HidGuid);
@@ -190,7 +207,7 @@ public:
 		if (MyDeviceDetected == FALSE) {
 			SetupDiDestroyDeviceInfoList(hDevInfo);
 			DeviceHandle = 0;
-			printf(" Failed to connect to Phantom controller. \n");
+			gLogManager.log(" Failed to connect to Phantom controller. ",ELL_WARNING);
 			return false;
 		}
 
@@ -202,10 +219,12 @@ public:
 
 		HidD_FreePreparsedData(PreparsedData);
 
-		printf("Phantom controller connected successfully. \n");
+		gLogManager.log("Phantom controller connected successfully. ",ELL_INFO);
 
-		SendControl(1023, 1023, 1023, 0);
+		SendControl(1023, 1023, 1023, 0);//Send start command
 		Sleep(3000);
+
+
 		
 		return true;
 	}
@@ -215,11 +234,12 @@ public:
 	}
 	void Disconnect()
 	{
-		SendControl(512, 512, 1023, 512);
-		if (DeviceHandle!=0)
+		SendControl(512, 512, 1023, 512);//Send stop command
+		Sleep(1000);
+		if (DeviceHandle != 0)
 			CloseHandle(DeviceHandle);
 		DeviceHandle = 0;
-		printf("Phantom controller disconnected. \n");
+		gLogManager.log("Phantom controller disconnected. ", ELL_INFO);
 	}
 
 	bool TimerUpdate()
@@ -239,16 +259,11 @@ public:
 			int V7 = 63;
 			int V8 = 512;
 			int V9 = 512;
-
-			printf("S1:%f,F1:%f,T1:%f,P1:%f\n", m_side, m_front, m_throttle, pan);
-			printf("S:%d,F:%d,T:%d,P:%d\n", V1, V2, V3, V4);
 			
 			Send(V1 % 256, V1 / 256, V2 % 256, V2 / 256, V3 % 256, V3 / 256, V4 % 256, V4 / 256, 
 				 V5 % 256, V5 / 256, V6 % 256, V6 / 256, V7 % 256, V7 / 256, V8 % 256, V8 / 256, V9 % 256, V9 / 256);
-			//robot->omni_control(-robot->robot_vx, -robot->robot_vy, -robot->robot_rot, robot->baseConnected ? RUN : STOP);
-			//printf("thread b: %d \r", count++);
-			//robot->yamahaXY_control(robot->robotX, robot->robotY, RUN);
-		}
+		}else
+			Sleep(100);
 
 		Sleep(30);
 		return true;
@@ -261,31 +276,23 @@ public:
 		return 0;
 	}
 
-	void OnUpdate(const RobotStatus& st)
+	virtual void Drive(const math::vector2di& speed, int rotationSpeed)
 	{
-		if (IsConnected() && !st.connected)
-		{
-			Disconnect();
-		}
-		else if (!IsConnected() && st.connected)
-		{
-			Connect();
-		}
-		if (st.connected)
-			threadStart = true;
-		else
-			threadStart = false;
-
-		if (!IsConnected())
-			return;
-
-		m_pan = st.rotation ;
-		m_front = st.speed[0];
-		m_side = -st.speed[1];
+		m_pan = rotationSpeed;
+		m_front = speed.x;
+		m_side = -speed.y;
 
 	}
+	virtual void DriveStop()
+	{
+
+		m_pan = 0;
+		m_front = 0;
+		m_side = 0;
+	}
 };
-}
+
+
 PhantomCommunicator::PhantomCommunicator()
 {
 	m_impl = new mray::PhantomCommunicatorImpl();
@@ -295,36 +302,39 @@ PhantomCommunicator::~PhantomCommunicator()
 	delete m_impl;
 }
 
-void PhantomCommunicator::SetListener(ITelubeeRobotListener* l)
+bool PhantomCommunicator::Connect(const core::string& port)
 {
-	m_impl->listener = l;
-}
-void PhantomCommunicator::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
-{
-
-}
-void PhantomCommunicator::ConnectRobot()
-{
-	m_impl->Connect();
-}
-void PhantomCommunicator::DisconnectRobot()
-{
-	m_impl->Disconnect();
-
+	return m_impl->Connect(port);
 }
 bool PhantomCommunicator::IsConnected()
 {
 	return m_impl->IsConnected();
 }
-void PhantomCommunicator::UpdateRobotStatus(const RobotStatus& st)
+void PhantomCommunicator::Disconnect()
 {
+	return m_impl->Disconnect();
+}
 
-	m_impl->OnUpdate(st);
-
+void PhantomCommunicator::Start()
+{
+	return m_impl->Start();
+}
+void PhantomCommunicator::Stop()
+{
+	return m_impl->Stop();
+}
+bool PhantomCommunicator::IsStarted()
+{
+	return m_impl->IsStarted();
+}
+void PhantomCommunicator::Drive(const math::vector2di& speed, int rotationSpeed)
+{
+	return m_impl->Drive(speed,rotationSpeed);
+}
+void PhantomCommunicator::DriveStop()
+{
+	return m_impl->DriveStop();
 
 }
 
-std::string PhantomCommunicator::ExecCommand(const std::string& cmd, const std::string& args)
-{
-	return "";
 }

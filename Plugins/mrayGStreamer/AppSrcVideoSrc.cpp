@@ -250,7 +250,7 @@ namespace video
 
 
 			videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / m_grabber.size()) +
-				" speed-preset=superfast pass=cbr tune=zerolatency sync-lookahead=0 rc-lookahead=0 sliced-threads=true key-int-max=5"
+				" speed-preset=superfast pass=cbr tune=zerolatency sync-lookahead=0 rc-lookahead=0 sliced-threads=true"//" key-int-max=5"
 				" psy-tune=1 "//interlaced=true sliced-threads=false  "// 
 				" ! rtph264pay ";
 

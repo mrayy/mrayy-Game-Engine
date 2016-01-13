@@ -20,6 +20,8 @@ namespace GoogleAPI
         GDocHandler gdocHandlerStd;
         GDocHandler gdocHandlerFac;
 
+        GTranslateHandler gTranslater;
+
         int m_id;
 
         DBHandler dbHandler;
@@ -72,6 +74,9 @@ namespace GoogleAPI
             m_id = 0;
 
             this.Resize += Main_Resize;
+
+            gTranslater = new GTranslateHandler();
+            gTranslater.Init();
         }
 
         void Main_Resize(object sender, EventArgs e)

@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include "movingAverage.h"
 
-MovAvg::MovAvg()
+MovAvg::MovAvg(int len)
 {
+	this->len = len;
 	cur = 0;
-	for(int i = 0;i< _MOVING_AVERAGE_BUF_LENGTH_;i++)
+	buf = new double[len];
+	for (int i = 0; i< len; i++)
 		buf[i] = 0.0;
 }
 
@@ -14,12 +16,12 @@ double MovAvg::getNext(double next)
 	double sum = 0.0;
 	
 	buf[cur++] = next;
-	if(cur>_MOVING_AVERAGE_BUF_LENGTH_) cur = 0;
+	if (cur>=len) cur = 0;
 
-	for(int i = 0;i< _MOVING_AVERAGE_BUF_LENGTH_;i++)
+	for (int i = 0; i< len; i++)
 		sum += buf[i];
 	
-	sum /= _MOVING_AVERAGE_BUF_LENGTH_;
+	sum /= (double)len;
 
 	return sum;
 }

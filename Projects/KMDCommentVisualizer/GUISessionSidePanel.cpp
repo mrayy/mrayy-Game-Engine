@@ -69,6 +69,19 @@ GUISessionSidePanel::~GUISessionSidePanel()
 {
 	gAppData.subProjectChange.RemoveListener(this);
 }
+void GUISessionSidePanel::LoadXMLSettings(xml::XMLElement*e)
+{
+	IGUIPanelElement::LoadXMLSettings(e);
+
+	math::vector2d sz;
+	sz = this->GetSize();
+	sz.x = core::StringConverter::toInt(gAppData.GetValue("UI", "SessionPanelWidth", core::StringConverter::toString(sz.x)));
+	this->SetSize(sz);
+
+	m_maxWidth = sz.x;
+	m_minWidth = sz.x * 70 / 100;
+}
+
 void GUISessionSidePanel::SetSessionContainer(kmd::SessionContainer* s)
 {
 	m_sessions = s;
@@ -239,7 +252,7 @@ void GUISessionSidePanel::Draw(const math::rectf*vp)
 
 			if (i == m_currentSpeaker)
 				y += selectedSpacing;
-			float t = (powf(1 - dst,2.0f)*0.3+ 0.7);;
+			float t = (powf(1 - dst,2.0f)*0.6+ 0.4);;
 			rc.ULPoint.y = y - sz*0.5f*t;
 			rc.BRPoint.y = y + sz*0.5f*t;
 

@@ -16,14 +16,12 @@
 #ifndef PhantomCommunicator_h__
 #define PhantomCommunicator_h__
 
-#include "IRobotController.h"
+#include "IBaseController.h"
 
 namespace mray
 {
-class PhantomCommunicatorImpl;
-
-}
-class PhantomCommunicator :public IRobotController
+	class PhantomCommunicatorImpl;
+class PhantomCommunicator :public IBaseController
 {
 protected:
 	mray::PhantomCommunicatorImpl* m_impl;
@@ -32,15 +30,25 @@ public:
 	PhantomCommunicator();
 	virtual~PhantomCommunicator();
 
-	void SetListener(ITelubeeRobotListener* l);
-	virtual void InitializeRobot(IRobotStatusProvider* robotStatusProvider);
-	void ConnectRobot();
-	void DisconnectRobot();
-	bool IsConnected();
-	void UpdateRobotStatus(const RobotStatus& st);
+	virtual bool Connect(const core::string& port) ;
+	virtual bool IsConnected();
+	virtual void Disconnect();
 
-	virtual std::string ExecCommand(const std::string& cmd, const std::string& args);
+	virtual void Start();
+	virtual void Stop();
+	virtual bool IsStarted();
+
+	virtual void Drive(const math::vector2di& speed, int rotationSpeed) ;
+	virtual void DriveStop() ;
+
+	virtual void UpdateSensors(){}
+
+
+	virtual int GetSensorCount() { return 0; }
+	virtual float GetSensorValue(int s) { return 0; };
+	virtual int GetBatteryLevel() { return 100; };
 };
+}
 
 #endif // PhantomCommunicator_h__
 

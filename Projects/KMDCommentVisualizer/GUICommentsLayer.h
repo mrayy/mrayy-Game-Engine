@@ -53,6 +53,9 @@ public:
 
 	virtual void Draw(const math::rectf*vp);
 	virtual void Update(float dt);
+
+
+	void LoadXMLSettings(xml::XMLElement*e);
 };
 DECLARE_ELEMENT_FACTORY(GUICommentsLayer);
 

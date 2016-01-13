@@ -6,6 +6,7 @@
 #include "GUIOverlayManager.h"
 #include "GUIOverlay.h"
 #include "GUICommentDetailsPanel.h"
+#include "AppData.h"
 
 namespace mray
 {
@@ -30,6 +31,15 @@ namespace GUI
 	GUICommentsLayer::~GUICommentsLayer()
 	{
 
+	}
+	void GUICommentsLayer::LoadXMLSettings(xml::XMLElement*e)
+	{
+		IGUIPanelElement::LoadXMLSettings(e);
+
+		math::vector2d sz;
+		sz = this->GetSize();
+		sz.y = core::StringConverter::toInt(gAppData.GetValue("UI", "CommentHeight", core::StringConverter::toString(sz.y)));
+		this->SetSize(sz);
 	}
 
 	void GUICommentsLayer::_AddComment(kmd::KMDComment* c)

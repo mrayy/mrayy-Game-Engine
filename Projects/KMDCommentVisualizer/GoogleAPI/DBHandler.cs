@@ -154,6 +154,7 @@ namespace GoogleAPI
 
             bool need = false;
             int count = 0;
+            List<string> vals = new List<string>();
             foreach(RowComment c in comments)
             {
                 if (c.id <= m_lastID)
@@ -164,7 +165,8 @@ namespace GoogleAPI
                 c.text=c.text.Replace("\'","- ");
                 if(c.text.Length>500)
                     c.text=c.text.Substring(0, 500);
-                query += "(" + c.id.ToString() + ", '" + c.publisher + "','" + c.project + "','" + c.text + "','" + c.timestamp.ToString("yyyy-MM-dd HH:mm:ss") + "')";
+                query += "(" + c.id.ToString() + ", '" + c.publisher + "','" + c.project + "',@V"+count.ToString()+",'" + c.timestamp.ToString("yyyy-MM-dd HH:mm:ss") + "')";
+                vals.Add(c.text);
                 m_lastID = Math.Max(m_lastID, c.id);
                 count++;
             }
@@ -174,7 +176,11 @@ namespace GoogleAPI
             if (this.OpenConnection() == true)
             {
                 MySqlCommand cmd = new MySqlCommand(query, sqlConnection);
-
+                //add values now
+                for (int i = 0; i < count;++i)
+                {
+                    cmd.Parameters.AddWithValue("@V" + i.ToString(), vals[i]);
+                }
                 try
                 {
                     cmd.ExecuteNonQuery();

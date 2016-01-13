@@ -17,7 +17,9 @@ namespace kmd
 		Debugging = false;
 		sessions = 0;
 
+#if USE_LEAP
 		leapDevice=0;
+#endif
 	}
 	AppData::~AppData()
 	{
@@ -29,9 +31,9 @@ namespace kmd
 		s_values.setPropertie(catagory, name, v);
 	}
 
-	core::string AppData::GetValue(const core::string&catagory, const core::string&name)
+	core::string AppData::GetValue(const core::string&catagory, const core::string&name, const core::string &defaultVal)
 	{
-		return s_values.getPropertie(catagory, name);
+		return s_values.getPropertie(catagory, name,defaultVal);
 	}
 	void AppData::Load(const core::string& path)
 	{

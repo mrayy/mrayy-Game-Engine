@@ -36,8 +36,8 @@ namespace mray
 
 ThreeAxisHead::ThreeAxisHead()
 {
-	comROBOT = 0;
 	connected = false;
+	comROBOT = 0;
 }
 ThreeAxisHead::~ThreeAxisHead()
 {
@@ -106,6 +106,7 @@ math::vector3d ThreeAxisHead::GetRotation()
 void ThreeAxisHead::_onSerialData(int size, char *buffer)
 {
 	char* ptr = buffer;
+	buffer[size - 1] = 0;
 	while (*ptr)
 	{
 		if (*ptr == '@')

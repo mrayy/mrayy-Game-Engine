@@ -74,6 +74,8 @@ public:
 	virtual void Update(float dt);
 	virtual void Draw(const math::rectf*vp);
 	virtual void _OnSubProjectChange(kmd::CSubProject* sp);
+	
+	virtual void LoadXMLSettings(xml::XMLElement*e);
 };
 DECLARE_ELEMENT_FACTORY(GUISessionSidePanel);
 

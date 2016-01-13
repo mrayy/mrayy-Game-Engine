@@ -59,6 +59,7 @@ public:
 
 	virtual void Update(float dt);
 	virtual void Draw(const math::rectf*vp);
+	void LoadXMLSettings(xml::XMLElement*e);
 };
 DECLARE_ELEMENT_FACTORY(GUICommentDetailsPanel);
 

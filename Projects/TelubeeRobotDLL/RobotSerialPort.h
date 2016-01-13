@@ -29,7 +29,6 @@ protected:
 	mray::TBee::RobotCapabilities m_caps;
 
 	RobotSerialPortImpl* m_impl;
-	float robotX, robotY, robotZ;
 	int robot_vx, robot_vy, robot_rot;
 	float pan, tilt, roll;
 	bool baseConnected;

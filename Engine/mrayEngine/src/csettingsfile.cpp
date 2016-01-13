@@ -230,11 +230,11 @@ void CSettingsFile::writeSettings(OS::IStream* file){
 
 }
 
-const core::string& CSettingsFile::getPropertie(const core::string&tag,const core::string&name){
+const core::string& CSettingsFile::getPropertie(const core::string&tag, const core::string&name, const core::string &defaultVal){
 	
 	SConfigTag *t=getTag(tag);
 	if(!t)
-		return core::string::Empty;
+		return defaultVal;
 	return t->getAttr(name);
 }
 

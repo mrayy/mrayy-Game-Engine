@@ -75,7 +75,7 @@ public:
 	void writeSettings(OS::IStream* file);
 
 	SConfigTag*getTag(const core::string&tag);
-	const core::string& getPropertie(const core::string&tag,const core::string&name);
+	const core::string& getPropertie(const core::string&tag, const core::string&name, const core::string &defaultVal=core::string::Empty);
 	bool hasPropertie(const core::string&tag,const core::string&name);
 
 	void clear();

@@ -51,6 +51,8 @@ void GUISceneSpacePanel::_OnSubProjectChange(kmd::CSubProject* sp)
 }
 
 void GUISceneSpacePanel::Update(float dt){
+	if (!IsVisible())
+		return;
 	IGUIPanelElement::Update(dt);
 
 	video::SColor c = Background-> GetColor();

@@ -67,7 +67,7 @@ void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
 		if (attr->value == "POV")
 			cameraType = ECameraType::POVCamera;
 		else if (attr->value == "OMNI")
-			cameraType = ECameraType::POVCamera;
+			cameraType = ECameraType::OmniCamera;
 	}
 	attr = e->getAttribute("CaptureMedia");
 	if (attr)

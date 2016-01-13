@@ -22,7 +22,6 @@ namespace GoogleAPI
 
     public class GDocHandler
     {
-
         string uid;
         string pwd;
         string URI;

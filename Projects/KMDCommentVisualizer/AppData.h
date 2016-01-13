@@ -6,13 +6,17 @@
 #include "ISingleton.h"
 #include "ISoundManager.h"
 
+#define USE_LEAP 0
+
 namespace mray
 {
 	class Application;
+#if USE_LEAP
 	namespace nui
 	{
 		class LeapDevice;
 	}
+#endif
 namespace kmd
 {
 	class SessionContainer;
@@ -44,7 +48,7 @@ public:
 	virtual void Save(const core::string& path);
 
 	void SetValue(const core::string&catagory, const core::string&name, const core::string& v);
-	core::string GetValue(const core::string&catagory, const core::string&name);
+	core::string GetValue(const core::string&catagory, const core::string&name, const core::string &defaultVal = "");
 
 	bool Debugging ;
 
@@ -52,7 +56,9 @@ public:
 
 	Application* app;
 
+#if USE_LEAP
 	nui::LeapDevice* leapDevice;
+#endif
 
 	SessionContainer* sessions;
 

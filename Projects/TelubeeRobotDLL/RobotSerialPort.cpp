@@ -101,8 +101,8 @@ RobotSerialPort::RobotSerialPort()
 	load_parameters();
 
 	for (int i = 0; i < 3; i++){
-		m_impl->mvRobot[BASE][i] = new MovAvg();
-		m_impl->mvRobot[HEAD][i] = new MovAvg();
+		m_impl->mvRobot[BASE][i] = new MovAvg(1);
+		m_impl->mvRobot[HEAD][i] = new MovAvg(1);
 	}
 
 	m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
@@ -137,6 +137,8 @@ DWORD RobotSerialPort::timerThreadRobot(RobotSerialPort *robot, LPVOID pdata){
 	while (!isDone){
 		robot->_ProcessRobot();
 		Sleep(1);
+		if (!threadStart)
+			Sleep(100);
 	}
 	return 0;
 }
@@ -154,41 +156,47 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EIniting:
 		break;
 	case ERobotControllerStatus::EConnecting:
-		if (m_impl->m_basePort == "")
-			m_impl->m_basePort = robotCOM;
-		ret = m_impl->m_baseController->Connect(m_impl->m_basePort);
-		if (ret){
+		if (_config.BaseEnabled)
+		{
+			if (m_impl->m_basePort == "")
+				m_impl->m_basePort = _config.robotCOM;
+			ret = m_impl->m_baseController->Connect(m_impl->m_basePort);
+			if (ret){
 
-			gLogManager.log("Robot Connected", ELL_INFO);
-			if (debug_print)
-				printf("Robot Connected!\n", ret);
-			ok |= true;
-		}
-		else{
-
-			gLogManager.log("Robot Failed to connected", ELL_WARNING);
-			if (debug_print)
-			{
-				printf("Robot not connected (%ld)\n", ret);
-				printf("Robot baud (%ld)\n", ret);
+				gLogManager.log("Robot Connected", ELL_INFO);
+				if (debug_print)
+					printf("Robot Connected!\n", ret);
+				ok |= true;
 			}
-			m_impl->m_baseController->Disconnect();
-		}
-		if (m_impl->m_headPort == "")
-			m_impl->m_headPort = headCOM;
-		ret = m_impl->m_headController->Connect(m_impl->m_headPort);
-		if (ret){
-			gLogManager.log("Head Connected", ELL_INFO);
-			if (debug_print)
-				printf("Head Connected!\n", ret);
-			ok |= true;
-		}
-		else{
+			else{
 
-			gLogManager.log("Head Failed to connected", ELL_WARNING);
-			if (debug_print)
-				printf("Head not connected (%ld)\n", ret);
-			m_impl->m_headController->Disconnect();
+				gLogManager.log("Robot Failed to connected", ELL_WARNING);
+				if (debug_print)
+				{
+					printf("Robot not connected (%ld)\n", ret);
+					printf("Robot baud (%ld)\n", ret);
+				}
+				m_impl->m_baseController->Disconnect();
+			}
+		}
+		if (_config.HeadEnabled)
+		{
+			if (m_impl->m_headPort == "")
+				m_impl->m_headPort = _config.headCOM;
+			ret = m_impl->m_headController->Connect(m_impl->m_headPort);
+			if (ret){
+				gLogManager.log("Head Connected", ELL_INFO);
+				if (debug_print)
+					printf("Head Connected!\n", ret);
+				ok |= true;
+			}
+			else{
+
+				gLogManager.log("Head Failed to connected", ELL_WARNING);
+				if (debug_print)
+					printf("Head not connected (%ld)\n", ret);
+				m_impl->m_headController->Disconnect();
+			}
 		}
 		m_baseCounter = 0;
 		if (ok)
@@ -196,11 +204,11 @@ void RobotSerialPort::_ProcessRobot()
 		break;
 	case ERobotControllerStatus::EConnected:
 
-		//printf("thread h: %d \r", count++);	
-		head_control(-pan*yAxis, tilt*xAxis, roll*zAxis);
-		if (m_baseCounter > 80)
+		//printf("thread h: %d \r", count++);
+		head_control(-pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
+		if (m_baseCounter > 120)
 		{
-			base_control(robot_vx, robot_vy, robot_rot, baseConnected ? RUN : STOP);
+			base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
 			m_baseCounter = 0;
 		}
 		m_baseCounter++;
@@ -210,9 +218,13 @@ void RobotSerialPort::_ProcessRobot()
 		gLogManager.log("Disconnecting Robot", ELL_INFO);
 		if (debug_print)
 			printf("Disconnecting Robot\n", ret);
-		m_impl->m_baseController->DriveStop();
-		m_impl->m_baseController->Disconnect();
-		m_impl->m_headController->Disconnect();
+		if (_config.BaseEnabled)
+		{
+			m_impl->m_baseController->DriveStop();
+			m_impl->m_baseController->Disconnect();
+		}
+		if (_config.HeadEnabled)
+			m_impl->m_headController->Disconnect();
 		_status = EDisconnected;
 		break;
 	case ERobotControllerStatus::EDisconnected:
@@ -279,7 +291,7 @@ std::string RobotSerialPort::ScanePorts()
 		if (false)
 		{
 			Tserial_event s;
-			s.connect((char*)device.port.c_str(), head_baudRate, SERIAL_PARITY_ODD, 8, FALSE, TRUE);
+			s.connect((char*)device.port.c_str(), _config.head_baudRate, SERIAL_PARITY_ODD, 8, FALSE, TRUE);
 			if (s.isconnected())
 			{
 				std::string cmd = "#q \n\r";
@@ -288,7 +300,7 @@ std::string RobotSerialPort::ScanePorts()
 				s.disconnect();
 			}
 		}
-		port.Setup(device.port, head_baudRate);
+		port.Setup(device.port, _config.head_baudRate);
 		try
 		{
 			port.open();
@@ -333,6 +345,7 @@ std::string RobotSerialPort::ScanePorts()
 }
 void RobotSerialPort::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 {
+	Sleep(500);
 	ScanePorts();
 	m_robotStatusProvider = robotStatusProvider;
 	_status = EDisconnected;
@@ -359,6 +372,9 @@ int RobotSerialPort::base_control(int velocity_x, int velocity_y, int rotation, 
 
 	static int counter = 0;
 
+	if (!_config.BaseEnabled)
+		return false;
+
 	if (!m_impl->m_baseController->IsConnected())
 		return FALSE;
 	if (abs(rotation) < 5)
@@ -379,53 +395,13 @@ int RobotSerialPort::base_control(int velocity_x, int velocity_y, int rotation, 
 
 }
 
-/*
-int RobotSerialPort::yamahaXY_control(float pos_x, float pos_y, int control){
-	int packet_size;
-	char sCommand[128];
-
-	if (!m_impl->m_baseController->IsConnected())
-		return FALSE;
-
-	if (control == RUN)
-		sprintf_s(sCommand, 128, "@DRIVE(1,%3.2f),(2,%3.2f),XY\r\n", pos_x, pos_y);
-
-	else if (control == STOP)
-		sprintf_s(sCommand, 128, "@SERVO OFF\r\n");
-
-	packet_size = strlen(sCommand);
-	m_impl->comROBOT->sendData(sCommand, packet_size);
-	printf(sCommand);
-
-	//Sleep(40); 
-
-	return true;
-
-}
-
-int RobotSerialPort::yamahaInitialize(){
-	char sCommand[128];
-	if (!m_impl->comROBOT)
-		return FALSE;
-
-	sprintf_s(sCommand, 128, "@TORQUE(1)=0\r\n");
-	m_impl->comROBOT->sendData(sCommand, strlen(sCommand));
-
-	sprintf_s(sCommand, 128, "@TORQUE(2)=0\r\n");
-	m_impl->comROBOT->sendData(sCommand, strlen(sCommand));
-
-	sprintf_s(sCommand, 128, "@TRQTIME(1)=10\r\n");
-	m_impl->comROBOT->sendData(sCommand, strlen(sCommand));
-
-	sprintf_s(sCommand, 128, "@TRQTIME(2)=10\r\n");
-	m_impl->comROBOT->sendData(sCommand, strlen(sCommand));
-
-	return true;
-
-}*/
 
 
 int RobotSerialPort::head_control(float pan, float tilt, float roll){
+	if (!_config.HeadEnabled)
+		return false;
+	//gLogManager.log("Rotation", ELL_INFO);
+
 	m_impl->m_headController->SetRotation(math::vector3d(tilt,pan,roll));
 
 	return true;
@@ -552,7 +528,7 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 
 	float v_size;
 
-	robot_vx = m_impl->mvRobot[BASE][0]->getNext(st.speed[0]*v_scale);
+	robot_vx = m_impl->mvRobot[BASE][0]->getNext(st.speed[0] * v_scale);
 	robot_vy = m_impl->mvRobot[BASE][1]->getNext(st.speed[1]*v_scale);
 	robot_rot = m_impl->mvRobot[BASE][2]->getNext(st.rotation*r_scale);
 
@@ -574,42 +550,7 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	roll = m_impl->mvRobot[HEAD][2]->getNext(-angles.x);
 
 	baseConnected = st.connected;
-
-	robotX = ROBOT_CENTER - robotX;
-
-	if (robotY > 0)
-		robotY = 100.0; 
-	else
-		robotY = 100.0 - robotY; 
-
-	//v_size = sqrt(static_cast<double>(robot_vx)*static_cast<double>(robot_vx)+static_cast<double>(robot_vy)*static_cast<double>(robot_vy));
-
-	if (debug_print && false){
-		//printf("Robot Speed / Rot = %3.2f,%3.2f,%3.2f\n", st.speed.x, st.speed.y, st.rotation);
-		printf("Head Position = %3.2f,%3.2f\n", robotX, robotY);
-		printf("Head Orientation = %3.2f,%3.2f,%3.2f\n", angles.y, angles.x, angles.z);
-		printf("-------------------------------\n");
-	}
-
-
-	//head_control(pan, tilt, roll);
-	//yamahaXY_control(robotx, roboty, RUN);
-
-	//while (true){
-	//	if (testPosx < 200){
-	//		testPosx += 0.1;
-	//		testPosy += 0.1;
-	//	}
-	//	else{
-	//		testPosx = 50.00;
-	//		testPosy = 50.00;
-	//	}
-
-	//	yamahaXY_control(testPosx, testPosy, RUN);	// init position
-
-	//}
-
-	//Sleep(1);
+	return;
 
 }
 
@@ -637,35 +578,39 @@ bool RobotSerialPort::GetJointValues(std::vector<float>& values)
 
 std::string RobotSerialPort::ExecCommand(const std::string& cmd, const std::string& args)
 {
-	if (!m_impl->m_baseController || !m_impl->m_baseController->IsConnected())
-		return "";
 	if (cmd == CMD_Start)
 	{
-		m_impl->m_baseController->Start();
+		if (_config.BaseEnabled)
+			m_impl->m_baseController->Start();
 		return "";
 	}
 	if (cmd == CMD_Stop)
 	{
-		m_impl->m_baseController->Stop();
+		if (_config.BaseEnabled)
+			m_impl->m_baseController->Stop();
 		return "";
 	}
 	 if (cmd == CMD_IsStarted)
 	{
-		return core::StringConverter::toString(m_impl->m_baseController->IsStarted());
+		 if (_config.BaseEnabled)
+			return core::StringConverter::toString(m_impl->m_baseController->IsStarted());
 	}
 	
 	if (cmd == CMD_GetSensorCount)
 	{
-		return core::StringConverter::toString(m_impl->m_baseController->GetSensorCount());
+		if (_config.BaseEnabled)
+			return core::StringConverter::toString(m_impl->m_baseController->GetSensorCount());
 
 	}
 	else if (cmd == CMD_GetSensorValue)
 	{
-		return core::StringConverter::toString(m_impl->m_baseController->GetSensorValue(core::StringConverter::toInt(args)));
+		if (_config.BaseEnabled)
+			return core::StringConverter::toString(m_impl->m_baseController->GetSensorValue(core::StringConverter::toInt(args)));
 	}
 	else if (cmd == CMD_GetBatteryLevel)
 	{
-		return core::StringConverter::toString(m_impl->m_baseController->GetBatteryLevel());
+		if(_config.BaseEnabled)
+			return core::StringConverter::toString(m_impl->m_baseController->GetBatteryLevel());
 	}
 	else
 		return m_impl->m_baseController->ExecCommand(cmd, args);

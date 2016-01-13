@@ -34,6 +34,7 @@ public:
 
 	virtual void Update(float dt);
 
+	virtual void LoadXMLSettings(xml::XMLElement*e);
 };
 DECLARE_ELEMENT_FACTORY(GUIFacultyList);
 

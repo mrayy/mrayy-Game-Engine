@@ -10,8 +10,8 @@ namespace mray
 
 OmniBaseController::OmniBaseController()
 {
-	comPort= 0;
 	connected = false;
+	comPort = 0;
 
 	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 }
@@ -19,7 +19,6 @@ OmniBaseController::OmniBaseController()
 OmniBaseController::~OmniBaseController()
 {
 	Disconnect();
-	//delete comPort;
 	delete m_dataMutex;
 }
 
@@ -58,7 +57,7 @@ void OmniBaseController::_onSerialData(int size, char *buffer)
 {
 	m_dataMutex->lock();
 	char* ptr = buffer;
-	buffer[size] = 0;
+	buffer[size-1] = 0;
 	gLogManager.log(buffer, ELL_INFO);
 	while (*ptr)
 	{
@@ -170,7 +169,6 @@ void OmniBaseController::Disconnect()
 	//comPort->disconnect();
 	comPort->close();
 	connected = FALSE;
-	//delete comPort;
 	delete comPort;
 	comPort = 0;
 }
