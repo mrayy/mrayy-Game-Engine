@@ -9,6 +9,7 @@
 #include "TextureResourceManager.h"
 #include "FontResourceManager.h"
 #include "IGUIRenderer.h"
+#include "AppData.h"
 
 namespace mray
 {
@@ -82,7 +83,7 @@ namespace GUI
 			m_fontAttrs.spacing = 0;
 			m_fontAttrs.lineSpacing = 10;
 			m_fontAttrs.wrap = true;
-			m_fontAttrs.fontSize = 18;
+			m_fontAttrs.fontSize = core::StringConverter::toInt(gAppData.GetValue("UI", "CommentSize", "18"));
 			font->print(tmpRc, &m_fontAttrs, &clip, m_Comment->text, creator->GetRenderQueue());
 
 		}

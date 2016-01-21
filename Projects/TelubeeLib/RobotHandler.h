@@ -4,6 +4,7 @@
 #define __RobotHandler__
 
 #include "IRobotController.h"
+#include "IDynamicLibrary.h"
 
 namespace mray
 {
@@ -19,7 +20,7 @@ namespace TBee
 
 		virtual void OnCollisionData(RobotHandler* sender, float left, float right){}
 
-		virtual void OnReportMessage(RobotHandler* sender, int code, const core::string& msg){}
+		virtual void OnReportMessage(RobotHandler* sender, int code, const std::string& msg){}
 		virtual void OnRobotStatus(RobotHandler* sender, const RobotStatus& status){};
 	};
 	

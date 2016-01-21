@@ -32,7 +32,7 @@ FILE     *OutputLogFile;
 
 
 // initialize udp thread for PLC Data
-MCClient *mc;
+//MCClient *mc;
 
 mc_buff mcWriteBuf;
 mc_buff mcReadBuf;
@@ -135,7 +135,7 @@ torsoController::torsoController()
 	memset(&mcReadBuf, 0, sizeof(mcReadBuf)); // initializing test read data
 
 	// create connection to Melsec PC via MC Protocol 
-	mc = new MCClient(PLC_PORT_TCP_TORSO, MELSEC_PLC);
+	//mc = new MCClient(PLC_PORT_TCP_TORSO, MELSEC_PLC);
 
 }
 
@@ -339,10 +339,10 @@ bool torsoController::writeRobotData(){
 
 
 	// Write TORSO Data to PLC
-	mc->batch_write("W", SELECT_TORSO, 0xA0, &mcWriteBuf, 0x20); Sleep(1);
+	//mc->batch_write("W", SELECT_TORSO, 0xA0, &mcWriteBuf, 0x20); Sleep(1);
 
 	// Read Interlock Flags	
-	mc->batch_read("W", SELECT_INTERLOCK, 0x0360, &mcReadBuf, 0x06); Sleep(1);
+	//mc->batch_read("W", SELECT_INTERLOCK, 0x0360, &mcReadBuf, 0x06); Sleep(1);
 
 
 	return true; 
@@ -674,7 +674,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	//-----[Step6] Calibrate AngularDisplacement for present position of each ServoMotor except M3.
 	logString("Calibrating Current Angular Displacement Except M3: ");
 	ServoMotor[0].CaliAngularDisplacementByPotentio();
-	//ServoMotor[1].CaliAngularDisplacementByPotentio();
+	ServoMotor[1].CaliAngularDisplacementByPotentio();
 	ServoMotor[3].CaliAngularDisplacementByPotentio();
 	ServoMotor[4].CaliAngularDisplacementByPotentio();
 	ServoMotor[5].CaliAngularDisplacementByPotentio();
@@ -714,7 +714,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	while (0
 		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 5.0, Time_start, MothorCLK.Elapsed())
-		//+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[2].GoDeadEndPosition(-0.02*GearRatio_J[2], 0.0001*GearRatio_J[2], 0.2, ServoMotor[2].ReadDeadendAngularDisplacement_n(),
 		Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 5.0, Time_start, MothorCLK.Elapsed())
@@ -747,7 +747,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	> 0)
 	{
 		ServoMotor[0].Fix2(AngularDisplacement_goal_M[0]);
-		//ServoMotor[1].Fix2(AngularDisplacement_goal_M[1]);
+		ServoMotor[1].Fix2(AngularDisplacement_goal_M[1]);
 		ServoMotor[3].Fix2(AngularDisplacement_goal_M[3]);
 		ServoMotor[4].Fix2(AngularDisplacement_goal_M[4]);
 		ServoMotor[5].Fix2(AngularDisplacement_goal_M[5]);
@@ -774,7 +774,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	while (0
 		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 5.0, Time_start, MothorCLK.Elapsed())
-		//+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 5.0, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 5.0, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 5.0, Time_start, MothorCLK.Elapsed())
@@ -1072,7 +1072,7 @@ int torsoController::controlStateMachine(){
 			robotState = EDisconnected;
 
 			ServoMotor[0].Fix2(AngularDisplacement_goal_M[0]);
-			//ServoMotor[1].Fix2(AngularDisplacement_goal_M[1]);
+			ServoMotor[1].Fix2(AngularDisplacement_goal_M[1]);
 			ServoMotor[2].Fix2(AngularDisplacement_goal_M[2]);
 			ServoMotor[3].Fix2(AngularDisplacement_goal_M[3]);
 			ServoMotor[4].Fix2(AngularDisplacement_goal_M[4]);
@@ -1142,7 +1142,7 @@ int torsoController::controlStateMachine(){
 
 			while (0
 				+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 2.0, Time_start, MothorCLK.Elapsed())
-				//+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 2.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 2.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 2.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 2.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 2.0, Time_start, MothorCLK.Elapsed())
@@ -1237,7 +1237,7 @@ int torsoController::controlStateMachine(){
 
 			while (0
 				+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 3.0, Time_start, MothorCLK.Elapsed())
-				//+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 3.0, Time_start, MothorCLK.Elapsed())
+				+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 3.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 3.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 3.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 3.0, Time_start, MothorCLK.Elapsed())

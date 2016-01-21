@@ -41,6 +41,7 @@ SessionRenderer::SessionRenderer()
 	m_CommentsDistance = 80;
 	gAppData.subProjectChange.AddListener(this);
 
+	m_enabled = core::StringConverter::toBool(gAppData.GetValue("UI", "NodesEnabled", "true"));
 }
 
 SessionRenderer::~SessionRenderer()
@@ -116,6 +117,8 @@ void SessionRenderer::SetSessions(kmd::SessionContainer*sessions)
 
 void SessionRenderer::AddComments(const std::vector<kmd::KMDComment*> &Comments)
 {
+	if (!m_enabled)
+		return;
 	for (int i = 0; i < Comments.size(); ++i)
 	{
 		if (!Comments[i]->project)
@@ -252,6 +255,8 @@ IKMDNode* SessionRenderer::GetNodeFromPosition(const math::vector2d& pos)
 
 void SessionRenderer::Update(float dt)
 {
+	if (!m_enabled)
+		return;
 	//if (dt > 0.01)
 	m_dataMutex->lock();
 	m_physics->Update(dt);
@@ -273,6 +278,8 @@ void SessionRenderer::Update(float dt)
 }
 void SessionRenderer::Draw(float alpha)
 {
+	if (!m_enabled)
+		return;
 	video::IVideoDevice* dev = Engine::getInstance().getDevice();
 
 	float a = alpha*m_alpha;

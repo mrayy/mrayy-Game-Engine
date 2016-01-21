@@ -2,7 +2,7 @@
 #include "stdafx.h"
 //#pragma warning(X:4005)
 
-#include "RemoteController.h"
+#include "RemoteControllerReceiver.h"
 
 #include <stdio.h>
 #include <windows.h> // for GetAsyncKeyState
@@ -19,6 +19,10 @@
 #include "StreamReader.h"
 #include "StreamWriter.h"
 #include "CMemoryStream.h"
+#include "RobotHandler.h"
+#include "Console.h"
+#include "StringConverter.h"
+#include "LocalDLLRobotController.h"
 
 #define GetCurrentDir _getcwd
 using namespace std;
@@ -27,6 +31,34 @@ using namespace std;
 using namespace mray;
 
 #define ROBOT_COMM_PORT 9090
+
+
+class ServiceLoaderRenderContext 
+{
+	int x, y;
+public:
+	ServiceLoaderRenderContext()
+	{
+		x = y = 0;
+	}
+	virtual void RenderText(const core::string &txt, int x, int y, bool r = 1, bool g = 1, bool b = 1)
+	{
+		this->x += x;
+		this->y += y;
+		Console::locate(this->x, this->y);
+		Console::setColor(r,g,b);
+		printf("%s\n", txt.c_str());
+		this->y++;
+	}
+	virtual void Reset()
+	{
+		x = y = 0;
+
+		Console::clear();
+		Console::locate(x, y);
+	}
+};
+
 
 class Mutex
 {
@@ -106,11 +138,13 @@ public:
 
 
 
-class RemoteControllerImpl
+class RemoteControllerReceiverImpl :public ITelubeeRobotListener,public IRobotStatusProvider
 {
 public:
 	ITelubeeRobotListener* listener;
-	RemoteController* _c;
+	RemoteControllerReceiver* _c;
+
+	ServiceLoaderRenderContext m_renderContext;
 
 	ClientStatusData clientStatus;
 	RemoteRobotStatus robotStatus;
@@ -119,6 +153,8 @@ public:
 
 	network::IUDPClient* netClientSender;
 	network::IUDPClient* netClientReceiver;
+
+	TBee::LocalDLLRobotController* m_robotController;
 
 	Mutex robotMutex;
 	Mutex clientMutex;
@@ -132,10 +168,10 @@ public:
 
 	HANDLE hThreadSend;
 	HANDLE hThreadRecv;
-	static DWORD WINAPI timerThreadSend(RemoteControllerImpl *robot, LPVOID pdata);
-	static DWORD WINAPI timerThreadRecv(RemoteControllerImpl *robot, LPVOID pdata);
+	static DWORD WINAPI timerThreadSend(RemoteControllerReceiverImpl *robot, LPVOID pdata);
+	static DWORD WINAPI timerThreadRecv(RemoteControllerReceiverImpl *robot, LPVOID pdata);
 
-	RemoteControllerImpl(RemoteController* c)
+	RemoteControllerReceiverImpl(RemoteControllerReceiver* c)
 	{
 		netClientSender = netClientReceiver = 0;
 		_c = c;
@@ -147,8 +183,12 @@ public:
 		hThreadRecv = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadRecv, this, NULL, NULL);
 
 		clientStatus.ipAddress = network::NetAddress::AnyAddr;
+
+		m_robotController = new TBee::LocalDLLRobotController();
+		m_robotController->SetListener(this);
+
 	}
-	~RemoteControllerImpl()
+	~RemoteControllerReceiverImpl()
 	{
 		threadStart = false;
 		isDone = true;
@@ -165,13 +205,9 @@ public:
 			netClientSender->Close();
 			netClientSender = 0;
 		}
-	}
-	void NotifyCollision(float l, float r)
-	{
-		if (listener)
-		{
-			listener->OnCollisionData(_c,l, r);
-		}
+
+		m_robotController->ShutdownRobot();
+		delete m_robotController;
 	}
 
 
@@ -192,7 +228,7 @@ public:
 
 	void _Send(OS::StreamWriter &wrtr, OS::CMemoryStream& stream)
 	{
-		_c->_processData();
+	//	_c->_processData();
 
 		if (clientStatus.ipAddress.address == network::NetAddress::AnyAddr.address)
 			return;
@@ -223,12 +259,12 @@ public:
 			rdr.read(&st, sizeof(st));
 			clientMutex.lock();
 			clientStatus = st;
+			clientStatus.ipAddress.address = src.address;
 			clientMutex.unlock();
 		}
 	}
 	void CallRemoteProcedure()
 	{
-		char buffer[64];
 
 	}
 
@@ -242,6 +278,8 @@ public:
 			robotStatus.status = s;
 		else if (s==EConnecting && robotStatus.status==EDisconnected)
 			robotStatus.status = s;
+		else if (s == EConnecting && robotStatus.status == EStopped)
+			robotStatus.status = EIniting;
 		else if (s == EConnected && robotStatus.status == EConnecting)
 			robotStatus.status = s;
 		else if (s == EDisconnecting && robotStatus.status == EConnected)
@@ -293,25 +331,28 @@ public:
 			{
 			case ERobotControllerStatus::EIniting:
 				//init the robot
-
-				Sleep(1000);
+				m_robotController->InitializeRobot(this);
 				ChangeState(ERobotControllerStatus::EDisconnected);
 				break;
+				
 			case ERobotControllerStatus::EConnecting:
 				//connect to robot
-				Sleep(1000);
+				m_robotController->ConnectRobot();
 				ChangeState(ERobotControllerStatus::EConnected);
 				break;
 			case ERobotControllerStatus::EDisconnecting:
 				//Disconnect the robot
-				Sleep(1000);
+				m_robotController->DisconnectRobot();
 				ChangeState(ERobotControllerStatus::EDisconnected);
 				break;
 			case  ERobotControllerStatus::EStopping:
 				//shutdown the robot
-				Sleep(1000);
+				m_robotController->ShutdownRobot();
 				ChangeState(ERobotControllerStatus::EStopped);
 				break;
+			case ERobotControllerStatus::EStopped:
+			{
+			}break;
 			default:
 				break;
 			}
@@ -323,10 +364,113 @@ public:
 		AutoLock l(robotMutex);
 		return robotStatus.status;
 	}
+
+	//request data is called from robot side
+	virtual void GetRobotStatus(RobotStatus& st)
+	{
+		clientMutex.lock();
+		memcpy(&st, &clientStatus.status, sizeof(st));
+		clientMutex.unlock();
+		_RobotStatus(st);
+
+	}
+	virtual bool RequestData(TBee::RobotHandler* r, RobotStatus& status)
+	{
+		if (clientMutex.tryLock())
+		{
+			memcpy(&status, &clientStatus.status, sizeof(status));
+			clientMutex.unlock();
+			return true;
+		}
+		return false;
+	}
+
+
+	void _RobotStatus(const RobotStatus& st)
+	{
+		if (!m_robotController)
+			return;
+
+		m_robotController->UpdateRobotStatus(st);
+	}
+	void Render()
+	{
+
+		RobotStatus m_robotData;
+		if (!RequestData(0, m_robotData))
+			return;
+
+		m_renderContext.Reset();
+		
+		char buffer[512];
+		float yoffset = 50;
+
+		core::string msg;
+		{
+			ERobotControllerStatus st = m_robotController->GetRobotStatus();
+			msg = core::string("Robot Status: ");
+			if (st == EStopped)msg += "Stopped";
+			if (st == EDisconnected)msg += "Disconnected";
+			if (st == EConnecting)msg += "Connecting";
+			if (st == EDisconnecting)msg += "Disconnecting";
+			if (st == EConnected)msg += "Connected";
+			m_renderContext.RenderText(msg, 50, 0);
+		}
+		msg = core::string("User Controlling: ") + (m_robotData.connected ? "Yes" : "No");
+		m_renderContext.RenderText(msg, 50, 0);
+		if (m_robotData.connected )
+		{
+
+			sprintf_s(buffer, "%-2.2f, %-2.2f", m_robotData.speed[0], m_robotData.speed[1]);
+			msg = core::string("Speed: ") + buffer;
+			m_renderContext.RenderText(msg, 100, 0);
+
+			msg = core::string("Rotation: ") + core::StringConverter::toString(m_robotData.rotation, 2);
+			m_renderContext.RenderText(msg, 100, 0);
+
+			math::vector3d angles;
+			math::quaternion q(m_robotData.headRotation[0], m_robotData.headRotation[3],
+				m_robotData.headRotation[1], m_robotData.headRotation[2]);
+			q.toEulerAngles(angles);
+			angles.set(angles.y, angles.z, angles.x);
+			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", angles.x, angles.y, angles.z);
+			msg = core::string("Head Rotation: ") + buffer;
+			m_renderContext.RenderText(msg, 100, 0);
+
+			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", m_robotData.headPos[0], m_robotData.headPos[1], m_robotData.headPos[2]);
+			msg = core::string("Head Position: ") + buffer;
+			m_renderContext.RenderText(msg, 100, 0);
+
+		}
+
+
+		{
+			msg = "Robot Started: " + m_robotController->ExecCommand(IRobotController::CMD_IsStarted, "");
+			m_renderContext.RenderText(msg, 100, 0);
+
+			std::vector<float> jvalues;
+
+			m_robotController->GetJointValues(jvalues);
+			m_renderContext.RenderText(core::string("Robot Joint Values:"), 50, 0);
+
+			msg = "";
+			m_renderContext.RenderText("   \tIK\t/ Real", 100, 0);
+			for (int i = 0; i < jvalues.size(); i += 2)
+			{
+
+				sprintf_s(buffer, "\t%-2.2f\t/ %-2.2f", jvalues[i], jvalues[i + 1]);
+				msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
+				m_renderContext.RenderText(msg, 100, 0);
+			}
+
+		}
+
+	}
+
 };
 
 
-DWORD RemoteControllerImpl::timerThreadSend(RemoteControllerImpl *robot, LPVOID pdata){
+DWORD RemoteControllerReceiverImpl::timerThreadSend(RemoteControllerReceiverImpl *robot, LPVOID pdata){
 	
 
 	char buffer[512];
@@ -338,7 +482,8 @@ DWORD RemoteControllerImpl::timerThreadSend(RemoteControllerImpl *robot, LPVOID 
 		if (robot->threadStart &&
 			robot->clientStatus.ipAddress.address != network::NetAddress::AnyAddr.address){
 			stream.seek(0, OS::ESeek_Set);
-			robot->_Send(wrtr,stream);
+			robot->_Send(wrtr, stream);
+			Sleep(10);
 		}
 		else
 			Sleep(50);
@@ -347,7 +492,7 @@ DWORD RemoteControllerImpl::timerThreadSend(RemoteControllerImpl *robot, LPVOID 
 	return 0;
 }
 
-DWORD RemoteControllerImpl::timerThreadRecv(RemoteControllerImpl *robot, LPVOID pdata){
+DWORD RemoteControllerReceiverImpl::timerThreadRecv(RemoteControllerReceiverImpl *robot, LPVOID pdata){
 	char buffer[512];
 	uint len;
 	network::NetAddress src;
@@ -372,9 +517,9 @@ DWORD RemoteControllerImpl::timerThreadRecv(RemoteControllerImpl *robot, LPVOID 
 }
 
 
-RemoteController::RemoteController()
+RemoteControllerReceiver::RemoteControllerReceiver()
 {
-	m_impl = new RemoteControllerImpl(this);
+	m_impl = new RemoteControllerReceiverImpl(this);
 
 	if (!m_impl->netClientReceiver)
 	{
@@ -393,9 +538,8 @@ RemoteController::RemoteController()
 
 }
 
-RemoteController::~RemoteController()
+RemoteControllerReceiver::~RemoteControllerReceiver()
 {
-	DisconnectRobot();
 	m_impl->isDone = true;
 	delete m_impl;
 
@@ -404,28 +548,17 @@ RemoteController::~RemoteController()
 }
 
 
-void RemoteController::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
-{
-	if (m_impl->GetState() != ERobotControllerStatus::EStopped)
-		return;
 
-	m_robotStatusProvider = robotStatusProvider;
-
-	m_impl->ChangeState(ERobotControllerStatus::EIniting);
-
-	return;
-}
-
-void RemoteController::_setupCaps()
+void RemoteControllerReceiver::_setupCaps()
 {
 }
-ERobotControllerStatus RemoteController::GetRobotStatus() {
+ERobotControllerStatus RemoteControllerReceiver::GetRobotStatus() {
 	AutoLock a(m_impl->robotMutex);
 	return m_impl->robotStatus.status;
 }
 
-
-bool RemoteController::GetJointValues(std::vector<float>& values){
+/*
+bool RemoteControllerReceiver::GetJointValues(std::vector<float>& values){
 	if (m_impl->robotMutex.tryLock())
 	{
 		values = m_impl->robotStatus.jointValues;
@@ -437,7 +570,7 @@ bool RemoteController::GetJointValues(std::vector<float>& values){
 }
 
 
-void RemoteController::ConnectRobot()
+void RemoteControllerReceiver::ConnectRobot()
 {
 	if (m_impl->GetState() == ERobotControllerStatus::EDisconnected)
 	{
@@ -446,12 +579,12 @@ void RemoteController::ConnectRobot()
 	return;
 }
 
-void RemoteController::ManualControlRobot()
+void RemoteControllerReceiver::ManualControlRobot()
 {
 	return;
 }
 
-void RemoteController::DisconnectRobot()
+void RemoteControllerReceiver::DisconnectRobot()
 {
 	if (m_impl->GetState() == ERobotControllerStatus::EDisconnecting ||
 		m_impl->GetState() == ERobotControllerStatus::EConnected)
@@ -461,7 +594,7 @@ void RemoteController::DisconnectRobot()
 	return;
 }
 
-void RemoteController::ShutdownRobot(){
+void RemoteControllerReceiver::ShutdownRobot(){
 
 	if (m_impl->GetState() != ERobotControllerStatus::EDisconnecting ||
 		m_impl->GetState() != ERobotControllerStatus::EDisconnected)
@@ -471,36 +604,46 @@ void RemoteController::ShutdownRobot(){
 	return;
 }
 
-void RemoteController::tuningMode(){
+void RemoteControllerReceiver::tuningMode(){
 
 
 	return;
 }
 
 
-void RemoteController::UpdateRobotStatus(const RobotStatus& st)
+void RemoteControllerReceiver::UpdateRobotStatus(const RobotStatus& st)
 {
-	m_impl->clientMutex.lock();
-	m_impl->clientStatus.status = st;
-	m_impl->clientMutex.unlock();
+// 	m_impl->clientMutex.lock();
+// 	m_impl->clientStatus.status = st;
+// 	m_impl->clientMutex.unlock();
+	printf("%f,%f,%f\n", st.headRotation[0], st.headRotation[1], st.headRotation[2]);
 }
 
 
-void RemoteController::_processData()
+void RemoteControllerReceiver::_processData()
 {
-	if (m_robotStatusProvider)
-	{
-		RobotStatus st;
-		m_robotStatusProvider->GetRobotStatus(st);
-	}
+	RobotStatus st;
+	m_impl->GetRobotStatus(st);
+	UpdateRobotStatus(st);
+// 	if (m_robotStatusProvider)
+// 	{
+// 		RobotStatus st;
+// 		m_robotStatusProvider->GetRobotStatus(st);
+// 	}
 }
-void RemoteController::SetListener(ITelubeeRobotListener* l)
+void RemoteControllerReceiver::SetListener(ITelubeeRobotListener* l)
 {
 	m_impl->listener = l;
 }
 
 
-void RemoteController::ParseParameters(const std::map<std::string, std::string>& valueMap)
+void RemoteControllerReceiver::ParseParameters(const std::map<core::string, core::string>& valueMap)
 {
 }
+*/
+void RemoteControllerReceiver::Render()
+{
 
+	m_impl->Render();
+	
+}

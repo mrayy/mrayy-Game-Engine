@@ -123,6 +123,7 @@ public:
 	RemoteRobotStatus robotStatus;
 
 	std::string robotIP;
+	std::string localIP;
 
 	network::IUDPClient* netClientSender;
 	network::IUDPClient* netClientReceiver;
@@ -252,6 +253,34 @@ public:
 	{
 		bool updated = true;
 		/**/
+		printf("Requesting: ");
+		switch (s)
+		{
+		case EStopped:
+			printf("EStopped\n");
+			break;
+		case EIniting:
+			printf("EIniting!\n");
+			break;
+		case EStopping:
+			printf("EStopping!\n");
+			break;
+		case EDisconnected:
+			printf("EDisconnected!\n");
+			break;
+		case EDisconnecting:
+			printf("EDisconnecting!\n");
+			break;
+		case EConnected:
+			printf("EConnected!\n");
+			break;
+		case EConnecting:
+			printf("EConnecting!\n");
+			break;
+		default:
+			break;
+		}
+
 		clientMutex.lock();
 		if (s == EIniting && clientStatus.controlStatus == EStopped)
 			clientStatus.controlStatus = s;
@@ -380,8 +409,7 @@ void RemoteController::InitializeRobot(IRobotStatusProvider* robotStatusProvider
 		m_impl->netClientReceiver = network::INetwork::getInstance().createUDPClient();
 		m_impl->netClientReceiver->Open();
 
-		m_impl->clientStatus.ipAddress.port = m_impl->netClientReceiver->Port();
-		m_impl->clientStatus.ipAddress.address = network::INetwork::getInstance().getLocalAddress();
+		m_impl->clientStatus.ipAddress = network::NetAddress(m_impl->localIP, m_impl->netClientReceiver->Port());
 
 	}
 	if (!m_impl->netClientSender)
@@ -465,6 +493,7 @@ void RemoteController::UpdateRobotStatus(const RobotStatus& st)
 	m_impl->clientMutex.lock();
 	m_impl->clientStatus.status = st;
 	m_impl->clientMutex.unlock();
+
 }
 
 
@@ -488,6 +517,11 @@ void RemoteController::ParseParameters(const std::map<std::string, std::string>&
 	if (it != valueMap.end())
 	{
 		m_impl->robotIP = it->second;
+	}
+	it = valueMap.find("LocalIP");
+	if (it != valueMap.end())
+	{
+		m_impl->localIP = it->second;
 	}
 }
 

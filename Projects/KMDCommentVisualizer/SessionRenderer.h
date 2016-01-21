@@ -59,6 +59,8 @@ protected:
 
 	float m_alpha;
 
+	bool m_enabled;
+
 	std::vector<ProjectNode*> m_projectsSeq;
 	ProjectMap m_projects;
 	CommentMap m_Comments;

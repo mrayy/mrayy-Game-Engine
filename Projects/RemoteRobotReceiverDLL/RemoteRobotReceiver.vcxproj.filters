@@ -2,79 +2,18 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="RemoteController.cpp" />
-    <ClCompile Include="RemoteRobotReceiverDLL.cpp" />
-    <ClCompile Include="include\Depend\CMemoryStream.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Depend\IStream.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Depend\StreamReader.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Depend\StreamWriter.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Depend\Win32Network.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Depend\Win32UDPClient.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Depend\win32NetInterface.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Depend\NetAddress.cpp">
-      <Filter>Dep</Filter>
-    </ClCompile>
     <ClCompile Include="IRobotController.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="RemoteControllerReceiver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="RemoteController.h" />
-    <ClInclude Include="include\Depend\CMemoryStream.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\INetwork.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\IStream.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\IUDPClient.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\mTypes.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\StreamReader.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\StreamWriter.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\Win32Network.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\Win32UDPClient.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\win32NetInterface.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Depend\NetAddress.h">
-      <Filter>Dep</Filter>
-    </ClInclude>
     <ClInclude Include="IRobotController.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="RemoteControllerReceiver.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Dep">
-      <UniqueIdentifier>{b343e15b-ce31-4b1f-9ba0-b2ebf7d0ac77}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
 </Project>

@@ -100,13 +100,13 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_USRDLL;TorsoROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>..\TelubeeLib;..\..\Engine\mrayEngine\include;..\..\Engine\mrayMath;..\..\Engine\mrayNet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\TelubeeLib;..\..\Engine\mrayNet;..\..\Engine\mrayWin32;..\..\Engine\mrayEngine\include;..\..\Engine\mrayMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\lib\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ws2_32.lib;mrayEngine.lib;mrayNet.lib;mrayMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;mrayEngine.lib;mrayMath.lib;mrayNet.lib;mrayWin32.lib;TelubeeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -147,15 +147,15 @@
       </SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>.\include\Depend;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\TelubeeLib;..\..\Engine\mrayNet;..\..\Engine\mrayWin32;..\..\Engine\mrayEngine\include;..\..\Engine\mrayMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\lib\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;mrayEngine.lib;mrayMath.lib;mrayNet.lib;mrayWin32.lib;TelubeeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\lib\$(Configuration);..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
@@ -193,31 +193,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Depend\CMemoryStream.h" />
-    <ClInclude Include="include\Depend\INetwork.h" />
-    <ClInclude Include="include\Depend\IStream.h" />
-    <ClInclude Include="include\Depend\IUDPClient.h" />
-    <ClInclude Include="include\Depend\mTypes.h" />
-    <ClInclude Include="include\Depend\NetAddress.h" />
-    <ClInclude Include="include\Depend\StreamReader.h" />
-    <ClInclude Include="include\Depend\StreamWriter.h" />
-    <ClInclude Include="include\Depend\win32NetInterface.h" />
-    <ClInclude Include="include\Depend\Win32Network.h" />
-    <ClInclude Include="include\Depend\Win32UDPClient.h" />
+    <ClInclude Include="Console.h" />
     <ClInclude Include="IRobotController.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="RemoteController.h" />
+    <ClInclude Include="RemoteControllerReceiver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Depend\CMemoryStream.cpp" />
-    <ClCompile Include="include\Depend\IStream.cpp" />
-    <ClCompile Include="include\Depend\NetAddress.cpp" />
-    <ClCompile Include="include\Depend\StreamReader.cpp" />
-    <ClCompile Include="include\Depend\StreamWriter.cpp" />
-    <ClCompile Include="include\Depend\win32NetInterface.cpp" />
-    <ClCompile Include="include\Depend\Win32Network.cpp" />
-    <ClCompile Include="include\Depend\Win32UDPClient.cpp" />
     <ClCompile Include="IRobotController.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -225,8 +207,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="RemoteController.cpp" />
-    <ClCompile Include="RemoteRobotReceiverDLL.cpp" />
+    <ClCompile Include="RemoteControllerReceiver.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
