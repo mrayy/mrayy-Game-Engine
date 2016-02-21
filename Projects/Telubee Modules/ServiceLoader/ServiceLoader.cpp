@@ -324,7 +324,6 @@ void ServiceLoader::Run()
 
 void ServiceLoader::_RenderInfo()
 {
-	return;
 	m_renderContext->Reset();
 
 	m_renderContext->RenderText("Service Name: " + m_moduleName, 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));

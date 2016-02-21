@@ -27,7 +27,7 @@ protected:
 	GstCustomMultipleVideoStreamer* m_owner;
 
 	core::string m_ipAddr;
-	uint m_videoPorts[2];
+	std::vector<uint> m_videoPorts;
 	uint m_clockPort;
 	bool m_rtcp;
 
@@ -58,8 +58,6 @@ public:
 	{
 		m_owner = owner;
 		m_ipAddr = "127.0.0.1";
-		m_videoPorts[0] = 0;
-		m_videoPorts[1] = 0;
 		m_clockPort = 0;
 
 		m_videoRtcpSink = 0;
@@ -105,6 +103,9 @@ public:
 	{
 		m_videoSrc = src;
 		m_srcData.resize(src->GetVideoSrcCount());
+		m_videoPorts.resize(src->GetVideoSrcCount());
+		for (int i = 0; i < m_videoPorts.size(); ++i)
+			m_videoPorts[i] = 0;
 	}
 
 	void _UpdatePorts()
@@ -146,15 +147,33 @@ public:
 
 	void BindPorts(const std::string& addr, uint *videoPorts, uint count, uint clockPort, bool rtcp)
 	{
-		if (count < 2)
-			return;
-		if (m_ipAddr == addr && m_videoPorts[0] == videoPorts[0] && m_videoPorts[1] == videoPorts[1] && m_rtcp == rtcp)
+		if (count != m_videoSrc->GetVideoSrcCount())
+		{
+			gLogManager.log("GstCustomMultipleVideoStreamer:BindPorts(): Failed to bound ports since ports counts doesn't match video source count!", ELL_WARNING);
+		}
+		bool skip = (addr==m_ipAddr);
+		if (skip)
+		{
+			for (int i = 0; i < m_videoPorts.size();++i)
+				if (m_videoPorts[i] != videoPorts[i])
+				{
+					skip = false;
+					break;
+				}
+		}
+		if (skip)
 			return;
 		m_ipAddr = addr;
-		m_videoPorts[0] = videoPorts[0];
-		m_videoPorts[1] = videoPorts[1];
+		m_videoPorts.clear();
+		for (int i = 0; i < count; ++i)
+			m_videoPorts.push_back(videoPorts[i]);
 		m_rtcp = rtcp;
 		m_clockPort = clockPort;
+
+		std::string msg = "GstCustomMultipleVideoStreamer:BindPorts(): Ports bound to:";
+		for (int i = 0; i < count; ++i)
+			msg += core::StringConverter::toString(videoPorts[i])+", ";
+		gLogManager.log(msg, ELL_INFO);
 
 		_UpdatePorts();
 	}

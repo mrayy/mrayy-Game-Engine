@@ -142,7 +142,7 @@ namespace GoogleAPI
                 }
                 catch (MySqlException ex)
                 {
-                    MessageBox.Show(ex.Message);
+                 //   MessageBox.Show(ex.Message);
                 }
                 this.CloseConnection();
             }
@@ -187,7 +187,7 @@ namespace GoogleAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                  //  MessageBox.Show(ex.Message);
                 }
                 this.CloseConnection();
             }

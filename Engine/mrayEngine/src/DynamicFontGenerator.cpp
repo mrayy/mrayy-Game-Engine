@@ -64,7 +64,7 @@ DynamicFontGenerator::DynamicFontGenerator(const core::string& name)
 	m_underline = false;
 	m_bold = false;
 	m_italic = false;
-	m_textureSize = 1024;
+	m_textureSize = 4096;
 	AddCharacterRange('A', 'Z');
 	AddCharacterRange('a', 'z');
 	AddCharacterRange('0', '9');

@@ -252,7 +252,7 @@ public:
 	void ChangeState(ERobotControllerStatus s)
 	{
 		bool updated = true;
-		/**/
+		/*
 		printf("Requesting: ");
 		switch (s)
 		{
@@ -279,7 +279,7 @@ public:
 			break;
 		default:
 			break;
-		}
+		}*/
 
 		clientMutex.lock();
 		if (s == EIniting && clientStatus.controlStatus == EStopped)
@@ -348,7 +348,8 @@ DWORD RemoteControllerImpl::timerThreadSend(RemoteControllerImpl *robot, LPVOID 
 	while (!robot->isDone){
 		if (robot->threadStart){
 			stream.seek(0, OS::ESeek_Set);
-			robot->_Send(wrtr,stream);
+			robot->_Send(wrtr, stream);
+			Sleep(1000/300);	//limit sending rate to 300 hz
 		}
 		else
 			Sleep(50);

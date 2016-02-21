@@ -69,6 +69,13 @@ namespace GUI
 		ifo.alpha = 0;
 		ifo.status = CommentInfo::EStart;
 		m_comments.push_front(ifo);
+
+		std::list<CommentInfo>::iterator it = m_comments.begin();
+		for (++it; it != m_comments.end(); ++it)
+		{
+			GUI::FontAttributes* attrs= it->ui->Details->GetFontAttributes();
+			attrs->fontSize = (attrs->fontSize * 3) / 4;
+		}
 	}
 
 	void GUICommentsLayer::CommentsLoaded(const std::vector<kmd::KMDComment*>& comments)

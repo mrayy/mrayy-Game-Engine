@@ -55,7 +55,7 @@ public:
 	CameraConfigurationManager* m_camConfigMngr;
 	TelubeeCameraConfiguration* m_camConfig;
 
-
+	int m_streamsCount;
 	//video::VideoGrabberTexture m_cameraTextures[2];
 
 	bool m_streamAudio;
@@ -79,7 +79,7 @@ public:
 
 	ICameraSrcController* m_cameraController;
 
-	uint m_VideoPorts[2];
+	std::vector<uint> m_VideoPorts;
 	uint m_AudioPort;
 	bool m_portsReceived;
 	bool m_isVideoStarted;
@@ -111,10 +111,11 @@ public:
 		m_streamers = new video::GstStreamBin();
 		LoadCameraSettings("StreamingProfiles.xml");
 
+		m_streamsCount = 0;
 		m_audioPlayer = 0;
-
+		/*
 		m_VideoPorts[0] = 7000;
-		m_VideoPorts[1] = 7001;
+		m_VideoPorts[1] = 7001;*/
 
 		m_portsReceived = false;
 		m_isVideoStarted = false;
@@ -252,11 +253,13 @@ public:
 			if (ifo.ifo.index>= 0)
 			{
 				m_cameraIfo.push_back(ifo);
+				++m_streamsCount;
 			}
 			ifo.ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Right")->getValue());
 			if (ifo.ifo.index >= 0)
 			{
 				m_cameraIfo.push_back(ifo);
+				++m_streamsCount;
 			}
 		}
 #endif
@@ -280,17 +283,20 @@ public:
 				{
 					ifo.ifo.index = i;
 					m_cameraIfo.push_back(ifo);
+					++m_streamsCount;
 				}
 				if (sp == c2)
 				{
 					ifo.ifo.index = i;
 					m_cameraIfo.push_back(ifo);
+					++m_streamsCount;
 				}
 
 			}
 		}
 #endif
 
+		m_VideoPorts.resize(m_streamsCount);
 
 		{
 			std::vector<sound::InputStreamDeviceInfo> lst;
@@ -493,9 +499,11 @@ public:
 			printf("Starting Cameras.\n");
 			m_cameraController->Start();
 		}
+		printf("Start Streaming.\n");
 		m_streamers->Stream();
 
 		m_lastGainUpdate = gEngine.getTimer()->getSeconds() + 2000;
+		printf("Stream started.\n");
 
 		m_isVideoStarted = true;
 	}
@@ -671,8 +679,8 @@ public:
 	virtual void OnUserDisconnected()
 	{
 		m_portsReceived = false;
-		m_VideoPorts[0] = 0;
-		m_VideoPorts[1] = 0;
+		for (int i = 0; i < m_VideoPorts.size(); ++i)
+			m_VideoPorts[i] = 0;
 	}
 
 
@@ -686,8 +694,10 @@ public:
 		xml::XMLElement e("root");
 
 		xml::XMLElement* ret = m_camConfig->ExportToXML(&e);
+		ret->addAttribute("StreamsCount", core::StringConverter::toString(m_streamsCount));
 
 		w.addElement(ret);
+
 		core::string res = w.flush();
 
 		int bufferLen = res.length() + sizeof(int)* 10;
@@ -717,23 +727,26 @@ public:
 		{
 			_SendCameraSettings();
 		}
-		else if (msg == "VideoPorts" && values.size()>=2)
+		else if (msg == "VideoPorts" && values.size()>=m_streamsCount)
 		{
-			int ports[2];
+			std::vector<uint> ports;
+			ports.resize(m_streamsCount);
 
-			ports[0] = core::StringConverter::toInt(values[0]);
-			ports[1] = core::StringConverter::toInt(values[1]);
 			m_portsReceived = true;
-			if (m_VideoPorts[0] == ports[0] && m_VideoPorts[1] == ports[1] && m_remoteAddr==m_context->remoteAddr)
+			bool ok = (m_remoteAddr == m_context->remoteAddr);
+			for (int i = 0; i < m_streamsCount; ++i)
+			{
+				ports[i] = core::StringConverter::toInt(values[i]);
+				ok &= (m_VideoPorts[i] == ports[i]);
+			}
+			if (ok)
 				return;
-			m_VideoPorts[0] = ports[0];
-			m_VideoPorts[1] = ports[1];
+			m_VideoPorts = ports;
 			m_remoteAddr = m_context->remoteAddr;
 			if (m_streamers)
 			{
-				printf("Starting video stream to: %s:%d,%d\n", m_context->remoteAddr.toString().c_str(), m_VideoPorts[0], m_VideoPorts[1]);
-
-				m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), m_VideoPorts, 2, 0, 0);
+				gLogManager.log("Starting video stream to: " +m_context->remoteAddr.toString(),ELL_INFO);
+				m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), &m_VideoPorts[0], m_VideoPorts.size(), 0, 0);
 
 
 				int reply = (int)EMessages::IsStereo;

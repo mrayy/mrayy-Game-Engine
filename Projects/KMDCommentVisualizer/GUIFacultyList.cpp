@@ -96,8 +96,8 @@ void GUIFacultyList::LoadXMLSettings(xml::XMLElement*e)
 	sz.y = core::StringConverter::toInt(gAppData.GetValue("UI", "FacultyHeight", core::StringConverter::toString(sz.y)));
 	this->SetSize(sz);
 
-	AdvisersLbl->GetFontAttributes()->fontSize = sz.y / 3;
-	committeeLbl->GetFontAttributes()->fontSize = sz.y / 3;
+	AdvisersLbl->GetFontAttributes()->fontSize = sz.y / 5;
+	committeeLbl->GetFontAttributes()->fontSize = sz.y / 5;
 }
 
 IMPLEMENT_ELEMENT_FACTORY(GUIFacultyList);

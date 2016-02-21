@@ -46,7 +46,7 @@ GUICommentDetailsPanel::GUICommentDetailsPanel(IGUIManager* m) :
 		TwitterImage->SetSize(sz);
 
 		math::vector2d pos = Details->GetPosition();
-		pos.x = TwitterImage->GetPosition().x + sz.x + 10;
+		pos.x = TwitterImage->GetPosition().x + sz.x + 50;
 		Details->SetPosition(pos);
 
 	}
@@ -69,7 +69,14 @@ void GUICommentDetailsPanel::SetComment(kmd::KMDComment* t)
 		{
 			TwitterImage->SetSourceImage(t->user->imageUrl);
 			TwitterID->SetText(t->user->name);
+			if (t->user->name == "Moderator")
+				Details->GetFontAttributes()->fontColor.Set(1, 0, 0, 1);
+			else 
+				Details->GetFontAttributes()->fontColor.Set(1, 1, 1, 1);
 		}
+		else
+			Details->GetFontAttributes()->fontColor.Set(1, 1, 1, 1);
+
 		ProjectID->SetText(t->project->GetSessionName());
 		Details->SetText(t->text);
 		CommentTime->SetText(core::DateTime::ToString(t->date));

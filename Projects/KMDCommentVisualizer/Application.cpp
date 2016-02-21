@@ -161,7 +161,7 @@ void Application::init(const OptionContainer &extraOptions)
 
 		GCPtr<GUI::DynamicFontGenerator> font = new GUI::DynamicFontGenerator("Arial");
 		font->SetFontName(L"Arial");
-		font->SetTextureSize(1024);
+		font->SetTextureSize(2048);
 		font->SetFontResolution(24);
 		font->SetBold(true);
 		font->Init();
