@@ -10,6 +10,7 @@
 #include "ViewPort.h"
 #include "RenderWindow.h"
 #include "RenderWindowUtils.h"
+#include <mrayOIS.h>
 
 
 namespace mray
@@ -96,6 +97,16 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 			HWND hWnd;
 			m_handsWnd->GetCustomParam("WINDOW", &hWnd);
 			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+			if (false)
+			{
+				InputCreationPack pack(m_handsWnd);
+				pack.WinSize = monitor->GetSize();
+				pack.exclusiveMouse = false;
+				pack.createJoystic = true;
+
+				m_inputManager = CreateOISInputManager(pack);
+			}
 		}
 		m_handsViewPort->AddListener(this);
 		video::RenderWindowUtils::AddListener(m_handsWnd, this);
@@ -157,7 +168,21 @@ void HandsWindow::OnConnected(const core::string &ipaddr, int handsPort, bool rt
 }
 
 void HandsWindow::OnUpdate(float dt)
-{
+{/*
+	m_inputManager->capture();
+	
+	controllers::IKeyboardController* kb= m_inputManager->getKeyboard();
+	
+	if (!kb->isRCtrlPress())
+	{
+		m_projectionRect.ULPoint.y += (kb->getKeyState(KEY_UP) - kb->getKeyState(KEY_DOWN))*dt*0.01f;
+		m_projectionRect.ULPoint.x += (kb->getKeyState(KEY_RIGHT) - kb->getKeyState(KEY_LEFT))*dt*0.01f;
+	}
+	else
+	{
+		m_projectionRect.BRPoint.y += (kb->getKeyState(KEY_UP) - kb->getKeyState(KEY_DOWN))*dt*0.01f;
+		m_projectionRect.BRPoint.x += (kb->getKeyState(KEY_RIGHT) - kb->getKeyState(KEY_LEFT))*dt*0.01f;
+	}*/
 
 }
 
@@ -191,7 +216,7 @@ void HandsWindow::onRenderDone(scene::ViewPort*vp)
 	float w = txsz.x*r;
 	float c = txsz.x - w;
 
-	if (false)
+	if (true)
 	{
 		gEngine.getDevice()->useTexture(0, &tex);
 		m_undistortShader->Setup(math::rectf(0, txsz));

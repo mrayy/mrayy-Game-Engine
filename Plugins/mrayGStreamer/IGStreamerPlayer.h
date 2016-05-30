@@ -53,6 +53,8 @@ public:
 
 	virtual void SetClockBase(ulong c);
 	virtual ulong GetClockBase();
+
+	virtual int GetPort(int i) = 0;
 };
 
 }

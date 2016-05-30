@@ -67,6 +67,12 @@
     <ClCompile Include="CameraVideoSrc.cpp">
       <Filter>StreamType\Streamer\CustomSrc</Filter>
     </ClCompile>
+    <ClCompile Include="AudioAppSinkHandler.cpp">
+      <Filter>Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="IAppSinkHandler.cpp">
+      <Filter>Handlers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -145,6 +151,12 @@
     </ClInclude>
     <ClInclude Include="CameraVideoSrc.h">
       <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioAppSinkHandler.h">
+      <Filter>Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="IAppSinkHandler.h">
+      <Filter>Handlers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

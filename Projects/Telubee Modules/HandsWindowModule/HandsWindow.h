@@ -28,7 +28,8 @@ protected:
 	GCPtr<video::ParsedShaderPP> m_undistortShader;
 	GCPtr<video::ParsedShaderPP> m_I420ToRGB;
 	video::GstNetworkVideoPlayer* m_player;
-	
+	GCPtr<InputManager> m_inputManager;
+
 	math::rectf m_projectionRect;
 
 	TBeeServiceContext* m_context;

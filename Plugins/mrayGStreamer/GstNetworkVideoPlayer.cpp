@@ -330,6 +330,13 @@ public:
 	{
 		return m_videoHandler.getPixelsRef()->format;
 	}
+	virtual int GetPort(int i)
+	{
+		if (m_videoSrc && m_videoSrc->m_client)
+			return m_videoSrc->m_client->Port();
+		return m_videoPort;
+	}
+
 
 	virtual bool GrabFrame(){ return m_videoHandler.GrabFrame(); }
 	virtual bool HasNewFrame(){ return m_videoHandler.isFrameNew(); }
@@ -440,6 +447,10 @@ const ImageInfo* GstNetworkVideoPlayer::GetLastFrame()
 	return m_impl->GetLastFrame();
 }
 
+int GstNetworkVideoPlayer::GetPort(int i)
+{
+	return m_impl->GetPort(i);
+}
 
 }
 }

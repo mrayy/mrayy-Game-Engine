@@ -21,7 +21,7 @@ RobotCommunicator::~RobotCommunicator()
 {
 	StopServer();
 }
-void RobotCommunicator::_HandleData(network::NetAddress* addr,const core::string& name, const core::string& value)
+void RobotCommunicator::_HandleData(network::NetAddress* srcaddr,const core::string& name, const core::string& value)
 {
 
 	std::vector<core::string> vals;
@@ -39,8 +39,8 @@ void RobotCommunicator::_HandleData(network::NetAddress* addr,const core::string
 		network::NetAddress addr = network::NetAddress(vals[0], videoPort);;*/
 		//if (addr.address != m_userStatus.address.address || addr.port!=m_userStatus.address.port)
 		{
-			m_userStatus.receivedAddress = *addr;
-			m_userStatus.clientAddress = *addr;// .setIP(vals[0]);
+			m_userStatus.receivedAddress = *srcaddr;
+			m_userStatus.clientAddress = *srcaddr;// .setIP(vals[0]);
 			if (m_listener)
 			{
 				UserConnectionData data;
@@ -57,6 +57,7 @@ void RobotCommunicator::_HandleData(network::NetAddress* addr,const core::string
 	else if (name == "Disconnect" && vals.size() == 2)
 	{
 		network::NetAddress addr = network::NetAddress(vals[0], atoi(vals[1].c_str()));
+		addr.address = srcaddr->address;
 		if (addr.address == m_userStatus.clientAddress.address)
 		{
 			if (m_listener)
@@ -68,7 +69,7 @@ void RobotCommunicator::_HandleData(network::NetAddress* addr,const core::string
 	else
 	{
 		if (m_listener)
-			m_listener->OnUserMessage(addr, name, value);
+			m_listener->OnUserMessage(srcaddr, name, value);
 	}
 }
 

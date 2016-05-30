@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="IRobotController.cpp" />
+    <ClCompile Include="RemoteRobotControlModule.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="RemoteControllerReceiver.cpp" />
+    <ClCompile Include="RemoteRobotReceiverServiceModule.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="IRobotController.h" />
+    <ClInclude Include="RemoteRobotControlModule.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="RemoteControllerReceiver.h" />
+    <ClInclude Include="RemoteRobotReceiverServiceModule.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{bc1ea2f3-46a4-4728-ac07-29cb2220f2ec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

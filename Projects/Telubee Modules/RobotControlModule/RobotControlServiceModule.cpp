@@ -71,6 +71,7 @@ public:
 	OS::IMutex* m_dataMutex;
 	std::map<std::string, std::string> m_robotValueMap;
 	bool m_connected;
+	core::string m_robotDll;
 
 
 
@@ -136,6 +137,7 @@ public:
 		m_status = EServiceStatus::Idle;
 		m_context = 0;
 		m_connected = false;
+		m_robotDll = "Robot.dll";
 
 	}
 
@@ -150,7 +152,7 @@ public:
 		m_context = context;
 
 		//gLogManager.log("Initializing RobotHandler",ELL_INFO);
-		m_RobotHandler = new RobotHandler();
+		m_RobotHandler = new RobotHandler(m_robotDll);
 		m_RobotHandler->GetRobotController()->ParseParameters(m_robotValueMap);
 		m_RobotHandler->SetListener(this);
 
@@ -572,7 +574,11 @@ bool RobotControlServiceModule::LoadServiceSettings(xml::XMLElement* elem)
 			e = e->nextSiblingElement("Value");
 		}
 	}
-
+	xml::XMLAttribute*a=elem->getAttribute("RobotDll");
+	if (a)
+	{
+		m_impl->m_robotDll = a->value;
+	}
 	return true;
 }
 

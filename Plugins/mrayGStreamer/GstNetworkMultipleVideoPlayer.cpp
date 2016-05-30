@@ -356,6 +356,15 @@ public:
 	{
 		g_object_set(G_OBJECT(GetPipeline()), "volume", (gdouble)vol, (void*)0);
 	}
+	virtual int GetPort(int i)
+	{
+		if (i >= m_videoHandler.size())return 0;
+		if (m_videoHandler[i].videoSrc && m_videoHandler[i].videoSrc->m_client)
+			return m_videoHandler[i].videoSrc->m_client->Port();
+		return m_videoHandler[i].videoPort;
+	}
+
+
 
 
 	virtual const math::vector2di& GetFrameSize(int i)
@@ -510,6 +519,10 @@ const ImageInfo* GstNetworkMultipleVideoPlayer::GetLastFrame(int i)
 	return m_impl->GetLastFrame(i);
 }
 
+int GstNetworkMultipleVideoPlayer::GetPort(int i)
+{
+	return m_impl->GetPort(i);
+}
 
 }
 }

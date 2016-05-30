@@ -40,6 +40,8 @@ public:
 	virtual bool IsPlaying();
 	virtual void Close();
 
+	virtual int GetPort(int i);
+
 };
 
 }

@@ -75,7 +75,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;HandsWindowMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;..\..\..\Engine\mrayOIS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -83,7 +83,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mrayWin32.lib;TelubeeLib.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayWin32.lib;TelubeeLib.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;mrayOIS.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

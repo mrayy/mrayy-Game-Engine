@@ -20,6 +20,8 @@
 #include "StreamWriter.h"
 #include "CMemoryStream.h"
 
+#include "ILogManager.h"
+
 #define GetCurrentDir _getcwd
 using namespace std;
 
@@ -404,6 +406,7 @@ void RemoteController::InitializeRobot(IRobotStatusProvider* robotStatusProvider
 		return;
 
 	m_robotStatusProvider = robotStatusProvider;
+	gLogManager.log("Connecting to Remote Robot:" + m_impl->robotIP + " using local IP: " + m_impl->localIP, ELL_INFO);
 
 	if (!m_impl->netClientReceiver)
 	{
@@ -524,5 +527,6 @@ void RemoteController::ParseParameters(const std::map<std::string, std::string>&
 	{
 		m_impl->localIP = it->second;
 	}
+
 }
 

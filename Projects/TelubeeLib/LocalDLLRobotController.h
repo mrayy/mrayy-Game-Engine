@@ -18,7 +18,7 @@ protected:
 	OS::IDynamicLibraryPtr m_robotLib;
 	IRobotController* m_controller;
 public:
-	LocalDLLRobotController();
+	LocalDLLRobotController(core::string robotdll);
 	virtual ~LocalDLLRobotController();
 
 	virtual void SetListener(ITelubeeRobotListener* l) ;

@@ -371,23 +371,27 @@ bool ServiceHostManager::_ProcessServices()
 	ulong t=m_timer->getMilliseconds();
 	for (int i = 0; i < m_serviceList.size(); ++i)
 	{
-		if (!m_serviceList[i].pingSent && (t - m_serviceList[i].lastTime) > PingTime)
+		if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port != 0)
 		{
-			m_serviceList[i].lastTime = t;
-			m_serviceList[i].pingSent = true;
-			core::string msg = "<Host Message=\"Ping\"/>";
+			if (!m_serviceList[i].pingSent && (t - m_serviceList[i].lastTime) > PingTime)
+			{
+				m_serviceList[i].lastTime = t;
+				m_serviceList[i].pingSent = true;
+				core::string msg = "<Host Message=\"Ping\"/>";
 
-		//	printf("Sending Ping to %s\n", m_serviceList[i].name.c_str());
-			m_commLink->SendTo(&m_serviceList[i].address, msg.c_str(), msg.length() + 1);
-		}else if (m_serviceList[i].pingSent && (t - m_serviceList[i].lastTime) > PingTime)
-		{
-			//Service is dead..
-			printf("Service %s has stopped working\n", m_serviceList[i].name.c_str());
-			toRemove.push_back(m_serviceList.begin()+i);
+			//	printf("Sending Ping to %s:%s\n", m_serviceList[i].name.c_str(), m_serviceList[i].address.toString().c_str());
+				m_commLink->SendTo(&m_serviceList[i].address, msg.c_str(), msg.length() + 1);
+			}
+			else if (m_serviceList[i].pingSent && (t - m_serviceList[i].lastTime) > PingTime)
+			{
+				//Service is dead..
+				printf("Service %s has stopped working\n", m_serviceList[i].name.c_str());
+				toRemove.push_back(m_serviceList.begin() + i);
 
-			//Restart the service
-			if (m_autoRestartService)
-				servicesToRun.push_back(m_serviceList[i].name);
+				//Restart the service
+				if (m_autoRestartService)
+					servicesToRun.push_back(m_serviceList[i].name);
+			}
 		}
 	}
 	m_dataMutex->lock();

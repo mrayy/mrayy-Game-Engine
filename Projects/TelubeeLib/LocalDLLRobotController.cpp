@@ -12,9 +12,9 @@ namespace TBee
 
 	typedef void(*dllFunctionPtr)();
 	typedef IRobotController*(*dllLoadRobotFunctionPtr)();
-LocalDLLRobotController::LocalDLLRobotController()
+LocalDLLRobotController::LocalDLLRobotController(core::string robotdll)
 {
-	m_robotLib = OS::IDllManager::getInstance().getLibrary("Robot.dll");
+	m_robotLib = OS::IDllManager::getInstance().getLibrary(robotdll);
 	if (m_robotLib)
 	{
 		dllFunctionPtr libInitPtr;

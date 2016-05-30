@@ -45,6 +45,7 @@
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-app-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-plugins-base-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
+    <Import Project="..\..\..\..\..\..\..\gstreamer\1.0\x86_64\share\vs\2010\libs\gstreamer-audio-1.0.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -54,6 +55,7 @@
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-base-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-plugins-base-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
+    <Import Project="..\..\..\..\..\..\..\gstreamer\1.0\x86_64\share\vs\2010\libs\gstreamer-audio-1.0.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -111,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppSrcVideoSrc.h" />
+    <ClInclude Include="AudioAppSinkHandler.h" />
     <ClInclude Include="CameraVideoSrc.h" />
     <ClInclude Include="CMySink.h" />
     <ClInclude Include="CMySrc.h" />
@@ -131,6 +134,7 @@
     <ClInclude Include="GstNetworkVideoPlayer.h" />
     <ClInclude Include="GStreamerPlayback.h" />
     <ClInclude Include="GstStreamBin.h" />
+    <ClInclude Include="IAppSinkHandler.h" />
     <ClInclude Include="ICustomVideoSrc.h" />
     <ClInclude Include="IGStreamerPlayer.h" />
     <ClInclude Include="IGstAppListener.h" />
@@ -144,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppSrcVideoSrc.cpp" />
+    <ClCompile Include="AudioAppSinkHandler.cpp" />
     <ClCompile Include="CameraVideoSrc.cpp" />
     <ClCompile Include="CMySink.cpp" />
     <ClCompile Include="CMySrc.cpp" />
@@ -164,6 +169,7 @@
     <ClCompile Include="GstStreamBin.cpp" />
     <ClCompile Include="GstUtils.cpp" />
     <ClCompile Include="GstVideoPlayer.cpp" />
+    <ClCompile Include="IAppSinkHandler.cpp" />
     <ClCompile Include="IGStreamerPlayer.cpp" />
     <ClCompile Include="IGStreamerStreamer.cpp" />
     <ClCompile Include="stdafx.cpp">

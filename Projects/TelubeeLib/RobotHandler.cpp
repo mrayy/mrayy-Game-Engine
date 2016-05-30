@@ -14,14 +14,14 @@ namespace TBee
 	typedef IRobotController*(*dllLoadRobotFunctionPtr)();
 
 
-	RobotHandler::RobotHandler()
+	RobotHandler::RobotHandler(core::string robotDll)
 	{
 		m_listener = 0;
 		m_localControl = 0;
-		m_robotLib = OS::IDllManager::getInstance().getLibrary("Robot.dll");
+		m_robotLib = OS::IDllManager::getInstance().getLibrary(robotDll);
 		if (!m_robotLib)
 		{
-			gLogManager.log("Failed to load Robot.dll!! Please make sure Robot.dll is placed next to application.", ELL_WARNING);
+			gLogManager.log("Failed to load " + robotDll + "!!Please make sure " + robotDll+" is placed next to application.", ELL_WARNING);
 			m_robotController = 0;
 			return;
 		}
@@ -84,8 +84,8 @@ namespace TBee
 		ERobotControllerStatus status = m_robotController->GetRobotStatus();
 		if ((st.connected || m_localControl) && status != ERobotControllerStatus::EConnected)
 		{
-// 			if (status == ERobotControllerStatus::EStopped)
-// 				m_robotController->InitializeRobot(this);
+ 			if (status == ERobotControllerStatus::EStopped)
+ 				m_robotController->InitializeRobot(this);
 			if (status == ERobotControllerStatus::EDisconnected)
 				m_robotController->ConnectRobot();
 		}

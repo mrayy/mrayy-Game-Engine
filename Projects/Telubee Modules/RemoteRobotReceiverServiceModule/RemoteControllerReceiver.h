@@ -3,7 +3,12 @@
 
 #include <string>
 #include "IRobotController.h"
+#include "ServiceContext.h"
 
+namespace mray
+{
+	namespace TBee
+	{
 
 class RemoteControllerReceiverImpl;
 class RemoteControllerReceiver
@@ -23,11 +28,15 @@ public:
 	RemoteControllerReceiver();
 	virtual~RemoteControllerReceiver();
 
+	void Init(core::string robotdll);
+
 	ERobotControllerStatus GetRobotStatus();
 
-	void Render();
+	void Render(ServiceRenderContext* context);
 };
 
+	}
+}
 
 
 

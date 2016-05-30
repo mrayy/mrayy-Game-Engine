@@ -29,6 +29,15 @@ IGStreamerStreamer* GstStreamBin::GetStream(const std::string& name)
 		return 0;
 	return it->second;
 }
+
+
+IGStreamerStreamer* GstStreamBin::GetStreamerAt(int index){
+	if (index >= m_Streamers.size())
+		return 0;
+	StreamMap::iterator it = m_Streamers.begin();
+	std::advance(it, index);
+	return it->second;
+}
 void GstStreamBin::Stream()
 {
 	StreamMap::iterator it = m_Streamers.begin();
@@ -38,6 +47,7 @@ void GstStreamBin::Stream()
 	}
 
 }
+
 void GstStreamBin::Stop()
 {
 	StreamMap::iterator it = m_Streamers.begin();

@@ -75,7 +75,7 @@
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)\Robot.dll</Command>
+      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)\$(TargetFileName) </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -100,7 +100,7 @@
       <AdditionalDependencies>mrayMath.lib;mrayEngine.lib;TelubeeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)\Robot.dll</Command>
+      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)\$(TargetFileName) </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

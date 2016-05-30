@@ -59,6 +59,8 @@ public:
 
 	virtual const ImageInfo* GetLastFrame() ;
 
+	virtual int GetPort(int i);
+
 };
 
 class GstNetworkVideoPlayerGrabber :public IVideoGrabber

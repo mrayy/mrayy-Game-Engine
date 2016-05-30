@@ -38,7 +38,7 @@ protected:
 	void _RobotStatus(const RobotStatus& st);
 
 public:
-	RobotHandler();
+	RobotHandler(core::string robotDll);
 	virtual ~RobotHandler();
 	
 	void Initialize();

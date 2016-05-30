@@ -27,6 +27,7 @@ namespace sound
 	{
 		int ID;
 		core::string name;
+		core::string deviceGUID;
 		core::string description;
 	};
 

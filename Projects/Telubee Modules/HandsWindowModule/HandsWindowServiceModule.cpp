@@ -151,6 +151,11 @@ public:
 		m_status = EServiceStatus::Shutdown;
 	}
 
+	bool LoadServiceSettings(xml::XMLElement* elem)
+	{
+
+		return true;
+	}
 };
 
 
@@ -212,9 +217,9 @@ void HandsWindowServiceModule::DebugRender(ServiceRenderContext* contex)
 	m_impl->DebugRender(contex);
 }
 
-bool HandsWindowServiceModule::LoadServiceSettings(xml::XMLElement* e)
+bool HandsWindowServiceModule::LoadServiceSettings(xml::XMLElement* elem)
 {
-	return true;
+	return m_impl->LoadServiceSettings(elem);
 }
 
 void HandsWindowServiceModule::ExportServiceSettings(xml::XMLElement* e)

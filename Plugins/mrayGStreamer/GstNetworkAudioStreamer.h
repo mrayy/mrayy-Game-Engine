@@ -20,12 +20,24 @@ protected:
 	GstNetworkAudioStreamerImpl* m_impl;
 	GstPipelineHandler* GetPipeline();
 public:
+
+	struct AudioInterface
+	{
+		AudioInterface() :channelsCount(1){}
+		AudioInterface(const std::string& guid, int count) :deviceGUID(guid), channelsCount(count)
+		{}
+		std::string deviceGUID;
+		int channelsCount;
+	};
+public:
 	GstNetworkAudioStreamer();
 	virtual ~GstNetworkAudioStreamer();
 
 	// addr: target address to stream video to
 	// audioport: port for the audio stream , audio rtcp is allocated as audioPort+1 and audioPort+2
 	void BindPorts(const std::string& addr, uint* ports, uint count, uint clockPort, bool rtcp);
+
+	void SetAudioInterface(const AudioInterface& interfaces);
 
 	bool CreateStream();
 	void Stream();

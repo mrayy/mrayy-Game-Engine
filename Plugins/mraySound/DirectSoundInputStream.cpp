@@ -69,12 +69,24 @@ void DirectSoundInputStream::ListDevices(std::vector<InputStreamDeviceInfo> &lst
 {
 	m_dsData->devices.clear();
 	DirectSoundCaptureEnumerate(DirectSoundOutDeviceEnumCallback,&m_dsData->devices);
+
+	char buffer[128];
 	for(int i=0;i<m_dsData->devices.size();++i)
 	{
 		InputStreamDeviceInfo ifo;
 		ifo.ID=i;
 		ifo.name=m_dsData->devices[i].module;
-		ifo.description=m_dsData->devices[i].Desciption;
+
+		OLECHAR* bstrGuid;
+		if (m_dsData->devices[i].lpGuid)
+		{
+			StringFromCLSID(*m_dsData->devices[i].lpGuid, &bstrGuid);
+			wcstombs(buffer, bstrGuid, 128);
+			ifo.deviceGUID = buffer;
+			::CoTaskMemFree(bstrGuid);
+		}
+		//ifo.GUID = *m_dsData->devices[i].lpGuid;
+		ifo.description = m_dsData->devices[i].Desciption;
 		lst.push_back(ifo);
 	}
 }

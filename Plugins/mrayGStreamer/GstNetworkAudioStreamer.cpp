@@ -7,6 +7,7 @@
 
 #include "CMyUDPSrc.h"
 #include "CMyUDPSink.h"
+#include "ILogManager.h"
 
 
 
@@ -30,6 +31,7 @@ protected:
 	GstMyUDPSink* m_audioSink;
 	GstMyUDPSink* m_audioRtcpSink;
 	GstMyUDPSrc* m_audioRtcpSrc;
+	GstNetworkAudioStreamer::AudioInterface m_interface;
 	bool m_rtcp;
 public:
 	GstNetworkAudioStreamerImpl()
@@ -54,7 +56,14 @@ public:
 #else 
 #ifdef VORBIS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
-		core::string audioStr = "directsoundsrc buffer-time=200  ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2   ! audioconvert ! "
+		core::string audioStr = "directsoundsrc buffer-time=200 ";
+		
+		if (m_interface.deviceGUID != "")
+		{
+			audioStr += "device=\"" + m_interface.deviceGUID + "\"";
+		}
+		
+		audioStr+=" ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2   ! audioconvert ! "
 		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
 			"vorbisenc quality=1 ! rtpvorbispay config-interval=3 ";
 #else
@@ -101,6 +110,12 @@ public:
 
 	}
 
+
+	void SetAudioInterface(const GstNetworkAudioStreamer::AudioInterface& interfaces)
+	{
+		m_interface = interfaces;
+	}
+
 	// addr: target address to stream video to
 	// audioport: port for the audio stream , audio rtcp is allocated as audioPort+1 and audioPort+2
 	void BindPorts(const std::string& addr, uint audioPort, uint clockPort, bool rtcp)
@@ -117,12 +132,14 @@ public:
 		GError *err = 0;
 		BuildString();
 		GstElement* p = gst_parse_launch(m_pipeLineString.c_str(), &err);
+		gLogManager.log("GstNetworkAudioStreamer::Starting with pipeline: " + m_pipeLineString, ELL_INFO);
 		if (err)
 		{
-			printf("GstAudioNetworkStreamer: Pipeline error: %s", err->message);
+			gLogManager.log("GstNetworkAudioStreamer: Pipeline error: " + core::string(err->message), ELL_WARNING);
 		}
 		if (!p)
 			return false;
+		gLogManager.log("GstNetworkAudioStreamer::Finished Linking Pipeline", ELL_INFO);
 		SetPipeline(p);
 		_UpdatePorts();
 
@@ -132,6 +149,10 @@ public:
 	void Stream()
 	{
 		SetPaused(false);
+	}
+	void Stop()
+	{
+		SetPaused(true);
 	}
 	bool IsStreaming()
 	{
@@ -165,6 +186,11 @@ void GstNetworkAudioStreamer::Stop()
 GstPipelineHandler* GstNetworkAudioStreamer::GetPipeline()
 {
 	return m_impl;
+}
+
+void GstNetworkAudioStreamer::SetAudioInterface(const AudioInterface& interfaces)
+{
+	m_impl->SetAudioInterface(interfaces);
 }
 
 void GstNetworkAudioStreamer::BindPorts(const std::string& addr, uint* ports, uint count, uint clockPort, bool rtcp)

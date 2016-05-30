@@ -30,6 +30,8 @@ public:
 	void Stop();
 	void CloseAll();
 
+	int GetStreamsCount(){ return m_Streamers.size(); }
+	IGStreamerStreamer* GetStreamerAt(int index);
 	void StartStream(const std::string& name);
 	void StopStream(const std::string& name);
 	IGStreamerStreamer* RemoveStream(const std::string& name, bool close);

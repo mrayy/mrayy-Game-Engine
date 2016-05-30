@@ -304,7 +304,7 @@ public:
 			inputStream.ListDevices(lst);
 			for (int i = 0; i < lst.size(); ++i)
 			{
-				printf("%d - %s : %s\n", lst[i].ID, lst[i].name.c_str(), lst[i].description.c_str());
+				printf("%d - %s : %s, %s\n", lst[i].ID, lst[i].name.c_str(), lst[i].description.c_str(),lst[i].deviceGUID.c_str());
 			}
 		}
 
@@ -397,7 +397,6 @@ public:
 
 		{
 			m_audioPlayer = new video::GstNetworkAudioPlayer();
-			m_audioPlayer->CreateStream();
 		}
 		printf("Finished streams\n");
 
@@ -523,8 +522,12 @@ public:
 #endif
 		if (m_audioPlayer)
 		{
-			m_audioPlayer->SetIPAddress(m_context->remoteAddr.toString(), 7010, 0, 0);
+			m_audioPlayer->Close();
+			m_audioPlayer->SetIPAddress(m_context->remoteAddr.toString(), 91234, 0, 0);
+			m_audioPlayer->CreateStream();
 			m_audioPlayer->Play();
+
+			gLogManager.log("Starting audio player at port: " + core::StringConverter::toString(m_audioPlayer->GetPort(0)), ELL_INFO);
 		}
 		_startVideoStream();
 	}
@@ -540,11 +543,13 @@ public:
 
 		printf("Stopping Cameras.\n");
 		m_cameraController->Stop();
+		printf("Camera Stopped.\n");
 
 		if (m_audioPlayer)
 		{
-// 			printf("Stopping Audio.\n");
-// 			m_audioPlayer->Pause();
+ 			printf("Stopping Audio.\n");
+			m_audioPlayer->Close();
+			printf("Audio Stopped.\n");
 		}
 
 		m_status = EServiceStatus::Stopped;
@@ -695,6 +700,11 @@ public:
 
 		xml::XMLElement* ret = m_camConfig->ExportToXML(&e);
 		ret->addAttribute("StreamsCount", core::StringConverter::toString(m_streamsCount));
+		if (m_audioPlayer)
+		{
+			ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_audioPlayer->GetPort(0)));
+			gLogManager.log("AudioPlayerPort: " + core::StringConverter::toString(m_audioPlayer->GetPort(0)), ELL_INFO);
+		}
 
 		w.addElement(ret);
 
@@ -703,7 +713,6 @@ public:
 		int bufferLen = res.length() + sizeof(int)* 10;
 		byte* buffer = new byte[bufferLen];
 
-		//tell the client if we are sending stereo or single video images
 		OS::CMemoryStream stream("", buffer, bufferLen, false, OS::BIN_WRITE);
 		OS::StreamWriter wrtr(&stream);
 
@@ -712,6 +721,8 @@ public:
 		int len = stream.write(&reply, sizeof(reply));
 		len += wrtr.binWriteString(res);
 		m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+		
+		delete[]buffer;
 
 	}
 	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
