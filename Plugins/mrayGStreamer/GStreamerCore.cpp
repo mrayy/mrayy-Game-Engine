@@ -100,9 +100,12 @@ void GStreamerCore::_Init()
 		//register plugin path
 		gLogManager.log("GStreamerCore - Starting Gstreamer", ELL_INFO);
 		core::string gst_path = g_getenv("GSTREAMER_1_0_ROOT_X86");
-		gst_path = ("GST_PLUGIN_PATH_1_0=" + gst_path + "lib\\gstreamer-1.0" + ";.");
-		putenv(gst_path.c_str());
-		gLogManager.log("GStreamerCore - GStreamer Plugins Path:" + gst_path, ELL_INFO);
+		if (gst_path != "")
+		{
+			gst_path = ("GST_PLUGIN_PATH_1_0=" + gst_path + "lib\\gstreamer-1.0" + ";.");
+			putenv(gst_path.c_str());
+			gLogManager.log("GStreamerCore - GStreamer Plugins Path:" + gst_path, ELL_INFO);
+		}
 
 
 		gLogManager.log("GStreamerCore - Adding Appsink", ELL_INFO);

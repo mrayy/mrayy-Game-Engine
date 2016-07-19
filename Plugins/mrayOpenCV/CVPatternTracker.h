@@ -15,6 +15,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
+#if 0
 namespace mray {
 namespace video {
 
@@ -125,3 +126,4 @@ private:
     
 }
 }
+#endif

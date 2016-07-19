@@ -13,6 +13,8 @@
 #include "stdafx.h"
 #include "CVPatternTracker.h"
 
+#if 0
+
 namespace mray {
 namespace video {
 
@@ -271,3 +273,4 @@ namespace video {
 
 }
 }
+#endif

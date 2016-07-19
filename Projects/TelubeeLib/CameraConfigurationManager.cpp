@@ -17,6 +17,8 @@ TelubeeCameraConfiguration::TelubeeCameraConfiguration() :fov(60), cameraOffset(
 	cameraRotation[0] = cameraRotation[1] = None;
 	cameraType = ECameraType::POVCamera;
 	captureType = ECameraCaptureType::CaptureRaw;
+	streamType = EStreamCodec::StreamCoded;
+	FlipX = FlipY = false;
 }
 
 void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
@@ -26,6 +28,10 @@ void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
 	fov = e->getValueFloat("FOV");
 	cameraOffset = e->getValueFloat("CameraOffset");
 	stereoOffset = e->getValueFloat("StereoOffset");
+	if (e->getValueBool("FlipX"))
+		FlipX = e->getValueBool("FlipX");
+	if (e->getValueBool("FlipY"))
+		FlipY = e->getValueBool("FlipY");
 	attr = e->getAttribute("OpticalCenter");
 	if (attr)
 		OpticalCenter = core::StringConverter::toVector2d(attr->value);
@@ -74,6 +80,8 @@ void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
 	{
 		if (attr->value == "RAW")
 			captureType = ECameraCaptureType::CaptureRaw;
+		if (attr->value == "CAM")
+			captureType = ECameraCaptureType::CaptureCam;
 		else if (attr->value == "H264")
 			captureType = ECameraCaptureType::CaptureH264;
 		else if (attr->value == "JPEG")
@@ -95,6 +103,8 @@ xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
 	e->addAttribute("FocalCoeff", core::StringConverter::toString(FocalCoeff));
 	e->addAttribute("KPCoeff", core::StringConverter::toString(KPCoeff));
 	e->addAttribute("PixelShift", core::StringConverter::toString(PixelShift));
+	e->addAttribute("FlipX", FlipX ? "true" : "false");
+	e->addAttribute("FlipY", FlipY?"true":"false");
 
 
 	for (int i = 0; i < 2; ++i)
@@ -120,6 +130,20 @@ xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
 		break;
 	case mray::TBee::TelubeeCameraConfiguration::OmniCamera:
 		e->addAttribute("Type", "OMNI");
+		break;
+	default:
+		break;
+	}
+	switch (streamType)
+	{
+	case mray::TBee::TelubeeCameraConfiguration::StreamRaw:
+		e->addAttribute("StreamCodec", "Raw");
+		break;
+	case mray::TBee::TelubeeCameraConfiguration::StreamCoded:
+		e->addAttribute("StreamCodec", "Coded");
+		break;
+	case mray::TBee::TelubeeCameraConfiguration::StreamOvrvision:
+		e->addAttribute("StreamCodec", "Ovrvision");
 		break;
 	default:
 		break;

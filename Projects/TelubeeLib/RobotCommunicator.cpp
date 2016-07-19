@@ -39,6 +39,7 @@ void RobotCommunicator::_HandleData(network::NetAddress* srcaddr,const core::str
 		network::NetAddress addr = network::NetAddress(vals[0], videoPort);;*/
 		//if (addr.address != m_userStatus.address.address || addr.port!=m_userStatus.address.port)
 		{
+			//printf("Connect Message: %s\n", srcaddr->toString().c_str());
 			m_userStatus.receivedAddress = *srcaddr;
 			m_userStatus.clientAddress = *srcaddr;// .setIP(vals[0]);
 			if (m_listener)
@@ -56,6 +57,7 @@ void RobotCommunicator::_HandleData(network::NetAddress* srcaddr,const core::str
 	}
 	else if (name == "Disconnect" && vals.size() == 2)
 	{
+		//printf("Disconnect Message: %s\n", srcaddr->toString().c_str());
 		network::NetAddress addr = network::NetAddress(vals[0], atoi(vals[1].c_str()));
 		addr.address = srcaddr->address;
 		if (addr.address == m_userStatus.clientAddress.address)

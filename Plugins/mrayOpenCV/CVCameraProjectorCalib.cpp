@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "CVCameraProjectorCalib.h"
+#include "opencv2/calib3d.hpp"
 
 using namespace std;
 

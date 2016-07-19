@@ -494,6 +494,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceLoader", "Projects\T
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceHostManager", "Projects\ServiceHostManager\ServiceHostManager.vcxproj", "{0D17BC20-9E02-434C-8FAF-76517AE39E62}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC75C431-3C9B-439F-8D24-FE2F104C0972} = {EC75C431-3C9B-439F-8D24-FE2F104C0972}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkValueController", "Projects\TelubeeLib\NetworkValueController\NetworkValueController.csproj", "{DC3F9099-6B04-4F63-B502-AE01734422FD}"
 EndProject

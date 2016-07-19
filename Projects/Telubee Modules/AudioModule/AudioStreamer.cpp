@@ -121,9 +121,9 @@ public:
 		}
 
 		printf("Finished streams\n");
-
+		/*
 		for (int i = 0; i < m_streamers->GetStreamsCount();++i)
-			m_streamers->GetStreamerAt(i)->CreateStream();
+			m_streamers->GetStreamerAt(i)->CreateStream();*/
 
 		//init cameras
 		_RegisterValues();
@@ -176,7 +176,9 @@ public:
 	{
 		if (!m_portsReceived || m_status != EServiceStatus::Running)
 			return;
-		printf("Start Streaming.\n");
+		gLogManager.log("Start Streaming.", ELL_INFO);
+		for (int i = 0; i < m_streamers->GetStreamsCount(); ++i)
+			m_streamers->GetStreamerAt(i)->CreateStream();
 		m_streamers->Stream();
 
 		printf("Stream started.\n");
@@ -202,6 +204,7 @@ public:
 
 		m_streamers->Stop();
 		Sleep(1000);
+		m_streamers->CloseAll();
 
 		m_status = EServiceStatus::Stopped;
 		m_isVideoStarted = false;

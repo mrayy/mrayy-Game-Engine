@@ -152,6 +152,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	if (!m_serviceModule)
 	{
 		m_sharedMemory.Detach();
+		_destroy();
 		delete Engine::getInstancePtr();
 		return false;
 	}

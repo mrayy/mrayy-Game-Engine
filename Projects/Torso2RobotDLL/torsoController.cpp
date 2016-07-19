@@ -292,18 +292,6 @@ bool torsoController::softCurrentSense(){
 
 
 bool torsoController::writeRobotData(){
-	//int j = 0;
-
-	//for (int i = 0; i < 6; i++){
-	//	if (i != 2)
-	//		robotJointData[j] = DesiredDisplacement_J[i] * 180 / PI;
-	//	else
-	//		robotJointData[j] = DesiredDisplacement_J[i];
-
-	//	robotJointData[j + 1] = ServoMotor[i].AngularDisplacement;
-
-	//	j += 2;
-	//}
 
 	mcWriteBuf.torso.J1_ik_angle = (int)(DesiredDisplacement_J[0] * 180 * 100 / PI);
 	mcWriteBuf.torso.J2_ik_angle = (int)(DesiredDisplacement_J[1] * 180 * 100 / PI);
@@ -450,14 +438,38 @@ void torsoController::SetListener(ITelubeeRobotListener* l)
 
 DWORD torsoController::timerThread1(torsoController *robot, LPVOID pdata){
 	int count1 = 0;
+
+	std::vector<float> angles;
+	std::vector<float> data;
+	FILE* dataFile = fopen("TorsoAngles.txt", "w");
+	fprintf(dataFile, "starting\n");
+	fclose(dataFile);
 	while (!isDone){
 		if (threadStart){
 			robot->_processData();
 			robot->controlStateMachine();
+			robot->GetJointValues(angles);
+			if (angles.size() > 11)
+			{
+				data.push_back(angles[11]);
+				if (data.size() > 500){
+					float lastAngle = 0;
+					dataFile = fopen("TorsoAngles.txt", "a");
+					for (int i = 0; i<data.size(); ++i)
+					{
+						float diff = data[i] - lastAngle;
+						fprintf(dataFile, "%f\t%f\n", data[i], diff);
+						lastAngle = data[i];
+					}
+					fclose(dataFile);
+					data.clear();
+				}
+			}
 		}
 		else
 			Sleep(50);
 	}
+
 
 	return 0;
 }
@@ -1286,6 +1298,20 @@ int torsoController::controlStateMachine(){
 	for (int i = 0; i<6; i++){
 		ServoMotor[i].SetReference_D(CalcMotorDisplacement(&(ServoMotor[i]), DesiredDisplacement_J[i], LimitDisplacement_p_J[i], LimitDisplacement_n_J[i]));
 		ServoMotor[i].CalcPIDControl();
+	}
+
+
+	int j = 0;
+
+	for (int i = 0; i < 6; i++){
+		if (i != 2)
+			robotJointData[j] = DesiredDisplacement_J[i] * 180 / PI;
+		else
+			robotJointData[j] = DesiredDisplacement_J[i];
+
+		robotJointData[j + 1] = ServoMotor[i].AngularDisplacement;
+
+		j += 2;
 	}
  
 contactNCord:

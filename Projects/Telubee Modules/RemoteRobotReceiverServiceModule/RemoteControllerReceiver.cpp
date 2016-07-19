@@ -223,12 +223,25 @@ public:
 			robotStatus.status = s;
 		if (s == EDisconnected && (robotStatus.status == EIniting || robotStatus.status == EDisconnecting))
 			robotStatus.status = s;
+		else if (s == EDisconnected && robotStatus.status == EStopped)
+		{
+			robotStatus.status = EIniting;
+		}
 		else if (s==EConnecting && robotStatus.status==EDisconnected)
 			robotStatus.status = s;
 		else if (s == EConnecting && robotStatus.status == EStopped)
 			robotStatus.status = EIniting;
 		else if (s == EConnected && robotStatus.status == EConnecting)
 			robotStatus.status = s;
+		else if (s == EConnected && robotStatus.status == EStopped)
+		{
+			//do initing sequence
+			robotStatus.status = EIniting;
+		}
+		else if (s == EConnected && robotStatus.status == EDisconnected)
+		{
+			robotStatus.status = EConnecting;
+		}
 		else if (s == EDisconnecting && robotStatus.status == EConnected)
 			robotStatus.status = s;
 		else if (s == EStopping && (robotStatus.status == EConnected || robotStatus.status == EDisconnected))
@@ -303,6 +316,7 @@ public:
 			default:
 				break;
 			}
+
 		}
 	}
 
@@ -352,6 +366,9 @@ public:
 		float yoffset = 50;
 
 		core::string msg;
+		{
+			msg = "Local IP:" ;
+		}
 		{
 			ERobotControllerStatus st = m_robotController->GetRobotStatus();
 			msg = core::string("Robot Status: ");

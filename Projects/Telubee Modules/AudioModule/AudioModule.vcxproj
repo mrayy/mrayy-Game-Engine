@@ -91,6 +91,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;FlyCaptureLibrary.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86)\lib;..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

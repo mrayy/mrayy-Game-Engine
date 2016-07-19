@@ -6,6 +6,9 @@
 // Created: 2015/12/27
 // Author: MHD Yamen Saraiji
 
+#include "OVRvisionCamGrabber.h"
+#include "OVRVisionCam.h"
+
 namespace mray
 {
 namespace TBee
@@ -15,7 +18,9 @@ namespace TBee
 enum class ECameraType
 {
 	Webcam,
-	PointGrey
+	PointGrey,
+	OvrvisionCompressed,
+	Ovrvision
 };
 struct _CameraInfo
 {
@@ -67,7 +72,17 @@ public:
 		{
 			if (c[i].ifo.index >= 0)
 			{
-				if (type == ECameraType::Webcam)
+				if (type == ECameraType::Ovrvision)
+				{
+					cameras[i] = new video::OVRVisionCam();
+					cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
+				}
+				else if (type == ECameraType::OvrvisionCompressed)
+				{
+					cameras[i] = new video::OVRvisionCamGrabber();
+					cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
+				}
+				else if (type == ECameraType::Webcam )
 				{
 					cameras[i] = new video::DirectShowVideoGrabber();
 					cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720

@@ -53,6 +53,7 @@ namespace mray {
 namespace video {
 
 	using namespace cv;
+	using namespace std;
 
 	float trackingDistance(const cv::Rect& a, const cv::Rect& b);
 	float trackingDistance(const cv::Point2f& a, const cv::Point2f& b);

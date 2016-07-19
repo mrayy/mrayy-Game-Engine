@@ -58,31 +58,34 @@ public:
 
 	}
 
-#define VORBIS_ENC
+#define OPUS_ENC
 	void _BuildPipeline()
 	{
 #ifdef FLAC_ENC
 		core::string audiocaps = " caps=application/x-rtp,media=application,clock-rate=90000,encoding-name=X-GST,payload=96 ";
 		core::string audioStr = " rtpgstdepay ! audio/x-flac,rate=8000,channels=1! flacdec !  audioconvert ! audioresample  ";
-#else 
-#ifdef VORBIS_ENC
+#elif defined OPUS_ENC
+		std::string audiocaps = "caps=application/x-rtp,media=(string)audio,clock-rate=48000,encoding-name=OPUS,payload=96,encoding-params=2 ";
+		char buffer[128];
+		sprintf(buffer, "%d", m_sampleRate);
 
+		std::string audioStr = "  rtpopusdepay ! opusdec ! audioconvert ! volume volume=2 ! audioresample  ! audio/x-raw,rate=";
+		audioStr+=buffer;
+		audioStr += " ";
+#elif defined VORBIS_ENC
 		std::string audiocaps = "caps=application/x-rtp,media=(string)audio,clock-rate=32000,encoding-name=VORBIS,payload=96,encoding-params=2 ";
 		char buffer[128];
 		sprintf(buffer, "%d", m_sampleRate);
 
 		std::string audioStr = " rtpvorbisdepay ! vorbisdec ! audioconvert ! audioresample  ! audio/x-raw, rate=";
 		audioStr+=buffer;
-		audioStr+=" ";
-#else
-#ifdef SPEEX_ENC
+		audioStr += " ";
+#elif defined SPEEX_ENC
 		core::string audiocaps = "caps=application/x-rtp,media=(string)audio,clock-rate=(int)22000,encoding-name=(string)SPEEX ";
 		core::string audioStr = " rtpspeexdepay ! speexdec ! audioconvert ! audioresample  ";
 #else
 		core::string audiocaps = "caps=application/x-rtp,media=(string)audio,clock-rate=(int)8000,encoding-name=(string)AMR,encoding-params=(string)1,octet-align=(string)1 ";
 		core::string audioStr = " rtpamrdepay ! amrnbdec  ";
-#endif
-#endif
 #endif
 		if (m_rtcp)
 		{
@@ -106,7 +109,7 @@ public:
 			if (m_customAudioInterface)
 				m_pipeLineString += " ! appsink name=audioSink sync=false  emit-signals=false";
 			else
-				m_pipeLineString += " ! directsoundsink sync=false";// "buffer-time=200000 latency-time=100 sync=false";
+				m_pipeLineString += " ! queue ! directsoundsink buffer-time=80000  sync=false";// "buffer-time=200000 latency-time=100 sync=false";
 
 		}
 

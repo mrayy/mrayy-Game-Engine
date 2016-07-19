@@ -20,7 +20,6 @@
 #include "IMonitorDeviceManager.h"
 #include "IMonitorDevice.h"
 
-#include <windows.h>
 
 
 namespace mray
@@ -168,11 +167,11 @@ void Application::init(const OptionContainer &extraOptions)
 	new video::FlyCameraManager();
 	m_impl->camera = new video::DirectShowVideoGrabber();
 	//m_impl->camera = new video::FlyCameraVideoGrabber();
-	m_impl->camera->InitDevice(0, 640,480, 30);
+	m_impl->camera->InitDevice(1, 640,480, 60);
 	m_impl->grabber = new video::VideoGrabberTexture();
 	m_impl->grabber->Set(m_impl->camera, 0);
-	m_impl->chessboard.Setup(math::vector2di(10, 7),2.3);
-	m_impl->cameraCalib.setPatternSize(10, 7);
+	m_impl->chessboard.Setup(math::vector2di(7, 5),2.8);
+	m_impl->cameraCalib.setPatternSize(7, 5);
 	m_impl->cameraCalib.setPatternType(video::CHESSBOARD);
 	m_impl->camera->Start();
 	m_impl->correctedTex = getDevice()->createEmptyTexture2D(false);

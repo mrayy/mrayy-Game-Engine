@@ -24,13 +24,20 @@ public:
 	enum ECameraType
 	{
 		POVCamera,
-		OmniCamera,
+		OmniCamera
 	};
 	enum ECameraCaptureType
 	{
 		CaptureRaw,
+		CaptureCam,
 		CaptureJpeg,
 		CaptureH264
+	};
+	enum EStreamCodec
+	{
+		StreamRaw,
+		StreamCoded,
+		StreamOvrvision
 	};
 
 	//http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
@@ -46,8 +53,11 @@ public:
 	math::vector4d PixelShift;
 	core::string name;
 
+	bool FlipX, FlipY;
+
 	ECameraCaptureType captureType;//RAW,JPEG,H264
 	ECameraType  cameraType; //FOV,OMNI
+	EStreamCodec streamType;
 
 public:
 	TelubeeCameraConfiguration();

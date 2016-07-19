@@ -19,8 +19,10 @@
 
 #include "mString.h"
 #include "opencv/cv.h"
+#include "opencv2/imgproc.hpp"
 
 using namespace cv;
+using namespace std;
 namespace mray
 {
 namespace video

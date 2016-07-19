@@ -74,6 +74,7 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 		}
 	}
 	{
+		gLogManager.log("Creating hands window", ELL_INFO);
 		OptionContainer opt;
 		opt["title"].value = "Hands Window";
 		opt["VSync"].value = "false";
@@ -111,15 +112,16 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 		m_handsViewPort->AddListener(this);
 		video::RenderWindowUtils::AddListener(m_handsWnd, this);
 
-		{
-			m_I420ToRGB = new video::ParsedShaderPP(Engine::getInstance().getDevice());
-			m_I420ToRGB->LoadXML(gFileSystem.openFile("I420ToRGB.peff"));
+	}
+	{
+		gLogManager.log("Loading Shaders", ELL_INFO);
+		m_I420ToRGB = new video::ParsedShaderPP(Engine::getInstance().getDevice());
+		m_I420ToRGB->LoadXML(gFileSystem.openFile("I420ToRGB.peff"));
 
 
-			video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
-			pp->LoadXML(gFileSystem.openFile("ProjectionCorrect.peff"));
-			m_undistortShader = pp;
-		}
+		video::ParsedShaderPP* pp = new video::ParsedShaderPP(gEngine.getDevice());
+		pp->LoadXML(gFileSystem.openFile("ProjectionCorrect.peff"));
+		m_undistortShader = pp;
 	}
 	return true;
 }

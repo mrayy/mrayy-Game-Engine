@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\cams">
+      <UniqueIdentifier>{552c1f16-d5a5-43e4-97cc-0870caec2687}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -39,6 +42,12 @@
     <ClInclude Include="CameraStreamController.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="OVRVisionCam.h">
+      <Filter>Source Files\cams</Filter>
+    </ClInclude>
+    <ClInclude Include="OVRvisionCamGrabber.h">
+      <Filter>Source Files\cams</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -58,6 +67,12 @@
     </ClCompile>
     <ClCompile Include="GstVideoProvider.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OVRVisionCam.cpp">
+      <Filter>Source Files\cams</Filter>
+    </ClCompile>
+    <ClCompile Include="OVRvisionCamGrabber.cpp">
+      <Filter>Source Files\cams</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

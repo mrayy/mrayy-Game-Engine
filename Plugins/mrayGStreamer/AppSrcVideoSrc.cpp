@@ -103,11 +103,12 @@ namespace video
 
 			if (!m_grabber[index])
 			{
-				gLogManager.log("No video grabber is assigned to CustomVideoStreamer", ELL_WARNING);
+				gLogManager.log("AppSrcVideoSrc::NeedBuffer() -No video grabber is assigned to CustomVideoStreamer", ELL_WARNING);
 				return GST_FLOW_ERROR;
 			}
 			if (!m_grabber[index]->GrabFrame())
 			{
+			//	gLogManager.log("AppSrcVideoSrc::NeedBuffer() - Failed to grab buffer " + core::StringConverter::toString(index), ELL_WARNING);
 				return GST_FLOW_ERROR;
 			}
 			m_grabber[index]->Lock();
@@ -118,6 +119,7 @@ namespace video
 			GstBuffer* outbuf = gst_buffer_new_and_alloc(len);
 			gst_buffer_map(outbuf, &map, GST_MAP_WRITE);
 			memcpy(map.data, ifo->imageData, len);
+
 			gst_buffer_unmap(outbuf, &map);
 			m_grabber[index]->Unlock();
 			*buffer = outbuf;
@@ -135,7 +137,7 @@ namespace video
 			{
 				ret = gst_app_src_push_buffer(d->videoSrc, buffer);
 				if (ret != GST_FLOW_OK){
-					gLogManager.log("Failed to push data to AppSrc " + core::StringConverter::toString(d->index), ELL_WARNING);
+					gLogManager.log("AppSrcVideoSrc::read_data() - Failed to push data to AppSrc " + core::StringConverter::toString(d->index), ELL_WARNING);
 					ret = gst_app_src_end_of_stream(d->videoSrc);
 					return FALSE;
 				}
@@ -221,9 +223,10 @@ namespace video
 					" ! video/x-raw,format=" + format + ",width=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().x) +
 					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
-				videoStr += "! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
-				videoStr += "! videoconvert  ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
-				videoStr += "! queue ";
+				//videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
+				videoStr += " ! videoconvert ";
+				//videoStr += " ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
+				//videoStr += " ! queue ";
 				//	if (m_grabber[i]->GetImageFormat()!=video::EPixel_YUYV)
 
 				if (!m_freeSize)
@@ -248,11 +251,17 @@ namespace video
 
 			videoStr += BuildBaseGStr(i);
 
-
+// 			videoStr += " ! videoconvert ! autovideosink sync=false ";
+// 			return videoStr;
+			
 			videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / m_grabber.size()) +
-				" speed-preset=superfast pass=cbr tune=zerolatency sync-lookahead=0 rc-lookahead=0 sliced-threads=true"//" key-int-max=5"
-				" psy-tune=1 "//interlaced=true sliced-threads=false  "// 
+				" speed-preset=superfast  tune=zerolatency pass=cbr   sliced-threads=true"//" key-int-max=5"
+				" sync-lookahead=0 rc-lookahead=0"
+				" psy-tune=none "//interlaced=true sliced-threads=false  "// 
+				" quantizer=15 "
 				" ! rtph264pay ";
+
+			//videoStr += "! autovideosink";
 
 			return videoStr;
 		}

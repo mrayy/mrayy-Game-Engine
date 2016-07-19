@@ -47,14 +47,26 @@ public:
 	virtual ~GstNetworkAudioStreamerImpl()
 	{
 	}
-#define VORBIS_ENC
+#define OPUS_ENC
 	void BuildString()
 	{
 #ifdef FLAC_ENC
 
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=8000,channels=1 ! audioconvert ! flacenc quality=2 ! rtpgstpay ";
-#else 
-#ifdef VORBIS_ENC
+#elif defined OPUS_ENC
+		//actual-buffer-time=0 actual-latency-time=0
+		core::string audioStr = "directsoundsrc buffer-time=100  ";
+
+		if (m_interface.deviceGUID != "")
+		{
+			audioStr += "device=\"" + m_interface.deviceGUID + "\"";
+		}
+
+		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2  ! audiochebband mode=band-pass lower-frequency=1000 upper-frequency=6000 poles=4 ! audioconvert ! volume volume=2 ! audioresample ! ";
+		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
+
+		audioStr += "opusenc complexity=10 bitrate-type=vbr frame-size=5 ! rtpopuspay  ";
+#elif defined VORBIS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
 		core::string audioStr = "directsoundsrc buffer-time=200 ";
 		
@@ -63,16 +75,15 @@ public:
 			audioStr += "device=\"" + m_interface.deviceGUID + "\"";
 		}
 		
-		audioStr+=" ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2   ! audioconvert ! "
+		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2   ! audioconvert ! ";
 		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
-			"vorbisenc quality=1 ! rtpvorbispay config-interval=3 ";
-#else
-#ifdef SPEEX_ENC
+
+		
+		audioStr += "vorbisenc quality=1 ! rtpvorbispay config-interval=3 ";
+#elif defined SPEEX_ENC
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=22000,channels=2   ! speexenc ! rtpspeexpay";
 #else
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=8000,channels=1   ! amrnbenc ! rtpamrpay";
-#endif
-#endif
 #endif
 		if (m_rtcp)
 		{
@@ -89,7 +100,7 @@ public:
 		else
 		{
 			m_pipeLineString = audioStr + " ! "
-				"myudpsink name=audioSink  ";
+				"myudpsink name=audioSink sync=false ";
 
 		}
 

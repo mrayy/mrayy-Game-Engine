@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "CVCameraCalib.h"
 
+#include "opencv2/calib3d.hpp"
 
 namespace mray
 {

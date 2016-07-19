@@ -17,6 +17,7 @@ namespace mray {
 namespace video {
 	
 	using namespace cv;
+	using namespace std;
 	
 	// these functions are for accessing Mat, ofPixels and ofImage consistently.
 	// they're very important for imitate().

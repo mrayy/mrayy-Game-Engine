@@ -169,11 +169,11 @@ public:
 			m_videoPorts.push_back(videoPorts[i]);
 		m_rtcp = rtcp;
 		m_clockPort = clockPort;
-
+		/*
 		std::string msg = "GstCustomMultipleVideoStreamer:BindPorts(): Ports bound to:";
 		for (int i = 0; i < count; ++i)
 			msg += core::StringConverter::toString(videoPorts[i])+", ";
-		gLogManager.log(msg, ELL_INFO);
+		gLogManager.log(msg, ELL_INFO);*/
 
 		_UpdatePorts();
 	}
@@ -184,13 +184,23 @@ public:
 			return false;
 		 BuildStringCompressed();
 
+		 int trials = 0;
+
 		//printf("\n\n%s\n\n", m_pipeLineString.c_str());
-		GstElement* pipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
-		gLogManager.log("Starting with pipeline: " + m_pipeLineString, ELL_INFO);
-		if (err)
-		{
-			gLogManager.log("GstCustomMultipleVideoStreamer: Pipeline error: " + core::string(err->message),ELL_WARNING);
-		}
+		 GstElement* pipeline = 0;
+		 
+		 while (trials < 3 && pipeline==0)
+		 {
+			 pipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
+			 gLogManager.log("Starting with pipeline: " + m_pipeLineString, ELL_INFO);
+			 if (err)
+			 {
+				 gLogManager.log("GstCustomMultipleVideoStreamer: Pipeline error: " + core::string(err->message), ELL_WARNING);
+				 gst_object_unref(pipeline);
+				 pipeline = 0;
+			 }
+			 ++trials;
+		 }
 		if (!pipeline)
 			return false;
 		gLogManager.log("Finished Linking Pipeline",ELL_INFO);

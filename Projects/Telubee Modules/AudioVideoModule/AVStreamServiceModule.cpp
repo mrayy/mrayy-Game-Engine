@@ -58,7 +58,7 @@ public:
 	int m_streamsCount;
 	//video::VideoGrabberTexture m_cameraTextures[2];
 
-	bool m_streamAudio;
+	//bool m_streamAudio;
 
 	struct CameraSettings
 	{
@@ -198,7 +198,15 @@ public:
 		m_resolution.set(1280, 720);
 
 #if USE_POINTGREY && USE_WEBCAMERA
-		m_cameraType = context->appOptions.GetOptionByName("CameraConnection")->getValue() == "DirectShow" ? ECameraType::Webcam : ECameraType::PointGrey;
+		core::string camType= context->appOptions.GetOptionByName("CameraConnection")->getValue();
+		if (camType == "DirectShow")
+			m_cameraType=ECameraType::Webcam ;
+		if (camType == "Ovrvision")
+			m_cameraType = ECameraType::Ovrvision;
+		if (camType == "OvrvisionRaw")
+			m_cameraType = ECameraType::OvrvisionCompressed;
+		if (camType == "PointGrey")
+			m_cameraType=ECameraType::PointGrey ;
 #else 
 #if USE_POINTGREY
 		m_cameraType = ECameraType::PointGrey;
@@ -240,11 +248,35 @@ public:
 			m_resolution.set(1280, 720);
 		else if (res == "2-FullHD")
 			m_resolution.set(1920, 1080);*/
-		m_streamAudio = context->appOptions.GetOptionByName("Audio")->getValue() == "Yes";
+		//m_streamAudio = context->appOptions.GetOptionByName("Audio")->getValue() == "Yes";
 
 		std::vector<_CameraInfo> m_cameraIfo;
 
 #ifdef USE_WEBCAMERA
+		if (m_cameraType == ECameraType::Ovrvision)
+		{
+
+			m_camConfig->streamType = TelubeeCameraConfiguration::StreamCoded;
+			// -1 for the None index
+			_CameraInfo ifo;
+			ifo.ifo.index = 0;
+			m_cameraIfo.push_back(ifo);
+			ifo.ifo.index = 1;
+			m_cameraIfo.push_back(ifo);
+			m_streamsCount = 2;
+		}
+		else
+		if (m_cameraType == ECameraType::OvrvisionCompressed)
+		{
+
+			m_camConfig->streamType = TelubeeCameraConfiguration::StreamOvrvision;
+			// -1 for the None index
+			_CameraInfo ifo;
+			ifo.ifo.index = 0;
+			m_cameraIfo.push_back(ifo);
+			m_streamsCount = 1;
+		}
+		else
 		if (m_cameraType == ECameraType::Webcam)
 		{
 			// -1 for the None index
@@ -333,9 +365,9 @@ public:
 			m_cameraIfo[i].h = capRes.y;
 		}
 #if USE_WEBCAMERA
-		if (m_cameraType == ECameraType::Webcam)
+		if (m_cameraType == ECameraType::Webcam || m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
 		{
-			video::GstNetworkVideoStreamer* vstreamer;
+			//video::GstNetworkVideoStreamer* vstreamer;
 			//Init Cameras
 			m_cameraController->SetCameras(m_cameraIfo,m_cameraType);
 
@@ -387,13 +419,14 @@ public:
 #endif
 
 		//Create Audio Stream
+		/*
 		if (m_streamAudio)
 		{
 			printf("Creating Audio Streamer\n");
 			video::GstNetworkAudioStreamer* streamer;
 			streamer = new video::GstNetworkAudioStreamer();
 			m_streamers->AddStream(streamer, "Audio");
-		}
+		}*/
 
 		{
 			m_audioPlayer = new video::GstNetworkAudioPlayer();
@@ -402,8 +435,8 @@ public:
 
 
 		m_streamers->GetStream("Video")->CreateStream();
-		if (m_streamAudio)
-			m_streamers->GetStream("Audio")->CreateStream();
+		/*if (m_streamAudio)
+			m_streamers->GetStream("Audio")->CreateStream();*/
 
 		//setup cameras settings
 		core::string camParams[] = {
@@ -452,6 +485,7 @@ public:
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Brightness);
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Saturation);
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Sharpness);
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Contrast);
 
 	}
 	void _OnCameraPropertyChanged(IValue* v)
@@ -581,7 +615,7 @@ public:
 								m_currentGain = 0;
 							else
 								m_currentGain += 0.02f;
-							SetCameraParameterValue("Gain", core::StringConverter::toString(m_currentGain));
+							m_cameraController->SetCameraParameterValue("Gain", core::StringConverter::toString(m_currentGain));
 							m_lastGainUpdate = t;
 						}
 					}
@@ -592,7 +626,7 @@ public:
 							m_currentGain -= 0.01f;
 							if (m_currentGain < 0)
 								m_currentGain = -1;
-							SetCameraParameterValue("Gain", core::StringConverter::toString(m_currentGain));
+							m_cameraController->SetCameraParameterValue("Gain", core::StringConverter::toString(m_currentGain));
 							m_lastGainUpdate = t;
 						}
 					}
@@ -768,7 +802,7 @@ public:
 
 				_SendCameraSettings();
 			}
-		}
+		}/*
 		else if (msg == "AudioPort" && values.size() >= 1)
 		{
 			int port;
@@ -777,12 +811,12 @@ public:
 			m_AudioPort = port;
 			if (m_streamAudio)
 				m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort, 1, 0, 0);
-		}
+		}*/
 		else if (msg == "Stream" && values.size() >= 1)
 		{
 			bool enabled=core::StringConverter::toBool(values[0]);
-			if (m_streamAudio)
-				m_streamers->GetStream("Audio")->SetPaused(!enabled);
+			/*if (m_streamAudio)
+				m_streamers->GetStream("Audio")->SetPaused(!enabled);*/
 			m_streamers->GetStream("Video")->SetPaused(!enabled);
 		}
 	}
