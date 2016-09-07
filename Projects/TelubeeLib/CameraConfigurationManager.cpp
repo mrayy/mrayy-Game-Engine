@@ -96,6 +96,7 @@ xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
 	elem->addSubElement(e);
 
 	e->addAttribute("Name", name);
+	e->addAttribute("EncoderType", encoderType);
 	e->addAttribute("FOV", core::StringConverter::toString(fov));
 	e->addAttribute("CameraOffset", core::StringConverter::toString(cameraOffset));
 	e->addAttribute("StereoOffset", core::StringConverter::toString(stereoOffset));

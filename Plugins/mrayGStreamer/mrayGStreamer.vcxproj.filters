@@ -73,6 +73,9 @@
     <ClCompile Include="IAppSinkHandler.cpp">
       <Filter>Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="ICustomVideoSrc.cpp">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />

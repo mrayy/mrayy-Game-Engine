@@ -8,6 +8,7 @@
 
 #include <gst/app/gstappsink.h>
 #include <gst/video/video.h>
+#include <Windows.h>
 
 #include <glib-object.h>
 #include <glib.h>
@@ -79,7 +80,6 @@ void g_logFunction(const gchar   *log_domain,
 
 void GStreamerCore::_Init()
 {
-
 	GError *err = 0;
 	_gst_debug_enabled = false; 
 	if (!gst_init_check(0,0, &err))
@@ -99,6 +99,7 @@ void GStreamerCore::_Init()
 
 		//register plugin path
 		gLogManager.log("GStreamerCore - Starting Gstreamer", ELL_INFO);
+		/*
 		core::string gst_path = g_getenv("GSTREAMER_1_0_ROOT_X86");
 		if (gst_path != "")
 		{
@@ -106,7 +107,7 @@ void GStreamerCore::_Init()
 			putenv(gst_path.c_str());
 			gLogManager.log("GStreamerCore - GStreamer Plugins Path:" + gst_path, ELL_INFO);
 		}
-
+		*/
 
 		gLogManager.log("GStreamerCore - Adding Appsink", ELL_INFO);
 		//add our custom src/sink elements

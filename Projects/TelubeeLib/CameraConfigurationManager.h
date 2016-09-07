@@ -52,6 +52,7 @@ public:
 	math::vector4d KPCoeff;
 	math::vector4d PixelShift;
 	core::string name;
+	core::string encoderType;
 
 	bool FlipX, FlipY;
 

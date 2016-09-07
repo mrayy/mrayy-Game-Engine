@@ -36,8 +36,11 @@ public:
 
 	enum EConnectionType
 	{
+		Local=0,
+		Ovrvision,
 		RTP,
-		WebRTC
+		WebRTC,
+		Movie
 	};
 
 

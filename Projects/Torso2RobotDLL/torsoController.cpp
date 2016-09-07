@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "plc_config.h"
+#include "Socket.h"
 
 
 #define GetCurrentDir _getcwd
@@ -31,11 +32,6 @@ bool tuningEnabled = false;
 FILE     *OutputLogFile;
 
 
-// initialize udp thread for PLC Data
-//MCClient *mc;
-
-mc_buff mcWriteBuf;
-mc_buff mcReadBuf;
 
 
 
@@ -51,6 +47,7 @@ void logString(const char* format, ...)
 	va_end(arglist);
 	OutputLogFile = fopen("TorsoLog.txt", "a+");
 	fprintf(OutputLogFile, "Msg --> %s", Buffer);
+	printf("%s", Buffer);
 	fclose(OutputLogFile);
 }
 
@@ -66,10 +63,24 @@ class torsoControllerImpl
 public:
 	ITelubeeRobotListener* listener;
 	torsoController* _c;
+
+	// initialize udp thread for PLC Data
+	//MCClient *mc;
+
+	mc_buff mcWriteBuf;
+	mc_buff mcReadBuf;
+
+	UDPClient *mPLCSender;
+
 	torsoControllerImpl(torsoController* c)
 	{
 		_c = c;
 		listener = 0;
+		mPLCSender = 0;
+	}
+	~torsoControllerImpl()
+	{
+		delete mPLCSender;
 	}
 	void NotifyCollision(float l, float r)
 	{
@@ -124,15 +135,15 @@ torsoController::torsoController()
 	torsoHeadOri[0] = torsoHeadOri[1] = torsoHeadOri[2] = torsoHeadOri[3]= 0;
 
 
-	WSAData wsaData;
-	if (WSAStartup(MAKEWORD(1, 1), &wsaData) != 0)
-		WSACleanup();
-	logString("Trying to connect to a PLC...\r\n");
+
+	logString("Connecting to PLCWriter Service\r\n");
 
 	Sleep(100);
 
-	memset(&mcWriteBuf, 0, sizeof(mcWriteBuf)); // initializing test write data
-	memset(&mcReadBuf, 0, sizeof(mcReadBuf)); // initializing test read data
+	memset(&m_impl->mcWriteBuf, 0, sizeof(m_impl->mcWriteBuf)); // initializing test write data
+	memset(&m_impl->mcReadBuf, 0, sizeof(m_impl->mcReadBuf)); // initializing test read data
+
+	m_impl->mPLCSender = new UDPClient(8010, "192.168.2.1");//ip hard coded now
 
 	// create connection to Melsec PC via MC Protocol 
 	//mc = new MCClient(PLC_PORT_TCP_TORSO, MELSEC_PLC);
@@ -199,7 +210,7 @@ void torsoController::ConnectRobot()
 
 	if ((robotState == EDisconnected) && torsoInitialized && ControlMode!=2)
 	{
-		ControlMode = 2;
+		_setMode(2);
 		logString("Connecting Robot\n");
 	}
 
@@ -212,7 +223,7 @@ void torsoController::ManualControlRobot()
 	tuningEnabled = false;
 
 	if ((robotState == EDisconnected) && torsoInitialized && ControlMode != 2)
-		ControlMode = 2;
+		_setMode(2);
 
 	return;
 }
@@ -221,7 +232,7 @@ void torsoController::DisconnectRobot()
 {
 	logString("torsoController::DisconnectRobot()\n");
 	tuningEnabled = false;
-	if (robotState == EConnected) ControlMode = 4;
+	if (robotState == EConnected) _setMode(4);;
 	
 	return;
 }
@@ -230,10 +241,38 @@ void torsoController::ShutdownRobot(){
 
 	logString("torsoController::ShutdownRobot()\n");
 	tuningEnabled = false;
-	if (robotState == EDisconnected && ControlMode != 5)
-		ControlMode = 5;
+	//if (robotState == EDisconnected && ControlMode != 5)
+	_setMode(5);
 
 	return;
+}
+void torsoController::_setMode(int mode)
+{
+	if (ControlMode == mode)
+		return;
+	ControlMode = mode;
+	switch (ControlMode)
+	{
+	case 0:
+		logString("Switching to Parking\r\n");
+		break;
+	case 1:
+		logString("Switching to Connected KB\r\n");
+		break;
+	case 2:
+		logString("Switching to Connecting\r\n");
+		break;
+	case 3:
+		logString("Switching to Connected RT\r\n");
+		break;
+	case 4:
+		logString("Switching to Disconnecting\r\n");
+		break;
+	case 5:
+		logString("Switching to Shutdown\r\n");
+		break;
+
+	}
 }
 
 void torsoController::tuningMode(){
@@ -246,9 +285,9 @@ void torsoController::tuningMode(){
 
 bool torsoController::softInterlockProcess(){
 	if (ServoMotor[0].AngularDisplacement >= 19)
-		mcWriteBuf.torso.collisionYBM = 1;
+		m_impl->mcWriteBuf.torso.collisionYBM = 1;
 	else
-		mcWriteBuf.torso.collisionYBM = 0;
+		m_impl->mcWriteBuf.torso.collisionYBM = 0;
 
 
 	return 0;
@@ -293,38 +332,45 @@ bool torsoController::softCurrentSense(){
 
 bool torsoController::writeRobotData(){
 
-	mcWriteBuf.torso.J1_ik_angle = (int)(DesiredDisplacement_J[0] * 180 * 100 / PI);
-	mcWriteBuf.torso.J2_ik_angle = (int)(DesiredDisplacement_J[1] * 180 * 100 / PI);
-	mcWriteBuf.torso.J3_ik_disp = (int)(DesiredDisplacement_J[2] * 100);
-	mcWriteBuf.torso.J4_ik_angle = (int)(DesiredDisplacement_J[3] * 180 * 100 / PI);
-	mcWriteBuf.torso.J5_ik_angle = (int)(DesiredDisplacement_J[4] * 180 * 100 / PI);
-	mcWriteBuf.torso.J6_ik_angle = (int)(DesiredDisplacement_J[5] * 180 * 100 / PI);
+	m_impl->mcWriteBuf.torso.J1_ik_angle = (int)(DesiredDisplacement_J[0] * 180 * 100 / PI);
+	m_impl->mcWriteBuf.torso.J2_ik_angle = (int)(DesiredDisplacement_J[1] * 180 * 100 / PI);
+	m_impl->mcWriteBuf.torso.J3_ik_disp = (int)(DesiredDisplacement_J[2] * 100);
+	m_impl->mcWriteBuf.torso.J4_ik_angle = (int)(DesiredDisplacement_J[3] * 180 * 100 / PI);
+	m_impl->mcWriteBuf.torso.J5_ik_angle = (int)(DesiredDisplacement_J[4] * 180 * 100 / PI);
+	m_impl->mcWriteBuf.torso.J6_ik_angle = (int)(DesiredDisplacement_J[5] * 180 * 100 / PI);
 
-	mcWriteBuf.torso.J1_rt_angle = (int)(ServoMotor[0].AngularDisplacement * 100);
-	mcWriteBuf.torso.J2_rt_angle = (int)(ServoMotor[1].AngularDisplacement * 100);
-	mcWriteBuf.torso.J3_rt_disp = (int)(ServoMotor[2].AngularDisplacement * 100);
-	mcWriteBuf.torso.J4_rt_angle = (int)(ServoMotor[3].AngularDisplacement * 100);
-	mcWriteBuf.torso.J5_rt_angle = (int)(ServoMotor[4].AngularDisplacement * 100);
-	mcWriteBuf.torso.J6_rt_angle = (int)(ServoMotor[5].AngularDisplacement * 100);
+	m_impl->mcWriteBuf.torso.J1_rt_angle = (int)(ServoMotor[0].AngularDisplacement * 100);
+	m_impl->mcWriteBuf.torso.J2_rt_angle = (int)(ServoMotor[1].AngularDisplacement * 100);
+	m_impl->mcWriteBuf.torso.J3_rt_disp = (int)(ServoMotor[2].AngularDisplacement * 100);
+	m_impl->mcWriteBuf.torso.J4_rt_angle = (int)(ServoMotor[3].AngularDisplacement * 100);
+	m_impl->mcWriteBuf.torso.J5_rt_angle = (int)(ServoMotor[4].AngularDisplacement * 100);
+	m_impl->mcWriteBuf.torso.J6_rt_angle = (int)(ServoMotor[5].AngularDisplacement * 100);
 
-	mcWriteBuf.torso.J1_current = (int)(motorCurrent[0] * 100);
-	mcWriteBuf.torso.J2_current = (int)(motorCurrent[1] * 100);
-	mcWriteBuf.torso.J3_current = (int)(motorCurrent[2] * 100);
-	mcWriteBuf.torso.J4_current = (int)(motorCurrent[3] * 100);
-	mcWriteBuf.torso.J5_current = (int)(motorCurrent[4] * 100);
-	mcWriteBuf.torso.J6_current = (int)(motorCurrent[5] * 100);
+	m_impl->mcWriteBuf.torso.J1_current = (int)(motorCurrent[0] * 100);
+	m_impl->mcWriteBuf.torso.J2_current = (int)(motorCurrent[1] * 100);
+	m_impl->mcWriteBuf.torso.J3_current = (int)(motorCurrent[2] * 100);
+	m_impl->mcWriteBuf.torso.J4_current = (int)(motorCurrent[3] * 100);
+	m_impl->mcWriteBuf.torso.J5_current = (int)(motorCurrent[4] * 100);
+	m_impl->mcWriteBuf.torso.J6_current = (int)(motorCurrent[5] * 100);
 
-	mcWriteBuf.torso.J1_torque = (int)(jointTorque[0] * 100);
-	mcWriteBuf.torso.J2_torque = (int)(jointTorque[1] * 100);
-	mcWriteBuf.torso.J3_torque = (int)(jointTorque[2] * 100);
-	mcWriteBuf.torso.J4_torque = (int)(jointTorque[3] * 100);
-	mcWriteBuf.torso.J5_torque = (int)(jointTorque[4] * 100);
-	mcWriteBuf.torso.J6_torque = (int)(jointTorque[5] * 100);
+	m_impl->mcWriteBuf.torso.J1_torque = (int)(jointTorque[0] * 100);
+	m_impl->mcWriteBuf.torso.J2_torque = (int)(jointTorque[1] * 100);
+	m_impl->mcWriteBuf.torso.J3_torque = (int)(jointTorque[2] * 100);
+	m_impl->mcWriteBuf.torso.J4_torque = (int)(jointTorque[3] * 100);
+	m_impl->mcWriteBuf.torso.J5_torque = (int)(jointTorque[4] * 100);
+	m_impl->mcWriteBuf.torso.J6_torque = (int)(jointTorque[5] * 100);
 
-	mcWriteBuf.torso.status = robotState; 
-	mcWriteBuf.torso.robotConnected = torsoInitialized;
+	m_impl->mcWriteBuf.torso.status = robotState; 
+	m_impl->mcWriteBuf.torso.robotConnected = torsoInitialized;
 
+	char buffer[sizeof(m_impl->mcWriteBuf.torso) + 10];
+	const char TORSO_DATA = 5;
+	buffer[0] = TORSO_DATA;
+	memcpy(&buffer + 1, &m_impl->mcWriteBuf.torso, sizeof(m_impl->mcWriteBuf.torso));
+	m_impl->mPLCSender->send(buffer,sizeof(buffer));
 
+	//now wait for reply message
+	m_impl->mPLCSender->receive(&m_impl->mcReadBuf, sizeof(m_impl->mcReadBuf));
 
 	// Write TORSO Data to PLC
 	//mc->batch_write("W", SELECT_TORSO, 0xA0, &mcWriteBuf, 0x20); Sleep(1);
@@ -438,31 +484,38 @@ void torsoController::SetListener(ITelubeeRobotListener* l)
 
 DWORD torsoController::timerThread1(torsoController *robot, LPVOID pdata){
 	int count1 = 0;
-
+	bool recordData = false;
 	std::vector<float> angles;
 	std::vector<float> data;
-	FILE* dataFile = fopen("TorsoAngles.txt", "w");
-	fprintf(dataFile, "starting\n");
-	fclose(dataFile);
+	FILE* dataFile = 0;
+	if (recordData)
+	{
+		dataFile = fopen("TorsoAngles.txt", "w");
+		fprintf(dataFile, "starting\n");
+		fclose(dataFile);
+	}
 	while (!isDone){
 		if (threadStart){
 			robot->_processData();
 			robot->controlStateMachine();
-			robot->GetJointValues(angles);
-			if (angles.size() > 11)
+			if (recordData)
 			{
-				data.push_back(angles[11]);
-				if (data.size() > 500){
-					float lastAngle = 0;
-					dataFile = fopen("TorsoAngles.txt", "a");
-					for (int i = 0; i<data.size(); ++i)
-					{
-						float diff = data[i] - lastAngle;
-						fprintf(dataFile, "%f\t%f\n", data[i], diff);
-						lastAngle = data[i];
+				robot->GetJointValues(angles);
+				if (angles.size() > 11)
+				{
+					data.push_back(angles[11]);
+					if (data.size() > 500){
+						float lastAngle = 0;
+						dataFile = fopen("TorsoAngles.txt", "a");
+						for (int i = 0; i < data.size(); ++i)
+						{
+							float diff = data[i] - lastAngle;
+							fprintf(dataFile, "%f\t%f\n", data[i], diff);
+							lastAngle = data[i];
+						}
+						fclose(dataFile);
+						data.clear();
 					}
-					fclose(dataFile);
-					data.clear();
 				}
 			}
 		}
@@ -723,15 +776,15 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	ServoMotor[2].ChangePGain_V(0.0008);								// Give PGain_V to M3 for GoDeadEndPosition.
 	
 	Time_start = MothorCLK.Elapsed();
-
+	float timespan = 3.0f;//5.0f;
 	while (0
-		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], timespan, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[2].GoDeadEndPosition(-0.02*GearRatio_J[2], 0.0001*GearRatio_J[2], 0.2, ServoMotor[2].ReadDeadendAngularDisplacement_n(),
 		Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], timespan, Time_start, MothorCLK.Elapsed())
 	> 0)
 	{
 		texArt_ncord->ContactPeriodic();
@@ -746,7 +799,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	ServoMotor[2].ZeroPGain_V();                                       // Zero PGain_V of M3.
 
 	//-----[Step8] Move J3 to neutral position in 5 seconds.
-	logString("Move J3 to neutral position in 5 seconds: ");
+	logString("Move J3 to neutral position in 2 seconds: ");
 
 	AngularDisplacement_start_M[2] = ServoMotor[2].AngularDisplacement;
 	AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
@@ -755,7 +808,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	Time_start = MothorCLK.Elapsed();
 
 	while (0
-		+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 5.0, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 2.0, Time_start, MothorCLK.Elapsed())
 	> 0)
 	{
 		ServoMotor[0].Fix2(AngularDisplacement_goal_M[0]);
@@ -773,9 +826,9 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	// moving the robot to parked positin
 	for (int i = 0; i<6; i++) AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;
 
-	AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
-	AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 20.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
-	AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
+	AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]); //-3.0/180.0
+	AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 0.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]); //20.0/180.0
+	AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);			
 	AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 	AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
 	AngularDisplacement_goal_M[5] = CalcMotorDisplacement(&(ServoMotor[5]), 0.0 / 180.0*PI, LimitDisplacement_p_J[5], LimitDisplacement_n_J[5]);
@@ -783,14 +836,17 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	ServoMotor[1].ZeroLimitAngularDisplacement(); // Cancel limitation by AngularDisplacement of J2.
 	ServoMotor[3].ZeroLimitAngularDisplacement(); // Cancel limitation by AngularDisplacement of J4.
 	Time_start = MothorCLK.Elapsed();
+	
+	
+	timespan = 3.0f; //5.0f;
 
 	while (0
-		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 5.0, Time_start, MothorCLK.Elapsed())
-		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 5.0, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], timespan, Time_start, MothorCLK.Elapsed())
+		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], timespan, Time_start, MothorCLK.Elapsed())
 	> 0)
 	{
 		texArt_ncord->ContactPeriodic();
@@ -808,7 +864,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	DesiredCoordinate_Head[2] = 0.6 + 0.055;
 
 	torsoInitialized = true;
-	ControlMode = 0;
+	_setMode(0);
 
 	robotState = ERobotControllerStatus::EDisconnected;
 	threadStart = true; 
@@ -1039,12 +1095,12 @@ int torsoController::controlStateMachine(){
 
 	if (softCurrentSense()){
 		overCurrent = true;
-		ControlMode = 4;
-		mcWriteBuf.torso.overCurrent = 1;
+		_setMode(4);
+		m_impl->mcWriteBuf.torso.overCurrent = 1;
 	}
 	else{
 		overCurrent = false;
-		mcWriteBuf.torso.overCurrent = 0;
+		m_impl->mcWriteBuf.torso.overCurrent = 0;
 	}
 		
 
@@ -1167,9 +1223,9 @@ int torsoController::controlStateMachine(){
 			for (int i = 0; i<6; i++) ServoMotor[i].ReloadLimitAngularDisplacement(); // Reload Limit Angles
 
 			if (manualMode)
-				ControlMode = 1; 
+				_setMode(1);
 			else
-				ControlMode = 3;
+				_setMode(3);
 
 			break;
 
@@ -1222,7 +1278,7 @@ int torsoController::controlStateMachine(){
 
 
 			// Limit Joint Space
-			if ((mcReadBuf.interlock.torso_ybm_collison == 1) && (DesiredDisplacement_J[0] >= 19.0*PI / 180.0f))
+			if ((m_impl->mcReadBuf.interlock.torso_ybm_collison == 1) && (DesiredDisplacement_J[0] >= 19.0*PI / 180.0f))
 				DesiredDisplacement_J[0] = 19.0*PI / 180.0f;
 	
 
@@ -1230,14 +1286,14 @@ int torsoController::controlStateMachine(){
 
 
 		case 4:		// fade disconnect
-
+			disconnect_lbl:
 			robotState = EDisconnecting;
 
 			for (int i = 0; i<6; i++)
 				AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;
 
-			AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), -3.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
-			AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 20.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
+			AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
+			AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 0.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
 			AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.00, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
 			AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 			AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
@@ -1260,23 +1316,30 @@ int torsoController::controlStateMachine(){
 			}
 
 			if (overCurrent){
-				ControlMode = 5; // Immediate Shtdown
+				_setMode(5); // Immediate Shtdown
 				logString("Over Current Shutdown\r\n");
 			}
 				
-			else
-				ControlMode = 0; // keep parking
+			else if (ControlMode==4)
+				_setMode(0);// keep parking
+			else robotState = EDisconnected;
 
 			break;
 
 		case 5:
+			if (robotState != EDisconnected)
+			{
+				printf("Disconnecting first\n");
+				robotState = EDisconnecting;
+				goto disconnect_lbl;
+			}
 			robotState = EStopping;
 			motorSafeShutdown();
 			torsoInitialized = false;
 			robotState = EStopped;
+			threadStart = false;
 			goto contactNCord;
 
-			threadStart = false;
 
 			break;
 		}

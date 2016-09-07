@@ -15,7 +15,7 @@ namespace mray{
 
 class MRAY_WinApp_DLL WinConfigDialog:public IConfigDialog
 {
-	static BOOL CALLBACK DlgProc(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
+	static INT_PTR CALLBACK DlgProc(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
 	OptionContainer*options;
 	
 	HINSTANCE m_hInstance;

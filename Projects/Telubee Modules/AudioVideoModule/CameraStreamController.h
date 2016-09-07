@@ -87,6 +87,7 @@ public:
 					cameras[i] = new video::DirectShowVideoGrabber();
 					cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
 				}
+#if USE_POINTGREY
 				else if (type == ECameraType::PointGrey)
 				{
 					printf("Initializing Pointgrey Camera\n");
@@ -97,6 +98,7 @@ public:
 					cameras[i]->SetImageFormat(video::EPixel_R8G8B8);
 					//	m_cameraIfo[0].camera->Start();
 				}
+#endif
 			}
 		}
 	}
@@ -224,16 +226,16 @@ public:
 		if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureJpeg)
 		{
 			src->SetCaptureType("JPEG");
-			src->SetEncodeType("H264");
+			src->SetEncoderType("H264");
 		}
 		else  if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureH264)
 		{
 			src->SetCaptureType("H264");
-			src->SetEncodeType("H264");
+			src->SetEncoderType("H264");
 		}
 		else {
 			src->SetCaptureType("RAW");
-			src->SetEncodeType("H264");
+			src->SetEncoderType("H264");
 		}
 
 		return src;

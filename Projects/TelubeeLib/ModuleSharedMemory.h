@@ -97,11 +97,15 @@ namespace TBee
 class ModuleSharedMemory:public ModuleSharedMemoryBase
 {
 public:
-	
+	ModuleSharedMemory()
+	{
+		dataRate = 0;
+	}
 	//Shared Data
 	bool UserConnected;	//indicate if the user being connected or not
 	TBee::UserConnectionData userConnectionData;
 	int userCommPort;	//direct communication port with the user
+	int   dataRate;
 	network::NetAddress hostAddress;	//host service address to communicate with
 
 	//bool IsStarted; //indicate if the services should run or not

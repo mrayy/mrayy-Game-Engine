@@ -1,5 +1,5 @@
 #include "stdafx.h"
-
+#if 0
 #include "CPUInfo.h"
 #include "LogManager.h"
 #include "StringConverter.h"
@@ -1558,3 +1558,5 @@ void CPUInfo::CPUSpeed::DelayOverhead (unsigned int uiMS)
 }
 
 }
+
+#endif

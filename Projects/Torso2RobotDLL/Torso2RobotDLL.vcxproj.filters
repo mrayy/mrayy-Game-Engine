@@ -34,6 +34,9 @@
     <ClCompile Include="melsec_mc.cpp">
       <Filter>Source\PLC</Filter>
     </ClCompile>
+    <ClCompile Include="Socket.cpp">
+      <Filter>Source\PLC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -61,6 +64,9 @@
       <Filter>Source\GeneralClass\TimerClass</Filter>
     </ClInclude>
     <ClInclude Include="include\plc_config.h">
+      <Filter>Source\PLC</Filter>
+    </ClInclude>
+    <ClInclude Include="Socket.h">
       <Filter>Source\PLC</Filter>
     </ClInclude>
   </ItemGroup>

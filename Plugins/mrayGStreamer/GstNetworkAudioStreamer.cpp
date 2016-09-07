@@ -62,7 +62,9 @@ public:
 			audioStr += "device=\"" + m_interface.deviceGUID + "\"";
 		}
 
-		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2  ! audiochebband mode=band-pass lower-frequency=1000 upper-frequency=6000 poles=4 ! audioconvert ! volume volume=2 ! audioresample ! ";
+		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2 "
+			//" ! audiochebband mode=band-pass lower-frequency=1000 upper-frequency=6000 poles=4 "
+			"! audioconvert ! volume volume=2 ! audioresample ! ";
 		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
 
 		audioStr += "opusenc complexity=10 bitrate-type=vbr frame-size=5 ! rtpopuspay  ";

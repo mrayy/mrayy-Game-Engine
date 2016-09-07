@@ -60,7 +60,7 @@ public:
 		m_RobotHandler->SetRobotData(m_robotData);
 		return true;
 	}*/
-	RobotStatus m_robotData;
+	RobotStatus *m_robotData;
 
 	math::vector2d m_collision;
 	RobotHandler* m_RobotHandler;
@@ -83,7 +83,7 @@ public:
 // 		OS::ScopedLock l(m_dataMutex);
 		if (m_dataMutex->tryLock())
 		{
-			memcpy(&status, &m_robotData, sizeof(status));
+			memcpy(&status, &m_context->sharedMemory->robotData, sizeof(status));
 			m_dataMutex->unlock();
 			return true;
 		}
@@ -130,7 +130,6 @@ public:
 	{
 	};
 public:
-
 	RobotControlServiceModuleImpl()
 	{
 		m_RobotHandler = 0;
@@ -139,6 +138,9 @@ public:
 		m_connected = false;
 		m_robotDll = "Robot.dll";
 
+		FILE* dataFile;
+		dataFile = fopen("TorsoAngles.txt", "w");
+		fclose(dataFile);
 	}
 
 	~RobotControlServiceModuleImpl()
@@ -150,6 +152,8 @@ public:
 	{
 		m_status = EServiceStatus::Inited;
 		m_context = context;
+
+		m_robotData = &context->sharedMemory->robotData;
 
 		//gLogManager.log("Initializing RobotHandler",ELL_INFO);
 		m_RobotHandler = new RobotHandler(m_robotDll);
@@ -308,64 +312,63 @@ public:
 			if (st == EConnecting)msg += "Connecting";
 			if (st == EDisconnecting)msg += "Disconnecting";
 			if (st == EConnected)msg += "Connected";
-			context->RenderText(msg, 50, 0);
+			context->RenderText(msg, 5, 0);
 		}
-		msg = core::string("User Controlling: ") + (m_robotData.connected ? "Yes" : "No");
-		context->RenderText(msg, 50, 0);
+		msg = core::string("User Controlling: ") + (m_robotData->connected ? "Yes" : "No");
+		context->RenderText(msg, 5, 0);
 		msg = core::string("Controlling: ") + (m_RobotHandler->IsLocalControl() ? "Local" : "Remote");
-		context->RenderText(msg, 50, 0);
+		context->RenderText(msg, 5, 0);
 		msg = core::string("Sensors : ") + core::StringConverter::toString(math::vector2d(m_collision));
-		context->RenderText(msg, 50, 0);
-		if (m_robotData.connected || m_RobotHandler->IsLocalControl())
+		context->RenderText(msg, 5, 0);
+		if (m_robotData->connected || m_RobotHandler->IsLocalControl())
 		{
-
-			sprintf_s(buffer, "%-2.2f, %-2.2f", m_robotData.speed[0], m_robotData.speed[1]);
+			sprintf_s(buffer, "%-2.2f, %-2.2f", m_robotData->speed[0], m_robotData->speed[1]);
 			msg = core::string("Speed: ") + buffer;
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
-			msg = core::string("Rotation: ") + core::StringConverter::toString(m_robotData.rotation,2);
-			context->RenderText(msg, 100, 0);
+			msg = core::string("Rotation: ") + core::StringConverter::toString(m_robotData->rotation,2);
+			context->RenderText(msg, 10, 0);
 
 			math::vector3d angles;
-			math::quaternion q(m_robotData.headRotation[0], m_robotData.headRotation[3],
-				m_robotData.headRotation[1], m_robotData.headRotation[2]);
+			math::quaternion q(m_robotData->headRotation[0], m_robotData->headRotation[3],
+				m_robotData->headRotation[1], m_robotData->headRotation[2]);
 			q.toEulerAngles(angles);
 			angles.set(angles.y, angles.z, angles.x);
 			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", angles.x, angles.y, angles.z);
 			msg = core::string("Head Rotation: ") + buffer;
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
-			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", m_robotData.headPos[0], m_robotData.headPos[1], m_robotData.headPos[2]);
+			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", m_robotData->headPos[0], m_robotData->headPos[1], m_robotData->headPos[2]);
 			msg = core::string("Head Position: ") + buffer;
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
 		}
 
 
 		{
 			msg = "Robot Started: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
 			int sensorsCount = core::StringConverter::toInt(m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorCount, ""));
 			for (int i = 0; i < sensorsCount;++i)
 			{
 				msg = "Sensor[" + core::StringConverter::toString(i) + "]: " + 
 					m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorValue, core::StringConverter::toString(i));
-				context->RenderText(msg, 100, 0);
+				context->RenderText(msg, 10, 0);
 			}
 			std::vector<float> jvalues;
 
 			m_RobotHandler->GetRobotController()->GetJointValues(jvalues);
-			context->RenderText(core::string("Robot Joint Values:"), 50, 0);
+			context->RenderText(core::string("Robot Joint Values:"), 5, 0);
 						
 			msg = "";
-			context->RenderText("   \tIK\t/ Real", 100, 0);
+			context->RenderText("   \tIK\t/ Real", 10, 0);
 			for (int i = 0; i < jvalues.size(); i += 2)
 			{
 				
 				sprintf_s(buffer, "\t%-2.2f\t/ %-2.2f", jvalues[i], jvalues[i+1]);
 				msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
-				context->RenderText(msg, 100, 0);
+				context->RenderText(msg, 10, 0);
 			}
 			
 		}
@@ -402,7 +405,7 @@ public:
 	{
 		RobotStatus st;
 		m_connected = false;
-		m_robotData.connected = 0;
+//		m_robotData->connected = 0;
 		//m_RobotHandler->SetRobotData(st);
 		if (m_RobotHandler->GetRobotController() != 0)
 		{
@@ -420,6 +423,7 @@ public:
 		std::vector<core::string> vals;
 		vals = core::StringUtil::Split(value, ",");
 
+		int arrived = false;
 
 		if (msg.equals_ignore_case("query"))
 		{
@@ -432,51 +436,65 @@ public:
 				m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
 			}
 		}
+#if 0 // these will be handled using shared memory
 		else if (msg.equals_ignore_case("RobotConnect") && vals.size() == 1)
 		{
 			OS::ScopedLock l(m_dataMutex);
-			m_robotData.connected = core::StringConverter::toBool(vals[0].c_str());
+			m_robotData->connected = core::StringConverter::toBool(vals[0].c_str());
 		}
 		else if (msg.equals_ignore_case("Speed") && vals.size() == 2)
 		{
 			OS::ScopedLock l(m_dataMutex);
-			m_robotData.speed[0] = atof(vals[0].c_str());
-			m_robotData.speed[1] = atof(vals[1].c_str());
+			m_robotData->speed[0] = atof(vals[0].c_str());
+			m_robotData->speed[1] = atof(vals[1].c_str());
 			//limit the speed
-			m_robotData.speed[0] = math::clamp<float>(m_robotData.speed[0], -1, 1);
-			m_robotData.speed[1] = math::clamp<float>(m_robotData.speed[1], -1, 1);
-			m_robotData.speed[0] = (m_robotData.speed[0] ) ;
-			m_robotData.speed[1] = (m_robotData.speed[1] ) ;
+			m_robotData->speed[0] = math::clamp<float>(m_robotData->speed[0], -1, 1);
+			m_robotData->speed[1] = math::clamp<float>(m_robotData->speed[1], -1, 1);
+			m_robotData->speed[0] = (m_robotData->speed[0] ) ;
+			m_robotData->speed[1] = (m_robotData->speed[1] ) ;
 
 		}
 		else if (msg.equals_ignore_case("Rotation") && vals.size() == 1)
 		{
 			OS::ScopedLock l(m_dataMutex);
-			m_robotData.rotation = atof(vals[0].c_str());
-			m_robotData.rotation = math::clamp<float>(m_robotData.rotation, -1, 1);
+			m_robotData->rotation = atof(vals[0].c_str());
+			m_robotData->rotation = math::clamp<float>(m_robotData->rotation, -1, 1);
 		}
 		else if (msg.equals_ignore_case("HeadRotation") && vals.size() == 4)
 		{
+			arrived = true;
 			OS::ScopedLock l(m_dataMutex);
-			m_robotData.headRotation[0] = atof(vals[0].c_str());
-			m_robotData.headRotation[1] = atof(vals[1].c_str());
-			m_robotData.headRotation[2] = atof(vals[2].c_str());
-			m_robotData.headRotation[3] = atof(vals[3].c_str());
+			m_robotData->headRotation[0] = atof(vals[0].c_str());
+			m_robotData->headRotation[1] = atof(vals[1].c_str());
+			m_robotData->headRotation[2] = atof(vals[2].c_str());
+			m_robotData->headRotation[3] = atof(vals[3].c_str());
+			/*
+			math::quaternion q(m_robotData->headRotation[0], m_robotData->headRotation[1], m_robotData->headRotation[2], m_robotData->headRotation[3]);
+			double a[3];
+			quaternion2Euler(q, a, RotSeq::zxy);
+			math::vector3d angles;
+			angles.set(math::toDeg(a[0]), math::toDeg(a[1]), math::toDeg(a[2]));
 
+			FILE* dataFile = 0;
 
+			dataFile = fopen("TorsoAngles.txt", "a");
+			fprintf(dataFile, "%f\t%f\t%f\n", angles.x, angles.y, angles.z);
+
+			fclose(dataFile);*/
 			//do head limits
-			// 		m_robotData.tilt = math::clamp(m_robotData.tilt, -50.0f, 50.0f);
-			// 		m_robotData.yaw = math::clamp(m_robotData.yaw, -70.0f, 70.0f);
-			// 		m_robotData.roll = math::clamp(m_robotData.roll, -40.0f, 40.0f);
+			// 		m_robotData->tilt = math::clamp(m_robotData->tilt, -50.0f, 50.0f);
+			// 		m_robotData->yaw = math::clamp(m_robotData->yaw, -70.0f, 70.0f);
+			// 		m_robotData->roll = math::clamp(m_robotData->roll, -40.0f, 40.0f);
 		}
 		else if (msg.equals_ignore_case("HeadPosition") && vals.size() == 3)
 		{
 			OS::ScopedLock l(m_dataMutex);
-			m_robotData.headPos[0] = atof(vals[0].c_str());
-			m_robotData.headPos[1] = atof(vals[1].c_str());
-			m_robotData.headPos[2] = atof(vals[2].c_str());
+			m_robotData->headPos[0] = atof(vals[0].c_str());
+			m_robotData->headPos[1] = atof(vals[1].c_str());
+			m_robotData->headPos[2] = atof(vals[2].c_str());
 
 		}
+#endif
 		else if (msg.equals_ignore_case("jointVals"))
 		{
 			if (m_RobotHandler->GetRobotController() != 0)

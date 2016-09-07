@@ -119,6 +119,7 @@ bool DirectShowVideoGrabber::InitDevice(int device,int w,int h,int fps)
 	h=s_videoInput->getHeight(device);
 	int ppCnt=s_videoInput->getSize(device);
 
+
 	printf("Camera Index:%d Width=%d, Height=%d, FPS=%d\n", m_device, w, h,fps);
 	if(m_size.x!=w || m_size.y!=h)
 	{
@@ -139,10 +140,13 @@ void DirectShowVideoGrabber::Start()
 {
 //	if(m_inited)
 	{
-		if(!InitDevice(m_device, m_size.x, m_size.y, m_fps))
-		//bool r=s_videoInput->restartDevice(m_device);
-		//if(!r)
-			gLogManager.log(core::string("DirectShowVideoGrabber::Start() - Failed to start directshow camera device ")+core::StringConverter::toString(m_device),ELL_WARNING);
+		if (!InitDevice(m_device, m_size.x, m_size.y, m_fps))
+		{
+			//bool r=s_videoInput->restartDevice(m_device);
+			//if(!r)
+			gLogManager.log(core::string("DirectShowVideoGrabber::Start() - Failed to start directshow camera device ") + core::StringConverter::toString(m_device), ELL_WARNING);
+		}else 
+			s_videoInput->setAutoReconnectOnFreeze(m_device, false, 500);
 	}
 }
 bool DirectShowVideoGrabber::IsConnected()
@@ -174,14 +178,14 @@ bool DirectShowVideoGrabber::GrabFrame(int i )
 	if(s_videoInput->isFrameNew(m_device))
 	{
 		float t = gEngine.getTimer()->getSeconds();
-		m_timeAcc += (t - m_lastT)*0.001f;
+		m_timeAcc += (t - m_lastT);
 
 		m_frameCount++;
-		if (m_timeAcc > 1)
+		if (m_timeAcc > 1000)
 		{
 			m_captureFPS = m_frameCount;
 			m_frameCount = 0;
-			m_timeAcc = m_timeAcc - (int)m_timeAcc;
+			m_timeAcc = 0;
 
 		//	printf("Capture FPS: %d\n", m_captureFPS);
 		}
@@ -236,12 +240,13 @@ void DirectShowVideoGrabber::SetParameter(const core::string& name,const core::s
 	long flags = 0;
 	if (isauto)
 		flags = VideoProcAmp_Flags_Auto;
+	else flags = VideoProcAmp_Flags_Manual;
 
 #define setValue(param)\
 	if (isauto)\
 		s_videoInput->setVideoSettingFilter(m_device, param, v, flags, true);\
 	else\
-		s_videoInput->setVideoSettingFilterPct(m_device, param, v, flags);
+		s_videoInput->setVideoSettingFilter(m_device, param, v, flags);
 
 	if(name.equals_ignore_case(Param_Exposure))
 	{

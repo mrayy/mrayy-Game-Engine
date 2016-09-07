@@ -21,6 +21,12 @@ RobotCommunicator::~RobotCommunicator()
 {
 	StopServer();
 }
+void RobotCommunicator::_OnDataArrived(network::NetAddress* addr,const char* buffer)
+{
+	if (m_listener)
+		m_listener->OnUserDataArrived(addr, buffer);
+
+}
 void RobotCommunicator::_HandleData(network::NetAddress* srcaddr,const core::string& name, const core::string& value)
 {
 

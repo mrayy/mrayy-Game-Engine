@@ -1061,7 +1061,10 @@ unsigned char * videoInput::getPixels(int id, bool flipRedAndBlue, bool flipImag
 //
 // ----------------------------------------------------------------------
 bool videoInput::isFrameNew(int id){
-	if (!isDeviceSetup(id)) return false;
+	if (!isDeviceSetup(id)) {
+		if (verbose)printf("device %d is not ready!\n", id);
+		return false;
+	}
 	if (!bCallback)return true;
 
 	bool result = false;
@@ -1159,7 +1162,7 @@ bool videoInput::getVideoSettingFilter(int deviceID, long Property, long &min, l
 
 	hr = getDevice(&VD->pVideoInputFilter, deviceID, VD->wDeviceName, VD->nDeviceName);
 	if (FAILED(hr)){
-		printf("setVideoSetting - getDevice Error\n");
+		printf("getVideoSettingFilter - getDevice Error\n");
 		return false;
 	}
 
@@ -1167,13 +1170,13 @@ bool videoInput::getVideoSettingFilter(int deviceID, long Property, long &min, l
 
 	hr = VD->pVideoInputFilter->QueryInterface(IID_IAMVideoProcAmp, (void**)&pAMVideoProcAmp);
 	if (FAILED(hr)){
-		printf("setVideoSetting - QueryInterface Error\n");
+		printf("getVideoSettingFilter - QueryInterface Error\n");
 		if (VD->pVideoInputFilter)VD->pVideoInputFilter->Release();
 		if (VD->pVideoInputFilter)VD->pVideoInputFilter = NULL;
 		return false;
 	}
 
-	if (verbose) printf("Setting video setting %ld.\n", Property);
+	if (verbose) printf("Getting video setting %ld.\n", Property);
 
 	pAMVideoProcAmp->GetRange(Property, &min, &max, &SteppingDelta, &defaultValue, &flags);
 	if (verbose) printf("Range for video setting %ld: Min:%ld Max:%ld SteppingDelta:%ld Default:%ld Flags:%ld\n", Property, min, max, SteppingDelta, defaultValue, flags);

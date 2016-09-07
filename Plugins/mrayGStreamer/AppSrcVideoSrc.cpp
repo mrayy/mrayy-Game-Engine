@@ -37,29 +37,23 @@ namespace video
 		std::vector<VideoSrcData> m_videoSrc;
 		std::vector<IVideoGrabber*> m_grabber;
 
-		std::string m_encoder;
-		int m_fps;
-		int m_bitRate;
 		math::vector2di m_frameSize;
 		bool m_freeSize;
+		int m_fps;
 
 		AppSrcVideoSrcImpl()
 		{
-			m_bitRate = 3000;
-
-			m_fps = 30;
+			m_fps = 30; 
 			m_frameSize.set(1280, 720);
 			m_freeSize = true;
-			m_encoder = "H264";
 		}
 
 		void  SetResolution(int width, int height, int fps, bool free)
 		{
+			m_fps = fps;
 			m_freeSize = free;
 			m_frameSize.set(width, height);
-			m_fps = fps;
 		}
-
 		core::string GetFormatStr(EPixelFormat fmt)
 		{
 
@@ -136,6 +130,7 @@ namespace video
 			if (d->o->NeedBuffer(0, &buffer, d->index) == GST_FLOW_OK)
 			{
 				ret = gst_app_src_push_buffer(d->videoSrc, buffer);
+			//	gLogManager.log("pushing data to: ", core::StringConverter::toString(d->index),ELL_INFO);
 				if (ret != GST_FLOW_OK){
 					gLogManager.log("AppSrcVideoSrc::read_data() - Failed to push data to AppSrc " + core::StringConverter::toString(d->index), ELL_WARNING);
 					ret = gst_app_src_end_of_stream(d->videoSrc);
@@ -186,8 +181,8 @@ namespace video
 				if (m_videoSrc[i].videoSrc){
 					printf("Linking Video Src:%d\n", i);
 					gst_base_src_set_blocksize(GST_BASE_SRC(m_videoSrc[i].videoSrc), 640 * 480 * 3);
-					gst_base_src_set_live(GST_BASE_SRC(m_videoSrc[i].videoSrc), true);
-					gst_base_src_set_async(GST_BASE_SRC(m_videoSrc[i].videoSrc), false);
+					//gst_base_src_set_live(GST_BASE_SRC(m_videoSrc[i].videoSrc), true);
+					//gst_base_src_set_async(GST_BASE_SRC(m_videoSrc[i].videoSrc), false);
 					gst_base_src_set_do_timestamp(GST_BASE_SRC(m_videoSrc[i].videoSrc), true);
 
 					g_object_set(G_OBJECT(m_videoSrc[i].videoSrc),
@@ -219,11 +214,11 @@ namespace video
 
 				videoStr = "appsrc";
 				videoStr += " name=src" + core::StringConverter::toString(i) + 
-					" do-timestamp=true is-live=true "//"block=true"
+					//" do-timestamp=true is-live=true "//"block=true"
 					" ! video/x-raw,format=" + format + ",width=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().x) +
 					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
-				//videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
+				videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
 				videoStr += " ! videoconvert ";
 				//videoStr += " ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
 				//videoStr += " ! queue ";
@@ -245,56 +240,6 @@ namespace video
 			return videoStr;
 		}
 
-		std::string BuildStringH264(int i)
-		{
-			std::string videoStr;
-
-			videoStr += BuildBaseGStr(i);
-
-// 			videoStr += " ! videoconvert ! autovideosink sync=false ";
-// 			return videoStr;
-			
-			videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / m_grabber.size()) +
-				" speed-preset=superfast  tune=zerolatency pass=cbr   sliced-threads=true"//" key-int-max=5"
-				" sync-lookahead=0 rc-lookahead=0"
-				" psy-tune=none "//interlaced=true sliced-threads=false  "// 
-				" quantizer=15 "
-				" ! rtph264pay ";
-
-			//videoStr += "! autovideosink";
-
-			return videoStr;
-		}
-
-		std::string BuildStringVP8(int i)
-		{
-			std::string videoStr;
-
-			videoStr += BuildBaseGStr(i);
-
-
-			videoStr += "! vp8enc end-usage=cbr target-bitrate=" + core::StringConverter::toString((1000 * m_bitRate) / m_grabber.size()) +
-				" keyframe-mode=1 keyframe-max-dist=1 threads=4 "// ip-factor=1.8 interlaced=true sliced-threads=false  "// 
-				" ! rtpvp8pay  ";
-			/*
-			//videoStr += " ! vp8enc ! rtpvp8pay ";
-			videoStr += " ! theoraenc ! rtptheorapay ";*/
-
-			//videoStr += " ! autovideosink sync=false ";
-
-			return videoStr;
-
-		}
-		core::string BuildGStr(int i)
-		{
-			std::string videoStr ;
-			if (m_encoder == "H264")
-				videoStr = BuildStringH264(i);
-			else if (m_encoder == "VP8")
-				videoStr = BuildStringVP8(i);
-
-			return videoStr;
-		}
 
 	};
 
@@ -309,12 +254,20 @@ AppSrcVideoSrc::~AppSrcVideoSrc()
 
 void  AppSrcVideoSrc::SetResolution(int width, int height, int fps, bool free)
 {
+	ICustomVideoSrc::SetResolution(width, height, fps, free);
 	m_impl->SetResolution(width, height, fps, free);
 }
 
 std::string AppSrcVideoSrc::GetPipelineStr(int i)
 {
-	return m_impl->BuildGStr(i);
+	std::string videoStr=m_impl->BuildBaseGStr(i);
+
+	if (m_encoder == "H264")
+		videoStr += BuildStringH264();
+	else if (m_encoder == "VP8")
+		videoStr += BuildStringVP8();
+
+	return videoStr;
 }
 
 void AppSrcVideoSrc::LinkWithPipeline(void* pipeline)
@@ -330,19 +283,6 @@ void AppSrcVideoSrc::SetVideoGrabber(const std::vector<IVideoGrabber*> &grabbers
 
 int AppSrcVideoSrc::GetVideoSrcCount(){ return m_impl->m_grabber.size(); }
 
-void AppSrcVideoSrc::SetEncoderType(const std::string &type)
-{
-	m_impl->m_encoder = type;
-}
-
-std::string AppSrcVideoSrc::GetDataType()
-{
-	return m_impl->m_encoder;
-}
-void AppSrcVideoSrc::SetBitRate(int bitRate)
-{
-	m_impl->m_bitRate = bitRate;
-}
 void AppSrcVideoSrc::Start()
 {
 }

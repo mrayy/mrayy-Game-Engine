@@ -1,6 +1,11 @@
 
 
 #include "stdafx.h"
+
+#if !_WIN64
+#define USE_POINTGREY 1
+#endif
+
 #include "AVStreamServiceModule.h"
 #include "TBeeServiceContext.h"
 #include "GstStreamBin.h"
@@ -10,12 +15,10 @@
 #include "CameraProfile.h"
 #include "GstNetworkVideoStreamer.h"
 #include "GstNetworkAudioStreamer.h"
-#include "FlyCameraVideoGrabber.h"
 #include "DirectShowVideoGrabber.h"
 #include "GstCustomVideoStreamer.h"
 #include "GstCustomMultipleVideoStreamer.h"
 #include "GstNetworkAudioPlayer.h"
-#include "FlyCameraManager.h"
 #include "DirectSoundInputStream.h"
 #include "CommunicationMessages.h"
 #include "StreamReader.h"
@@ -30,12 +33,17 @@
 
 #include <conio.h>
 
+#if !USE_POINTGREY
+#include "FlyCameraVideoGrabber.h"
+#include "FlyCameraManager.h"
+#endif
+
 namespace mray
 {
 namespace TBee
 {
 #define USE_WEBCAMERA 1
-#define USE_POINTGREY 1
+
 
 //#define FOVE_PEPPER
 
@@ -58,7 +66,9 @@ public:
 	int m_streamsCount;
 	//video::VideoGrabberTexture m_cameraTextures[2];
 
-	//bool m_streamAudio;
+	bool m_supportAudio;
+	xml::XMLTree m_streamingParameters;
+	xml::XMLElement* m_paramsElement;
 
 	struct CameraSettings
 	{
@@ -113,6 +123,7 @@ public:
 
 		m_streamsCount = 0;
 		m_audioPlayer = 0;
+		m_supportAudio = false;
 		/*
 		m_VideoPorts[0] = 7000;
 		m_VideoPorts[1] = 7001;*/
@@ -131,17 +142,18 @@ public:
 		m_streamers = 0;
 		delete m_cameraProfileManager;
 		delete m_camConfigMngr;
+#if USE_POINTGREY
 		if (video::FlyCameraManager::isExist())
 			delete video::FlyCameraManager::getInstancePtr();
+#endif
 	}
 
 	void LoadCameraSettings(const core::string &src)
 	{
-		xml::XMLTree tree;
 		core::string path;
 		gFileSystem.getCorrectFilePath(src, path);
 
-		if (path == "" || tree.load(path) == false)
+		if (path == "" || m_streamingParameters.load(path) == false)
 		{
 			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 3000, 30));
 			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 4000, 45));
@@ -151,8 +163,9 @@ public:
 			return;
 		}
 
-		xml::XMLElement* e = tree.getSubElement("Settings");
-		e = e->getSubElement("Setting");
+		xml::XMLElement* e;
+		m_paramsElement = m_streamingParameters.getSubElement("Settings");
+		e = m_paramsElement->getSubElement("Setting");
 
 		while (e)
 		{
@@ -225,11 +238,14 @@ public:
 
 			gLogManager.log("Capture Type:" + core::StringConverter::toString(m_camConfig->captureType), ELL_INFO);
 
+			//m_camConfig->captureType = TBee::TelubeeCameraConfiguration::Capture
+
 			//Create Camera Controller
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
 				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
-				m_cameraController = new CameraGrabberController();
+				m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType);
+				//m_cameraController = new CameraGrabberController();
 			}else 
 			{
 				gLogManager.log("Creating Encoded Capture Camera", ELL_INFO);
@@ -248,7 +264,7 @@ public:
 			m_resolution.set(1280, 720);
 		else if (res == "2-FullHD")
 			m_resolution.set(1920, 1080);*/
-		//m_streamAudio = context->appOptions.GetOptionByName("Audio")->getValue() == "Yes";
+		m_supportAudio = context->appOptions.GetOptionByName("Audio")->getValue() == "Yes";
 
 		std::vector<_CameraInfo> m_cameraIfo;
 
@@ -329,7 +345,7 @@ public:
 #endif
 
 		m_VideoPorts.resize(m_streamsCount);
-
+/*
 		{
 			std::vector<sound::InputStreamDeviceInfo> lst;
 			sound::DirectSoundInputStream inputStream;
@@ -339,6 +355,7 @@ public:
 				printf("%d - %s : %s, %s\n", lst[i].ID, lst[i].name.c_str(), lst[i].description.c_str(),lst[i].deviceGUID.c_str());
 			}
 		}
+*/
 
 		{
 			//load camera cropping offsets
@@ -389,6 +406,8 @@ public:
 			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);
 			src->SetBitRate(m_currentSettings.bitrate);
 
+			src->LoadParameters(m_paramsElement->getSubElement("Encoder"));
+			m_camConfig->encoderType = src->GetEncoderType();
 			hs->SetVideoSrc(src);
 
 			m_streamers->AddStream(hs, "Video");
@@ -420,7 +439,7 @@ public:
 
 		//Create Audio Stream
 		/*
-		if (m_streamAudio)
+		if (m_supportAudio)
 		{
 			printf("Creating Audio Streamer\n");
 			video::GstNetworkAudioStreamer* streamer;
@@ -428,9 +447,11 @@ public:
 			m_streamers->AddStream(streamer, "Audio");
 		}*/
 
+		if (m_supportAudio)
 		{
 			m_audioPlayer = new video::GstNetworkAudioPlayer();
 		}
+		else m_audioPlayer = 0;
 		printf("Finished streams\n");
 
 
@@ -480,7 +501,7 @@ public:
 
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Exposure);
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Gain);
-		ADD_CAMERA_VALUE(Vector2dfValue, video::ICameraVideoGrabber::Param_WhiteBalance);
+		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_WhiteBalance);
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Gamma);
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Brightness);
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Saturation);
@@ -531,9 +552,11 @@ public:
 			//Pointgrey cameras need to be started manually
 			printf("Starting Cameras.\n");
 			m_cameraController->Start();
+			Sleep(100);
 		}
 		printf("Start Streaming.\n");
 		m_streamers->Stream();
+		Sleep(500);
 
 		m_lastGainUpdate = gEngine.getTimer()->getSeconds() + 2000;
 		printf("Stream started.\n");
@@ -570,20 +593,20 @@ public:
 	{
 		if (m_status != EServiceStatus::Running)
 			return false;
-		printf("Stopping AVStreamService.\n");
+		gLogManager.log("Stopping AVStreamService.",ELL_INFO);
 
 		m_streamers->Stop();
 		Sleep(1000);
 
-		printf("Stopping Cameras.\n");
+		gLogManager.log("Stopping Cameras.", ELL_INFO);
 		m_cameraController->Stop();
-		printf("Camera Stopped.\n");
+		gLogManager.log("Camera Stopped.", ELL_INFO);
 
 		if (m_audioPlayer)
 		{
- 			printf("Stopping Audio.\n");
+			gLogManager.log("Stopping Audio.", ELL_INFO);
 			m_audioPlayer->Close();
-			printf("Audio Stopped.\n");
+			gLogManager.log("Audio Stopped.", ELL_INFO);
 		}
 
 		m_status = EServiceStatus::Stopped;

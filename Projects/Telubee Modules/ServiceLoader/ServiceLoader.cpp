@@ -49,6 +49,7 @@ namespace mray
 	public:
 		virtual void RenderText(const core::string &txt, int x, int y, const video::SColor& clr = 1)
 		{
+			m_currPos.x = 0;
 			m_currPos += math::vector2di(x, y);
 			Console::locate(m_currPos.x, m_currPos.y);
 			Console::setColor(clr.R>0.5, clr.G>0.5, clr.B>0.5);
@@ -86,6 +87,21 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	else
 	{
 		m_moduleName = argv[1];
+	}
+	if (false)
+	{
+		char myPath[_MAX_PATH + 1];
+		core::string path, file,dllPath;
+		core::stringw wpath;
+		GetModuleFileNameA(NULL, myPath, _MAX_PATH);
+		core::StringUtil::SplitPathFileName(myPath, path, file);
+		dllPath=path+ "dlls\\";
+		printf_s("%s\n", dllPath.c_str());
+		core::string_to_wchar(dllPath, wpath);
+		if (SetDllDirectoryW(wpath.c_str()) == false)
+		{
+			printf("Failed to set DLL Directory\n");
+		}
 	}
 	new OS::WinFileSystem();
 	new Engine(new OS::WinOSystem());
@@ -211,7 +227,9 @@ void ServiceLoader::_loadSettings()
 	core::string path,name,ext;
 //	core::StringUtil::SplitPathFileName(m_moduleName, path, name);
 	core::StringUtil::SplitPathExt(m_moduleName, name, ext);
-	if (m_valueTree.load("Modules\\" + name + ".xml"))
+	
+	printf("%s\n", (gFileSystem.getAppPath() + "Modules\\" + name + ".xml").c_str());
+	if (m_valueTree.load(gFileSystem.getAppPath() + "Modules\\" + name + ".xml"))
 	{
 		xml::XMLElement* e = m_valueTree.getSubElement(name);
 		m_valueRootElement = e;
@@ -328,14 +346,15 @@ void ServiceLoader::_RenderInfo()
 	m_renderContext->Reset();
 
 	m_renderContext->RenderText("Service Name: " + m_moduleName, 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
-	m_renderContext->RenderText("NetValues Port: " + core::StringConverter::toString(m_context.netValueController->GetPort()), 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
+	m_renderContext->RenderText("NetValues Port: " + core::StringConverter::toString(m_context.netValueController->GetPort()), 0, 1, video::SColor(CONSOLE_CLR_INFO, 1));
 	m_serviceModule->Render(m_renderContext);
 	m_serviceModule->DebugRender(m_renderContext);
 
-	m_renderContext->RenderText(core::string("Status: ") + (m_memory->UserConnected? "User Connected":"User Disconnected"), 0, 0, video::SColor(CONSOLE_CLR_INFO, 1));
+	m_renderContext->RenderText(core::string("Status: ") + (m_memory->UserConnected ? "User Connected" : "User Disconnected"), 0, 1, video::SColor(CONSOLE_CLR_INFO, 1));
+	m_renderContext->RenderText(core::string("Update Rate: ") + core::StringConverter::toString(m_memory->dataRate), 0, 1, video::SColor(CONSOLE_CLR_INFO, 1));
 	if (m_memory->UserConnected)
 	{
-		m_renderContext->RenderText("User IP Address:" + m_memory->userConnectionData.userData.clientAddress.toString(), 0, 0, video::SColor(CONSOLE_CLR_SUCCESS, 1));
+		m_renderContext->RenderText("User IP Address:" + m_memory->userConnectionData.userData.clientAddress.toString(), 0, 1, video::SColor(CONSOLE_CLR_SUCCESS, 1));
 	}
 	if (_isProcessLocked())
 	{
@@ -477,7 +496,8 @@ void ServiceLoader::OnUserConnected( const TBee::UserConnectionData& data)
 	if (m_context.remoteAddr.address != data.userData.clientAddress.address)
 	{
 		Console::setColor(CONSOLE_CLR_INFO);
-		printf("User Connected : %s\n", data.userData.clientAddress.toString().c_str());
+		gLogManager.log("User Connected : " + data.userData.clientAddress.toString(), ELL_INFO);
+		//printf("User Connected : %s\n", data.userData.clientAddress.toString().c_str());
 	}
 	m_context.remoteAddr = data.userData.clientAddress;
 	//m_videoProvider->StreamDataTo(address,videoPort,audioPort);
@@ -494,7 +514,7 @@ void ServiceLoader::OnUserConnected( const TBee::UserConnectionData& data)
 void ServiceLoader::OnUserDisconnected( const network::NetAddress& address)
 {
 	Console::setColor(CONSOLE_CLR_INFO);
-	printf("User Disconnected : %s\n", address.toString().c_str());
+	gLogManager.log("User Disconnected : "+ address.toString(),ELL_INFO);
 	m_context.__FIRE_OnUserDisconnected();
 }
 

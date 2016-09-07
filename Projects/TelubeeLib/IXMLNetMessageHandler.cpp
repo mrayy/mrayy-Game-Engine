@@ -116,6 +116,8 @@ void IXMLNetMessageHandler::ProcessPacket(network::NetAddress* addr, const char*
 	// 		return;
 	// 	if (!m_robotStatus.connected)
 	// 		return;
+
+	_OnDataArrived(addr,buffer);
 	tinyxml2::XMLElement* node = root->FirstChildElement("Data");
 	while (node)
 	{

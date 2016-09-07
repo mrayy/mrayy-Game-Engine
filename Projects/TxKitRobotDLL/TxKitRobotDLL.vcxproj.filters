@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Impl">
+      <UniqueIdentifier>{5fa98040-1bc5-4fe0-be2e-4c389cda3dbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Robot">
+      <UniqueIdentifier>{d7a1206c-e861-4477-b7f2-9534d564305f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FTDI">
+      <UniqueIdentifier>{51b8e3c3-8349-45e7-9d21-51130a475d7f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="agent.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="movingAverage.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Tserial_event.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotSerialPort.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RoombaController.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="IBaseController.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="OmniBaseController.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\win.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\serial.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\v8stdint.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="IHeadController.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="IRobotComponent.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="TxKitRobotDLL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RTThreeAxisHead.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="FTD2XX.H">
+      <Filter>Source Files\FTDI</Filter>
+    </ClInclude>
+    <ClInclude Include="SFP10X_COM.h">
+      <Filter>Source Files\FTDI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="movingAverage.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tserial_event.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotSerialPort.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RoombaController.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="OmniBaseController.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\list_ports_win.cc">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\serial.cc">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\win.cc">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="TxKitRobotDLL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RTThreeAxisHead.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="SFP10X_COM.cpp">
+      <Filter>Source Files\FTDI</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

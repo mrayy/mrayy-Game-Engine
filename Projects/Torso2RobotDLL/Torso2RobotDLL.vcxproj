@@ -90,7 +90,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Lib\x64\$(Configuration)</OutDir>
+    <OutDir>..\..\Lib\$(Configuration)64</OutDir>
+    <IntDir>..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -172,7 +173,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>include/TexARTNCord/;include/;$(MRAY_ENGINE)\Projects\TelubeeLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include/TexARTNCord/;include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -184,7 +185,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetFileName) ..\bin\x64</Command>
+      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)64</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -197,6 +198,7 @@
     <ClInclude Include="include\TexARTNCord\TexART_ServoMotor2015.h" />
     <ClInclude Include="MMTimer.h" />
     <ClInclude Include="movingAverage.h" />
+    <ClInclude Include="Socket.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="torsoController.h" />
@@ -232,6 +234,7 @@
     <ClCompile Include="melsec_mc.cpp" />
     <ClCompile Include="MMTimer.cpp" />
     <ClCompile Include="movingAverage.cpp" />
+    <ClCompile Include="Socket.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

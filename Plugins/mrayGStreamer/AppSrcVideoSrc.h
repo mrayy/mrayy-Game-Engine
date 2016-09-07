@@ -26,7 +26,6 @@ public:
 	
 
 	void  SetResolution(int width, int height, int fps, bool free);
-	void SetBitRate(int biterate);
 	
 	std::string GetPipelineStr(int i);
 
@@ -34,10 +33,6 @@ public:
 
 	void SetVideoGrabber(const std::vector<IVideoGrabber*> &grabbers);
 	int GetVideoSrcCount();
-
-	void SetEncoderType(const std::string &type);
-
-	std::string GetDataType();
 
 	void Start() ;
 	void Pause() ;

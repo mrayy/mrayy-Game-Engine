@@ -8,7 +8,7 @@ namespace mray{
 
 
 
-BOOL CALLBACK WinConfigDialog::DlgProc(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam)
+	INT_PTR CALLBACK WinConfigDialog::DlgProc(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	core::string str;
 	HWND dlgItem ;

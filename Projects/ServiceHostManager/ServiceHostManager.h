@@ -35,6 +35,9 @@ protected:
 
 	TBee::RobotCommunicator* m_robotCommunicator;
 
+	int _currDataRate;
+	double _lastTime;
+
 	struct ServiceInfo
 	{
 		ServiceInfo()
@@ -83,6 +86,7 @@ public:
 	virtual void OnUserConnected(TBee::RobotCommunicator* sender, const TBee::UserConnectionData& data);
 	void OnUserDisconnected(TBee::RobotCommunicator* sender, const network::NetAddress& address);
 	void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value);
+	void OnUserDataArrived(network::NetAddress* addr, const char* buffer);
 };
 
 }

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-
+#if 0
 #include "SIMD_SSE.h"
 #include "SIMD_Macros.h"
 
@@ -3236,3 +3236,5 @@ __asm movhps		[eax+row*48+10*4], xmm6
 #endif
 
 }
+
+#endif

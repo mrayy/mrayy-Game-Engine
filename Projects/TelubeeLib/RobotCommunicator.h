@@ -52,7 +52,7 @@ namespace TBee
 		virtual void OnUserDisconnected(RobotCommunicator* sender, const network::NetAddress& address){}
 		virtual void OnUserConnected(RobotCommunicator* sender, const UserConnectionData& data){};
 		virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value){};
-
+		virtual void OnUserDataArrived(network::NetAddress* addr, const char* buffer){}
 	};
 
 
@@ -61,6 +61,7 @@ class RobotCommunicator :protected IXMLNetMessageHandler
 protected:
 	UserStatus m_userStatus;
 	void _HandleData(network::NetAddress* addr,const core::string& name, const core::string& value);
+	void _OnDataArrived(network::NetAddress* addr, const char* buffer);
 
 	IRobotCommunicatorListener* m_listener;
 

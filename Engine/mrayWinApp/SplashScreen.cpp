@@ -5,7 +5,9 @@
 
 
 namespace mray{
-
+#if _WIN64
+#define  DWL_USER 8
+#endif
 	typedef BOOL (WINAPI *lpfnSetLayeredWindowAttributes)
 		(HWND hWnd, COLORREF cr, BYTE bAlpha, DWORD dwFlags);
 
@@ -19,6 +21,7 @@ namespace mray{
 //! windows message callback
 LRESULT CALLBACK	SplashScreen::WndProc	( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ){
 	SplashScreen *win=(SplashScreen *)GetWindowLong(hWnd,DWL_USER);
+
 
 	switch (uMsg)
 	{

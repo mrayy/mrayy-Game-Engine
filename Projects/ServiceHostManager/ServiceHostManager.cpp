@@ -25,7 +25,7 @@
 namespace mray
 {
 #define COMMUNICATION_PORT 6000
-#define PingTime 5000
+#define PingTime 10000
 
 	typedef bool(ServiceHostManager::*ProcessFunction)();
 class ServiceHostManagerThread :public OS::IThreadFunction
@@ -65,6 +65,8 @@ ServiceHostManager::ServiceHostManager()
 	m_commThread = 0;
 	m_serviceThread = 0;
 	m_dataMutex = 0;
+	_currDataRate = 0;
+	_lastTime = 0;
 }
 ServiceHostManager::~ServiceHostManager()
 {
@@ -140,9 +142,17 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
 	m_robotCommunicator->SetListener(this);
 
+	char computerName[512];
+	DWORD sz=512;
 	m_info.IP = m_memory->hostAddress.toString();
-	m_info.name = "Telexistence Robot";
+	if (GetComputerName(computerName, &sz))
+		m_info.name = computerName;
+	else		
+		m_info.name = "Telexistence Robot";
 	m_info.CommunicationPort = m_robotCommunicator->GetServerPort();
+	m_info.Type = TBee::TBRobotInfo::EConnectionType::RTP;
+
+	printf("Robot Name: %s\n\n", m_info.name.c_str());
 
 	gLogManager.log("Starting Services", ELL_INFO);
 	for (int i = 1; i < argc; ++i)
@@ -253,12 +263,12 @@ int ServiceHostManager::GetServiceByName(const core::string &name)
 //#define USE_JSON_PARSER
 #define USE_XML_PARSER
 
+#define MAX_BUFFER 4096*4
+char buffer[MAX_BUFFER];
 bool ServiceHostManager::_ProcessPacket()
 {
 	if (!m_commLink->IsOpen())
 		return -1;
-#define MAX_BUFFER 4096*4
-	char buffer[MAX_BUFFER];
 	network::NetAddress src;
 	uint len = MAX_BUFFER;
 	if (m_commLink->RecvFrom(buffer, &len, &src, 0) != network::UDP_SOCKET_ERROR_NONE)
@@ -432,8 +442,22 @@ void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const 
 void ServiceHostManager::OnUserDisconnected(TBee::RobotCommunicator* sender, const network::NetAddress& address)
 {
 	m_memory->UserConnected =  false;
+	m_memory->robotData.connected = false;
 	printf("User Disconnected : %s\n", address.toString().c_str());
 }
+
+void ServiceHostManager::OnUserDataArrived(network::NetAddress* addr, const char* buffer)
+{
+	++_currDataRate;
+	float t = m_timer->getSeconds();
+	if (t - _lastTime > 1000)
+	{
+		_lastTime = t;
+		m_memory->dataRate = _currDataRate;
+		_currDataRate = 0;
+	}
+}
+
 void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
 {
 	const int BufferLen = 65537;
@@ -445,6 +469,8 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 	if (i != -1)
 		m = msg.substr(0, i);
 	else m = msg;
+
+
 
 	std::vector<core::string> vals;
 	vals = core::StringUtil::Split(value, ",");
@@ -483,6 +509,39 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 			retAddr.port = core::StringConverter::toInt(vals[1]);
 			m_commLink->SendTo(&retAddr, (char*)buffer, len);
 		}
+	}
+	else if (m.equals_ignore_case("Speed") && vals.size() == 2)
+	{
+		m_memory->robotData.speed[0] = atof(vals[0].c_str());
+		m_memory->robotData.speed[1] = atof(vals[1].c_str());
+		//limit the speed
+		m_memory->robotData.speed[0] = math::clamp<float>(m_memory->robotData.speed[0], -1, 1);
+		m_memory->robotData.speed[1] = math::clamp<float>(m_memory->robotData.speed[1], -1, 1);
+		m_memory->robotData.speed[0] = (m_memory->robotData.speed[0]);
+		m_memory->robotData.speed[1] = (m_memory->robotData.speed[1]);
+
+	}
+	else if (m.equals_ignore_case("Rotation") && vals.size() == 1)
+	{
+		m_memory->robotData.rotation = atof(vals[0].c_str());
+		m_memory->robotData.rotation = math::clamp<float>(m_memory->robotData.rotation, -1, 1);
+	}
+	else if (m.equals_ignore_case("RobotConnect"))
+	{
+		m_memory->robotData.connected = core::StringConverter::toBool(vals[0].c_str());
+	}
+	else if (m.equals_ignore_case("HeadRotation"))
+	{
+		m_memory->robotData.headRotation[0] = atof(vals[0].c_str());
+		m_memory->robotData.headRotation[1] = atof(vals[1].c_str());
+		m_memory->robotData.headRotation[2] = atof(vals[2].c_str());
+		m_memory->robotData.headRotation[3] = atof(vals[3].c_str());
+	}
+	else if (m.equals_ignore_case("HeadPosition"))
+	{
+		m_memory->robotData.headPos[0] = atof(vals[0].c_str());
+		m_memory->robotData.headPos[1] = atof(vals[1].c_str());
+		m_memory->robotData.headPos[2] = atof(vals[2].c_str());
 	}
 	else
 	{

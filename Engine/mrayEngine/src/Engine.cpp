@@ -128,7 +128,7 @@ namespace mray
 
 		video::ShaderSemanticTable* shaderSemTable;
 
-		CPUInfo* cpuInfo;
+//		CPUInfo* cpuInfo;
 
 		ScheduleManager* scheduleManager;
 
@@ -170,7 +170,7 @@ namespace mray
 
 			new LogSubSystemManager();
 
-			cpuInfo = new CPUInfo();
+//			cpuInfo = new CPUInfo();
 
 			eventQueue = new EventQueue();
 
@@ -320,7 +320,7 @@ namespace mray
 
 			delete delegateManager;
 
-			delete cpuInfo;
+//			delete cpuInfo;
 			delete eventQueue;
 			delete fpsCounter;
 			delete timer;

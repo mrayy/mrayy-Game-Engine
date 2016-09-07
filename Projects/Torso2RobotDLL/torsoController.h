@@ -52,6 +52,8 @@ protected:
 	std::string ScanePorts();
 
 	void _setupCaps();
+
+	void _setMode(int mode);
 public:
 
 	TexART_NCord000_Interface  *texArt_ncord;   // Interface object for the machine hardware.

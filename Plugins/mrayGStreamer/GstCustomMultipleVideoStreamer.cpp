@@ -95,7 +95,7 @@ public:
 	std::string FinalizePipeline(const std::string &pipeline,int i)
 	{
 		std::string videoStr = pipeline;
-		videoStr += " ! myudpsink name=videoSink" + core::StringConverter::toString(i) + " sync=false ";
+		videoStr += " ! myudpsink name=videoSink" + core::StringConverter::toString(i) + " sync=true ";
 		return videoStr;
 	}
 
@@ -184,12 +184,12 @@ public:
 			return false;
 		 BuildStringCompressed();
 
-		 int trials = 0;
 
 		//printf("\n\n%s\n\n", m_pipeLineString.c_str());
 		 GstElement* pipeline = 0;
 		 
-		 while (trials < 3 && pipeline==0)
+		 // int trials = 0;
+		 // while (trials < 3 && pipeline==0)
 		 {
 			 pipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
 			 gLogManager.log("Starting with pipeline: " + m_pipeLineString, ELL_INFO);
@@ -199,7 +199,7 @@ public:
 				 gst_object_unref(pipeline);
 				 pipeline = 0;
 			 }
-			 ++trials;
+		//	 ++trials;
 		 }
 		if (!pipeline)
 			return false;

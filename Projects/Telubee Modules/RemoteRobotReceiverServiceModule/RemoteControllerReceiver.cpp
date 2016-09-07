@@ -153,7 +153,8 @@ public:
 
 		hThreadSend = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadSend, this, NULL, NULL);
 		hThreadRecv = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadRecv, this, NULL, NULL);
-
+		SetThreadPriority(hThreadSend, HIGH_PRIORITY_CLASS);
+		SetThreadPriority(hThreadRecv, HIGH_PRIORITY_CLASS);
 		m_robotController = new TBee::LocalDLLRobotController(robotDLL);
 		m_robotController->SetListener(this);
 	}

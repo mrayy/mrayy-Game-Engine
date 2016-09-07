@@ -294,7 +294,7 @@ public:
 			clientStatus.controlStatus = s;
 		else if (s == EDisconnecting && clientStatus.controlStatus == EConnected)
 			clientStatus.controlStatus = s;
-		else if (s == EStopping && (clientStatus.controlStatus == EConnected || clientStatus.controlStatus == EDisconnected))
+		else if (s == EStopping)// && (clientStatus.controlStatus == EConnected || clientStatus.controlStatus == EDisconnected))
 			clientStatus.controlStatus = s;
 		else if (s == EStopped && clientStatus.controlStatus == EStopping)
 			clientStatus.controlStatus = s;

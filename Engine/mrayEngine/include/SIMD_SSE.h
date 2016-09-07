@@ -13,7 +13,7 @@
 
 #ifndef ___SIMD_SSE___
 #define ___SIMD_SSE___
-
+#if 0
 #include "SIMD_Default.h"
 
 namespace mray{
@@ -81,3 +81,4 @@ public:
 
 
 #endif //___SIMD_SSE___
+#endif

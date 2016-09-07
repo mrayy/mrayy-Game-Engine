@@ -2,6 +2,7 @@
 #include "CPNGLoader.h"
 #include "IFileSystem.h"
 #include <libpng/png.h>
+#include <libpng/pngstruct.h>
 #include "ILogManager.h"
 #include "TextureResourceManager.h"
 #include "StringConverter.h"
@@ -46,7 +47,7 @@ CPNGLoader::CPNGLoader(){
 static void png_cpexcept_error(png_structp png_ptr, png_const_charp msg)
 {
 	gLogManager.log(mT("PNG FATAL ERROR"),core::StringConverter::toString(msg),ELL_WARNING);
-	longjmp(png_ptr->jmpbuf, 1);
+	//longjmp(png_ptr->jmpbuf, 1);
 }
 // PNG function for file reading
 void PNGAPI user_read_data_fcn(png_structp png_ptr, png_bytep data, png_size_t length)
@@ -134,7 +135,7 @@ bool CPNGLoader::load(OS::IStream* file,video::ImageInfo* image,video::ETextureT
 	if (BitDepth < 8)
 	{
 		if (ColorType==PNG_COLOR_TYPE_GRAY || ColorType==PNG_COLOR_TYPE_GRAY_ALPHA)
-			png_set_gray_1_2_4_to_8(png_ptr);
+			png_set_expand_gray_1_2_4_to_8(png_ptr);
 		else
 			png_set_packing(png_ptr);
 	}
