@@ -30,6 +30,7 @@
 #include "AppSrcVideoSrc.h"
 #include "CameraVideoSrc.h"
 #include "CameraStreamController.h"
+#include "capDevice.h"
 
 #include <conio.h>
 
@@ -560,6 +561,7 @@ public:
 
 		m_lastGainUpdate = gEngine.getTimer()->getSeconds() + 2000;
 		printf("Stream started.\n");
+
 
 		m_isVideoStarted = true;
 	}

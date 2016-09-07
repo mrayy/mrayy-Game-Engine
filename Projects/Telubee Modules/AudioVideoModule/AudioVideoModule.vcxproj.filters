@@ -48,6 +48,9 @@
     <ClInclude Include="OVRvisionCamGrabber.h">
       <Filter>Source Files\cams</Filter>
     </ClInclude>
+    <ClInclude Include="capDevice.h">
+      <Filter>Source Files\cams</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -72,6 +75,9 @@
       <Filter>Source Files\cams</Filter>
     </ClCompile>
     <ClCompile Include="OVRvisionCamGrabber.cpp">
+      <Filter>Source Files\cams</Filter>
+    </ClCompile>
+    <ClCompile Include="capDevice.cpp">
       <Filter>Source Files\cams</Filter>
     </ClCompile>
   </ItemGroup>

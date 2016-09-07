@@ -8,6 +8,7 @@
 
 #include "OVRvisionCamGrabber.h"
 #include "OVRVisionCam.h"
+#include "capDevice.h"
 
 namespace mray
 {
@@ -202,27 +203,234 @@ public:
 
 class EncodedCameraStreamController :public ICameraSrcController
 {
+	std::vector<int> _captureDevices;
+	capDeviceInput* _capDev;
+	core::string _GetParameter(int device,const core::string& name)
+	{
+		if (device == -1 )
+			return "";
+		long min; long max; long SteppingDelta; long currentValue = 0; long flags; long defaultValue;
+		if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Exposure))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propExposure, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Brightness))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propBrightness, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Contrast))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propContrast, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Hue))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propHue, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Saturation))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propSaturation, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Sharpness))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propSharpness, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_ColorEnable))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propColorEnable, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_WhiteBalance))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propWhiteBalance, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_BacklightCompensation))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propBacklightCompensation, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Pan))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propPan, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Tilt))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propTilt, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Roll))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propRoll, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Zoom))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propZoom, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Iris))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propIris, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Focus))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propFocus, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Gamma))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propGamma, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Gamma))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propGamma, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Gain))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propGain, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Gamma))
+		{
+			_capDev->getVideoSettingFilter(device, _capDev->propGamma, min, max, SteppingDelta, currentValue, flags, defaultValue);
+		}
+
+		return core::StringConverter::toString(currentValue);
+	}
+	void _setParam(int device,const core::string& name, const core::string& value)
+	{
+		if (device == -1 )
+			return;
+		if (_GetParameter(device,name) == value)
+			return;
+		bool isauto = (value == "auto");
+		float v = 0;
+		if (!isauto)
+			v = core::StringConverter::toFloat(value);
+
+		long flags = 0;
+		if (isauto)
+			flags = 0x1;// VideoProcAmp_Flags_Auto;
+		else flags = 0x2;// VideoProcAmp_Flags_Manual;
+
+#define setValue(param)\
+		if (isauto)\
+		_capDev->setVideoSettingFilter(device, param, v, flags, true); \
+		else\
+		_capDev->setVideoSettingFilter(device, param, v, flags);
+
+		if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Exposure))
+		{
+			setValue(_capDev->propExposure);
+		}
+		else if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Brightness))
+		{
+
+			setValue(_capDev->propBrightness);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Contrast))
+		{
+
+			setValue(_capDev->propContrast);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Hue))
+		{
+			setValue(_capDev->propHue);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Saturation))
+		{
+			setValue(_capDev->propSaturation);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Sharpness))
+		{
+			setValue(_capDev->propSharpness);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_ColorEnable))
+		{
+			setValue(_capDev->propColorEnable);
+
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_WhiteBalance))
+		{
+			setValue(_capDev->propWhiteBalance);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_BacklightCompensation))
+		{
+			setValue(_capDev->propBacklightCompensation);
+
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Pan))
+		{
+
+			setValue(_capDev->propPan);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Tilt))
+		{
+
+			setValue(_capDev->propTilt);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Roll))
+		{
+			setValue(_capDev->propRoll);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Zoom))
+		{
+			setValue(_capDev->propZoom);
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Iris))
+		{
+			setValue(_capDev->propIris);
+
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Focus))
+		{
+			setValue(_capDev->propFocus);
+
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Gain))
+		{
+			setValue(_capDev->propGain);
+
+		}
+		else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Gamma))
+		{
+			setValue(_capDev->propGamma);
+
+		}
+	}
 public:
 	TBee::TelubeeCameraConfiguration::ECameraCaptureType CaptureType;
+
 
 	EncodedCameraStreamController(TBee::TelubeeCameraConfiguration::ECameraCaptureType t)
 	{
 		CaptureType = t;
+		_capDev = new capDeviceInput();
+	}
+	virtual ~EncodedCameraStreamController()
+	{
+		delete _capDev;
+	}
+	virtual void Start()
+	{
+		for (int i = 0; i < _captureDevices.size(); ++i)
+		{
+			_capDev->setupDevice(_captureDevices[i]);
+		}
+	}
+	virtual void Stop() 
+	{
+		for (int i = 0; i < _captureDevices.size(); ++i)
+		{
+			_capDev->stopDevice(_captureDevices[i]);
+		}
 	}
 
 	video::ICustomVideoSrc* CreateVideoSrc()
 	{
-		std::vector<int> grabbers;
 		for (int i = 0; i < cams.size(); ++i)
 		{
 			if (cams[i].ifo.index>=0)
 			{
-				grabbers.push_back(cams[i].ifo.index);
+				_captureDevices.push_back(cams[i].ifo.index);
+				
 			}
 		}
 
 		video::CameraVideoSrc* src = new video::CameraVideoSrc();
-		src->SetCameraIndex(grabbers);
+		src->SetCameraIndex(_captureDevices);
 		if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureJpeg)
 		{
 			src->SetCaptureType("JPEG");
@@ -247,6 +455,19 @@ public:
 			count += (cams[i].ifo.index >= 0?1:0);
 		}
 		return count > 1; 
+	}
+	virtual void SetCameraParameterValue(const core::string& name, const core::string& value)
+	{
+		for (int i = 0; i < _captureDevices.size(); ++i)
+		{
+			_setParam(_captureDevices[i], name, value);
+			
+		}
+	}
+	virtual core::string GetCameraParameterValue(const core::string& name, int i)
+	{
+		return _GetParameter(_captureDevices[i],name);
+		
 	}
 };
 
