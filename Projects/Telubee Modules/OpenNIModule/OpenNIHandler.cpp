@@ -1,7 +1,6 @@
 
 
 #include "stdafx.h"
-#ifdef USE_OPENNI
 
 #include "OpenNIHandler.h"
 #include "OpenNIManager.h"
@@ -104,9 +103,9 @@ void OpenNIHandler::Close()
 	m_started = false;
 	if (m_threadFunc)
 		m_threadFunc->destroy = true;
+	OS::IThreadManager::getInstance().killThread(m_thread);
 	if (m_openNiCamera)
 		m_openNiCamera->Close();
-	OS::IThreadManager::getInstance().killThread(m_thread);
 //	delete m_thread;
 	m_thread = 0;
 	
@@ -161,5 +160,3 @@ bool OpenNIHandler::ConvertToImageSpace(const math::vector2d& pos, math::vector2
 
 }
 }
-
-#endif

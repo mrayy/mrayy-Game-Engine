@@ -1,7 +1,6 @@
 
 
 #include "stdafx.h"
-#ifdef USE_OPENNI
 #include "OpenNICaptureDevice.h"
 #include "ILogManager.h"
 
@@ -107,6 +106,8 @@ void OpenNICaptureDevice::Close()
 	if(!m_isOpen)
 		return;
 	m_isOpen=false;
+	m_depthStream.stop();
+	m_colorStream.stop();
 	m_depthStream.destroy();
 	m_colorStream.destroy();
 	m_userTrackerFrame.release();
@@ -131,6 +132,3 @@ bool OpenNICaptureDevice::Update()
 
 
 }
-
-
-#endif

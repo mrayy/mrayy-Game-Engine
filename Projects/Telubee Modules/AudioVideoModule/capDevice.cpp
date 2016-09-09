@@ -408,14 +408,14 @@ capDevice::~capDevice(){
 	}
 
 	//Check to see if the graph is running, if so stop it.
-	if ((pControl))
+	/*if ((pControl))
 	{
 		HR = pControl->Pause();
 		if (FAILED(HR)) if (verbose)printf("ERROR - Could not pause pControl\n");
 
 		HR = pControl->Stop();
 		if (FAILED(HR)) if (verbose)printf("ERROR - Could not stop pControl\n");
-	}
+	}*/
 
 	//Disconnect filters from capture device
 	if ((pcapDeviceInputFilter))NukeDownstream(pcapDeviceInputFilter);

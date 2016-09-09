@@ -63,10 +63,13 @@ public:
 		uint len;
 		network::NetAddress src;
 		OS::StreamReader rdr;
+		m_dataReceived = 1;
 		while (!isDone){
 			len = sizeof(buffer);
-			if (netClientReceiver->RecvFrom(buffer, &len, &src, 0) == network::UDP_SOCKET_ERROR_NONE && len > 0)
+			network::UDPClientError e= netClientReceiver->RecvFrom(buffer, &len, &src, 0);
+			if (e == network::UDP_SOCKET_ERROR_NONE && len > 0)
 			{
+				++m_dataReceived;
 				OS::CMemoryStream stream("", (byte*)buffer, len, false);
 				stream.seek(0, OS::ESeek_Set);
 				rdr.setStream(&stream);
@@ -75,17 +78,20 @@ public:
 					//read torso data
 					rdr.read(&mcWriteBuf.torso, sizeof(mcWriteBuf.torso));
 					//update torso plc
-					mc->batch_write("W", SELECT_TORSO, 0xA0, &mcWriteBuf, 0x20); 
+				//	mc->batch_write("W", SELECT_TORSO, 0xA0, &mcWriteBuf, 0x20); 
 					Sleep(1);
 				}
-				++m_dataReceived;
 				//regardless of the message, reply with the entire data buffer
-				mc->batch_read("W", SELECT_INTERLOCK, 0x0360, &mcReadBuf, 0x06);
+			//	mc->batch_read("W", SELECT_INTERLOCK, 0x0360, &mcReadBuf, 0x06);
 				Sleep(1);
 				//reply with the data buffer
 				netClientReceiver->SendTo(&src, (const char*)&mcReadBuf, sizeof(mcReadBuf));
 			}
+			else {
+				gLogManager.log("Failed to receive data!", ELL_WARNING);
+			}
 		}
+		m_dataReceived = -1;
 	}
 
 public:

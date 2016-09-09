@@ -96,8 +96,11 @@ unsigned UDPServer::recvloop(){
 
 UDPClient::UDPClient(int portnum, char *ipaddr){
 	// ソケット初期化
-	WSAStartup(MAKEWORD(2, 0), &wsaData);
-	sock = socket(AF_INET, SOCK_DGRAM, 0);
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	sock = WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP,
+		0, 0,
+		WSA_FLAG_OVERLAPPED |
+		WSA_FLAG_MULTIPOINT_C_LEAF);
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(portnum);
 	addr.sin_addr.S_un.S_addr = inet_addr(ipaddr);

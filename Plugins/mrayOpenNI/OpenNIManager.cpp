@@ -66,8 +66,14 @@ namespace mray
 		{
 			if(!m_isOpen)
 				return;
-			nite::NiTE::shutdown();
-			openni::OpenNI::shutdown();
+			try{
+
+				nite::NiTE::shutdown();
+				openni::OpenNI::shutdown();
+			}
+			catch (...)
+			{
+			}
 		}
 
 

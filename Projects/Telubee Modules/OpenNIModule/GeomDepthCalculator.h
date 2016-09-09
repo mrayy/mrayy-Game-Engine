@@ -15,8 +15,6 @@ purpose:
 #ifndef __GeomDepthCalculator__
 #define __GeomDepthCalculator__
 
-#ifdef USE_OPENNI
-
 #include <NiTE.h>
 #include "DepthFrame.h"
 
@@ -78,7 +76,5 @@ public:
 
 }
 }
-
-#endif
 
 #endif

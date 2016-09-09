@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="OpenNIModule.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="OpenNIService.cpp" />
+    <ClCompile Include="GeomDepthCalculator.cpp">
+      <Filter>OpenNI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeomDepthRect.cpp">
+      <Filter>OpenNI</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenNIHandler.cpp">
+      <Filter>OpenNI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="OpenNIModule.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="OpenNIService.h" />
+    <ClInclude Include="GeomDepthCalculator.h">
+      <Filter>OpenNI</Filter>
+    </ClInclude>
+    <ClInclude Include="GeomDepthRect.h">
+      <Filter>OpenNI</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenNIHandler.h">
+      <Filter>OpenNI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="OpenNI">
+      <UniqueIdentifier>{27fe4846-110d-43d0-b581-66fe3fe86c25}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -14,7 +14,6 @@ purpose:
 
 #ifndef __OpenNIHandler__
 #define __OpenNIHandler__
-#ifdef USE_OPENNI
 
 
 #include "OpenNICaptureDevice.h"
@@ -85,7 +84,5 @@ public:
 
 }
 }
-
-#endif
 
 #endif

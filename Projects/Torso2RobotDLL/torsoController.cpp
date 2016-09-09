@@ -19,6 +19,9 @@
 #include "plc_config.h"
 #include "Socket.h"
 
+#include "IUDPClient.h"
+#include "INetwork.h"
+
 
 #define GetCurrentDir _getcwd
 using namespace std;
@@ -32,7 +35,7 @@ bool tuningEnabled = false;
 FILE     *OutputLogFile;
 
 
-
+using namespace mray;
 
 
 void logString(const char* format, ...)
@@ -70,7 +73,7 @@ public:
 	mc_buff mcWriteBuf;
 	mc_buff mcReadBuf;
 
-	UDPClient *mPLCSender;
+	network::IUDPClient *mPLCSender;
 
 	torsoControllerImpl(torsoController* c)
 	{
@@ -143,7 +146,8 @@ torsoController::torsoController()
 	memset(&m_impl->mcWriteBuf, 0, sizeof(m_impl->mcWriteBuf)); // initializing test write data
 	memset(&m_impl->mcReadBuf, 0, sizeof(m_impl->mcReadBuf)); // initializing test read data
 
-	m_impl->mPLCSender = new UDPClient(8010, "192.168.2.1");//ip hard coded now
+	m_impl->mPLCSender = network::INetwork::getInstance().createUDPClient();//ip hard coded now
+	m_impl->mPLCSender->Open();
 
 	// create connection to Melsec PC via MC Protocol 
 	//mc = new MCClient(PLC_PORT_TCP_TORSO, MELSEC_PLC);
@@ -300,7 +304,11 @@ bool torsoController::softCurrentSense(){
 
 	motorCurrent[0] = texArt_ncord->Terminal[0].AD_Value[4] * 0.000415;
 	motorCurrent[1] = texArt_ncord->Terminal[0].AD_Value[5] * 0.000415;
+#ifdef J3Enabled
 	motorCurrent[2] = texArt_ncord->Terminal[0].AD_Value[6] * 0.000415;
+#else 
+	motorCurrent[2]=0;
+#endif
 	motorCurrent[3] = (texArt_ncord->Terminal[1].AD_Value[4] - 0x8000)*0.000424;
 	motorCurrent[4] = (texArt_ncord->Terminal[1].AD_Value[5] - 0x8000)*0.000424;
 	motorCurrent[5] = (texArt_ncord->Terminal[1].AD_Value[6] - 0x8000)*0.000424;
@@ -310,7 +318,11 @@ bool torsoController::softCurrentSense(){
 
 	jointTorque[0] = 37.7*motorCurrent[0] * 60 / 1000;
 	jointTorque[1] = 37.7*motorCurrent[1] * 60 / 1000;
+#ifdef J3Enabled
 	jointTorque[2] = 37.7*motorCurrent[2] * 1 / 2000;
+#else
+	jointTorque[2] = 0;
+#endif
 	jointTorque[3] = 24.1*motorCurrent[3] * 55 / 2000;
 	jointTorque[4] = 24.1*motorCurrent[4] * 50 / 1000;
 	jointTorque[5] = 24.1*motorCurrent[5] * 21 / 1000;
@@ -367,10 +379,27 @@ bool torsoController::writeRobotData(){
 	const char TORSO_DATA = 5;
 	buffer[0] = TORSO_DATA;
 	memcpy(&buffer + 1, &m_impl->mcWriteBuf.torso, sizeof(m_impl->mcWriteBuf.torso));
-	m_impl->mPLCSender->send(buffer,sizeof(buffer));
+	int len = 1 + sizeof(m_impl->mcWriteBuf.torso);
 
+	network::NetAddress toAddr;
+	toAddr.setIP("192.168.2.1");
+	toAddr.port = 8010;
+	uint outlen = 0;;
+	network::UDPClientError err= m_impl->mPLCSender->SendTo(&toAddr, buffer, len,&outlen);
+	if (err != network::UDP_SOCKET_ERROR_NONE)
+	{
+		logString("Failed to send\n");
+	}
+	
+	uint inLen = sizeof(m_impl->mcReadBuf);
 	//now wait for reply message
-	m_impl->mPLCSender->receive(&m_impl->mcReadBuf, sizeof(m_impl->mcReadBuf));
+	if (m_impl->mPLCSender->RecvFrom((char*)&m_impl->mcReadBuf, &inLen,0,0)<0)
+	{
+		if (ret < 0){
+			int err = WSAGetLastError();
+			logString("Failed to receive: %d\n", err);
+		}
+	}
 
 	// Write TORSO Data to PLC
 	//mc->batch_write("W", SELECT_TORSO, 0xA0, &mcWriteBuf, 0x20); Sleep(1);
@@ -534,8 +563,8 @@ DWORD torsoController::timerThread2(torsoController *robot, LPVOID pdata){
 		if (threadStart){
 			robot->writeRobotData(); 
 
-			//logString("current: %4.2f, %4.2f, %4.2f, %4.2f, %4.2f, %4.2f \r\n",
-			//	robot->motorCurrent[0], robot->motorCurrent[1], robot->motorCurrent[2], robot->motorCurrent[3], robot->motorCurrent[4], robot->motorCurrent[5]);
+// 			printf("current: %4.2f, %4.2f, %4.2f, %4.2f, %4.2f, %4.2f \r\n",
+// 				robot->motorCurrent[0], robot->motorCurrent[1], robot->motorCurrent[2], robot->motorCurrent[3], robot->motorCurrent[4], robot->motorCurrent[5]);
 
 			Sleep(50);
 		}
@@ -780,8 +809,10 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	while (0
 		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], timespan, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], timespan, Time_start, MothorCLK.Elapsed())
+#ifdef J3Enabled
 		+ ServoMotor[2].GoDeadEndPosition(-0.02*GearRatio_J[2], 0.0001*GearRatio_J[2], 0.2, ServoMotor[2].ReadDeadendAngularDisplacement_n(),
 		Time_start, MothorCLK.Elapsed())
+#endif
 		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], timespan, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], timespan, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], timespan, Time_start, MothorCLK.Elapsed())
@@ -828,7 +859,11 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]); //-3.0/180.0
 	AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 0.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]); //20.0/180.0
+#ifdef J3Enabled
 	AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);			
+#else 
+	AngularDisplacement_goal_M[2] = 0;
+#endif
 	AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 	AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
 	AngularDisplacement_goal_M[5] = CalcMotorDisplacement(&(ServoMotor[5]), 0.0 / 180.0*PI, LimitDisplacement_p_J[5], LimitDisplacement_n_J[5]);
@@ -843,7 +878,9 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	while (0
 		+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], timespan, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], timespan, Time_start, MothorCLK.Elapsed())
+#ifdef J3Enabled
 		+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], timespan, Time_start, MothorCLK.Elapsed())
+#endif
 		+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], timespan, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], timespan, Time_start, MothorCLK.Elapsed())
 		+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], timespan, Time_start, MothorCLK.Elapsed())
@@ -1141,7 +1178,9 @@ int torsoController::controlStateMachine(){
 
 			ServoMotor[0].Fix2(AngularDisplacement_goal_M[0]);
 			ServoMotor[1].Fix2(AngularDisplacement_goal_M[1]);
+#ifdef J3Enabled
 			ServoMotor[2].Fix2(AngularDisplacement_goal_M[2]);
+#endif
 			ServoMotor[3].Fix2(AngularDisplacement_goal_M[3]);
 			ServoMotor[4].Fix2(AngularDisplacement_goal_M[4]);
 			ServoMotor[5].Fix2(AngularDisplacement_goal_M[5]);
@@ -1211,7 +1250,9 @@ int torsoController::controlStateMachine(){
 			while (0
 				+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 2.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 2.0, Time_start, MothorCLK.Elapsed())
+#ifdef J3Enabled
 				+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 2.0, Time_start, MothorCLK.Elapsed())
+#endif
 				+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 2.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 2.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 2.0, Time_start, MothorCLK.Elapsed())
@@ -1236,7 +1277,11 @@ int torsoController::controlStateMachine(){
 			//Realtime data verify overshoot
 			DesiredCoordinate_Head[0] = torsoHeadPos[0];     // X-coordinate of point Glabella.	 Start at 0.0 [m]
 			DesiredCoordinate_Head[1] = torsoHeadPos[1];	 // Y-coordinate of point Glabella.  Start at 0.0[m]
-			DesiredCoordinate_Head[2] = torsoHeadPos[2];	 // Z-coordinate of point Glabella.  Start at 0.655 [m]
+#ifdef J3Enabled
+			DesiredCoordinate_Head[2] = torsoHeadPos[2];	 // Z-coordinate of point Glabella.  Start at 0.655 [m]		
+#else 
+			DesiredCoordinate_Head[2] = 0;
+#endif
 			DesiredCoordinate_Head[3] = torsoHeadOri[0];     // Roll  of head.					 Start at 0.0 [rad]
 			DesiredCoordinate_Head[4] = torsoHeadOri[1];     // Pitch  of head.					 Start at 0.0 [rad]
 			DesiredCoordinate_Head[5] = torsoHeadOri[2];     // Yaw  of head.					 Start at 0.0 [rad]		
@@ -1294,7 +1339,11 @@ int torsoController::controlStateMachine(){
 
 			AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
 			AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 0.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
+#ifdef J3Enabled
 			AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.00, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
+#else 
+			AngularDisplacement_goal_M[2] = 0;
+#endif
 			AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 			AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
 			AngularDisplacement_goal_M[5] = CalcMotorDisplacement(&(ServoMotor[5]), 0.0 / 180.0*PI, LimitDisplacement_p_J[5], LimitDisplacement_n_J[5]);
@@ -1306,7 +1355,9 @@ int torsoController::controlStateMachine(){
 			while (0
 				+ ServoMotor[0].GoNextPositionOnTime2(AngularDisplacement_start_M[0], AngularDisplacement_goal_M[0], 3.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[1].GoNextPositionOnTime2(AngularDisplacement_start_M[1], AngularDisplacement_goal_M[1], 3.0, Time_start, MothorCLK.Elapsed())
+#ifdef J3Enabled
 				+ ServoMotor[2].GoNextPositionOnTime2(AngularDisplacement_start_M[2], AngularDisplacement_goal_M[2], 3.0, Time_start, MothorCLK.Elapsed())
+#endif
 				+ ServoMotor[3].GoNextPositionOnTime2(AngularDisplacement_start_M[3], AngularDisplacement_goal_M[3], 3.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[4].GoNextPositionOnTime2(AngularDisplacement_start_M[4], AngularDisplacement_goal_M[4], 3.0, Time_start, MothorCLK.Elapsed())
 				+ ServoMotor[5].GoNextPositionOnTime2(AngularDisplacement_start_M[5], AngularDisplacement_goal_M[5], 3.0, Time_start, MothorCLK.Elapsed())

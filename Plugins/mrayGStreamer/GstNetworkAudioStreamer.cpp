@@ -67,7 +67,7 @@ public:
 			"! audioconvert ! volume volume=2 ! audioresample ! ";
 		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
 
-		audioStr += "opusenc complexity=10 bitrate-type=vbr frame-size=5 ! rtpopuspay  ";
+		audioStr += "opusenc complexity=5 bitrate-type=vbr frame-size=5 ! rtpopuspay  ";
 #elif defined VORBIS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
 		core::string audioStr = "directsoundsrc buffer-time=200 ";

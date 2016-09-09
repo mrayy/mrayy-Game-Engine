@@ -456,7 +456,6 @@ public:
 		printf("Finished streams\n");
 
 
-		m_streamers->GetStream("Video")->CreateStream();
 		/*if (m_streamAudio)
 			m_streamers->GetStream("Audio")->CreateStream();*/
 
@@ -523,7 +522,6 @@ public:
 // 		m_cameraTextures[1].Set(0, 0);
 
 		StopStream();
-		m_streamers->CloseAll();
 
 		m_context->RemoveListener(this);
 		m_streamers->ClearStreams(true);
@@ -548,6 +546,7 @@ public:
 		printf("Starting Stream at :%dx%d@%d\n", m_resolution.x, m_resolution.y, m_fps);
 		//  Begin the video stream
 
+		m_streamers->GetStream("Video")->CreateStream();
 		//if (m_cameraType == ECameraType::PointGrey)
 		{
 			//Pointgrey cameras need to be started manually
@@ -598,6 +597,7 @@ public:
 		gLogManager.log("Stopping AVStreamService.",ELL_INFO);
 
 		m_streamers->Stop();
+		m_streamers->CloseAll();
 		Sleep(1000);
 
 		gLogManager.log("Stopping Cameras.", ELL_INFO);
