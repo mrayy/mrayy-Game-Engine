@@ -30,7 +30,6 @@ class GstNetworkMultipleVideoPlayerImpl :public GstPipelineHandler,IPipelineList
 {
 	GstNetworkMultipleVideoPlayer* m_owner;
 	core::string m_ipAddr;
-	uint m_clockPort;
 	uint m_baseVideoSrc;
 	int m_playersCount;
 
@@ -63,7 +62,6 @@ public:
 	{
 		m_owner = o;
 		m_ipAddr = "127.0.0.1";
-		m_clockPort = 5010;
 		m_videoRtcpSrc = 0;
 		m_videoRtcpSink = 0;
 		m_playersCount = 0;
@@ -212,12 +210,11 @@ public:
 		}
 	}
 
-	void SetIPAddress(const std::string& ip, uint videoPort, int count,uint clockPort, bool rtcp)
+	void SetIPAddress(const std::string& ip, uint videoPort, int count, bool rtcp)
 	{
 		m_playersCount = count;
 		m_ipAddr = ip;
 		m_baseVideoSrc= videoPort;
-		m_clockPort = clockPort;
 		m_rtcp = rtcp;
 
 		m_videoHandler.resize(m_playersCount);
@@ -323,7 +320,7 @@ public:
 
 		}
 
-		return CreatePipeline(false,m_ipAddr,m_clockPort);
+		return CreatePipeline();
 
 	}
 
@@ -430,9 +427,9 @@ GstNetworkMultipleVideoPlayer::~GstNetworkMultipleVideoPlayer()
 {
 	delete m_impl;
 }
-void GstNetworkMultipleVideoPlayer::SetIPAddress(const std::string& ip, uint videoPort, uint count, uint clockPort, bool rtcp)
+void GstNetworkMultipleVideoPlayer::SetIPAddress(const std::string& ip, uint videoPort, uint count, bool rtcp)
 {
-	m_impl->SetIPAddress(ip, videoPort,count, clockPort,rtcp);
+	m_impl->SetIPAddress(ip, videoPort,count,rtcp);
 }
 bool GstNetworkMultipleVideoPlayer::CreateStream()
 {

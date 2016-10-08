@@ -13,6 +13,7 @@ void OnExit()
 {
 	if (s_loader)
 	{
+		gLogManager.log("Exiting Service", ELL_INFO);
 		delete s_loader;
 		s_loader = 0;
 	}

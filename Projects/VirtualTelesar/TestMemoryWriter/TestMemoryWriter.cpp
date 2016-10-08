@@ -61,27 +61,27 @@ void ProcessKey(char c,float dt)
 	if((index=findIndex(leftPosMap,c,7))!=-1)
 	{
 		v=(m_agent->data->joints.rt_arm.left[index]+=da);
-		m_agent->data->joints.kin_arm.left[index]=v;
+		//m_agent->data->joints.kin_arm.left[index]=v;
 	}else if((index=findIndex(leftNegMap,c,7))!=-1)
 	{
 		v=(m_agent->data->joints.rt_arm.left[index]-=da);
-		m_agent->data->joints.kin_arm.left[index]=v;
+		//m_agent->data->joints.kin_arm.left[index]=v;
 	}else if((index=findIndex(rightPosMap,c,7))!=-1)
 	{
 		v=(m_agent->data->joints.rt_arm.right[index]+=da);
-		m_agent->data->joints.kin_arm.right[index]=v;
+		//m_agent->data->joints.kin_arm.right[index]=v;
 	}else if((index=findIndex(rightNegMap,c,7))!=-1)
 	{
 		v=(m_agent->data->joints.rt_arm.right[index]-=da);
-		m_agent->data->joints.kin_arm.right[index]=v;
+		//m_agent->data->joints.kin_arm.right[index]=v;
 	}else if((index=findIndex(BodyPosMap,c,9))!=-1)
 	{
 		v=(m_agent->data->joints.rt_body[index]+=da);
-		m_agent->data->joints.kin_body[index]=v;
+		//m_agent->data->joints.kin_body[index]=v;
 	}else if((index=findIndex(BodyNegMap,c,9))!=-1)
 	{
 		v=(m_agent->data->joints.rt_body[index]-=da);
-		m_agent->data->joints.kin_body[index]=v;
+		//m_agent->data->joints.kin_body[index]=v;
 	}
 	printf("%f\n",v);
 }

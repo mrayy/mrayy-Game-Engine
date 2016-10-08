@@ -161,14 +161,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;OpenNIModule_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Plugins\mrayOpenNI;$(NITE2_INCLUDE64);$(OPENNI2_INCLUDE64);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\DepthCompressor;..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Plugins\mrayOpenNI;$(NITE2_INCLUDE64);$(OPENNI2_INCLUDE64);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ws2_32.lib;mrayEngine.lib;TelubeeLib.lib;mrayNet.lib;mrayOpenNI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;mrayEngine.lib;TelubeeLib.lib;mrayNet.lib;mrayOpenNI.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86_64)\lib;..\..\..\lib\$(Configuration)64;..\..\..\Dependencies\lib\$(Configuration)64;</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -177,6 +177,9 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DepthCompressor\ofxCompress.h" />
+    <ClInclude Include="DepthCompressor\ofxDepthCompressedFrame.h" />
+    <ClInclude Include="DepthCompressor\ofxDepthStreamCompression.h" />
     <ClInclude Include="GeomDepthCalculator.h" />
     <ClInclude Include="GeomDepthRect.h" />
     <ClInclude Include="OpenNIHandler.h" />
@@ -186,6 +189,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DepthCompressor\ofxDepthCompressedFrame.cpp" />
+    <ClCompile Include="DepthCompressor\ofxDepthStreamCompression.cpp" />
     <ClCompile Include="GeomDepthCalculator.cpp" />
     <ClCompile Include="GeomDepthRect.cpp" />
     <ClCompile Include="OpenNIHandler.cpp" />

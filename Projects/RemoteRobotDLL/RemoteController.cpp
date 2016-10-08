@@ -232,7 +232,8 @@ public:
 
 			//now copy this status to local memory
 			robotMutex.lock();
-			memcpy(&robotStatus, &st, sizeof(st));
+			robotStatus.status = st.status;
+			robotStatus.jointValues = st.jointValues;
 			ChangeState(robotStatus.status);
 			robotMutex.unlock();
 			if (st.status == ERobotControllerStatus::EStopped) //the robot has been totally disconnected

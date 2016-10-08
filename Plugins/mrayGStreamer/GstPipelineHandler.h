@@ -41,7 +41,7 @@ public:
 	virtual ~GstPipelineHandler();
 
 	//set isMasterClock to true if 
-	virtual bool CreatePipeline(bool isMasterClock,const std::string& clockIP="",uint clockPort=7010);
+	virtual bool CreatePipeline();
 	virtual void SetPaused(bool p);
 	virtual void Stop();
 	virtual bool IsLoaded();
@@ -54,6 +54,9 @@ public:
 
 	virtual void SetClockBaseTime(ulong baseTime);
 	virtual ulong GetClockBaseTime();
+
+	void SetClockAddr(const core::string& host, int port);
+	int GetClockPort();
 
 	void SetPipeline(GstElement* p);
 	GstElement* GetPipeline();

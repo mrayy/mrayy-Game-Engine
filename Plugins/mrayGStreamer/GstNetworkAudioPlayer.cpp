@@ -27,7 +27,6 @@ class GstNetworkAudioPlayerImpl :public GstPipelineHandler
 {
 	core::string m_ipAddr;
 	uint m_audioPort;
-	uint m_clockPort;
 
 	core::string m_pipeLineString;
 
@@ -40,14 +39,12 @@ class GstNetworkAudioPlayerImpl :public GstPipelineHandler
 	bool m_customAudioInterface;
 	GstAppSink* m_audioSink;
 	AudioAppSinkHandler m_audioHandler;
-
 public:
 	GstNetworkAudioPlayerImpl()
 	{
 		m_ipAddr = "127.0.0.1";
 		m_audioPort = 5005;
 		m_audioSrc = 0;
-		m_clockPort = 5010;
 		m_audioRtcpSrc = 0;
 		m_audioRtcpSink = 0;
 		m_sampleRate = 32000;
@@ -131,11 +128,10 @@ public:
 
 	}
 
-	void SetIPAddress(const std::string& ip, uint audioPort,uint clockPort, bool rtcp)
+	void SetIPAddress(const std::string& ip, uint audioPort, bool rtcp)
 	{
 		m_ipAddr = ip;
 		m_audioPort = audioPort;
-		m_clockPort = clockPort;
 		m_rtcp = rtcp;
 
 		//set src and sinks elements
@@ -189,7 +185,7 @@ public:
 		}
 
 		gLogManager.log("NetworkAudioPlayer:CreateStream() - Pipeline created", ELL_INFO);
-		return CreatePipeline(false,m_ipAddr,m_clockPort);
+		return CreatePipeline();
 
 	}
 
@@ -271,9 +267,9 @@ GstNetworkAudioPlayer::~GstNetworkAudioPlayer()
 {
 	delete m_impl;
 }
-void GstNetworkAudioPlayer::SetIPAddress(const std::string& ip, uint audioPort,uint clockPort,bool rtcp)
+void GstNetworkAudioPlayer::SetIPAddress(const std::string& ip, uint audioPort, bool rtcp)
 {
-	m_impl->SetIPAddress(ip, audioPort, clockPort, rtcp);
+	m_impl->SetIPAddress(ip, audioPort, rtcp);
 }
 bool GstNetworkAudioPlayer::CreateStream()
 {

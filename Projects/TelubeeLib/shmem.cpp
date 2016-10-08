@@ -135,7 +135,7 @@ int shmem::openWrite(void){
 	}
 
 	data = pMap;
- 	memset(data, 0, size);
+ 	//memset(data, 0, size);
 
 	return 1; 
 

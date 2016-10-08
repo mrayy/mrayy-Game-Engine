@@ -38,7 +38,7 @@ std::string ICustomVideoSrc::BuildStringH264()
 	// 			videoStr += " ! videoconvert ! autovideosink sync=false ";
 	// 			return videoStr;
 
-	videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / GetVideoSrcCount()) + " ";
+	videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / GetStreamsCount()) + " ";
 
 	/*
 	" speed-preset=superfast  tune=zerolatency pass=cbr sliced-threads=true"//" key-int-max=5"
@@ -62,7 +62,7 @@ std::string ICustomVideoSrc::BuildStringVP8()
 {
 	std::string videoStr="";
 
-	videoStr += "! vp8enc  target-bitrate=" + core::StringConverter::toString((1000 * m_bitRate) / GetVideoSrcCount()) + " ";
+	videoStr += "! vp8enc  target-bitrate=" + core::StringConverter::toString((1000 * m_bitRate) / GetStreamsCount()) + " ";
 
 	//fill in parameters
 	std::map<std::string, std::string>::iterator it = m_encoderParams.begin();
@@ -92,6 +92,10 @@ void ICustomVideoSrc::LoadParameters(xml::XMLElement* elem)
 	{
 		SetEncoderType(attr->value);
 	}
+	attr = elem->getAttribute("SeparateStreams");
+	if (attr)
+		SetSeparateStreams(core::StringConverter::toBool(attr->value));
+
 	e = elem->getSubElement("Param");
 	while (e)
 	{

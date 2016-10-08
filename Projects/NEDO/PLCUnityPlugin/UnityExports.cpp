@@ -140,3 +140,54 @@ extern "C" EXPORT_API unsigned short PLCGetXyrisUShort(PLCHandler* driver, EXyri
 	}
 	return 0;
 }
+
+
+
+extern "C" EXPORT_API void PLCSetYbmUInt(PLCHandler* driver, EYbmDataField data, unsigned int v)
+{
+	if (driver)
+	{
+		 driver->SetYbmDataUInt(data,v);
+	}
+}
+extern "C" EXPORT_API void PLCSetYbmUShort(PLCHandler* driver, EYbmDataField data, unsigned short v)
+{
+	if (driver)
+	{
+		driver->SetYbmDataUShort(data, v);
+	}
+}
+extern "C" EXPORT_API unsigned int PLCGetYbmUInt(PLCHandler* driver, EYbmDataField data)
+{
+	if (driver)
+	{
+		return driver->GetYbmUInt(data);
+	}
+	return 0;
+}
+extern "C" EXPORT_API unsigned short PLCGetYbmUShort(PLCHandler* driver, EYbmDataField data)
+{
+	if (driver)
+	{
+		return driver->GetYbmUShort(data);
+	}
+	return 0;
+}
+extern "C" EXPORT_API unsigned short PLCGetCommonUShort(PLCHandler* driver, ECommonDataField data)
+{
+
+	if (driver)
+	{
+		return driver->GetCommonFieldUShort(data);
+	}
+	return 0;
+}
+extern "C" EXPORT_API short PLCGetCommonShort(PLCHandler* driver, ECommonDataField data)
+{
+
+	if (driver)
+	{
+		return driver->GetCommonFieldShort(data);
+	}
+	return 0;
+}

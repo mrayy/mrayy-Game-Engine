@@ -177,7 +177,7 @@ public:
 		gst_app_sink_set_callbacks(GST_APP_SINK(m_videoSink), &gstCallbacks, &m_videoHandler, NULL);
 
 
-		return CreatePipeline(true);
+		return CreatePipeline();
 
 	}
 

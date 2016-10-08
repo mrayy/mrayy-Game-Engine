@@ -240,7 +240,14 @@ namespace video
 			return videoStr;
 		}
 
-
+		void Close()
+		{
+			for (int i = 0; i < m_videoSrc.size(); ++i)
+			{
+				if (m_videoSrc[i].videoSrc)
+					gst_element_send_event(GST_ELEMENT(m_videoSrc[i].videoSrc), gst_event_new_eos());
+			}
+		}
 	};
 
 AppSrcVideoSrc::AppSrcVideoSrc()

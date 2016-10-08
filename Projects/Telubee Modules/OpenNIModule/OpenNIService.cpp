@@ -15,6 +15,7 @@
 #include "OpenNIHandler.h"
 #include "GeomDepthRect.h"
 #include "OpenNIManager.h"
+#include "ofxDepthStreamCompression.h"
 
 namespace mray
 {
@@ -31,7 +32,7 @@ class OpenNIServiceImpl :public IServiceContextListener
 {
 public:
 
-
+	ofxDepthStreamCompression m_compressor;
 
 	EServiceStatus m_status;
 
@@ -42,6 +43,9 @@ public:
 	GeomDepthRect m_depthRect;
 	OpenNIManager *m_openNIMngr;
 	bool m_depthSend;
+
+	int _dataSize,_compSize;
+
 
 public:
 	OpenNIServiceImpl()
@@ -82,12 +86,15 @@ public:
 
 	void StartService()
 	{
-		m_openNi->Start(320, 240);
+		m_openNi->Start(320,240);
+		m_compressor.setup(320, 240);
+		m_status = EServiceStatus::Running;
 	}
 
 	bool StopService()
 	{
 		m_openNi->Close();
+		m_status = EServiceStatus::Stopped;
 		return true;
 	}
 	void Destroy()
@@ -113,6 +120,20 @@ public:
 
 		if (m_status != EServiceStatus::Running)
 			return;
+		
+
+		auto d = m_openNi->GetNormalCalculator().GetDepthFrame();
+		if (d->GetSize().x ==0)
+			return;
+
+		auto frame = m_compressor.newFrame(d, 1, 1);
+		auto c = frame->compressedData();
+
+		_compSize= c.size();
+		_dataSize = d->GetRawDataLength(); 
+
+		ofxDepthCompressedFrame f;
+		f.fromCompressedData((char*)&c[0], c.size()*sizeof(short));
 	}
 
 
@@ -124,6 +145,11 @@ public:
 
 		if (m_status != EServiceStatus::Running)
 			return;
+
+		msg = "Compression: " + core::StringConverter::toString(_compSize);
+		msg += "/" + core::StringConverter::toString(_dataSize);
+		msg += " Ratio: " + core::StringConverter::toString((int)(_compSize * 100.0 / (float)_dataSize)) + "%";
+		context->RenderText(msg, 0, 0);
 	}
 	void Render(ServiceRenderContext* context)
 	{

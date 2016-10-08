@@ -53,6 +53,8 @@ public:
 
 	virtual void SetClockBase(ulong c);
 	virtual ulong GetClockBase();
+	virtual void SetClockAddr(const core::string& host, int port);
+	virtual int GetClockPort();
 
 	virtual int GetPort(int i) = 0;
 };

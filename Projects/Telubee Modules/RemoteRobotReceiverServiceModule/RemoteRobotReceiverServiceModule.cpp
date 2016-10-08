@@ -116,6 +116,7 @@ public:
 	}
 	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
 	{
+		
 	}
 };
 

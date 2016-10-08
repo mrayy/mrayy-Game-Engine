@@ -25,6 +25,10 @@ public:
 	virtual ~AppSrcVideoSrc();
 	
 
+	void SetSeparateStreams(bool separate){}
+	bool IsSeparateStreams(){
+		return true;
+	}
 	void  SetResolution(int width, int height, int fps, bool free);
 	
 	std::string GetPipelineStr(int i);

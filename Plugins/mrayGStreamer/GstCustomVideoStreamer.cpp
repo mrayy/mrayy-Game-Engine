@@ -28,7 +28,6 @@ protected:
 
 	core::string m_ipAddr;
 	uint m_videoPort;
-	uint m_clockPort;
 
 	IVideoGrabber* m_grabber[2];
 	int m_bitRate;
@@ -62,7 +61,6 @@ public:
 		m_owner = owner;
 		m_ipAddr = "127.0.0.1";
 		m_videoPort = 5000;
-		m_clockPort = 5010;
 
 		m_bitRate = 5000;
 		m_grabber[0] = m_grabber[1] = 0;
@@ -405,14 +403,13 @@ public:
 
 	}
 
-	void BindPorts(const std::string& addr, int videoPort, uint clockPort, bool rtcp)
+	void BindPorts(const std::string& addr, int videoPort, bool rtcp)
 	{
 		if (m_ipAddr == addr && m_videoPort == videoPort && m_rtcp == rtcp)
 			return;
 		m_ipAddr = addr;
 		m_videoPort = videoPort;
 		m_rtcp = rtcp;
-		m_clockPort = clockPort;
 
 		_UpdatePorts();
 	}
@@ -431,7 +428,7 @@ public:
 		SetPipeline(pipeline);
 		_UpdatePorts();
 
-		return CreatePipeline(true,"",m_clockPort);
+		return CreatePipeline();
 
 	}
 	void Stream()
@@ -473,9 +470,9 @@ void GstCustomVideoStreamer::Stop()
 }
 
 
-void GstCustomVideoStreamer::BindPorts(const std::string& addr, uint* videoPort, uint count, uint clockPort, bool rtcp)
+void GstCustomVideoStreamer::BindPorts(const std::string& addr, uint* videoPort, uint count, bool rtcp)
 {
-	m_impl->BindPorts(addr, videoPort[0], clockPort, rtcp);
+	m_impl->BindPorts(addr, videoPort[0], rtcp);
 }
 
 bool GstCustomVideoStreamer::CreateStream()

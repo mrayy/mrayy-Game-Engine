@@ -25,7 +25,6 @@ class GstNetworkAudioStreamerImpl :public GstPipelineHandler
 protected:
 	core::string m_ipAddr;
 	uint m_audioPort;
-	uint m_clockPort;
 
 	core::string m_pipeLineString;
 	GstMyUDPSink* m_audioSink;
@@ -41,7 +40,6 @@ public:
 		m_audioRtcpSrc = 0;
 		m_ipAddr = "127.0.0.1";
 		m_audioPort = 5005;
-		m_clockPort = 5010;
 		m_rtcp = false;
 	}
 	virtual ~GstNetworkAudioStreamerImpl()
@@ -131,11 +129,10 @@ public:
 
 	// addr: target address to stream video to
 	// audioport: port for the audio stream , audio rtcp is allocated as audioPort+1 and audioPort+2
-	void BindPorts(const std::string& addr, uint audioPort, uint clockPort, bool rtcp)
+	void BindPorts(const std::string& addr, uint audioPort, bool rtcp)
 	{
 		m_ipAddr = addr;
 		m_audioPort = audioPort;
-		m_clockPort = clockPort;
 		m_rtcp = rtcp;
 		_UpdatePorts();
 	}
@@ -156,7 +153,7 @@ public:
 		SetPipeline(p);
 		_UpdatePorts();
 
-		return CreatePipeline(true, "", m_clockPort);
+		return CreatePipeline();
 
 	}
 	void Stream()
@@ -206,9 +203,9 @@ void GstNetworkAudioStreamer::SetAudioInterface(const AudioInterface& interfaces
 	m_impl->SetAudioInterface(interfaces);
 }
 
-void GstNetworkAudioStreamer::BindPorts(const std::string& addr, uint* ports, uint count, uint clockPort, bool rtcp)
+void GstNetworkAudioStreamer::BindPorts(const std::string& addr, uint* ports, uint count, bool rtcp)
 {
-	m_impl->BindPorts(addr, ports[0], clockPort, rtcp);
+	m_impl->BindPorts(addr, ports[0], rtcp);
 }
 
 bool GstNetworkAudioStreamer::CreateStream()

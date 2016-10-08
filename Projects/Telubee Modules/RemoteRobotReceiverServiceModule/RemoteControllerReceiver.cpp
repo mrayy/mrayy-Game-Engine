@@ -84,8 +84,8 @@ public:
 	RemoteControllerReceiver* _c;
 
 
-	ClientStatusData clientStatus;
-	RemoteRobotStatus robotStatus;
+	ClientStatusData _clientStatus;
+	RemoteRobotStatus _robotStatus;
 	
 	network::NetAddress clientAddress;
 
@@ -120,9 +120,9 @@ public:
 		robotMutex = OS::IThreadManager::getInstance().createMutex();
 		clientMutex = OS::IThreadManager::getInstance().createMutex();
 
-		robotStatus.status = ERobotControllerStatus::EStopped;
+		_robotStatus.status = ERobotControllerStatus::EStopped;
 
-		clientStatus.ipAddress = network::NetAddress::AnyAddr;
+		_clientStatus.ipAddress = network::NetAddress::AnyAddr;
 
 
 	}
@@ -178,12 +178,14 @@ public:
 	{
 	//	_c->_processData();
 
-		if (clientStatus.ipAddress.address == network::NetAddress::AnyAddr.address)
+		if (_clientStatus.ipAddress.address == network::NetAddress::AnyAddr.address)
 			return;
 		wrtr.writeByte((byte)MSG_RobotStatus);
 		RemoteRobotStatus st;
 		robotMutex->lock();
-		st = robotStatus;
+		m_robotController->GetJointValues(_robotStatus.jointValues);
+		//st = _robotStatus;
+		st.status = m_robotController->GetRobotStatus();
 		robotMutex->unlock();
 
 		wrtr.write(&st.status, sizeof(st.status));
@@ -193,7 +195,7 @@ public:
 		{
 			wrtr.binWriteFloat(st.jointValues[i]);
 		}
-		netClientSender->SendTo(&clientStatus.ipAddress, (const char*)stream.getData(), stream.getPos());
+		netClientSender->SendTo(&_clientStatus.ipAddress, (const char*)stream.getData(), stream.getPos());
 	}
 	void _Receive(OS::StreamReader& rdr,const network::NetAddress& src)
 	{
@@ -206,8 +208,8 @@ public:
 			ClientStatusData st;
 			rdr.read(&st, sizeof(st));
 			clientMutex->lock();
-			clientStatus = st;
-			clientStatus.ipAddress.address = src.address;
+			_clientStatus = st;
+			_clientStatus.ipAddress.address = src.address;
 			clientMutex->unlock();
 		}
 	}
@@ -220,41 +222,41 @@ public:
 	{
 		bool updated = true;
 		robotMutex->lock();
-		if (s==EIniting && robotStatus.status==EStopped)
-			robotStatus.status = s;
-		if (s == EDisconnected && (robotStatus.status == EIniting || robotStatus.status == EDisconnecting))
-			robotStatus.status = s;
-		else if (s == EDisconnected && robotStatus.status == EStopped)
+		if (s == EIniting && _robotStatus.status == EStopped)
+			_robotStatus.status = s;
+		if (s == EDisconnected && (_robotStatus.status == EIniting || _robotStatus.status == EDisconnecting))
+			_robotStatus.status = s;
+		else if (s == EDisconnected && _robotStatus.status == EStopped)
 		{
-			robotStatus.status = EIniting;
+			_robotStatus.status = EIniting;
 		}
-		else if (s==EConnecting && robotStatus.status==EDisconnected)
-			robotStatus.status = s;
-		else if (s == EConnecting && robotStatus.status == EStopped)
-			robotStatus.status = EIniting;
-		else if (s == EConnected && robotStatus.status == EConnecting)
-			robotStatus.status = s;
-		else if (s == EConnected && robotStatus.status == EStopped)
+		else if (s==EConnecting && _robotStatus.status==EDisconnected)
+			_robotStatus.status = s;
+		else if (s == EConnecting && _robotStatus.status == EStopped)
+			_robotStatus.status = EIniting;
+		else if (s == EConnected && _robotStatus.status == EConnecting)
+			_robotStatus.status = s;
+		else if (s == EConnected && _robotStatus.status == EStopped)
 		{
 			//do initing sequence
-			robotStatus.status = EIniting;
+			_robotStatus.status = EIniting;
 		}
-		else if (s == EConnected && robotStatus.status == EDisconnected)
+		else if (s == EConnected && _robotStatus.status == EDisconnected)
 		{
-			robotStatus.status = EConnecting;
+			_robotStatus.status = EConnecting;
 		}
-		else if (s == EDisconnecting && robotStatus.status == EConnected)
-			robotStatus.status = s;
-		else if (s == EStopping && (robotStatus.status == EConnected || robotStatus.status == EDisconnected))
-			robotStatus.status = s;
-		else if (s == EStopped && robotStatus.status == EStopping)
-			robotStatus.status = s;
+		else if (s == EDisconnecting && _robotStatus.status == EConnected)
+			_robotStatus.status = s;
+		else if (s == EStopping && (_robotStatus.status == EConnected || _robotStatus.status == EDisconnected))
+			_robotStatus.status = s;
+		else if (s == EStopped && _robotStatus.status == EStopping)
+			_robotStatus.status = s;
 		else updated = false;
 
 		robotMutex->unlock();
 		if (!updated)
 			return;
-		switch (robotStatus.status)
+		switch (_robotStatus.status)
 		{
 		case EStopped:
 			printf("Robot Stopped!\n");
@@ -284,11 +286,11 @@ public:
 
 	void _Update()
 	{
-		if (GetState() != clientStatus.controlStatus)
+		if (GetState() != _clientStatus.controlStatus)
 		{
-			ChangeState(clientStatus.controlStatus);
+			ChangeState(_clientStatus.controlStatus);
 
-			switch (robotStatus.status)
+			switch (_robotStatus.status)
 			{
 			case ERobotControllerStatus::EIniting:
 				//init the robot
@@ -324,14 +326,14 @@ public:
 	ERobotControllerStatus GetState()
 	{
 		OS::ScopedLock l(robotMutex);
-		return robotStatus.status;
+		return _robotStatus.status;
 	}
 
 	//request data is called from robot side
 	virtual void GetRobotStatus(RobotStatus& st)
 	{
 		clientMutex->lock();
-		memcpy(&st, &clientStatus.status, sizeof(st));
+		memcpy(&st, &_clientStatus.status, sizeof(st));
 		clientMutex->unlock();
 		_RobotStatus(st);
 
@@ -340,7 +342,7 @@ public:
 	{
 		if (clientMutex->tryLock())
 		{
-			memcpy(&status, &clientStatus.status, sizeof(status));
+			memcpy(&status, &_clientStatus.status, sizeof(status));
 			clientMutex->unlock();
 			return true;
 		}
@@ -373,24 +375,26 @@ public:
 		{
 			ERobotControllerStatus st = m_robotController->GetRobotStatus();
 			msg = core::string("Robot Status: ");
+			if (st == EIniting)msg += "Initing";
 			if (st == EStopped)msg += "Stopped";
+			if (st == EStopping)msg += "Stopping";
 			if (st == EDisconnected)msg += "Disconnected";
 			if (st == EConnecting)msg += "Connecting";
 			if (st == EDisconnecting)msg += "Disconnecting";
 			if (st == EConnected)msg += "Connected";
-			context->RenderText(msg, 50, 0);
+			context->RenderText(msg, 5, 0);
 		}
 		msg = core::string("User Controlling: ") + (m_robotData.connected ? "Yes" : "No");
-		context->RenderText(msg, 50, 0);
+		context->RenderText(msg, 5, 0);
 		if (m_robotData.connected )
 		{
 
 			sprintf_s(buffer, "%-2.2f, %-2.2f", m_robotData.speed[0], m_robotData.speed[1]);
 			msg = core::string("Speed: ") + buffer;
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
 			msg = core::string("Rotation: ") + core::StringConverter::toString(m_robotData.rotation, 2);
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
 			math::vector3d angles;
 			math::quaternion q(m_robotData.headRotation[0], m_robotData.headRotation[3],
@@ -399,32 +403,32 @@ public:
 			angles.set(angles.y, angles.z, angles.x);
 			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", angles.x, angles.y, angles.z);
 			msg = core::string("Head Rotation: ") + buffer;
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
 			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", m_robotData.headPos[0], m_robotData.headPos[1], m_robotData.headPos[2]);
 			msg = core::string("Head Position: ") + buffer;
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
 		}
 
 
 		{
 			msg = "Robot Started: " + m_robotController->ExecCommand(IRobotController::CMD_IsStarted, "");
-			context->RenderText(msg, 100, 0);
+			context->RenderText(msg, 10, 0);
 
 			std::vector<float> jvalues;
 
 			m_robotController->GetJointValues(jvalues);
-			context->RenderText(core::string("Robot Joint Values:"), 50, 0);
+			context->RenderText(core::string("Robot Joint Values:"), 5, 0);
 
 			msg = "";
-			context->RenderText("   \tIK\t/ Real", 100, 0);
+			context->RenderText("   \tIK\t/ Real", 10, 0);
 			for (int i = 0; i < jvalues.size(); i += 2)
 			{
 
 				sprintf_s(buffer, "\t%-2.2f\t/ %-2.2f", jvalues[i], jvalues[i + 1]);
 				msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
-				context->RenderText(msg, 100, 0);
+				context->RenderText(msg, 10, 0);
 			}
 
 		}
@@ -444,7 +448,7 @@ DWORD RemoteControllerReceiverImpl::timerThreadSend(RemoteControllerReceiverImpl
 	OS::StreamWriter wrtr(&stream);
 	while (!robot->isDone){
 		if (robot->threadStart &&
-			robot->clientStatus.ipAddress.address != network::NetAddress::AnyAddr.address){
+			robot->_clientStatus.ipAddress.address != network::NetAddress::AnyAddr.address){
 			stream.seek(0, OS::ESeek_Set);
 			robot->_Send(wrtr, stream);
 			Sleep(10);
@@ -520,17 +524,17 @@ RemoteControllerReceiver::~RemoteControllerReceiver()
 
 void RemoteControllerReceiver::_setupCaps()
 {
-}
+}/*
 ERobotControllerStatus RemoteControllerReceiver::GetRobotStatus() {
 	OS::ScopedLock a(m_impl->robotMutex);
-	return m_impl->robotStatus.status;
-}
+	return m_impl->_robotStatus.status;
+}*/
 
 /*
 bool RemoteControllerReceiver::GetJointValues(std::vector<float>& values){
 	if (m_impl->robotMutex->tryLock())
 	{
-		values = m_impl->robotStatus.jointValues;
+		values = m_impl->_robotStatus.jointValues;
 		m_impl->robotMutex->unlock();
 		return true;
 	}
@@ -583,7 +587,7 @@ void RemoteControllerReceiver::tuningMode(){
 void RemoteControllerReceiver::UpdateRobotStatus(const RobotStatus& st)
 {
 // 	m_impl->clientMutex->lock();
-// 	m_impl->clientStatus.status = st;
+// 	m_impl->_clientStatus.status = st;
 // 	m_impl->clientMutex->unlock();
 	printf("%f,%f,%f\n", st.headRotation[0], st.headRotation[1], st.headRotation[2]);
 }

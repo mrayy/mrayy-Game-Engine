@@ -126,6 +126,13 @@ enum EYbmDataField
 	testStarted
 };
 
+ enum ECommonDataField {
+	batteryCurrent,
+	battertVoltage,
+	commonUnused,
+	rssi_base,
+	rssi_robot
+};
 
 class PLCHandler
 {
@@ -167,6 +174,8 @@ public:
 	unsigned short GetYbmUShort(EYbmDataField data);
 	unsigned char GetYbmUChar(EYbmDataField data);
 
+	unsigned short GetCommonFieldUShort(ECommonDataField data);
+	short GetCommonFieldShort(ECommonDataField data);
 };
 
 

@@ -6,6 +6,7 @@
 #include "IServiceModule.h"
 #undef StartService
 
+
 namespace mray
 {
 namespace TBee

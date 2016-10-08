@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="movingAverage.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="EmptyRobotDLL.cpp" />
+    <ClCompile Include="ThreeAxisHead.cpp" />
+    <ClCompile Include="RobotController.cpp" />
+    <ClCompile Include="Tserial_event.cpp">
+      <Filter>serial</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\serial.cc">
+      <Filter>serial</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\win.cc">
+      <Filter>serial</Filter>
+    </ClCompile>
+    <ClCompile Include="serial\list_ports_win.cc">
+      <Filter>serial</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IHeadController.h" />
+    <ClInclude Include="IRobotComponent.h" />
+    <ClInclude Include="movingAverage.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="EmptyRobotDLL.h" />
+    <ClInclude Include="ThreeAxisHead.h" />
+    <ClInclude Include="RobotController.h" />
+    <ClInclude Include="Tserial_event.h">
+      <Filter>serial</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\serial.h">
+      <Filter>serial</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\win.h">
+      <Filter>serial</Filter>
+    </ClInclude>
+    <ClInclude Include="serial\v8stdint.h">
+      <Filter>serial</Filter>
+    </ClInclude>
+    <ClInclude Include="IRobotController.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="serial">
+      <UniqueIdentifier>{d022af36-f423-467b-b2a3-58e216484237}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -38,8 +38,12 @@ public:
 	virtual void LinkWithPipeline(void* pipeline) = 0;
 
 	virtual int GetVideoSrcCount(){ return 1; }
+	virtual int GetStreamsCount(){ return GetVideoSrcCount(); }
 	virtual void  SetResolution(int width, int height, int fps, bool free){ m_fps = fps; }
 	virtual void SetBitRate(int biterate){ m_bitRate = biterate; }
+
+	virtual void SetSeparateStreams(bool separate) = 0;
+	virtual bool IsSeparateStreams() = 0;
 
 	// return type of presented data:
 	// RAW: Raw Image Data
@@ -49,6 +53,7 @@ public:
 	virtual std::string GetEncoderType() { return m_encoder; }
 
 	virtual void LoadParameters(xml::XMLElement* e);
+
 
 
 	virtual void Start() {};

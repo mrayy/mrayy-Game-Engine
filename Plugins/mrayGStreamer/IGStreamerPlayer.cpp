@@ -22,11 +22,20 @@ void IGStreamerPlayer::SetClockBase(ulong c)
 
 	GetPipeline()->SetClockBaseTime(c);
 }
+void IGStreamerPlayer::SetClockAddr(const core::string& host, int port)
+{
+	GetPipeline()->SetClockAddr(host,port);
+}
 ulong IGStreamerPlayer::GetClockBase()
 {
 	return GetPipeline()->GetClockBaseTime();
 }
 
+int IGStreamerPlayer::GetClockPort()
+{
+	return GetPipeline()->GetClockPort();
+
+}
 
 }
 }

@@ -75,7 +75,6 @@ class GstNetworkVideoPlayerImpl :public GstPipelineHandler,IPipelineListener
 	GstNetworkVideoPlayer* m_owner;
 	core::string m_ipAddr;
 	uint m_videoPort;
-	uint m_clockPort;
 
 	core::string m_pipeLineString;
 
@@ -94,7 +93,6 @@ public:
 		m_owner = o;
 		m_ipAddr = "127.0.0.1";
 		m_videoPort = 5000;
-		m_clockPort = 5010;
 		m_videoSrc = 0;
 		m_videoRtcpSrc = 0;
 		m_videoRtcpSink = 0;
@@ -190,11 +188,10 @@ public:
 
 	}
 
-	void SetIPAddress(const std::string& ip, uint videoPort, uint clockPort, bool rtcp)
+	void SetIPAddress(const std::string& ip, uint videoPort, bool rtcp)
 	{
 		m_ipAddr = ip;
 		m_videoPort = videoPort;
-		m_clockPort = clockPort;
 		m_rtcp = rtcp;
 
 		//set src and sinks elements
@@ -289,7 +286,7 @@ public:
 		g_object_set(m_videoSink, "emit-signals", false, "sync", false, "async", false, (void*)NULL);
 		*/
 
-		return CreatePipeline(false,m_ipAddr,m_clockPort);
+		return CreatePipeline();
 
 	}
 
@@ -363,9 +360,9 @@ GstNetworkVideoPlayer::~GstNetworkVideoPlayer()
 {
 	delete m_impl;
 }
-void GstNetworkVideoPlayer::SetIPAddress(const std::string& ip, uint videoPort, uint clockPort, bool rtcp)
+void GstNetworkVideoPlayer::SetIPAddress(const std::string& ip, uint videoPort, bool rtcp)
 {
-	m_impl->SetIPAddress(ip, videoPort, clockPort,rtcp);
+	m_impl->SetIPAddress(ip, videoPort,rtcp);
 }
 bool GstNetworkVideoPlayer::CreateStream()
 {

@@ -15,6 +15,7 @@
 #include <direct.h>
 
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include "plc_config.h"
 #include "Socket.h"
@@ -22,6 +23,12 @@
 #include "IUDPClient.h"
 #include "INetwork.h"
 
+#define USE_TORSO_LAB
+//#define USE_TORSO_OBAYASHI
+
+#ifdef USE_TORSO_LAB
+#define J3Enabled
+#endif
 
 #define GetCurrentDir _getcwd
 using namespace std;
@@ -43,13 +50,16 @@ void logString(const char* format, ...)
 	va_list arglist;
 
 	char Buffer[512];
+	time_t t = time(0);   // get time now
+	struct tm * now = localtime(&t);
+
 
 	va_start(arglist, format);
 	vprintf(format, arglist);
 	vsprintf(Buffer, format, arglist);
 	va_end(arglist);
 	OutputLogFile = fopen("TorsoLog.txt", "a+");
-	fprintf(OutputLogFile, "Msg --> %s", Buffer);
+	fprintf(OutputLogFile, "[%d/%d/%d %d:%d:%d] Msg --> %s", now->tm_mday, now->tm_mon+1, now->tm_year + 1900, now->tm_hour, now->tm_min, now->tm_sec, Buffer);
 	printf("%s", Buffer);
 	fclose(OutputLogFile);
 }
@@ -328,11 +338,11 @@ bool torsoController::softCurrentSense(){
 	jointTorque[5] = 24.1*motorCurrent[5] * 21 / 1000;
 
 	// Current Limitations
-	if ((motorCurrent[0] > 2.0) || 
-		(motorCurrent[1] > 2.0) ||
-		(motorCurrent[2] > 2.0) ||
-		(motorCurrent[3] > 0.6) || 
-		(motorCurrent[4] > 0.6) || 
+	if ((motorCurrent[0] > 1.5) || 
+		(motorCurrent[1] > 1.5) ||
+		(motorCurrent[2] > 1.4) ||
+		(motorCurrent[3] > 0.4) || 
+		(motorCurrent[4] > 0.4) || 
 		(motorCurrent[5] > 0.6))
 		return true; 
 
@@ -711,36 +721,58 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	logString("Initialize NCord Interface: ");
 	//-----[Step2] Initialize texArt_ncord.
-	texArt_ncord = new TexART_NCord000_Interface(0);
-	ret = texArt_ncord->Initialize();
+	//try to initialize up to three times, then force shutdown
+	bool initilized = false;
+	for (int i = 0; !initilized && i < 3; ++i)
+	{
+		logString("Trial[%d]\n", i);
+		texArt_ncord = new TexART_NCord000_Interface(0);
+		ret = texArt_ncord->Initialize();
 		if (ret) {
-			logString("Initialize error = %d \n", ret);
-			motorForceShutdown();
+			logString("Initialize error = %d \n",  ret);
+			motorForceShutdown(false);
 			Sleep(100);
 		}
 		else
-			logString("done.\n");
+		{
 
-		// added by charith, clearing previous driver commands in buffer. 
-		texArt_ncord->Free();
-		Sleep(100);
+			// added by charith, clearing previous driver commands in buffer. 
+			texArt_ncord->Free();
+			Sleep(100);
 
-		// resetting all terminals
-		for (int i = 0; i<8; i++)
-			texArt_ncord->ResetTerminal(i);
+			// resetting all terminals
+			for (int i = 0; i < 8; i++)
+				texArt_ncord->ResetTerminal(i);
 
 
-	logString("Start NCord Interface: ");
-	//-----[Step3] Start the interface object texArt_ncord.
-	ret = texArt_ncord->Start();
+			logString("Start NCord Interface: ");
+			//-----[Step3] Start the interface object texArt_ncord.
+			ret = texArt_ncord->Start();
 
-	if (ret)
-	{
-		logString("TexART Driver communication error #:%d\n", ret);
-		motorForceShutdown(); // danger overriding device diagnostic
+			if (ret)
+			{
+				logString("TexART Driver communication error #:%d\n", ret);
+				motorForceShutdown(false);
+				Sleep(100);
+			}
+			else
+			{
+				initilized = true;
+				logString("TexART Driver communication ok!\n");
+			}
+		}
+			//logString("done.\n");
+
 	}
-	else
-		logString("TexART Driver communication ok!\n");
+
+	if (!initilized)
+	{
+		//motorForceShutdown(false);
+		//issue restart command
+		//ExitWindowsEx(EWX_REBOOT, SHTDN_REASON_MAJOR_SOFTWARE);
+		system("shutdown -t 0 -r");
+		exit(0);
+	}
 
 	logString("Initialize ServoMotor Control: ");
 	//-----[Step4] Initialize ServoMotor.
@@ -748,7 +780,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 		ParameterFile_M[i].open(Name_ParameterFile_M[i]);
 		if (!ParameterFile_M[i].is_open()) {
 			cout << " FileOpenError(ParameterFile_M[" << i << "])" << endl;
-			motorForceShutdown();
+			motorForceShutdown(true);
 		}
 	}
 	logString("done.\n");
@@ -785,7 +817,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	if ((isnan(AngularDisplacement_start_M[3]) || isnan(AngularDisplacement_start_M[4]) || isnan(AngularDisplacement_start_M[5]))){
 		logString("Potentiometer Read Error...");
-		motorForceShutdown();
+		motorForceShutdown(true);
 	}
 
 	AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
@@ -796,7 +828,7 @@ int torsoController::InitializeTorsoRobot(bool debug){
 
 	if ((isnan(AngularDisplacement_goal_M[3]) || isnan(AngularDisplacement_goal_M[4]) || isnan(AngularDisplacement_goal_M[5]))){
 		logString("Goal calculation Error...");
-		motorForceShutdown();
+		motorForceShutdown(true);
 	}
 
 	for (int i = 0; i<6; i++) 
@@ -856,15 +888,20 @@ int torsoController::InitializeTorsoRobot(bool debug){
 	logString("Move Robot to Parking Positiion..");
 	// moving the robot to parked positin
 	for (int i = 0; i<6; i++) AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;
-
+#ifdef USE_TORSO_LAB
+	AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), -3.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]); //-3.0/180.0
+	AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 20.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]); //20.0/180.0
+#else
 	AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]); //-3.0/180.0
 	AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 0.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]); //20.0/180.0
+
+#endif
 #ifdef J3Enabled
 	AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.0, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);			
 #else 
 	AngularDisplacement_goal_M[2] = 0;
 #endif
-	AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
+	AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 30.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 	AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
 	AngularDisplacement_goal_M[5] = CalcMotorDisplacement(&(ServoMotor[5]), 0.0 / 180.0*PI, LimitDisplacement_p_J[5], LimitDisplacement_n_J[5]);
 
@@ -1105,13 +1142,13 @@ int torsoController::motorSafeShutdown(){
 }
 
 
-int torsoController::motorForceShutdown(){
+int torsoController::motorForceShutdown(bool quitApp){
 	logString("torsoController::motorForceShutdown()\n");
 	texArt_ncord->Free();
 	delete texArt_ncord;
 	texArt_ncord = 0;
-
-	exit(0);
+	if (quitApp)
+		exit(0);
 
 	return true;
 }
@@ -1337,14 +1374,21 @@ int torsoController::controlStateMachine(){
 			for (int i = 0; i<6; i++)
 				AngularDisplacement_start_M[i] = ServoMotor[i].AngularDisplacement;
 
+#ifdef USE_TORSO_LAB
+
+			AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), -3.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
+			AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 20.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
+#else
 			AngularDisplacement_goal_M[0] = CalcMotorDisplacement(&(ServoMotor[0]), 0.0 / 180.0*PI, LimitDisplacement_p_J[0], LimitDisplacement_n_J[0]);
 			AngularDisplacement_goal_M[1] = CalcMotorDisplacement(&(ServoMotor[1]), 0.0 / 180.0*PI, LimitDisplacement_p_J[1], LimitDisplacement_n_J[1]);
+
+#endif
 #ifdef J3Enabled
 			AngularDisplacement_goal_M[2] = CalcMotorDisplacement(&(ServoMotor[2]), 0.00, LimitDisplacement_p_J[2], LimitDisplacement_n_J[2]);
 #else 
 			AngularDisplacement_goal_M[2] = 0;
 #endif
-			AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 45.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
+			AngularDisplacement_goal_M[3] = CalcMotorDisplacement(&(ServoMotor[3]), 30.0 / 180.0*PI, LimitDisplacement_p_J[3], LimitDisplacement_n_J[3]);
 			AngularDisplacement_goal_M[4] = CalcMotorDisplacement(&(ServoMotor[4]), 0.0 / 180.0*PI, LimitDisplacement_p_J[4], LimitDisplacement_n_J[4]);
 			AngularDisplacement_goal_M[5] = CalcMotorDisplacement(&(ServoMotor[5]), 0.0 / 180.0*PI, LimitDisplacement_p_J[5], LimitDisplacement_n_J[5]);
 
@@ -1389,6 +1433,7 @@ int torsoController::controlStateMachine(){
 			torsoInitialized = false;
 			robotState = EStopped;
 			threadStart = false;
+			
 			goto contactNCord;
 
 

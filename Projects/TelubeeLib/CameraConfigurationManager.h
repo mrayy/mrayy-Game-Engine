@@ -56,6 +56,9 @@ public:
 
 	bool FlipX, FlipY;
 
+	bool separateStreams;
+	int CameraStreams;
+
 	ECameraCaptureType captureType;//RAW,JPEG,H264
 	ECameraType  cameraType; //FOV,OMNI
 	EStreamCodec streamType;

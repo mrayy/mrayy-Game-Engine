@@ -1,16 +1,31 @@
 
 
+
+
+
+/********************************************************************
+	created:	2013/12/05
+	created:	5:12:2013   20:26
+	filename: 	C:\Development\mrayEngine\Plugins\mrayGStreamer\GstCustomVideoStreamer
+	file base:	GstCustomVideoStreamer
+	file ext:	h
+	author:		MHD Yamen Saraiji
+	
+	purpose:	
+*********************************************************************/
+
 #ifndef GstNetworkVideoStreamer_h__
 #define GstNetworkVideoStreamer_h__
 
 #include "IGStreamerStreamer.h"
+#include "ICustomVideoSrc.h"
 
 namespace mray
 {
 namespace video
 {
 
-class GstNetworkVideoStreamerImpl;
+	class GstNetworkVideoStreamerImpl;
 class IVideoGrabber;
 
 class GstNetworkVideoStreamer :public IGStreamerStreamer
@@ -18,27 +33,25 @@ class GstNetworkVideoStreamer :public IGStreamerStreamer
 protected:
 	GstNetworkVideoStreamerImpl* m_impl;
 
-	GstPipelineHandler* GetPipeline();
 	friend class GstNetworkVideoStreamerImpl;
+	GstPipelineHandler* GetPipeline();
 public:
 	GstNetworkVideoStreamer();
 	virtual ~GstNetworkVideoStreamer();
 
 	// addr: target address to stream video to
-	// videoport: port for the video stream, video rtcp is allocated as videoPort+1/videoPort+2
-	void BindPorts(const std::string& addr, uint* videoPort,uint count, uint clockPort, bool rtcp);
-	void SetCameraResolution(int width, int height, int fps = 30);
-	void SetFrameResolution(int width, int height);
-	void SetBitRate(int bitRate);
+	// baseVideoPort: base port for the video streams, 
+	void BindPorts(const std::string& addr, uint *videoPorts, uint count, bool rtcp);
+	
+	void SetVideoSrc(ICustomVideoSrc* src);
+
+
 
 	bool CreateStream();
 	void Stream();
 	bool IsStreaming();
 	void Stop();
 	virtual void Close();
-
-	void SetCameras(int cam0, int cam1);
-	bool IsStereo();
 
 	virtual void SetPaused(bool paused);
 	virtual bool IsPaused();
@@ -47,4 +60,4 @@ public:
 }
 }
 
-#endif // GstNetworkVideoStreamer_h__
+#endif // GstCustomVideoStreamer_h__

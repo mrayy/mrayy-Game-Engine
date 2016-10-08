@@ -100,6 +100,8 @@ public:
 	ModuleSharedMemory()
 	{
 		dataRate = 0;
+		gstClockPortStreamer = 0;
+		gstClockPortPlayer = 0;
 	}
 	//Shared Data
 	bool UserConnected;	//indicate if the user being connected or not
@@ -107,6 +109,10 @@ public:
 	int userCommPort;	//direct communication port with the user
 	int   dataRate;
 	network::NetAddress hostAddress;	//host service address to communicate with
+
+	// synchronization
+	int gstClockPortStreamer;
+	int gstClockPortPlayer;
 
 	//bool IsStarted; //indicate if the services should run or not
 	RobotStatus robotData;	//robot control data

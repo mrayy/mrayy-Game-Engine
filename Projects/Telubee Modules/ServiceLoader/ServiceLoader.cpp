@@ -71,6 +71,7 @@ ServiceLoader::ServiceLoader()
 }
 ServiceLoader::~ServiceLoader()
 {
+	gLogManager.log("Shutting down service", ELL_INFO);
 	_destroy();
 	delete m_renderContext;
 }
@@ -120,7 +121,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	m_sharedMemory.SetDataSize(sizeof(TBee::ModuleSharedMemory));
 	m_sharedMemory.SetName("SH_TBee_Service");
 
-	m_sharedMemory.openRead();
+	m_sharedMemory.openWrite();
 	m_memory = (TBee::ModuleSharedMemory*)m_sharedMemory.GetData();
 	if (!m_memory)
 	{
@@ -210,6 +211,7 @@ void ServiceLoader::_sendConnectMessage()
 }
 void ServiceLoader::_sendDisconnectMessage()
 {
+	gLogManager.log("Disconnecting service",ELL_INFO);
 	core::string msg = "<ServiceModule Message=\"Disconnect\"/>";
 
 	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
@@ -275,6 +277,7 @@ void ServiceLoader::_destroy()
 	if (m_inited)
 	{
 		m_inited = false;
+		gLogManager.log("Destroying service", ELL_INFO);
 		_sendDisconnectMessage();
 
 		m_serviceModule->DestroyService();

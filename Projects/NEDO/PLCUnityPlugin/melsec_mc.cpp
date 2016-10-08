@@ -35,7 +35,11 @@ MCClient::MCClient(int portnum, const char *ipaddr){
 	int ret = connect(sock, (struct sockaddr *)&server, sizeof(server));
 
 	if (ret != 0)
+	{
 		printf("Melsec PLC Connection Error.. \r\n");
+		closesocket(sock);
+		sock = 0;
+	}
 	else
 		printf("Melsec PLC Connected Succssfully at %s : %d \r\n", ipaddr, portnum);
 }

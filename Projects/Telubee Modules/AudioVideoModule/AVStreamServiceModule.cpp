@@ -17,7 +17,6 @@
 #include "GstNetworkAudioStreamer.h"
 #include "DirectShowVideoGrabber.h"
 #include "GstCustomVideoStreamer.h"
-#include "GstCustomMultipleVideoStreamer.h"
 #include "GstNetworkAudioPlayer.h"
 #include "DirectSoundInputStream.h"
 #include "CommunicationMessages.h"
@@ -31,6 +30,7 @@
 #include "CameraVideoSrc.h"
 #include "CameraStreamController.h"
 #include "capDevice.h"
+#include "ModuleSharedMemory.h"
 
 #include <conio.h>
 
@@ -345,7 +345,6 @@ public:
 		}
 #endif
 
-		m_VideoPorts.resize(m_streamsCount);
 /*
 		{
 			std::vector<sound::InputStreamDeviceInfo> lst;
@@ -399,7 +398,7 @@ public:
 
 			printf("Creating Video Streamer\n");
 
-			video::GstCustomMultipleVideoStreamer* hs = new video::GstCustomMultipleVideoStreamer();
+			video::GstNetworkVideoStreamer* hs = new video::GstNetworkVideoStreamer();
 			hs->AddListener(this);
 
 			
@@ -409,9 +408,13 @@ public:
 
 			src->LoadParameters(m_paramsElement->getSubElement("Encoder"));
 			m_camConfig->encoderType = src->GetEncoderType();
+			m_camConfig->separateStreams = src->IsSeparateStreams();
+			m_camConfig->CameraStreams = src->GetVideoSrcCount();
 			hs->SetVideoSrc(src);
 
 			m_streamers->AddStream(hs, "Video");
+
+			m_streamsCount = src->GetStreamsCount();
 
 		}
 #endif
@@ -437,6 +440,9 @@ public:
 			m_streamers->AddStream(hs, "Video");
 		}
 #endif
+
+		
+		m_VideoPorts.resize(m_streamsCount);
 
 		//Create Audio Stream
 		/*
@@ -545,8 +551,17 @@ public:
 			return;
 		printf("Starting Stream at :%dx%d@%d\n", m_resolution.x, m_resolution.y, m_fps);
 		//  Begin the video stream
-
+		core::string clockIpAddr;
+		if (m_context->sharedMemory->gstClockPortStreamer != 0)
+		{
+			clockIpAddr = "127.0.0.1";
+		}
+			
+		m_streamers->GetStream("Video")->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortStreamer);
 		m_streamers->GetStream("Video")->CreateStream();
+		if (m_context->sharedMemory->gstClockPortStreamer == 0)//only if first time
+			m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStream("Video")->GetClockPort();
+
 		//if (m_cameraType == ECameraType::PointGrey)
 		{
 			//Pointgrey cameras need to be started manually
@@ -581,9 +596,18 @@ public:
 		if (m_audioPlayer)
 		{
 			m_audioPlayer->Close();
-			m_audioPlayer->SetIPAddress(m_context->remoteAddr.toString(), 91234, 0, 0);
+
+			core::string clockIpAddr;
+			if (m_context->sharedMemory->gstClockPortPlayer != 0)
+			{
+				clockIpAddr = "127.0.0.1";
+			}
+			m_audioPlayer->SetIPAddress(m_context->remoteAddr.toString(), 91234, 0);
+			m_audioPlayer->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortPlayer);
 			m_audioPlayer->CreateStream();
 			m_audioPlayer->Play();
+			if (m_context->sharedMemory->gstClockPortPlayer == 0)//only if first time
+				m_context->sharedMemory->gstClockPortPlayer = m_audioPlayer->GetClockPort();
 
 			gLogManager.log("Starting audio player at port: " + core::StringConverter::toString(m_audioPlayer->GetPort(0)), ELL_INFO);
 		}
@@ -816,8 +840,8 @@ public:
 			if (m_streamers)
 			{
 				gLogManager.log("Starting video stream to: " +m_context->remoteAddr.toString(),ELL_INFO);
-				m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), &m_VideoPorts[0], m_VideoPorts.size(), 0, 0);
-
+				m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), &m_VideoPorts[0], m_VideoPorts.size(),  0);
+				
 
 				int reply = (int)EMessages::IsStereo;
 				int len = stream.write(&reply, sizeof(reply));

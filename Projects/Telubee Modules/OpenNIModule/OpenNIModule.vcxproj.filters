@@ -14,6 +14,12 @@
     <ClCompile Include="OpenNIHandler.cpp">
       <Filter>OpenNI</Filter>
     </ClCompile>
+    <ClCompile Include="DepthCompressor\ofxDepthCompressedFrame.cpp">
+      <Filter>DepthCompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthCompressor\ofxDepthStreamCompression.cpp">
+      <Filter>DepthCompressor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenNIModule.h" />
@@ -29,6 +35,15 @@
     <ClInclude Include="OpenNIHandler.h">
       <Filter>OpenNI</Filter>
     </ClInclude>
+    <ClInclude Include="DepthCompressor\ofxCompress.h">
+      <Filter>DepthCompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthCompressor\ofxDepthCompressedFrame.h">
+      <Filter>DepthCompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthCompressor\ofxDepthStreamCompression.h">
+      <Filter>DepthCompressor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -36,6 +51,9 @@
   <ItemGroup>
     <Filter Include="OpenNI">
       <UniqueIdentifier>{27fe4846-110d-43d0-b581-66fe3fe86c25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DepthCompressor">
+      <UniqueIdentifier>{1676421b-7721-427f-80e1-50628ec95989}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

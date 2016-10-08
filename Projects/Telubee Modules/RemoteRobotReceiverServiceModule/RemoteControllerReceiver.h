@@ -30,7 +30,7 @@ public:
 
 	void Init(core::string robotdll);
 
-	ERobotControllerStatus GetRobotStatus();
+	//ERobotControllerStatus GetRobotStatus();
 
 	void Render(ServiceRenderContext* context);
 };

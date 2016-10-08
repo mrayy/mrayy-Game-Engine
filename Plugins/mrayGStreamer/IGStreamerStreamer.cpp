@@ -31,5 +31,16 @@ ulong IGStreamerStreamer::GetClockBase()
 
 }
 
+
+void IGStreamerStreamer::SetClockAddr(const core::string& host, int port)
+{
+	GetPipeline()->SetClockAddr(host, port);
+}
+int IGStreamerStreamer::GetClockPort()
+{
+	GstPipelineHandler* p = GetPipeline();
+	return p->GetClockPort();
+
+}
 }
 }

@@ -19,6 +19,8 @@ TelubeeCameraConfiguration::TelubeeCameraConfiguration() :fov(60), cameraOffset(
 	captureType = ECameraCaptureType::CaptureRaw;
 	streamType = EStreamCodec::StreamCoded;
 	FlipX = FlipY = false;
+	separateStreams = false;
+	CameraStreams = 1;
 }
 
 void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
@@ -105,7 +107,9 @@ xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
 	e->addAttribute("KPCoeff", core::StringConverter::toString(KPCoeff));
 	e->addAttribute("PixelShift", core::StringConverter::toString(PixelShift));
 	e->addAttribute("FlipX", FlipX ? "true" : "false");
-	e->addAttribute("FlipY", FlipY?"true":"false");
+	e->addAttribute("FlipY", FlipY ? "true" : "false");
+	e->addAttribute("SeparateStreams", separateStreams ? "true" : "false");
+	e->addAttribute("CameraStreams", core::StringConverter::toString(CameraStreams));
 
 
 	for (int i = 0; i < 2; ++i)

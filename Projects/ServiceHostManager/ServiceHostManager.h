@@ -9,6 +9,7 @@
 #include "IServiceModule.h"
 #include "IUDPClient.h"
 #include "TBRobotInfo.h"
+#include "GstCustomDataStreamer.h"
 
 #include <windows.h>
 
@@ -35,6 +36,8 @@ protected:
 
 	TBee::RobotCommunicator* m_robotCommunicator;
 
+	video::GstCustomDataStreamer* m_dataStreamer;
+
 	int _currDataRate;
 	double _lastTime;
 
@@ -45,7 +48,7 @@ protected:
 			processHandle = 0;
 			threadHandle = 0;
 			lastTime = 0;
-			pingSent = false;
+			pingSent = 0;
 			netValuePort = 0;
 		}
 		core::string name;
@@ -56,7 +59,7 @@ protected:
 		HANDLE processHandle;
 		HANDLE threadHandle;
 
-		bool pingSent;
+		int pingSent;
 		ulong lastTime;//last time this service was alive
 	};
 

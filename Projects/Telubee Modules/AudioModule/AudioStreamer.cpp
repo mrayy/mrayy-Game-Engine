@@ -14,6 +14,7 @@
 #include "NetworkValueController.h"
 #include "StringUtil.h"
 #include "AppSrcVideoSrc.h"
+#include "ModuleSharedMemory.h"
 
 #include <conio.h>
 
@@ -171,7 +172,11 @@ public:
 			return;
 		gLogManager.log("Start Streaming.", ELL_INFO);
 		for (int i = 0; i < m_streamers->GetStreamsCount(); ++i)
+		{
 			m_streamers->GetStreamerAt(i)->CreateStream();
+			if (m_context->sharedMemory->gstClockPortStreamer==0)
+				m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStreamerAt(i)->GetClockPort();
+		}
 		m_streamers->Stream();
 
 		gLogManager.log("Stream started.", ELL_INFO);
@@ -334,8 +339,17 @@ public:
 			if (ports == m_AudioPort)
 				return;
 			m_AudioPort = ports;
-			for (int i = 0; i < m_streamers->GetStreamsCount() && i<m_AudioPort.size(); ++i)
-				m_streamers->GetStreamerAt(i)->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort[i], 1, 0, 0);
+
+			core::string clockIpAddr;
+			if (m_context->sharedMemory->gstClockPortStreamer != 0)
+			{
+				clockIpAddr = "127.0.0.1";
+			}
+
+			for (int i = 0; i < m_streamers->GetStreamsCount() && i < m_AudioPort.size(); ++i)
+			{
+				m_streamers->GetStreamerAt(i)->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort[i], 1, 0);
+			}
 			//m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort, 1, 0, 0);
 
 			m_portsReceived = true;

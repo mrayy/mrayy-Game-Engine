@@ -177,15 +177,6 @@
     <ClInclude Include="JoystickInputController.h">
       <Filter>Source Files\Input Controller\Control</Filter>
     </ClInclude>
-    <ClInclude Include="OpenNIHandler.h">
-      <Filter>Source Files\Depth</Filter>
-    </ClInclude>
-    <ClInclude Include="GeomDepthCalculator.h">
-      <Filter>Source Files\Depth</Filter>
-    </ClInclude>
-    <ClInclude Include="GeomDepthRect.h">
-      <Filter>Source Files\Depth</Filter>
-    </ClInclude>
     <ClInclude Include="DepthFrame.h">
       <Filter>Source Files\Depth</Filter>
     </ClInclude>
@@ -352,15 +343,6 @@
     </ClCompile>
     <ClCompile Include="WiiboardInputController.cpp">
       <Filter>Source Files\Input Controller\Control</Filter>
-    </ClCompile>
-    <ClCompile Include="GeomDepthCalculator.cpp">
-      <Filter>Source Files\Depth</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenNIHandler.cpp">
-      <Filter>Source Files\Depth</Filter>
-    </ClCompile>
-    <ClCompile Include="GeomDepthRect.cpp">
-      <Filter>Source Files\Depth</Filter>
     </ClCompile>
     <ClCompile Include="DepthFrame.cpp">
       <Filter>Source Files\Depth</Filter>

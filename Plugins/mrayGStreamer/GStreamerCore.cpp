@@ -18,6 +18,13 @@
 #include "CMyUDPSrc.h"
 #include "CMyUDPSink.h"
 
+//#define USE_LIBNICE
+
+#ifdef USE_LIBNICE
+#include "nice\gst\gstnicesrc.h"
+#include "nice\gst\gstnicesink.h"
+#endif
+
 namespace mray
 {
 namespace video
@@ -25,6 +32,15 @@ namespace video
 
 GStreamerCore* GStreamerCore::m_instance=0;
 uint GStreamerCore::m_refCount = 0;
+
+#ifdef USE_LIBNICE
+static gboolean nicesrc_plugin_init(GstPlugin * plugin){
+	return gst_element_register(plugin, "nicesrc", GST_RANK_NONE, GST_TYPE_NICE_SRC);
+}
+static gboolean nicesink_plugin_init(GstPlugin * plugin){
+	return gst_element_register(plugin, "nicesink", GST_RANK_NONE, GST_TYPE_NICE_SINK);
+}
+#endif
 
 static gboolean appsink_plugin_init(GstPlugin * plugin)
 {
@@ -133,6 +149,12 @@ void GStreamerCore::_Init()
 			"myudpsink", (char*)"Element udp sink",
 			_GstMyUDPSinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 			"");
+
+#ifdef USE_LIBNICE
+		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "nicesrc", strdup("nicesrc"), nicesrc_plugin_init, "1.0.4", "BSD", "libnice", "nice", "http://libnice.org");
+
+		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "nicesink", strdup("nicesink"), nicesink_plugin_init, "1.0.4", "BSD", "libnice", "nice", "http://libnice.org");
+#endif
 		gLogManager.log("GStreamerCore - GStreamer inited", ELL_INFO);
 	}
 

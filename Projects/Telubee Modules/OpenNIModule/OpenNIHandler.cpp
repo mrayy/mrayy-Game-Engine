@@ -27,6 +27,7 @@ namespace mray
 		}
 		virtual void execute(OS::IThread*caller, void*arg)
 		{
+			Sleep(1000);
 			while (caller->isActive() && !destroy)
 			{
 				if (m_owner->IsStarted())
@@ -91,6 +92,7 @@ void OpenNIHandler::Start(int w, int h)
 	float minV = depthStream.getMinPixelValue();
 	float maxV = depthStream.getMaxPixelValue();
 	m_started = true;
+	m_threadFunc->destroy = false;
 	m_thread = OS::IThreadManager::getInstance().createThread(m_threadFunc);
 	m_thread->start(0);
 

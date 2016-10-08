@@ -5,190 +5,105 @@
 
 #include "GstPipelineHandler.h"
 
+#include "IVideoGrabber.h"
+#include "CMySrc.h"
 #include "CMyUDPSrc.h"
 #include "CMyUDPSink.h"
 
 #include "StringConverter.h"
+#include "ILogManager.h"
+#include "IThreadManager.h"
 
+#include <gst/app/gstappsrc.h>
 namespace mray
 {
 namespace video
 {
 
-class GstNetworkVideoStreamerImpl :public GstPipelineHandler, public IPipelineListener
+class GstNetworkVideoStreamerImpl :public GstPipelineHandler,public IPipelineListener
 {
 protected:
-	GstNetworkVideoStreamer* m_owner;
-	core::string m_ipAddr;
-	uint m_videoPort;
-	uint m_clockPort;
 
-	int m_camIdx[2];
-	int m_bitRate;
-	int m_fps;
+	GstNetworkVideoStreamer* m_owner;
+
+	core::string m_ipAddr;
+	std::vector<uint> m_videoPorts;
 	bool m_rtcp;
 
-	math::vector2di m_cameraSize;
-	math::vector2di m_frameSize;
-
 	core::string m_pipeLineString;
-	GstMyUDPSink* m_videoSink;
 	GstMyUDPSink* m_videoRtcpSink;
 	GstMyUDPSrc* m_videoRtcpSrc;
 
+	ICustomVideoSrc* m_videoSrc;
+
+	video::ImageInfo m_tmp;
+
+	struct VideoSrcData
+	{
+		VideoSrcData()
+		{
+			o = 0;
+			videoSink = 0;
+		}
+		GstNetworkVideoStreamerImpl* o;
+
+		GstElement* videoSink;
+	};
+	std::vector<VideoSrcData> m_srcData;
+
 
 public:
-	GstNetworkVideoStreamerImpl(GstNetworkVideoStreamer* o)
+	GstNetworkVideoStreamerImpl(GstNetworkVideoStreamer* owner)
 	{
-		m_owner = o;
+		m_owner = owner;
 		m_ipAddr = "127.0.0.1";
-		m_videoPort = 5000;
-		m_clockPort = 5010;
 
-		m_bitRate = 5000;
-		m_camIdx[0] = 0;
-		m_camIdx[1] = 1;
-		m_fps = 30;
-
-		m_videoSink = 0;
 		m_videoRtcpSink = 0;
 		m_videoRtcpSrc = 0;
-		m_frameSize.set(1280, 720);
-		m_cameraSize.set(1280, 720);
+
 
 		AddListener(this);
+
 	}
 
 	virtual ~GstNetworkVideoStreamerImpl()
-	{
+	{/*
+		for (int i = 0; i < m_srcData.size(); ++i)
+		{
+			if (m_srcData[i].videoSink && m_srcData[i].videoSink->m_client)
+			{
+				m_srcData[i].videoSink->m_client->Close();
+			}
+		}*/
+		Stop();
 	}
 
-	core::string getVdoString(int i)
+	void BuildStringCompressed()
 	{
-		core::string str;
-		
-		core::string caps = " video/x-raw,width=" + core::StringConverter::toString(m_cameraSize.x) + ",height=" + core::StringConverter::toString(m_cameraSize.y);
+		m_pipeLineString="";
 
-		str = "ksvideosrc name=src" + core::StringConverter::toString(i) + " device-index=" + core::StringConverter::toString(m_camIdx[i]) + " ! " + caps + " ! videorate max-rate=" + core::StringConverter::toString(m_fps)+" ";
-		str += "! videoconvert ! video/x-raw,format=I420 ";
-		return str;
+		for (int i = 0; i < m_videoSrc->GetStreamsCount(); ++i)
+		{
+			m_pipeLineString += m_videoSrc->GetPipelineStr(i);
+			m_pipeLineString = FinalizePipeline(m_pipeLineString, i);
+
+		}
+
 	}
-
-	core::string _buildCamString()
+	std::string FinalizePipeline(const std::string &pipeline,int i)
 	{
-		core::string videoStr;
-
-		if (m_camIdx[0] < 0)m_camIdx[0] = 0;
-		if (m_camIdx[1] < 0)m_camIdx[1] = 0;
-		if (m_camIdx[0] == m_camIdx[1])
-		{
-			//ksvideosrc
-#if 0
-			videoStr = "ksvideosrc name=src device-index=" + core::StringConverter::toString(m_cam0) + // device=" + m_cam0.guidPath + "" +//
-				" ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) +
-				",framerate=" + core::StringConverter::toString(m_fps) + "/1 ! videoconvert  ! videoflip method=4 ";// !videoflip method = 1  ";
-#else
-			videoStr = getVdoString(0);
-#endif
-
-		}
-		else
-		{
-
-			int halfW = m_frameSize.x / 2;
-			videoStr = "videomixer name=mix sink_0::xpos=0   sink_0::ypos=0  sink_0::alpha=1  sink_0::zorder=0  sink_1::xpos=0   sink_1::ypos=0  sink_1::zorder=1     sink_2::xpos=" + core::StringConverter::toString(halfW) + "   sink_2::ypos=0  sink_2::zorder=1  ";
-
-			videoStr += "videotestsrc pattern=\"black\" ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) + " !  mix.sink_0 ";
-
-#if 0
-			//first camera
-			videoStr += "ksvideosrc name=src1 device-index=" + core::StringConverter::toString(m_cam0) + "  ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) +
-				",framerate=" + core::StringConverter::toString(m_fps) + "/1 ! videoconvert ! videoflip method=4 ! videoscale !"
-				"video/x-raw,format=I420,width=" + core::StringConverter::toString(halfW) + ",height=" + core::StringConverter::toString(m_frameSize.y) + " ! mix.sink_1 ";
-
-			//second camera
-			videoStr += "ksvideosrc name=src2 device-index=" + core::StringConverter::toString(m_cam1) + "  ! video/x-raw,format=I420,width=" + core::StringConverter::toString(m_frameSize.x) + ",height=" + core::StringConverter::toString(m_frameSize.y) +
-				",framerate=" + core::StringConverter::toString(m_fps) + "/1 ! videoconvert ! videoflip method=4 ! videoscale ! "
-				"video/x-raw,format=I420,width=" + core::StringConverter::toString(halfW) + ",height=" + core::StringConverter::toString(m_frameSize.y) + "! mix.sink_2 ";
-#else
-			//first camera
-			videoStr += getVdoString(0);
-			
-			if (m_cameraSize.x > halfW || m_cameraSize.y > m_frameSize.y)
-			{
-				videoStr += " ! videoscale !"
-					"video/x-raw,format=I420,width=" + core::StringConverter::toString(halfW) + ",height=" + core::StringConverter::toString(m_frameSize.y);
-			}
-			videoStr+=" ! mix.sink_1 ";
-
-			//second camera
-			videoStr += getVdoString(1);
-
-			if (m_cameraSize.x > halfW || m_cameraSize.y > m_frameSize.y)
-			{
-				videoStr += " ! videoscale !"
-					"video/x-raw,format=I420,width=" + core::StringConverter::toString(halfW) + ",height=" + core::StringConverter::toString(m_frameSize.y);
-			}
-			videoStr += " ! mix.sink_2 ";
-
-#endif
-			videoStr += " mix. ";
-
-		}
+		std::string videoStr = pipeline;
+		videoStr += " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port="+core::StringConverter::toString(m_videoPorts[i])+" host="+m_ipAddr+" sync=false ";
 		return videoStr;
 	}
 
-
-	void BuildString()
+	void SetVideoSrc(ICustomVideoSrc* src)
 	{
-		core::string videoStr;
-
-		videoStr=_buildCamString();
-		//encoder string
-		videoStr +="! x264enc name=videoEnc bitrate=" + core::StringConverter::toString(m_bitRate) + " speed-preset=superfast tune=zerolatency sync-lookahead=0 sliced-threads=false pass=qual ! rtph264pay ";//rc-lookahead=0 
-		if (m_rtcp)
-		{
-			m_pipeLineString = "rtpbin  name=rtpbin " +
-				videoStr +
-				"! rtpbin.send_rtp_sink_0 "
-
-				"rtpbin.send_rtp_src_0 ! "
-				"myudpsink name=videoSink  "
-
-				"rtpbin.send_rtcp_src_0 ! "
-				"myudpsink name=videoRtcpSink sync=false async=false "
-				"myudpsrc name=videoRtcpSrc ! rtpbin.recv_rtcp_sink_0 ";
-		}
-		else
-		{
-			m_pipeLineString = videoStr + " ! "
-				"myudpsink name=videoSink sync=false";
-		}
-
-	}
-
-	void SetBitRate(int bitRate)
-	{
-		m_bitRate = bitRate;
-	}
-	void SetCameras(int cam0, int cam1)
-	{
-		m_camIdx[0] = cam0;
-		m_camIdx[1] = cam1;
-	}
-	bool IsStereo()
-	{
-		return m_camIdx[0] != m_camIdx[1];
-	}
-
-	void SetCameraResolution(int width, int height, int fps)
-	{
-		m_cameraSize.set(width, height);
-		m_fps = fps;
-	}
-	void SetFrameResolution(int width, int height)
-	{
-		m_frameSize.set(width, height);
+		m_videoSrc = src;
+		m_srcData.resize(src->GetStreamsCount());
+		m_videoPorts.resize(src->GetStreamsCount());
+		for (int i = 0; i < m_videoPorts.size(); ++i)
+			m_videoPorts[i] = 0;
 	}
 
 	void _UpdatePorts()
@@ -197,46 +112,118 @@ public:
 		if (!GetPipeline())
 			return;
 #define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
-#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
+//#define SET_SINK(elem,name,p) elem=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), name)); if(elem){elem->SetPort(m_ipAddr,p);}
 
-		SET_SINK(videoSink, m_videoPort);
+		for (int i = 0; i < m_videoSrc->GetStreamsCount(); ++i)
+		{
+#if 1
+			core::string videoSinkName="videoSink"+core::StringConverter::toString(i);
+			m_srcData[i].videoSink=gst_bin_get_by_name(GST_BIN(GetPipeline()), videoSinkName.c_str());
+			g_object_set(m_srcData[i].videoSink, "port", m_videoPorts[i],  0);
+			g_object_set(m_srcData[i].videoSink, "host", m_ipAddr.c_str(), 0);
+		//	SET_SINK(m_srcData[i].videoSink, videoSinkName.c_str(), m_videoPorts[i]);
+		//	gst_base_sink_set_async_enabled(GST_BASE_SINK(m_srcData[i].videoSink), false);
+			gst_base_sink_set_sync(GST_BASE_SINK(m_srcData[i].videoSink), false);
+#else
+
+			m_srcData[i].videoSrc = GST_MySRC(gst_bin_get_by_name(GST_BIN(m_gstPipeline), name.c_str()));
+			m_srcData[i].o = this;
+			m_srcData[i].index = i;
+			if (m_srcData[i].videoSrc){
+				m_srcData[i].videoSrc->need_buffer = need_buffer;
+				m_srcData[i].videoSrc->data = &m_srcData[i];
+			}
+#endif
+
+
+		}
+		//g_object_set(G_OBJECT(m_videoSink), "sync", false, (void*)NULL);
+
 		if (m_rtcp){
-			SET_SRC(videoRtcpSrc, (m_videoPort + 1));
-			SET_SINK(videoRtcpSink, (m_videoPort + 2));
+			//SET_SRC(videoRtcpSrc, (m_baseVideoPort + 1));
+//			SET_SINK(videoRtcpSink, (m_baseVideoPort + 2));
 		}
 
 	}
 
-	void BindPorts(const std::string& addr, uint videoPort,uint clockPort, bool rtcp)
+	void BindPorts(const std::string& addr, uint *videoPorts, uint count, bool rtcp)
 	{
+		if (count != m_videoSrc->GetStreamsCount())
+		{
+			gLogManager.log("GstNetworkVideoStreamer:BindPorts(): Failed to bound ports since ports counts doesn't match video source count!", ELL_WARNING);
+		}
+		bool skip = (addr==m_ipAddr);
+		if (skip)
+		{
+			for (int i = 0; i < m_videoPorts.size();++i)
+				if (m_videoPorts[i] != videoPorts[i])
+				{
+					skip = false;
+					break;
+				}
+		}
+		if (skip)
+			return;
 		m_ipAddr = addr;
-		m_videoPort = videoPort;
+		m_videoPorts.clear();
+		for (int i = 0; i < count; ++i)
+			m_videoPorts.push_back(videoPorts[i]);
 		m_rtcp = rtcp;
-		m_clockPort = clockPort;
+		/*
+		std::string msg = "GstNetworkVideoStreamer:BindPorts(): Ports bound to:";
+		for (int i = 0; i < count; ++i)
+			msg += core::StringConverter::toString(videoPorts[i])+", ";
+		gLogManager.log(msg, ELL_INFO);*/
 
 		_UpdatePorts();
 	}
 	bool CreateStream()
 	{
 		GError *err = 0;
-		BuildString();
-		GstElement* p = gst_parse_launch(m_pipeLineString.c_str(), &err);
-		if (err)
-		{
-			printf("GstNetworkVideoStreamer: Pipeline error: %s", err->message);
-		}
-		if (!p)
+		if (!m_videoSrc)
 			return false;
-		SetPipeline(p);
+		 BuildStringCompressed();
 
+
+		//printf("\n\n%s\n\n", m_pipeLineString.c_str());
+		 GstElement* pipeline = 0;
+		 
+		 // int trials = 0;
+		 // while (trials < 3 && pipeline==0)
+		 {
+			 pipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
+			 gLogManager.log("Starting with pipeline: " + m_pipeLineString, ELL_INFO);
+			 if (err)
+			 {
+				 gLogManager.log("GstNetworkVideoStreamer: Pipeline error: " + core::string(err->message), ELL_WARNING);
+				 gst_object_unref(pipeline);
+				 pipeline = 0;
+			 }
+		//	 ++trials;
+		 }
+		if (!pipeline)
+			return false;
+		gLogManager.log("Finished Linking Pipeline",ELL_INFO);
+
+		SetPipeline(pipeline);
 		_UpdatePorts();
+		m_videoSrc->LinkWithPipeline(static_cast<void*>(pipeline));
+		/*
+		printf("Starting video streams\nPort Numbers:\n");
+		for (int i=0;i<m_srcData.size();++i)
+			printf("\t[%d] %d\n", i,m_srcData[i].videoSink->m_client->Port());*/
 
-		return CreatePipeline(true, "", m_clockPort);
+		return CreatePipeline();
 
 	}
+
 	void Stream()
 	{
 		SetPaused(false);
+	}
+	void Stop()
+	{
+		SetPaused(true);
 	}
 	bool IsStreaming()
 	{
@@ -247,10 +234,10 @@ public:
 		GstPipelineHandler::Close();
 	}
 
+
 	virtual void OnPipelineReady(GstPipelineHandler* p){ m_owner->__FIRE_OnStreamerReady(m_owner); }
 	virtual void OnPipelinePlaying(GstPipelineHandler* p){ m_owner->__FIRE_OnStreamerStarted(m_owner); }
 	virtual void OnPipelineStopped(GstPipelineHandler* p){ m_owner->__FIRE_OnStreamerStopped(m_owner); }
-
 };
 
 
@@ -273,9 +260,9 @@ void GstNetworkVideoStreamer::Stop()
 }
 
 
-void GstNetworkVideoStreamer::BindPorts(const std::string& addr, uint* videoPort, uint count, uint clockPort, bool rtcp)
+void GstNetworkVideoStreamer::BindPorts(const std::string& addr, uint *videoPorts, uint count, bool rtcp)
 {
-	m_impl->BindPorts(addr,videoPort[0],clockPort ,rtcp);
+	m_impl->BindPorts(addr, videoPorts,count, rtcp);
 }
 
 bool GstNetworkVideoStreamer::CreateStream()
@@ -292,31 +279,10 @@ bool GstNetworkVideoStreamer::IsStreaming()
 	return m_impl->IsStreaming();
 }
 
-void GstNetworkVideoStreamer::SetCameraResolution(int width, int height,int fps)
+void GstNetworkVideoStreamer::SetVideoSrc(ICustomVideoSrc* src)
 {
-	m_impl->SetCameraResolution(width, height, fps);
+	m_impl->SetVideoSrc(src);
 }
-
-void GstNetworkVideoStreamer::SetFrameResolution(int width, int height)
-{
-	m_impl->SetFrameResolution(width, height);
-}
-
-void GstNetworkVideoStreamer::SetBitRate(int bitRate)
-{
-	m_impl->SetBitRate(bitRate);
-}
-
-
-void GstNetworkVideoStreamer::SetCameras(int cam0, int cam1)
-{
-	m_impl->SetCameras(cam0, cam1);
-}
-bool GstNetworkVideoStreamer::IsStereo()
-{
-	return m_impl->IsStereo();
-}
-
 void GstNetworkVideoStreamer::SetPaused(bool paused)
 {
 	m_impl->SetPaused(paused);
@@ -324,9 +290,8 @@ void GstNetworkVideoStreamer::SetPaused(bool paused)
 
 bool GstNetworkVideoStreamer::IsPaused()
 {
-	return !m_impl->IsPlaying();
+	return m_impl->IsPaused();
 }
-
 GstPipelineHandler* GstNetworkVideoStreamer::GetPipeline()
 {
 	return m_impl;

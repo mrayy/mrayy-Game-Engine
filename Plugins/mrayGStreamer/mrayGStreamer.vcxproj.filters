@@ -36,9 +36,6 @@
     <ClCompile Include="GstNetworkAudioStreamer.cpp">
       <Filter>StreamType\Streamer</Filter>
     </ClCompile>
-    <ClCompile Include="GstNetworkVideoStreamer.cpp">
-      <Filter>StreamType\Streamer</Filter>
-    </ClCompile>
     <ClCompile Include="GstStreamBin.cpp">
       <Filter>StreamType\Streamer</Filter>
     </ClCompile>
@@ -54,9 +51,6 @@
     </ClCompile>
     <ClCompile Include="IGStreamerPlayer.cpp">
       <Filter>StreamType\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="GstCustomMultipleVideoStreamer.cpp">
-      <Filter>StreamType\Streamer</Filter>
     </ClCompile>
     <ClCompile Include="GstNetworkMultipleVideoPlayer.cpp">
       <Filter>StreamType\Player</Filter>
@@ -75,6 +69,12 @@
     </ClCompile>
     <ClCompile Include="ICustomVideoSrc.cpp">
       <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="GstCustomDataStreamer.cpp">
+      <Filter>StreamType\Streamer</Filter>
+    </ClCompile>
+    <ClCompile Include="GstNetworkVideoStreamer.cpp">
+      <Filter>StreamType\Streamer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -115,9 +115,6 @@
     <ClInclude Include="GstNetworkAudioStreamer.h">
       <Filter>StreamType\Streamer</Filter>
     </ClInclude>
-    <ClInclude Include="GstNetworkVideoStreamer.h">
-      <Filter>StreamType\Streamer</Filter>
-    </ClInclude>
     <ClInclude Include="GstStreamBin.h">
       <Filter>StreamType\Streamer</Filter>
     </ClInclude>
@@ -140,9 +137,6 @@
     <ClInclude Include="IStreamListener.h">
       <Filter>StreamType</Filter>
     </ClInclude>
-    <ClInclude Include="GstCustomMultipleVideoStreamer.h">
-      <Filter>StreamType\Streamer</Filter>
-    </ClInclude>
     <ClInclude Include="GstNetworkMultipleVideoPlayer.h">
       <Filter>StreamType\Player</Filter>
     </ClInclude>
@@ -160,6 +154,12 @@
     </ClInclude>
     <ClInclude Include="IAppSinkHandler.h">
       <Filter>Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="GstCustomDataStreamer.h">
+      <Filter>StreamType\Streamer</Filter>
+    </ClInclude>
+    <ClInclude Include="GstNetworkVideoStreamer.h">
+      <Filter>StreamType\Streamer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

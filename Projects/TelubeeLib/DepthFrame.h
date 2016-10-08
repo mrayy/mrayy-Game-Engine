@@ -44,7 +44,8 @@ public:
 		}
 
 		T* Data(){ return m_data; }
-		const math::vector2di& Size(){ return m_size; }
+		const T* Data()const { return m_data; }
+		const math::vector2di& Size()const{ return m_size; }
 		void clean()
 		{
 			delete[]m_data;
@@ -97,7 +98,7 @@ public:
 	int GetOuterBandThreshold();
 
 
-	const math::vector2di& GetSize();
+	const math::vector2di& GetSize()const;
 	float* GetDepth();
 	math::vector3d* GetNormals();
 
@@ -107,6 +108,8 @@ public:
 	void CreateRawData(int w, int h);
 	void SetRawData(ushort* d, int w, int h);
 	ushort* GetRawData();
+	const ushort* GetRawData()const;
+	uint GetRawDataLength()const;
 
 	math::recti  GetCroppedFrame(const math::recti& src, const DepthFrame* f);
 	void AddFrame(const math::recti& src, const  DepthFrame* f);

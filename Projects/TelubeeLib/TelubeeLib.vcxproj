@@ -224,8 +224,6 @@
     <ClInclude Include="CRobotConnector.h" />
     <ClInclude Include="DepthFrame.h" />
     <ClInclude Include="DepthVisualizer.h" />
-    <ClInclude Include="GeomDepthCalculator.h" />
-    <ClInclude Include="GeomDepthRect.h" />
     <ClInclude Include="LocalSingleCameraVideoSource.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -278,7 +276,6 @@
     <ClInclude Include="multicast.h" />
     <ClInclude Include="NullRenderState.h" />
     <ClInclude Include="OculusHeadController.h" />
-    <ClInclude Include="OpenNIHandler.h" />
     <ClInclude Include="OptiTrackDataSource.h" />
     <ClInclude Include="OptiTrackHeadController.h" />
     <ClInclude Include="RemoteRobotCommunicator.h" />
@@ -346,8 +343,6 @@
     <ClCompile Include="CRobotConnector.cpp" />
     <ClCompile Include="DepthFrame.cpp" />
     <ClCompile Include="DepthVisualizer.cpp" />
-    <ClCompile Include="GeomDepthCalculator.cpp" />
-    <ClCompile Include="GeomDepthRect.cpp" />
     <ClCompile Include="LocalDLLRobotController.cpp" />
     <ClCompile Include="LocalSingleCameraVideoSource.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -398,7 +393,6 @@
       <SDLCheck Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</SDLCheck>
     </ClCompile>
     <ClCompile Include="OculusHeadController.cpp" />
-    <ClCompile Include="OpenNIHandler.cpp" />
     <ClCompile Include="OptiTrackDataSource.cpp" />
     <ClCompile Include="OptiTrackHeadController.cpp" />
     <ClCompile Include="RemoteRobotCommunicator.cpp" />

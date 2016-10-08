@@ -25,7 +25,7 @@
 namespace mray
 {
 #define COMMUNICATION_PORT 6000
-#define PingTime 10000
+#define PingTime 5000
 
 	typedef bool(ServiceHostManager::*ProcessFunction)();
 class ServiceHostManagerThread :public OS::IThreadFunction
@@ -67,6 +67,7 @@ ServiceHostManager::ServiceHostManager()
 	m_dataMutex = 0;
 	_currDataRate = 0;
 	_lastTime = 0;
+	m_dataStreamer = 0;
 }
 ServiceHostManager::~ServiceHostManager()
 {
@@ -84,6 +85,13 @@ void ServiceHostManager::_destroy()
 	m_sharedMemory.Detach();
 	if (m_commLink)
 		m_commLink->Close();
+
+	if (m_dataStreamer)
+	{
+		m_dataStreamer->Close();
+		delete m_dataStreamer;
+		m_dataStreamer = 0;
+	}
 
 	OS::IThreadManager::getInstance().killThread(m_commThread);
 	delete m_commThread;
@@ -120,6 +128,7 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_sharedMemory.createWrite();
 	m_sharedMemory.openWrite();
 	m_memory = (TBee::ModuleSharedMemory*)m_sharedMemory.GetData();
+	memset(m_memory, 0, sizeof(TBee::ModuleSharedMemory));
 	m_memory->InitMaster(m_memory);
 
 	{
@@ -141,6 +150,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_robotCommunicator = new TBee::RobotCommunicator();
 	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
 	m_robotCommunicator->SetListener(this);
+
+	m_dataStreamer = new video::GstCustomDataStreamer();
+	m_dataStreamer->SetApplicationDataType("control", true);
+	m_dataStreamer->SetClockAddr("", 0);
+
 
 	char computerName[512];
 	DWORD sz=512;
@@ -353,7 +367,7 @@ bool ServiceHostManager::_ProcessPacket()
 				//printf("Pong message recevied from :%s\n", m_serviceList[i].name.c_str());
 				m_dataMutex->lock();
 				m_serviceList[i].lastTime = m_timer->getMilliseconds();
-				m_serviceList[i].pingSent = false;
+				m_serviceList[i].pingSent = 0;
 				m_dataMutex->unlock();
 			}
 		}
@@ -379,20 +393,21 @@ bool ServiceHostManager::_ProcessServices()
 	std::vector<ServiceList::iterator> toRemove;
 	std::vector<core::string> servicesToRun;
 	ulong t=m_timer->getMilliseconds();
+#define MAX_TRIALS 1
 	for (int i = 0; i < m_serviceList.size(); ++i)
 	{
 		if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port != 0)
 		{
-			if (!m_serviceList[i].pingSent && (t - m_serviceList[i].lastTime) > PingTime)
+			if (m_serviceList[i].pingSent<MAX_TRIALS && (t - m_serviceList[i].lastTime) > PingTime)
 			{
 				m_serviceList[i].lastTime = t;
-				m_serviceList[i].pingSent = true;
+				m_serviceList[i].pingSent ++;
 				core::string msg = "<Host Message=\"Ping\"/>";
 
 			//	printf("Sending Ping to %s:%s\n", m_serviceList[i].name.c_str(), m_serviceList[i].address.toString().c_str());
 				m_commLink->SendTo(&m_serviceList[i].address, msg.c_str(), msg.length() + 1);
 			}
-			else if (m_serviceList[i].pingSent && (t - m_serviceList[i].lastTime) > PingTime)
+			else if (m_serviceList[i].pingSent >= MAX_TRIALS && (t - m_serviceList[i].lastTime) > PingTime)
 			{
 				//Service is dead..
 				printf("Service %s has stopped working\n", m_serviceList[i].name.c_str());
@@ -421,8 +436,10 @@ bool ServiceHostManager::_ProcessServices()
 }
 void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const TBee::UserConnectionData& data)
 {
-	if (!m_inited)
+	if (!m_inited || m_memory->UserConnected)
 		return;
+
+
 	if (m_memory->userConnectionData.userData.clientAddress.address != data.userData.clientAddress.address)
 		printf("User Connected : %s\n", data.userData.clientAddress.toString().c_str());
 	//m_videoProvider->StreamDataTo(address,videoPort,audioPort);
@@ -433,6 +450,14 @@ void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const 
 		core::StringConverter::toString(ip[2]) + "." +
 		core::StringConverter::toString(ip[3]);
 
+	//start dataStreamer
+	uint port = 7030;
+	m_dataStreamer->BindPorts(data.userData.clientAddress.toString(),&port,1,false);
+	m_dataStreamer->SetClockAddr("", 0);
+	m_dataStreamer->CreateStream();
+	m_dataStreamer->Stream();
+	m_memory->gstClockPortStreamer = m_dataStreamer->GetClockPort();
+	m_memory->gstClockPortPlayer = m_dataStreamer->GetClockPort();
 	
 	m_memory->UserConnected = true;
 	m_memory->userConnectionData = data;
@@ -443,6 +468,9 @@ void ServiceHostManager::OnUserDisconnected(TBee::RobotCommunicator* sender, con
 {
 	m_memory->UserConnected =  false;
 	m_memory->robotData.connected = false;
+	m_dataStreamer->Stop();
+	m_memory->gstClockPortStreamer = 0;
+	m_memory->gstClockPortPlayer = 0;
 	printf("User Disconnected : %s\n", address.toString().c_str());
 }
 

@@ -5,13 +5,16 @@
 #include "ILogManager.h"
 #include "GStreamerCore.h"
 
-//#include <gst/net/gstnet.h>
+#define USE_GST_CLOCK 
+
+#ifdef USE_GST_CLOCK
+#include <gst/net/gstnet.h>
+#endif
 
 namespace mray
 {
 namespace video
 {
-
 	class GstPipelineHandlerImpl
 	{
 	public:
@@ -23,28 +26,32 @@ namespace video
 			Loaded = false;
 			playing = false;
 
-//			baseTime = 0;
-//			isMasterClock = false;
-//			clockProvider = 0;
+#ifdef USE_GST_CLOCK
+			baseTime = 0;
+			isMasterClock = false;
+			clockProvider = 0;
 
-//			clock = 0;
-//			clockPort = 0;
+			clock = 0;
+			clockPort = 0;
+#endif
 		}
 
 		guint busWatchID;
 		GstElement* gstPipeline;
-//		GstNetTimeProvider* clockProvider;
-//		GstClock* clock;
+#ifdef USE_GST_CLOCK
+		GstNetTimeProvider* clockProvider;
+		GstClock* clock;
+		uint clockPort;
+		core::string clockIP;
+		ulong baseTime;
+		bool isMasterClock;
+#endif
 
 		bool  paused;
 		bool  Loaded;
 		bool  playing;
 		bool  closing;
 
-//		uint clockPort;
-//		core::string clockIP;
-//		ulong baseTime;
-//		bool isMasterClock;
 	};
 
 	GstPipelineHandler::GstPipelineHandler()
@@ -61,18 +68,19 @@ namespace video
 		delete m_data;
 	}
 
-	bool GstPipelineHandler::CreatePipeline(bool isMasterClock, const std::string& clockIP, uint clockPort)
+	bool GstPipelineHandler::CreatePipeline()
 	{
 		if (!m_data->gstPipeline)
 			return false;
+
 
 		//enable logging to stdout
 		g_signal_connect(m_data->gstPipeline, "deep-notify", G_CALLBACK(gst_object_default_deep_notify), NULL);
 
 
-// 		m_data->clockIP = clockIP;
-// 		m_data->clockPort = clockPort;
-// 		m_data->isMasterClock = isMasterClock;
+#ifdef USE_GST_CLOCK
+		m_data->isMasterClock = (m_data->clockIP == "127.0.0.1" ? false : true);
+#endif
 		m_data->paused = true;
 		m_data->Loaded = false;
 		m_data->playing = false;
@@ -101,17 +109,22 @@ namespace video
 			(gLogManager.StartLog(ELL_WARNING) << "GStreamerNetworkPlayer::Play(): unable to pause pipeline").flush();
 			return false;
 		}
-#if 0
-		if (m_data->clockPort > 0)
+#ifdef USE_GST_CLOCK
+		if (false)
 		{
 			if (m_data->isMasterClock)
 			{
 				ulong basetime;
 				m_data->clock = gst_pipeline_get_clock(GST_PIPELINE(m_data->gstPipeline));
+				
 				basetime = gst_clock_get_time(m_data->clock);
 				gst_pipeline_use_clock(GST_PIPELINE(m_data->gstPipeline), m_data->clock);
 
 				m_data->clockProvider = gst_net_time_provider_new(m_data->clock, "127.0.0.1", m_data->clockPort);
+				gint port;
+				g_object_get(m_data->clockProvider, "port", &port, 0);
+				m_data->clockPort = port;
+
 				gst_element_set_start_time(m_data->gstPipeline, GST_CLOCK_TIME_NONE);
 				SetClockBaseTime(basetime);
 			}
@@ -214,6 +227,9 @@ namespace video
 			m_data->gstPipeline = NULL;
 		}
 
+#ifdef USE_GST_CLOCK
+
+#endif
 		m_data->Loaded = false;
 	}
 	bool GstPipelineHandler::HandleMessage(GstBus * bus, GstMessage * msg)
@@ -312,10 +328,17 @@ namespace video
 		return true;
 	}
 
+	void GstPipelineHandler::SetClockAddr(const core::string& host, int port)
+	{
+#ifdef USE_GST_CLOCK
+		m_data->clockPort = port;
+		m_data->clockIP = host;
+#endif
 
+	}
 	void GstPipelineHandler::SetClockBaseTime(ulong baseTime)
 	{
-#if 0
+#ifdef USE_GST_CLOCK
 		m_data->baseTime = baseTime;
 		if (m_data->gstPipeline)
 		{
@@ -325,14 +348,24 @@ namespace video
 		}
 #endif
 	}
+
+	int GstPipelineHandler::GetClockPort()
+	{
+#ifdef USE_GST_CLOCK
+		return m_data->clockPort;
+#else 
+		return 0;
+#endif
+	}
 	ulong GstPipelineHandler::GetClockBaseTime()
 	{
-#if 0
+#ifdef USE_GST_CLOCK
 		if (m_data->clock)
 			return gst_clock_get_time(m_data->clock);
 		return m_data->baseTime;
-#endif
+#else
 		return 0;
+#endif
 	}
 	bool GstPipelineHandler::busFunction(GstBus * bus, GstMessage * message, GstPipelineHandler * player)
 	{

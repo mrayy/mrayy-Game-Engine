@@ -26,7 +26,7 @@ public:
 	IGStreamerStreamer(){}
 	virtual ~IGStreamerStreamer(){}
 
-	virtual void BindPorts(const std::string& addr, uint *port,uint count,uint clockPort,bool rtcp) = 0;
+	virtual void BindPorts(const std::string& addr, uint *port, uint count, bool rtcp) = 0;
 
 	virtual bool CreateStream() = 0;
 	virtual void Stream() = 0;
@@ -40,7 +40,9 @@ public:
 	virtual bool QueryLatency(bool &isLive, ulong& minLatency, ulong& maxLatency);
 
 	virtual void SetClockBase(ulong c) ;
-	virtual ulong GetClockBase() ;
+	virtual ulong GetClockBase();
+	virtual void SetClockAddr(const core::string& host, int port);
+	virtual int GetClockPort();
 };
 
 }

@@ -123,7 +123,7 @@ public:
 	int displayEncoderValues(); 
 	int controlStateMachine(); 
 	int motorSafeShutdown();
-	int motorForceShutdown();
+	int motorForceShutdown(bool quitApp);
 	bool softCurrentSense();
 	bool softInterlockProcess(); 
 	bool writeRobotData();

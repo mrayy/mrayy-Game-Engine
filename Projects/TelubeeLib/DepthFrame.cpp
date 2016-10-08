@@ -134,7 +134,7 @@ public:
 	{
 		return m_amplitude;
 	}
-	const math::vector2di& GetSize()
+	const math::vector2di& GetSize()const
 	{
 		return m_size;
 	}
@@ -461,9 +461,17 @@ public:
 		m_depthDirty = true;
 		m_normalDirty = true;
 	}
+	const ushort* GetRawData()const
+	{
+		return m_depthData.Data();
+	}
 	ushort* GetRawData()
 	{
 		return m_depthData.Data();
+	}
+	uint GetRawDataLength()const
+	{
+		return m_depthData.Size().x*m_depthData.Size().y;
 	}
 
 	math::recti  GetCroppedFrame(const math::recti& src, const DepthFrame* f)
@@ -593,7 +601,7 @@ int DepthFrame::GetOuterBandThreshold()
 	return m_impl->m_outerBandThreshold;
 }
 
-const math::vector2di& DepthFrame::GetSize()
+const math::vector2di& DepthFrame::GetSize()const
 {
 	return m_impl->GetSize();
 }
@@ -638,9 +646,19 @@ void DepthFrame::SetRawData(ushort* d, int w, int h)
 	m_impl->SetRawData(d,w,h);
 }
 
+const ushort* DepthFrame::GetRawData()const
+{
+	return m_impl->GetRawData();
+}
+
 ushort* DepthFrame::GetRawData()
 {
 	return m_impl->GetRawData();
+}
+
+uint DepthFrame::GetRawDataLength()const
+{
+	return m_impl->GetRawDataLength();
 }
 
 math::recti DepthFrame::GetCroppedFrame(const math::recti& src, const DepthFrame* f)

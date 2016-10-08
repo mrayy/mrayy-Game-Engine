@@ -307,7 +307,9 @@ public:
 		{
 			ERobotControllerStatus st = m_RobotHandler->GetRobotController()->GetRobotStatus();
 			msg = core::string("Robot Status: ");
+			if (st == EIniting)msg += "Initing";
 			if (st == EStopped)msg += "Stopped";
+			if (st == EStopping)msg += "Stopping";
 			if (st == EDisconnected)msg += "Disconnected";
 			if (st == EConnecting)msg += "Connecting";
 			if (st == EDisconnecting)msg += "Disconnecting";
