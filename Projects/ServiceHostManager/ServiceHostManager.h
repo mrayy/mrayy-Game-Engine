@@ -9,6 +9,7 @@
 #include "IServiceModule.h"
 #include "IUDPClient.h"
 #include "TBRobotInfo.h"
+#include "XMLTree.h"
 #include "GstCustomDataStreamer.h"
 
 #include <windows.h>
@@ -40,6 +41,14 @@ protected:
 
 	int _currDataRate;
 	double _lastTime;
+
+	xml::XMLTree m_valueTree;
+	xml::XMLElement* m_valueRootElement;
+
+	network::NetAddress *_portHostAddr;
+	std::map<core::string, unsigned short> _portMap;
+	ushort _GetPortValue(const core::string& name, ushort defaultValue=0);
+	network::NetAddress* _GetTargetClientAddr();
 
 	struct ServiceInfo
 	{
@@ -74,9 +83,11 @@ protected:
 	void _destroy();
 
 	void _ServiceAdded();
-	bool _ProcessPacket();
+//	bool _ProcessPacket();
+	void _ProcessServiceMessage(const core::string msg, network::NetAddress* src);
 	bool _ProcessServices();
 
+	void _loadSettings();
 public:
 	ServiceHostManager();
 	virtual ~ServiceHostManager();

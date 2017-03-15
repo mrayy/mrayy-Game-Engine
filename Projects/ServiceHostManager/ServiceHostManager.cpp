@@ -13,6 +13,7 @@
 #include "MutexLocks.h"
 #include "CommunicationMessages.h"
 #include "LogManager.h"
+#include "LocalNetworkPortAssigner.h"
 
 #include "picojson.h"
 #include <tinyxml2.h>
@@ -84,7 +85,10 @@ void ServiceHostManager::_destroy()
 	}
 	m_sharedMemory.Detach();
 	if (m_commLink)
+	{
 		m_commLink->Close();
+		delete m_commLink;
+ 	}
 
 	if (m_dataStreamer)
 	{
@@ -101,19 +105,20 @@ void ServiceHostManager::_destroy()
 	delete m_serviceThread;
 	m_serviceThread = 0;
 
-	delete m_commLink;
 	delete m_dataMutex;
+
+	delete network::INetworkPortAssigner::getInstancePtr();
 }
 
 bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 {
 	new OS::WinOSystem();
-	new LogManager();
 	m_timer = OS::WinOSystem::getInstance().createTimer();
-	//new OS::WinFileSystem();
-	//new Engine(new OS::WinOSystem());
+	new OS::WinFileSystem();
+	new Engine(new OS::WinOSystem());
 	//gEngine.loadPlugins("plugins.stg");
 	//gEngine.createDevice("OpenGL");
+	new network::LocalNetworkPortAssigner();
 
 	StreamLogger *log = new StreamLogger(true);
 	log->setStream(gFileSystem.createTextFileWriter("ServiceHostManager.log"));
@@ -126,8 +131,8 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	m_sharedMemory.SetName("SH_TBee_Service");
 
 	m_sharedMemory.createWrite();
-	m_sharedMemory.openWrite();
-	m_memory = (TBee::ModuleSharedMemory*)m_sharedMemory.GetData();
+	//m_sharedMemory.openWrite();
+	m_memory = m_sharedMemory.GetData<TBee::ModuleSharedMemory>();
 	memset(m_memory, 0, sizeof(TBee::ModuleSharedMemory));
 	m_memory->InitMaster(m_memory);
 
@@ -135,21 +140,24 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 		TBee::SharedMemoryLock m(m_memory);
 	}
 
+	_portMap["CommPort"] = COMMUNICATION_PORT;
+	_loadSettings();
+
 	m_commLink = network::INetwork::getInstance().createUDPClient();
-	m_commLink->Open();
-
-	m_memory->hostAddress.address= network::INetwork::getInstance().getLocalAddress();
-	m_memory->hostAddress.port = m_commLink->Port();
-	printf("Service Host: %s:%d\n\n", m_memory->hostAddress.toString().c_str(), m_memory->hostAddress.port);
-
-	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
-
+	m_commLink->Open(gNetworkPortAssigner.AssignPort("CommLink", network::EPT_UDP, _GetPortValue("CommLink")));
 
 	printf("Initializing RobotCommunicator\n");
 	gLogManager.log("Initializing RobotCommunicator", ELL_INFO);
 	m_robotCommunicator = new TBee::RobotCommunicator();
-	m_robotCommunicator->StartServer(COMMUNICATION_PORT);
+	m_robotCommunicator->StartServer(gNetworkPortAssigner.AssignPort("CommPort", network::EPT_UDP, _GetPortValue("CommPort")));
 	m_robotCommunicator->SetListener(this);
+
+	m_memory->hostAddress.address= network::INetwork::getInstance().getLocalAddress();
+	//m_memory->hostAddress.port = m_commLink->Port();
+	m_memory->hostAddress.port = m_robotCommunicator->GetServerPort();
+	printf("Service Host: %s:%d\n\n", m_memory->hostAddress.toString().c_str(), m_memory->hostAddress.port);
+
+	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 
 	m_dataStreamer = new video::GstCustomDataStreamer();
 	m_dataStreamer->SetApplicationDataType("control", true);
@@ -181,11 +189,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 			RunLocalService(argv[i]);
 		}
 	}
-//  	RunLocalService("AVStreamServiceModule");
-//  	RunLocalService("RobotControlServiceModule");
+//  RunLocalService("AVStreamServiceModule");
+//  RunLocalService("RobotControlServiceModule");
 
-	m_commThread = OS::IThreadManager::getInstance().createThread(new ServiceHostManagerThread(this, &ServiceHostManager::_ProcessPacket));
-	m_commThread->start(0);
+// 	m_commThread = OS::IThreadManager::getInstance().createThread(new ServiceHostManagerThread(this, &ServiceHostManager::_ProcessPacket));
+// 	m_commThread->start(0);
 
 	m_serviceThread = OS::IThreadManager::getInstance().createThread(new ServiceHostManagerThread(this, &ServiceHostManager::_ProcessServices, 100));
 	m_serviceThread->start(0);
@@ -273,6 +281,60 @@ int ServiceHostManager::GetServiceByName(const core::string &name)
 	return -1;
 }
 
+ushort ServiceHostManager::_GetPortValue(const core::string& name,ushort defaultValue)
+{
+	std::map<core::string, unsigned short>::iterator it = _portMap.find(name);
+	if (it == _portMap.end())
+		return defaultValue;
+	return it->second;
+}
+
+network::NetAddress* ServiceHostManager::_GetTargetClientAddr()
+{
+	if (_portHostAddr)
+		return _portHostAddr;
+	return &m_memory->userConnectionData.userData.clientAddress;
+}
+void ServiceHostManager::_loadSettings()
+{
+	if (m_valueTree.load(gFileSystem.getAppPath() + "Modules\\ServiceHostManager.xml"))
+	{
+		xml::XMLElement* elem = m_valueTree.getSubElement("ServiceHostManager");
+		m_valueRootElement = elem;
+		if (!elem)
+			return;
+		{
+			xml::XMLElement* e = elem->getSubElement("PortMap");
+			if (e)
+			{
+				xml::XMLAttribute*a = e->getAttribute("TargetHost");
+				if (a)
+				{
+					_portHostAddr = new network::NetAddress(a->value);
+				}
+				e = e->getSubElement("Port");
+				while (e)
+				{
+					core::string name;
+					ushort port;
+					a = e->getAttribute("Name");
+					name = a->value;
+					a = e->getAttribute("TargetPort");
+					port = core::StringConverter::toInt(a->value);
+
+					_portMap[name] = port;
+					e = e->nextSiblingElement("Port");
+				}
+			}
+		}
+	}
+	else
+	{
+		printf("Failed to load Host Manager Settings!\n");
+	}
+}
+
+#if 0
 
 //#define USE_JSON_PARSER
 #define USE_XML_PARSER
@@ -386,7 +448,88 @@ bool ServiceHostManager::_ProcessPacket()
 	
 	return 0;
 }
+#endif
 
+
+void ServiceHostManager::_ProcessServiceMessage(const core::string data, network::NetAddress* src)
+{
+	tinyxml2::XMLDocument doc;
+	tinyxml2::XMLError err = doc.Parse(data.c_str());
+	if (err != tinyxml2::XML_NO_ERROR)
+	{
+		return;
+	}
+	tinyxml2::XMLElement*root = doc.RootElement();
+	core::string rootName = root->Name();
+
+	std::string msg = root->Attribute("Message");
+	if (msg == "Connect") //New service
+	{
+		ServiceInfo ifo;
+		ifo.name = root->Attribute("Name");
+		ifo.address = *src;
+		ifo.netValuePort = root->IntAttribute("NetValue");
+
+		printf("New service was connected [%s]: %s:%d. NetValue Port:%d\n", ifo.name.c_str(), ifo.address.toString().c_str(), ifo.address.port, ifo.netValuePort);
+
+		//let know the user the new net value port
+		if (m_memory->UserConnected)
+		{
+
+		}
+
+		int i = GetServiceByName(ifo.name);
+		ifo.lastTime = m_timer->getMilliseconds();
+		if (i != -1)
+		{
+
+			m_dataMutex->lock();
+			m_serviceList[i].lastTime = ifo.lastTime;
+			m_serviceList[i].address = *src;
+			m_serviceList[i].netValuePort = ifo.netValuePort;
+			m_dataMutex->unlock();
+		}
+		else
+		{
+			m_dataMutex->lock();
+			m_serviceList.push_back(ifo);
+			m_dataMutex->unlock();
+		}
+	}
+	else if (msg == "Disconnect") //New service
+	{
+		int i = GetServiceByAddress(src);
+		if (i != -1)
+		{
+			printf("Service disconnected [%s]\n", m_serviceList[i].name.c_str());
+			m_dataMutex->lock();
+			m_serviceList.erase(m_serviceList.begin() + i);
+			m_dataMutex->unlock();
+		}
+	}
+	else if (msg == "Pong")
+	{
+		int i = GetServiceByAddress(src);
+		if (i != -1)
+		{
+			//printf("Pong message recevied from :%s\n", m_serviceList[i].name.c_str());
+			m_dataMutex->lock();
+			m_serviceList[i].lastTime = m_timer->getMilliseconds();
+			m_serviceList[i].pingSent = 0;
+			m_dataMutex->unlock();
+		}
+	}if (msg == "Broadcast") // broadcast message to all services
+	{
+		for (int i = 0; i < m_serviceList.size(); ++i)
+		{
+			m_dataMutex->lock();
+			if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port != 0 &&
+				m_serviceList[i].address.address != src->address && m_serviceList[i].address.port != src->port)
+				m_commLink->SendTo(&m_serviceList[i].address, data.c_str(), data.length());
+			m_dataMutex->unlock();
+		}
+	}
+}
 
 bool ServiceHostManager::_ProcessServices()
 {
@@ -505,7 +648,7 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 	if (m.equals_ignore_case("commPort"))
 	{
 		TBee::SharedMemoryLock m(m_memory);
-		m_memory->userConnectionData.userData.clientAddress.port = core::StringConverter::toInt(value);
+		m_memory->userConnectionData.userData.clientAddress.port = _GetPortValue("UserCommPort", core::StringConverter::toInt(value));;
 		m_memory->userCommPort = m_memory->userConnectionData.userData.clientAddress.port;
 	}
 	else if (m.equals_ignore_case("detect"))
@@ -570,6 +713,10 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 		m_memory->robotData.headPos[0] = atof(vals[0].c_str());
 		m_memory->robotData.headPos[1] = atof(vals[1].c_str());
 		m_memory->robotData.headPos[2] = atof(vals[2].c_str());
+	}
+	else if (m.equals_ignore_case("ServiceModule"))
+	{
+		_ProcessServiceMessage(value,addr);
 	}
 	else
 	{
