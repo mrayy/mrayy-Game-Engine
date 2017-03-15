@@ -76,6 +76,15 @@
     <ClCompile Include="GstNetworkVideoStreamer.cpp">
       <Filter>StreamType\Streamer</Filter>
     </ClCompile>
+    <ClCompile Include="EyegazeCameraVideoSrc.cpp">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="CMyListener.cpp">
+      <Filter>Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="rtp.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -160,6 +169,15 @@
     </ClInclude>
     <ClInclude Include="GstNetworkVideoStreamer.h">
       <Filter>StreamType\Streamer</Filter>
+    </ClInclude>
+    <ClInclude Include="EyegazeCameraVideoSrc.h">
+      <Filter>StreamType\Streamer\CustomSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="CMyListener.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="rtp.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

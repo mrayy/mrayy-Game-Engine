@@ -30,7 +30,7 @@ class GstNetworkAudioPlayerImpl :public GstPipelineHandler
 
 	core::string m_pipeLineString;
 
-	GstMyUDPSrc* m_audioSrc;
+	GstElement* m_audioSrc;
 	GstMyUDPSrc* m_audioRtcpSrc;
 	GstMyUDPSink* m_audioRtcpSink;
 	int m_sampleRate;
@@ -88,13 +88,13 @@ public:
 		{
 			m_pipeLineString =
 				"rtpbin name=rtpbin "
-				"myudpsrc name=audioSrc "+ audiocaps +
+				"udpsrc name=audioSrc "+ audiocaps +
 				//audio rtp
 				"! rtpbin.recv_rtp_sink_0 "
 
 				"rtpbin. ! " + audioStr+ " ! directsoundsink "
 
-				"myudpsrc name=audioRtcpSrc ! rtpbin.recv_rtcp_sink_0 "
+				"udpsrc name=audioRtcpSrc ! rtpbin.recv_rtcp_sink_0 "
 
 				//audio rtcp
 				"rtpbin.send_rtcp_src_0 ! myudpsink name=audioRtcpSink sync=false async=false ";
@@ -102,7 +102,7 @@ public:
 		else
 		{
 			m_pipeLineString =
-				"myudpsrc name=audioSrc " + audiocaps + "!" + audioStr;//
+				"udpsrc name=audioSrc " + audiocaps + "!" + audioStr;//
 			if (m_customAudioInterface)
 				m_pipeLineString += " ! appsink name=audioSink sync=false  emit-signals=false";
 			else
@@ -115,15 +115,17 @@ public:
 	{
 		if (!GetPipeline())
 			return;
-#define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
-#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
+//#define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
+//#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
 
 
-		SET_SRC(audioSrc, m_audioPort);
+		m_audioSrc = gst_bin_get_by_name(GST_BIN(GetPipeline()), "audioSrc");
+		g_object_set(m_audioSrc, "port", m_audioPort, 0);
+	//	SET_SRC(audioSrc, m_audioPort);
 		if (m_rtcp)
 		{
-			SET_SINK(audioRtcpSink, (m_audioPort + 1));
-			SET_SRC(audioRtcpSrc, (m_audioPort + 2));
+		//	SET_SINK(audioRtcpSink, (m_audioPort + 1));
+		//	SET_SRC(audioRtcpSrc, (m_audioPort + 2));
 		}
 
 	}
@@ -143,10 +145,11 @@ public:
 			return true;
 
 		_BuildPipeline();
+		gLogManager.log("GstNetworkAudioPlayer::Starting with pipeline: " + m_pipeLineString, ELL_INFO);
 
 		GError *err = 0;
 		GstElement* p = gst_parse_launch(m_pipeLineString.c_str(), &err);
-		gLogManager.log("GstNetworkAudioPlayer::Starting with pipeline: " + m_pipeLineString, ELL_INFO);
+		gLogManager.log("Finished pipeline parsing", ELL_INFO);
 		if (err)
 		{
 			gLogManager.log("GstNetworkAudioPlayer: Pipeline error: " + core::string(err->message), ELL_WARNING);
@@ -196,8 +199,8 @@ public:
 
 	virtual void Close()
 	{
-		if (m_audioSrc && m_audioSrc->m_client)
-			m_audioSrc->m_client->Close();
+//		if (m_audioSrc && m_audioSrc->m_client)
+//			m_audioSrc->m_client->Close();
 		GstPipelineHandler::Close();
 	}
 
@@ -216,9 +219,10 @@ public:
 	}
 	int GetPort()
 	{
-		if (m_audioSrc && m_audioSrc->m_client)
-			return m_audioSrc->m_client->Port();//return the generated port
-		else return m_audioPort;
+	//	if (m_audioSrc && m_audioSrc->m_client)
+	//		return m_audioSrc->m_client->Port();//return the generated port
+	//	else 
+		return m_audioPort;
 	}
 
 	virtual void UseCustomAudioInterface(bool use)

@@ -19,13 +19,24 @@
 #include "mString.h"
 #include "IStreamListener.h"
 #include "ListenerContainer.h"
-
+#include "ImageInfo.h"
 
 namespace mray
 {
 namespace video
 {
 	class GstPipelineHandler;
+
+	template<class T>
+	class GstFrameData
+	{
+	public:
+		T data;
+		unsigned __int64 PTS;
+		unsigned __int64 DTS;
+	};
+
+	typedef GstFrameData<ImageInfo> GstImageFrame;
 
 class IGStreamerPlayer :public ListenerContainer<IGStreamerPlayerListener*>
 {

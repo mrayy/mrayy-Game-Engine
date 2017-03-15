@@ -51,7 +51,7 @@ std::string ICustomVideoSrc::BuildStringH264()
 	for (; it != m_encoderParams.end(); ++it)
 		videoStr += it->first + "=" + it->second + " ";
 
-	videoStr += " ! rtph264pay ";
+	videoStr += " ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize)+" ";
 
 	//videoStr += "! autovideosink";
 
@@ -71,7 +71,7 @@ std::string ICustomVideoSrc::BuildStringVP8()
 
 	//	" keyframe-mode=1 keyframe-max-dist=1 threads=4 "// ip-factor=1.8 interlaced=true sliced-threads=false  "// 
 
-	videoStr += " ! rtpvp8pay  ";
+	videoStr += " ! rtpvp8pay mtu=" + core::StringConverter::toString(m_mtuSize) + " ";
 	/*
 	//videoStr += " ! vp8enc ! rtpvp8pay ";
 	videoStr += " ! theoraenc ! rtptheorapay ";*/
@@ -95,6 +95,9 @@ void ICustomVideoSrc::LoadParameters(xml::XMLElement* elem)
 	attr = elem->getAttribute("SeparateStreams");
 	if (attr)
 		SetSeparateStreams(core::StringConverter::toBool(attr->value));
+	attr = elem->getAttribute("mtu");
+	if (attr)
+		m_mtuSize=core::StringConverter::toInt(attr->value);
 
 	e = elem->getSubElement("Param");
 	while (e)

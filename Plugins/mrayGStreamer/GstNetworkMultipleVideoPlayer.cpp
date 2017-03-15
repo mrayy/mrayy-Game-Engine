@@ -51,7 +51,7 @@ class GstNetworkMultipleVideoPlayerImpl :public GstPipelineHandler,IPipelineList
 		VideoAppSinkHandler handler;
 		uint videoPort;
 
-		GstMyUDPSrc* videoSrc;
+		GstElement* videoSrc;
 		GstAppSink* videoSink;
 	};
 
@@ -204,7 +204,11 @@ public:
 		for (int i = 0; i < m_playersCount; ++i)
 		{
 			core::string name = ("videoSrc" + core::StringConverter::toString(i));
-			SET_SRC(i, name.c_str(), m_videoHandler[i].videoPort);
+			m_videoHandler[i].videoSrc= gst_bin_get_by_name(GST_BIN(GetPipeline()), name.c_str());
+			if (m_videoHandler[i].videoSrc)
+				g_object_set(m_videoHandler[i].videoSrc, "port", m_videoHandler[i].videoPort, "host", m_ipAddr.c_str(), 0);
+
+//			SET_SRC(i, name.c_str(), m_videoHandler[i].videoPort);
 // 			SET_SINK(i, videoRtcpSink, (m_videoHandler[i].videoPort + 1));
 // 			SET_SRC(i, videoRtcpSrc, (m_videoHandler[i].videoPort + 2));
 		}
@@ -333,8 +337,8 @@ public:
 	{
 		for (int i = 0; i < m_playersCount; ++i)
 		{
-			if (m_videoHandler[i].videoSrc && m_videoHandler[i].videoSrc->m_client)
-				m_videoHandler[i].videoSrc->m_client->Close();
+/*			if (m_videoHandler[i].videoSrc && m_videoHandler[i].videoSrc->m_client)
+				m_videoHandler[i].videoSrc->m_client->Close();*/
 			m_videoHandler[i].handler.Close();
 		}
 		GstPipelineHandler::Close();
@@ -356,8 +360,12 @@ public:
 	virtual int GetPort(int i)
 	{
 		if (i >= m_videoHandler.size())return 0;
-		if (m_videoHandler[i].videoSrc && m_videoHandler[i].videoSrc->m_client)
-			return m_videoHandler[i].videoSrc->m_client->Port();
+		if (m_videoHandler[i].videoSrc)
+		{
+			gint port;
+			g_object_get(m_videoHandler[i].videoSrc, "port", &port,0);
+			return port;
+		}else
 		return m_videoHandler[i].videoPort;
 	}
 
@@ -410,6 +418,13 @@ public:
 			return m_videoHandler[i].handler.getPixelsRef(); 
 	}
 
+	const GstImageFrame* GetLastDataFrame(int i)
+	{
+		if (i > m_playersCount)
+			return 0;
+		else
+			return m_videoHandler[i].handler.getPixelFrame();
+	}
 
 	virtual void OnPipelineReady(GstPipelineHandler* p){ m_owner->__FIRE_OnPlayerReady(m_owner); }
 	virtual void OnPipelinePlaying(GstPipelineHandler* p){ m_owner->__FIRE_OnPlayerStarted(m_owner); }
@@ -514,6 +529,11 @@ float GstNetworkMultipleVideoPlayer::GetCaptureFrameRate(int i)
 const ImageInfo* GstNetworkMultipleVideoPlayer::GetLastFrame(int i)
 {
 	return m_impl->GetLastFrame(i);
+}
+
+const GstImageFrame* GstNetworkMultipleVideoPlayer::GetLastDataFrame(int i)
+{
+	return m_impl->GetLastDataFrame(i);
 }
 
 int GstNetworkMultipleVideoPlayer::GetPort(int i)

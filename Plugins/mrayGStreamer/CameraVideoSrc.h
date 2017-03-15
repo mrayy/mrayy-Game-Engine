@@ -19,10 +19,10 @@ class CameraVideoSrc:public ICustomVideoSrc
 {
 protected:
 	CameraVideoSrcImpl* m_impl;
-	std::string GetEncodingStr();
+	virtual std::string GetEncodingStr();
 
-	std::string _generateString(int i);
-	std::string _generateFullString();
+	virtual std::string _generateString(int i);
+	virtual std::string _generateFullString();
 public:
 	CameraVideoSrc();
 	virtual ~CameraVideoSrc();
@@ -35,9 +35,9 @@ public:
 	void  SetResolution(int width, int height, int fps, bool free);
 	void SetCaptureType(const std::string &type);
 
-	std::string GetPipelineStr(int i);
+	virtual std::string GetPipelineStr(int i);
 
-	void LinkWithPipeline(void* pipeline);
+	virtual void LinkWithPipeline(void* pipeline);
 	int GetVideoSrcCount();
 
 	int GetStreamsCount();

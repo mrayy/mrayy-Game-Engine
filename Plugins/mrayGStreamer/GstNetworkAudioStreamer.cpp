@@ -27,7 +27,7 @@ protected:
 	uint m_audioPort;
 
 	core::string m_pipeLineString;
-	GstMyUDPSink* m_audioSink;
+	GstElement* m_audioSink;
 	GstMyUDPSink* m_audioRtcpSink;
 	GstMyUDPSrc* m_audioRtcpSrc;
 	GstNetworkAudioStreamer::AudioInterface m_interface;
@@ -60,7 +60,7 @@ public:
 			audioStr += "device=\"" + m_interface.deviceGUID + "\"";
 		}
 
-		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=32000,channels=2 "
+		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=" + core::StringConverter::toString(m_interface.samplingRate) + ",channels=" + core::StringConverter::toString(m_interface.channelsCount)+" "
 			//" ! audiochebband mode=band-pass lower-frequency=1000 upper-frequency=6000 poles=4 "
 			"! audioconvert ! volume volume=2 ! audioresample ! ";
 		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
@@ -100,7 +100,7 @@ public:
 		else
 		{
 			m_pipeLineString = audioStr + " ! "
-				"myudpsink name=audioSink sync=false ";
+				"udpsink name=audioSink port=" + core::StringConverter::toString(m_audioPort) + " host=" + m_ipAddr + " sync=false ";
 
 		}
 
@@ -108,14 +108,16 @@ public:
 	}
 	void _UpdatePorts()
 	{
-
 		if (!GetPipeline())
 			return;
 #define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
 #define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
 
 
-		SET_SINK(audioSink, m_audioPort);
+		m_audioSink = gst_bin_get_by_name(GST_BIN(GetPipeline()), "audioSink");
+		g_object_set(m_audioSink, "port", m_audioPort, 0);
+		g_object_set(m_audioSink, "host", m_ipAddr.c_str(), 0);
+	//	SET_SINK(audioSink, m_audioPort);
 		SET_SRC(audioRtcpSrc, (m_audioPort + 1));
 		SET_SINK(audioRtcpSink, (m_audioPort + 2));
 
@@ -146,6 +148,8 @@ public:
 		if (err)
 		{
 			gLogManager.log("GstNetworkAudioStreamer: Pipeline error: " + core::string(err->message), ELL_WARNING);
+			gst_object_unref(p);
+			p = 0;
 		}
 		if (!p)
 			return false;

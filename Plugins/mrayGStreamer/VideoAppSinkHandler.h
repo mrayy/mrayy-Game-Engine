@@ -12,14 +12,16 @@ namespace video
 {
 class VideoAppSinkHandler :public IAppSinkHandler
 {
+public:
+
 protected:
 	std::shared_ptr<GstSample> 	buffer, prevBuffer;
 	GstMapInfo mapinfo;
 
 	video::EPixelFormat m_pixelFormat;
 	//quick hack for YUV support: maximum of 3 surfaces
-	video::ImageInfo m_pixels[1];				// 24 bit: rgb
-	video::ImageInfo m_backPixels[1];
+	GstImageFrame m_pixels[1];				// 24 bit: rgb
+	GstImageFrame m_backPixels[1];
 	bool			m_IsFrameNew;			// if we are new
 	bool			m_HavePixelsChanged;
 	bool			m_BackPixelsChanged;
@@ -41,7 +43,8 @@ public:
 
 	virtual void Close();
 	bool 			isFrameNew(){ return m_IsFrameNew; }
-	video::ImageInfo*	getPixelsRef(int surface = 0){ return &m_pixels[surface]; }
+	video::ImageInfo*	getPixelsRef(int surface = 0){ return &m_pixels[surface].data; }
+	GstImageFrame*	getPixelFrame(int surface = 0){ return &m_pixels[surface]; }
 	int getSurfaceCount(){ return m_surfaceCount; }
 	bool GrabFrame();
 	uint GetFrameID(){ return m_frameID; }

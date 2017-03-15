@@ -37,7 +37,8 @@ public:
 	{
 		StreamRaw,
 		StreamCoded,
-		StreamOvrvision
+		StreamOvrvision,
+		StreamEyegazeRaw
 	};
 
 	//http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html

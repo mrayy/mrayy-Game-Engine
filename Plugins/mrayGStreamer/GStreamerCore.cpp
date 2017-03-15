@@ -16,6 +16,7 @@
 #include "CMySrc.h"
 #include "CMySink.h"
 #include "CMyUDPSrc.h"
+#include "CMyListener.h"
 #include "CMyUDPSink.h"
 
 //#define USE_LIBNICE
@@ -91,27 +92,33 @@ void g_logFunction(const gchar   *log_domain,
 	const gchar   *message,
 	gpointer       user_data)
 {
-	printf("GStreamer::%s\n", message);
+	//printf("GStreamer::%s\n", message);
 }
 
 void GStreamerCore::_Init()
 {
 	GError *err = 0;
-	_gst_debug_enabled = false; 
 	if (!gst_init_check(0,0, &err))
 	{
 		gLogManager.log("GStreamerCore - Failed to init GStreamer!"+ core::StringConverter::toString(err->message), ELL_ERROR);
 	}
 	else
 	{
-// 		g_log_set_handler(0, G_LOG_LEVEL_INFO, g_logFunction, 0);
-// 		g_log_set_handler(0, G_LOG_LEVEL_DEBUG, g_logFunction, 0);
-// 		g_log_set_handler(0, G_LOG_LEVEL_MESSAGE, g_logFunction, 0);
-// 		g_log_set_handler(0, G_LOG_LEVEL_CRITICAL, g_logFunction, 0);
-// 		g_log_set_handler(0, G_LOG_FLAG_FATAL , g_logFunction, 0);
-// 		g_log_set_default_handler(g_logFunction, 0);
+ 		g_log_set_handler(0, G_LOG_LEVEL_INFO, 0, 0);
+ 		g_log_set_handler(0, G_LOG_LEVEL_DEBUG, 0, 0);
+ 		g_log_set_handler(0, G_LOG_LEVEL_MESSAGE, 0, 0);
+ 		g_log_set_handler(0, G_LOG_LEVEL_CRITICAL, 0, 0);
+ 		g_log_set_handler(0, G_LOG_FLAG_FATAL , 0, 0);
+		g_log_set_default_handler(0, 0);
+		_gst_debug_enabled = false;
+		_gst_debug_min = GST_LEVEL_NONE;
+		/*
+		g_log_set_handler_full("", G_LOG_LEVEL_INFO, g_logFunction, 0, 0);
+		g_log_set_handler_full("", G_LOG_LEVEL_DEBUG, g_logFunction, 0, 0);
+		g_log_set_handler_full("", G_LOG_LEVEL_MESSAGE, g_logFunction, 0, 0);*/
 
-//		fclose(stderr);
+		fclose(stderr);
+		//fclose(stdout);
 
 		//register plugin path
 		gLogManager.log("GStreamerCore - Starting Gstreamer", ELL_INFO);
@@ -150,6 +157,10 @@ void GStreamerCore::_Init()
 			_GstMyUDPSinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 			"");
 
+		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+			"mylistener", (char*)"Custom listener element",
+			_GstMyListenerClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "mray",
+			"");
 #ifdef USE_LIBNICE
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "nicesrc", strdup("nicesrc"), nicesrc_plugin_init, "1.0.4", "BSD", "libnice", "nice", "http://libnice.org");
 

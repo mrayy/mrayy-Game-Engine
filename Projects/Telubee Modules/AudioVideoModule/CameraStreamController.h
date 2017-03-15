@@ -10,6 +10,8 @@
 #include "OVRVisionCam.h"
 #include "capDevice.h"
 
+#include "EyegazeCameraVideoSrc.h"
+
 namespace mray
 {
 namespace TBee
@@ -205,6 +207,7 @@ class EncodedCameraStreamController :public ICameraSrcController
 {
 	std::vector<int> _captureDevices;
 	capDeviceInput* _capDev;
+	bool _eyegaze;
 	core::string _GetParameter(int device,const core::string& name)
 	{
 		if (device == -1 )
@@ -398,6 +401,7 @@ public:
 	{
 		CaptureType = t;
 		_capDev = new capDeviceInput();
+		_eyegaze = false;
 	}
 	virtual ~EncodedCameraStreamController()
 	{
@@ -418,6 +422,11 @@ public:
 		}
 	}
 
+	void EnableEyegaze(bool e)
+	{
+		_eyegaze = e;
+	}
+
 	video::ICustomVideoSrc* CreateVideoSrc()
 	{
 		for (int i = 0; i < cams.size(); ++i)
@@ -429,7 +438,11 @@ public:
 			}
 		}
 
-		video::CameraVideoSrc* src = new video::CameraVideoSrc();
+		video::CameraVideoSrc* src;
+		if (_eyegaze)
+		 src = new video::EyegazeCameraVideoSrc();
+		else 
+			src = new video::CameraVideoSrc();
 		src->SetCameraIndex(_captureDevices);
 		if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureJpeg)
 		{

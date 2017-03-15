@@ -68,6 +68,7 @@ void IXMLNetMessageHandler::StartHandler(int port)
 	m_thread = OS::IThreadManager::getInstance().createThread(new IXMLNetMessageHandlerThread(this));
 	m_thread->start(0);
 	printf("Communication Channel started - Port : %d\n", port);
+
 }
 
 void IXMLNetMessageHandler::StopHandler()

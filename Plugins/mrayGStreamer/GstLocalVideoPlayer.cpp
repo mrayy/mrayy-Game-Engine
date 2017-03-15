@@ -82,7 +82,7 @@ public:
 		}
 
 		{
-			ss << "! videoconvert ! video/x-raw,format=I420 ! appsink name=videosink";
+			ss << "! F ! appsink name=videosink";
 
 		}
 		m_pipeLineString = ss.str();

@@ -41,7 +41,7 @@ public:
 	DECLARE_FIRE_METHOD(OnUserDisconnected, (), ())
 	DECLARE_FIRE_METHOD(OnUserMessage, (network::NetAddress* addr, const core::string& msg, const core::string& value), (addr,msg,value))
 public:
-	TBeeServiceContext() :serviceLoader(0),app(0),commChannel(0),sharedMemory(0),netValueController(0)
+	TBeeServiceContext() :serviceLoader(0), app(0), commChannel(0), sharedMemory(0), netValueController(0), portHostAddr(0)
 	{}
 	virtual ~TBeeServiceContext(){}
 
@@ -51,6 +51,10 @@ public:
 
 	//application runtime options
 	OptionContainer appOptions;
+
+	//network port map
+	network::NetAddress *portHostAddr;
+	std::map<core::string, unsigned short> portMap;
 
 	//User's end address
 	network::NetAddress remoteAddr;
@@ -64,6 +68,22 @@ public:
 	ModuleSharedMemory* sharedMemory;
 
 	NetworkValueController* netValueController;
+
+	ushort GetPortValue(const core::string& name)
+	{
+		std::map<core::string, unsigned short>::iterator it= portMap.find(name);
+		if (it == portMap.end())
+			return 0;
+		return it->second;
+	}
+
+	network::NetAddress* GetTargetClientAddr()
+	{
+		if (portHostAddr)
+			return portHostAddr;
+		return &remoteAddr;
+
+	}
 };
 
 class TbeeServiceRenderContext:public ServiceRenderContext

@@ -7,6 +7,7 @@
 #include <gst/app/gstappsink.h>
 #include <memory>
 #include "ListenerContainer.h"
+#include "IGStreamerPlayer.h"
 
 namespace mray
 {

@@ -31,6 +31,7 @@
 #include "CameraStreamController.h"
 #include "capDevice.h"
 #include "ModuleSharedMemory.h"
+#include "INetworkPortAssigner.h"
 
 #include <conio.h>
 
@@ -59,6 +60,8 @@ public:
 
 	GCPtr<video::GstStreamBin> m_streamers;
 	ECameraType m_cameraType;
+	bool m_enableEyegaze;
+	math::vector2di m_eyegazeSize;
 	math::vector2di m_resolution;
 	int m_fps;
 	CameraConfigurationManager* m_camConfigMngr;
@@ -89,6 +92,7 @@ public:
 	//std::vector<_CameraInfo> m_cameraIfo;
 
 	ICameraSrcController* m_cameraController;
+	video::ICustomVideoSrc* m_cameraSource;
 
 	std::vector<uint> m_VideoPorts;
 	uint m_AudioPort;
@@ -211,7 +215,7 @@ public:
 		m_context = context;
 		m_resolution.set(1280, 720);
 
-#if USE_POINTGREY && USE_WEBCAMERA
+//#if USE_POINTGREY && USE_WEBCAMERA
 		core::string camType= context->appOptions.GetOptionByName("CameraConnection")->getValue();
 		if (camType == "DirectShow")
 			m_cameraType=ECameraType::Webcam ;
@@ -221,14 +225,17 @@ public:
 			m_cameraType = ECameraType::OvrvisionCompressed;
 		if (camType == "PointGrey")
 			m_cameraType=ECameraType::PointGrey ;
-#else 
+
+		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze"));
+		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
+/*#else 
 #if USE_POINTGREY
 		m_cameraType = ECameraType::PointGrey;
 #else
 		m_cameraType = ECameraType::Webcam;
 #endif
 
-#endif
+#endif*/
 		m_cameraProfile = context->appOptions.GetOptionValue("CameraProfile");
 
 		{
@@ -245,8 +252,13 @@ public:
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
 				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
-				m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType);
-				//m_cameraController = new CameraGrabberController();
+				if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
+					m_cameraController = new CameraGrabberController();
+				else
+				{
+					m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType);
+					((EncodedCameraStreamController*)m_cameraController)->EnableEyegaze(m_enableEyegaze);
+				}
 			}else 
 			{
 				gLogManager.log("Creating Encoded Capture Camera", ELL_INFO);
@@ -296,6 +308,11 @@ public:
 		else
 		if (m_cameraType == ECameraType::Webcam)
 		{
+			if (m_enableEyegaze)
+				m_camConfig->streamType = TelubeeCameraConfiguration::StreamEyegazeRaw;
+			else
+				m_camConfig->streamType = TelubeeCameraConfiguration::StreamRaw;
+
 			// -1 for the None index
 			_CameraInfo ifo;
 			ifo.ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Left")->getValue());
@@ -403,6 +420,13 @@ public:
 
 			
 			video::ICustomVideoSrc* src = m_cameraController->CreateVideoSrc();
+			m_cameraSource = src;
+			if (m_enableEyegaze)
+			{
+				video::EyegazeCameraVideoSrc* cs = (video::EyegazeCameraVideoSrc*)src;
+				cs->SetEyegazeCrop(m_eyegazeSize.x, m_eyegazeSize.y);
+			}
+
 			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);
 			src->SetBitRate(m_currentSettings.bitrate);
 
@@ -457,6 +481,7 @@ public:
 		if (m_supportAudio)
 		{
 			m_audioPlayer = new video::GstNetworkAudioPlayer();
+			m_AudioPort = gNetworkPortAssigner.AssignPort("AudioPlayer", network::EPT_UDP, m_context->GetPortValue("AudioPlayer"));
 		}
 		else m_audioPlayer = 0;
 		printf("Finished streams\n");
@@ -547,7 +572,7 @@ public:
 
 	void _startVideoStream()
 	{
-		if (!m_portsReceived || m_status != EServiceStatus::Running)
+		if ( (!m_portsReceived && m_context->portHostAddr==0 ) || m_status != EServiceStatus::Running)
 			return;
 		printf("Starting Stream at :%dx%d@%d\n", m_resolution.x, m_resolution.y, m_fps);
 		//  Begin the video stream
@@ -556,8 +581,13 @@ public:
 		{
 			clockIpAddr = "127.0.0.1";
 		}
-			
+		for (int i = 0; i < m_VideoPorts.size(); ++i)
+		{
+			core::string pname = "Video" + core::StringConverter::toString(i);
+			m_VideoPorts[i]=gNetworkPortAssigner.AssignPort(pname, network::EPT_UDP, m_context->GetPortValue(pname));
+		}
 		m_streamers->GetStream("Video")->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortStreamer);
+		m_streamers->GetStream("Video")->BindPorts(m_context->GetTargetClientAddr()->toString(),&m_VideoPorts[0],m_VideoPorts.size(),false);
 		m_streamers->GetStream("Video")->CreateStream();
 		if (m_context->sharedMemory->gstClockPortStreamer == 0)//only if first time
 			m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStream("Video")->GetClockPort();
@@ -602,7 +632,7 @@ public:
 			{
 				clockIpAddr = "127.0.0.1";
 			}
-			m_audioPlayer->SetIPAddress(m_context->remoteAddr.toString(), 91234, 0);
+			m_audioPlayer->SetIPAddress(m_context->GetTargetClientAddr()->toString(), m_AudioPort, 0);
 			m_audioPlayer->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortPlayer);
 			m_audioPlayer->CreateStream();
 			m_audioPlayer->Play();
@@ -701,7 +731,7 @@ public:
 
 		core::string msg = "[" + AVStreamServiceModule::ModuleName + "] Service Status: " + IServiceModule::ServiceStatusToString(m_status);
 
-		if (m_status == EServiceStatus::Running && m_portsReceived == false)
+		if (m_status == EServiceStatus::Running && (!m_portsReceived && m_context->portHostAddr == 0))
 		{
 
 			msg = "Started, but waiting for video connection.";
@@ -785,8 +815,8 @@ public:
 		ret->addAttribute("StreamsCount", core::StringConverter::toString(m_streamsCount));
 		if (m_audioPlayer)
 		{
-			ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_audioPlayer->GetPort(0)));
-			gLogManager.log("AudioPlayerPort: " + core::StringConverter::toString(m_audioPlayer->GetPort(0)), ELL_INFO);
+			ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_AudioPort));
+			gLogManager.log("AudioPlayerPort: " + core::StringConverter::toString(m_AudioPort), ELL_INFO);
 		}
 
 		w.addElement(ret);
@@ -832,6 +862,11 @@ public:
 			{
 				ports[i] = core::StringConverter::toInt(values[i]);
 				ok &= (m_VideoPorts[i] == ports[i]);
+
+				if (!m_context->portHostAddr)
+				{
+					m_context->portMap["Video" + core::StringConverter::toString(i)] = ports[i];
+				}
 			}
 			if (ok)
 				return;
@@ -840,7 +875,7 @@ public:
 			if (m_streamers)
 			{
 				gLogManager.log("Starting video stream to: " +m_context->remoteAddr.toString(),ELL_INFO);
-				m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), &m_VideoPorts[0], m_VideoPorts.size(),  0);
+				//m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), &m_VideoPorts[0], m_VideoPorts.size(),  true);
 				
 
 				int reply = (int)EMessages::IsStereo;
@@ -868,8 +903,30 @@ public:
 				m_streamers->GetStream("Audio")->SetPaused(!enabled);*/
 			m_streamers->GetStream("Video")->SetPaused(!enabled);
 		}
+		else if (msg == "Gaze" && values.size() >= 2)
+		{
+			std::vector<math::vector2df> gaze;
+			for (int i = 0; i < values.size(); i+=2)
+			{
+				math::vector2d p;
+				p.x = math::clamp(core::StringConverter::toFloat(values[i]),0.0f,1.0f);
+				p.y = math::clamp(core::StringConverter::toFloat(values[i + 1]), 0.0f, 1.0f);
+				gaze.push_back(p);
+			}
+			video::EyegazeCameraVideoSrc* src= dynamic_cast<video::EyegazeCameraVideoSrc*>(m_cameraSource);
+			if (src)
+			{
+				src->SetEyegazePos(gaze);
+			}
+		}
 	}
 
+	bool LoadServiceSettings(xml::XMLElement* elem)
+	{
+		
+
+		return true;
+	}
 };
 
 AVStreamServiceModule::AVStreamServiceModule()
@@ -932,7 +989,7 @@ void AVStreamServiceModule::DebugRender(ServiceRenderContext* contex)
 
 bool AVStreamServiceModule::LoadServiceSettings(xml::XMLElement* e)
 {
-	return true;
+	return m_impl->LoadServiceSettings(e);
 }
 
 void AVStreamServiceModule::ExportServiceSettings(xml::XMLElement* e)

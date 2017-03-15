@@ -21,9 +21,11 @@ protected:
 	std::string m_encoder;
 	int m_fps;
 	int m_bitRate;
+	int m_mtuSize;
 public:
 	ICustomVideoSrc()
 	{
+		m_mtuSize = 1400;
 		m_bitRate = 3000;
 		m_fps = 30;
 		m_encoder = "H264";

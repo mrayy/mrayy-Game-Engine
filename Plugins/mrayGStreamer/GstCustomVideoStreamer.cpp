@@ -252,7 +252,6 @@ public:
 		}
 		else
 		{
-
 			m_pipeLineString = videoStr + " ! "
 				"myudpsink name=videoSink sync=false";
 			//"udpsink host=127.0.0.1 port=7000";

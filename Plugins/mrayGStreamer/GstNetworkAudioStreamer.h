@@ -23,11 +23,12 @@ public:
 
 	struct AudioInterface
 	{
-		AudioInterface() :channelsCount(1){}
-		AudioInterface(const std::string& guid, int count) :deviceGUID(guid), channelsCount(count)
+		AudioInterface() :channelsCount(1), samplingRate(44100){}
+		AudioInterface(const std::string& guid, int count) :deviceGUID(guid), channelsCount(count), samplingRate(44100)
 		{}
 		std::string deviceGUID;
 		int channelsCount;
+		int samplingRate;
 	};
 public:
 	GstNetworkAudioStreamer();

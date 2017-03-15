@@ -57,7 +57,8 @@ public:
 	virtual bool HasNewFrame() ;
 	virtual ulong GetBufferID() ;// incremented once per frame
 
-	virtual const ImageInfo* GetLastFrame() ;
+	virtual const ImageInfo* GetLastFrame();
+	virtual const GstImageFrame* GetLastDataFrame();
 
 	virtual int GetPort(int i);
 

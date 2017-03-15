@@ -80,7 +80,11 @@ public:
 
 	void BuildStringCompressed()
 	{
-		m_pipeLineString="";
+		m_pipeLineString = "";
+		if (m_rtcp)
+		{
+			m_pipeLineString = "rtpbin  name=rtpbin ";
+		}
 
 		for (int i = 0; i < m_videoSrc->GetStreamsCount(); ++i)
 		{
@@ -93,7 +97,25 @@ public:
 	std::string FinalizePipeline(const std::string &pipeline,int i)
 	{
 		std::string videoStr = pipeline;
-		videoStr += " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port="+core::StringConverter::toString(m_videoPorts[i])+" host="+m_ipAddr+" sync=false ";
+		
+		if (m_rtcp)
+		{
+			core::string session = core::StringConverter::toString(i);
+
+			core::string rtpSink = "udpsink name=videoSink" + session + " host=" + m_ipAddr + " port=" + core::StringConverter::toString(m_videoPorts[i] + 1) + " ts-offset=0 force-ipv4=1 ";
+			core::string rtcpSink = "udpsink name=videoRtcpSink" + session + " host=" + m_ipAddr + " port=" + core::StringConverter::toString(m_videoPorts[i] + 2) + " sync=false async=false ";
+			core::string rtcpSrc = "udpsrc name=videoRtcpSrc" + session + " port=" + core::StringConverter::toString(m_videoPorts[i] + 3);
+
+			videoStr = videoStr +
+				"! rtpbin.send_rtp_sink_" + session +
+				" rtpbin.send_rtp_src_" + session + " ! " + rtpSink +
+				" rtpbin.send_rtcp_src_" + session + " ! " + rtcpSink+
+				rtcpSrc + " ! rtpbin.recv_rtcp_sink_" + session + " ";
+		}
+		else
+		{
+			videoStr += " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port=" + core::StringConverter::toString(m_videoPorts[i]) + " host=" + m_ipAddr + " sync=true ";
+		}
 		return videoStr;
 	}
 

@@ -344,6 +344,11 @@ public:
 	virtual const ImageInfo* GetLastFrame(){ return m_videoHandler.getPixelsRef(); }
 
 
+	const GstImageFrame* GetLastDataFrame()
+	{
+		return m_videoHandler.getPixelFrame();
+	}
+
 	virtual void OnPipelineReady(GstPipelineHandler* p){ m_owner->__FIRE_OnPlayerReady(m_owner); }
 	virtual void OnPipelinePlaying(GstPipelineHandler* p){ m_owner->__FIRE_OnPlayerStarted(m_owner); }
 	virtual void OnPipelineStopped(GstPipelineHandler* p){ m_owner->__FIRE_OnPlayerStopped(m_owner); }
@@ -444,6 +449,10 @@ const ImageInfo* GstNetworkVideoPlayer::GetLastFrame()
 	return m_impl->GetLastFrame();
 }
 
+const GstImageFrame* GstNetworkVideoPlayer::GetLastDataFrame()
+{
+	return m_impl->GetLastDataFrame();
+}
 int GstNetworkVideoPlayer::GetPort(int i)
 {
 	return m_impl->GetPort(i);

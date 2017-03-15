@@ -94,7 +94,6 @@ namespace video
 		gst_object_unref(bus);
 
 
-
 		if (gst_element_set_state(GST_ELEMENT(m_data->gstPipeline), GST_STATE_READY) == GST_STATE_CHANGE_FAILURE) {
 			(gLogManager.StartLog(ELL_WARNING) << "GStreamerNetworkPlayer::Play(): unable to set pipeline to ready").flush();
 			return false;

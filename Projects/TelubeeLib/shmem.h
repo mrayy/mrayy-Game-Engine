@@ -48,7 +48,8 @@ public:
 		this->size = size;
 	}
 
-	void*GetData(){ return data; }
+	template <class T>
+	T*GetData(){ return (T*)data; }
 	unsigned int GetDataSize(){ return size; }
 
 	bool Attach(void);

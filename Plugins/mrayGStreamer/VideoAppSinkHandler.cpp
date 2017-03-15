@@ -38,8 +38,8 @@ namespace video
 		m_IsAllocated = false;
 		for (int i = 0; i < m_surfaceCount; ++i)
 		{
-			m_pixels[i].clear();
-			m_backPixels[i].clear();
+			m_pixels[i].data.clear();
+			m_backPixels[i].data.clear();
 		}
 		//	m_eventPixels.clear();
 	}
@@ -103,11 +103,11 @@ namespace video
 			//fmt = video::EPixel_LUMINANCE8;
 			height *= 1.5;
 		}
-		if (m_pixels[0].imageData && (m_pixels[0].Size.x != vinfo.width || m_pixels[0].Size.y != height || m_pixels[0].format != fmt))
+		if (m_pixels[0].data.imageData && (m_pixels[0].data.Size.x != vinfo.width || m_pixels[0].data.Size.y != height || m_pixels[0].data.format != fmt))
 		{
 			m_IsAllocated = false;
-			m_pixels[0].clear();
-			m_backPixels[0].clear();
+			m_pixels[0].data.clear();
+			m_backPixels[0].data.clear();
 		}
 
 		gst_buffer_map(_buffer, &mapinfo, GST_MAP_READ);
@@ -115,18 +115,18 @@ namespace video
 		float pxSize = video::PixelUtil::getPixelDescription(fmt).elemSizeB;
 
 		int stride = 0;
-		int dataSize = m_pixels[0].Size.x*m_pixels[0].Size.y;
+		int dataSize = m_pixels[0].data.Size.x*m_pixels[0].data.Size.y;
 		if (isI420)
 		{
 		}
 		else
 			dataSize *= pxSize;
 
-		if (m_pixels[0].imageData && dataSize != (int)size){
+		if (m_pixels[0].data.imageData && dataSize != (int)size){
 			GstVideoInfo vinfo = getVideoInfo(sample.get());
 			stride = vinfo.stride[0];
 
-			if (stride != (m_pixels[0].Size.x * pxSize)) {
+			if (stride != (m_pixels[0].data.Size.x * pxSize)) {
 				gst_buffer_unmap(_buffer, &mapinfo);
 				gLogManager.StartLog(ELL_WARNING) << "VideoAppSinkHandler::process_sample(): error on new buffer, buffer size: " << size << "!= init size: " << dataSize;
 				gLogManager.flush();
@@ -136,10 +136,12 @@ namespace video
 		m_mutex->lock();
 		buffer = sample;
 
-		if (m_pixels[0].imageData){
+		if (m_pixels[0].data.imageData){
 			++m_frameID;
 			//if (stride > 0) {
-			m_backPixels[0].setData(mapinfo.data, m_pixels[0].Size, m_pixels[0].format);
+			m_backPixels[0].data.setData(mapinfo.data, m_pixels[0].data.Size, m_pixels[0].data.format);
+			m_backPixels[0].PTS = _buffer->pts;
+			m_backPixels[0].DTS = _buffer->dts;
 			// 		}
 			// 		else {
 			// 			m_backPixels[0].setData(mapinfo.data, m_pixels[0].Size, m_pixels[0].format);
@@ -174,8 +176,8 @@ namespace video
 		m_frameSize.x = width;
 		m_frameSize.y = height;
 
-		m_pixels[0].createData(math::vector3di(width, height, 1), fmt);
-		m_backPixels[0].createData(math::vector3di(width, height, 1), fmt);
+		m_pixels[0].data.createData(math::vector3di(width, height, 1), fmt);
+		m_backPixels[0].data.createData(math::vector3di(width, height, 1), fmt);
 
 		m_HavePixelsChanged = false;
 		m_BackPixelsChanged = true;
@@ -197,7 +199,9 @@ namespace video
 		m_HavePixelsChanged = m_BackPixelsChanged;
 		if (m_HavePixelsChanged){
 			m_BackPixelsChanged = false;
-			math::Swap(m_pixels[0].imageData, m_backPixels[0].imageData);
+			math::Swap(m_pixels[0].data.imageData, m_backPixels[0].data.imageData);
+			math::Swap(m_pixels[0].DTS, m_backPixels[0].DTS);
+			math::Swap(m_pixels[0].PTS, m_backPixels[0].PTS);
 
 			prevBuffer = buffer;
 

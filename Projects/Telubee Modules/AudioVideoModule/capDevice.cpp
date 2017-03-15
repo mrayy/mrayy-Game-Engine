@@ -86,7 +86,7 @@ static bool verbose = true;
 static bool VI_COM_MULTI_THREADED = false;
 
 ///////////////////////////  HANDY FUNCTIONS  /////////////////////////////
-
+/*
 void MyFreeMediaType(AM_MEDIA_TYPE& mt){
 	if (mt.cbFormat != 0)
 	{
@@ -110,7 +110,10 @@ void MyDeleteMediaType(AM_MEDIA_TYPE *pmt)
 		CoTaskMemFree(pmt);
 	}
 }
+*/
 
+void MyFreeMediaType(AM_MEDIA_TYPE& mt);
+void MyDeleteMediaType(AM_MEDIA_TYPE *pmt);
 //////////////////////////////  CALLBACK  ////////////////////////////////
 
 //Callback class
@@ -498,13 +501,14 @@ capDevice::~capDevice(){
 
 void makeGUID(GUID *guid, unsigned long Data1, unsigned short Data2, unsigned short Data3,
 	unsigned char b0, unsigned char b1, unsigned char b2, unsigned char b3,
-	unsigned char b4, unsigned char b5, unsigned char b6, unsigned char b7){
+	unsigned char b4, unsigned char b5, unsigned char b6, unsigned char b7);
+/*{
 	guid->Data1 = Data1;
 	guid->Data2 = Data2;
 	guid->Data3 = Data3;
 	guid->Data4[0] = b0; guid->Data4[1] = b1; guid->Data4[2] = b2; guid->Data4[3] = b3;
 	guid->Data4[4] = b4; guid->Data4[5] = b5; guid->Data4[6] = b6; guid->Data4[7] = b7;
-}
+}*/
 
 capDeviceInput::capDeviceInput(){
 	//start com
