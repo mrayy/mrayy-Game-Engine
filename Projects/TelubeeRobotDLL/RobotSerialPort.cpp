@@ -13,6 +13,7 @@
 #include "RoombaController.h"
 #include "OmniBaseController.h"
 #include "ThreeAxisHead.h"
+#include "TxKitHead.h"
 #include "StringUtil.h"
 #include "ILogManager.h"
 
@@ -55,7 +56,8 @@ class RobotSerialPortImpl
 #else 
 		mray::OmniBaseController* m_baseController;
 #endif
-		mray::ThreeAxisHead* m_headController;
+		typedef TxKitHead TXHeadType;
+		TXHeadType* m_headController;
 
 		std::string m_headPort;
 		std::string m_basePort;
@@ -73,7 +75,7 @@ class RobotSerialPortImpl
 #else 
 			m_baseController = new mray::OmniBaseController;
 #endif
-			m_headController = new mray::ThreeAxisHead();
+			m_headController = new TXHeadType();
 			listener = 0;
 		}
 		~RobotSerialPortImpl()
@@ -136,7 +138,7 @@ DWORD RobotSerialPort::timerThreadRobot(RobotSerialPort *robot, LPVOID pdata){
 	int count = 0;
 	while (!isDone){
 		robot->_ProcessRobot();
-		Sleep(1);
+		Sleep(2);
 		if (!threadStart)
 			Sleep(100);
 	}
@@ -300,7 +302,7 @@ std::string RobotSerialPort::ScanePorts()
 				s.disconnect();
 			}
 		}
-		port.Setup(device.port, _config.head_baudRate);
+		//port.Setup(device.port, _config.head_baudRate);
 		try
 		{
 			port.open();
@@ -500,6 +502,145 @@ void QuaternionToEuler(const math::quaternion quaternion, math::vector3df &euler
 
 }
 
+enum RotSeq{ zyx, zyz, zxy, zxz, yxz, yxy, yzx, yzy, xyz, xyx, xzy, xzx };
+
+void twoaxisrot(double r11, double r12, double r21, double r31, double r32, double res[]){
+	res[0] = atan2(r11, r12);
+	res[1] = acos(r21);
+	res[2] = atan2(r31, r32);
+}
+
+void threeaxisrot(double r11, double r12, double r21, double r31, double r32, double res[]){
+	res[0] = atan2(r31, r32);
+	res[1] = asin(r21);
+	res[2] = atan2(r11, r12);
+}
+
+void quaternion2Euler(const math::quaternion& q, double res[], RotSeq rotSeq)
+{
+	switch (rotSeq){
+	case zyx:
+		threeaxisrot(2 * (q.x*q.y + q.w*q.z),
+			q.w*q.w + q.x*q.x - q.y*q.y - q.z*q.z,
+			-2 * (q.x*q.z - q.w*q.y),
+			2 * (q.y*q.z + q.w*q.x),
+			q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
+			res);
+		break;
+
+	case zyz:
+		twoaxisrot(2 * (q.y*q.z - q.w*q.x),
+			2 * (q.x*q.z + q.w*q.y),
+			q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
+			2 * (q.y*q.z + q.w*q.x),
+			-2 * (q.x*q.z - q.w*q.y),
+			res);
+		break;
+
+	case zxy:
+		threeaxisrot(-2 * (q.x*q.y - q.w*q.z),
+			q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z,
+			2 * (q.y*q.z + q.w*q.x),
+			-2 * (q.x*q.z - q.w*q.y),
+			q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
+			res);
+		break;
+
+	case zxz:
+		twoaxisrot(2 * (q.x*q.z + q.w*q.y),
+			-2 * (q.y*q.z - q.w*q.x),
+			q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
+			2 * (q.x*q.z - q.w*q.y),
+			2 * (q.y*q.z + q.w*q.x),
+			res);
+		break;
+
+	case yxz:
+		threeaxisrot(2 * (q.x*q.z + q.w*q.y),
+			q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
+			-2 * (q.y*q.z - q.w*q.x),
+			2 * (q.x*q.y + q.w*q.z),
+			q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z,
+			res);
+		break;
+
+	case yxy:
+		twoaxisrot(2 * (q.x*q.y - q.w*q.z),
+			2 * (q.y*q.z + q.w*q.x),
+			q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z,
+			2 * (q.x*q.y + q.w*q.z),
+			-2 * (q.y*q.z - q.w*q.x),
+			res);
+		break;
+
+	case yzx:
+		threeaxisrot(-2 * (q.x*q.z - q.w*q.y),
+			q.w*q.w + q.x*q.x - q.y*q.y - q.z*q.z,
+			2 * (q.x*q.y + q.w*q.z),
+			-2 * (q.y*q.z - q.w*q.x),
+			q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z,
+			res);
+		break;
+
+	case yzy:
+		twoaxisrot(2 * (q.y*q.z + q.w*q.x),
+			-2 * (q.x*q.y - q.w*q.z),
+			q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z,
+			2 * (q.y*q.z - q.w*q.x),
+			2 * (q.x*q.y + q.w*q.z),
+			res);
+		break;
+
+	case xyz:
+		threeaxisrot(-2 * (q.y*q.z - q.w*q.x),
+			q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
+			2 * (q.x*q.z + q.w*q.y),
+			-2 * (q.x*q.y - q.w*q.z),
+			q.w*q.w + q.x*q.x - q.y*q.y - q.z*q.z,
+			res);
+		break;
+
+	case xyx:
+		twoaxisrot(2 * (q.x*q.y + q.w*q.z),
+			-2 * (q.x*q.z - q.w*q.y),
+			q.w*q.w + q.x*q.x - q.y*q.y - q.z*q.z,
+			2 * (q.x*q.y - q.w*q.z),
+			2 * (q.x*q.z + q.w*q.y),
+			res);
+		break;
+
+	case xzy:
+		threeaxisrot(2 * (q.y*q.z + q.w*q.x),
+			q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z,
+			-2 * (q.x*q.y - q.w*q.z),
+			2 * (q.x*q.z + q.w*q.y),
+			q.w*q.w + q.x*q.x - q.y*q.y - q.z*q.z,
+			res);
+		break;
+
+	case xzx:
+		twoaxisrot(2 * (q.x*q.z - q.w*q.y),
+			2 * (q.x*q.y + q.w*q.z),
+			q.w*q.w + q.x*q.x - q.y*q.y - q.z*q.z,
+			2 * (q.x*q.z + q.w*q.y),
+			-2 * (q.x*q.y - q.w*q.z),
+			res);
+		break;
+	default:
+		std::cout << "Unknown rotation sequence" << std::endl;
+		break;
+	}
+
+
+
+	res[0] = math::toDeg(res[0]);
+	res[1] = math::toDeg(res[1]);
+	res[2] = math::toDeg(res[2]);
+
+
+
+}
+
 void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 {
 // 	if (!IsConnected())
@@ -542,12 +683,26 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	//qtomatrix(rotMat, q);
 	//MatrixtoXYZ((double*)rotMat, &angles.x, &angles.y, &angles.z);
 	math::vector3d angles;
-	q.toEulerAngles(angles);
 	//QuaternionToEuler(q, angles);
 
-	tilt = m_impl->mvRobot[HEAD][1]->getNext(-angles.y);
-	pan = m_impl->mvRobot[HEAD][0]->getNext(-angles.z);
-	roll = m_impl->mvRobot[HEAD][2]->getNext(-angles.x);
+	//QuaternionToEulerYZX(q2, angles);
+	if (false)
+	{
+		q.toEulerAngles(angles);
+		tilt = m_impl->mvRobot[HEAD][1]->getNext(-angles.y);
+		pan = m_impl->mvRobot[HEAD][0]->getNext(-angles.z);
+		roll = m_impl->mvRobot[HEAD][2]->getNext(-angles.x);
+	}
+	else
+	{
+		double res[3];
+		quaternion2Euler(q2, res, RotSeq::xzy);
+		q.toEulerAngles(angles);
+
+		tilt = m_impl->mvRobot[HEAD][1]->getNext(-res[2]);
+		pan = m_impl->mvRobot[HEAD][0]->getNext(-res[0]);
+		roll = m_impl->mvRobot[HEAD][2]->getNext(-res[1]);
+	}
 
 	baseConnected = st.connected;
 	return;

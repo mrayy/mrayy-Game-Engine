@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-#include "serial/win.h"
+#include "serial/impl/win.h"
 
 using std::string;
 using std::wstring;
@@ -20,16 +20,6 @@ using serial::SerialException;
 using serial::PortNotOpenedException;
 using serial::IOException;
 
-inline wstring
-_prefix_port_if_needed(const wstring &input)
-{
-  static wstring windows_com_port_prefix = L"\\\\.\\";
-  if (input.compare(windows_com_port_prefix) != 0)
-  {
-    return windows_com_port_prefix + input;
-  }
-  return input;
-}
 
 Serial::SerialImpl::SerialImpl (const string &port, unsigned long baudrate,
                                 bytesize_t bytesize,
@@ -41,8 +31,8 @@ Serial::SerialImpl::SerialImpl (const string &port, unsigned long baudrate,
 {
   read_mutex = CreateMutex(NULL, false, NULL);
   write_mutex = CreateMutex(NULL, false, NULL);
-//   if (port_.empty () == false)
-//     open ();
+  if (port_.empty () == false)
+    open ();
 }
 
 Serial::SerialImpl::~SerialImpl ()
@@ -56,17 +46,13 @@ void
 Serial::SerialImpl::open ()
 {
   if (port_.empty ()) {
-	  return;
     throw invalid_argument ("Empty port is invalid.");
   }
   if (is_open_ == true) {
-    //throw SerialException ("Serial port already open.");
-	  return;
+    throw SerialException ("Serial port already open.");
   }
 
-  // See: https://github.com/wjwwood/serial/issues/84
-  wstring port_with_prefix = _prefix_port_if_needed(port_);
-  LPCWSTR lp_port = port_with_prefix.c_str();
+  LPCWSTR lp_port = port_.c_str();
   fd_ = CreateFileW(lp_port,
                     GENERIC_READ | GENERIC_WRITE,
                     0,
@@ -82,12 +68,10 @@ Serial::SerialImpl::open ()
     case ERROR_FILE_NOT_FOUND:
       // Use this->getPort to convert to a std::string
       ss << "Specified port, " << this->getPort() << ", does not exist.";
-     // THROW (IOException, ss.str().c_str());
-	  return;
+      THROW (IOException, ss.str().c_str());
     default:
       ss << "Unknown error opening the serial port: " << errno;
-	  return;
-	  //THROW(IOException, ss.str().c_str());
+      THROW (IOException, ss.str().c_str());
     }
   }
 
@@ -232,10 +216,6 @@ Serial::SerialImpl::reconfigurePort ()
     dcbSerialParams.Parity = EVENPARITY;
   } else if (parity_ == parity_odd) {
     dcbSerialParams.Parity = ODDPARITY;
-  } else if (parity_ == parity_mark) {
-    dcbSerialParams.Parity = MARKPARITY;
-  } else if (parity_ == parity_space) {
-    dcbSerialParams.Parity = SPACEPARITY;
   } else {
     throw invalid_argument ("invalid parity");
   }
@@ -319,14 +299,14 @@ Serial::SerialImpl::available ()
 }
 
 bool
-Serial::SerialImpl::waitReadable (uint32_t /*timeout*/)
+Serial::SerialImpl::waitReadable (uint32_t timeout)
 {
   THROW (IOException, "waitReadable is not implemented on Windows.");
   return false;
 }
 
 void
-Serial::SerialImpl::waitByteTimes (size_t /*count*/)
+Serial::SerialImpl::waitByteTimes (size_t count)
 {
   THROW (IOException, "waitByteTimes is not implemented on Windows.");
 }
@@ -470,28 +450,24 @@ Serial::SerialImpl::flush ()
     throw PortNotOpenedException ("Serial::flush");
   }
   FlushFileBuffers (fd_);
-  flushInput();
-  flushOutput();
 }
 
 void
 Serial::SerialImpl::flushInput ()
 {
- // THROW (IOException, "flushInput is not supported on Windows.");
-  PurgeComm(fd_, PURGE_RXCLEAR);
+//  THROW (IOException, "flushInput is not supported on Windows.");
 }
 
 void
 Serial::SerialImpl::flushOutput ()
 {
-//  THROW (IOException, "flushOutput is not supported on Windows.");
-	PurgeComm(fd_, PURGE_TXCLEAR);
+ // THROW (IOException, "flushOutput is not supported on Windows.");
 }
 
 void
-Serial::SerialImpl::sendBreak (int /*duration*/)
+Serial::SerialImpl::sendBreak (int duration)
 {
-  THROW (IOException, "sendBreak is not supported on Windows.");
+ // THROW (IOException, "sendBreak is not supported on Windows.");
 }
 
 void

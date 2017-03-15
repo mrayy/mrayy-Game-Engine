@@ -12,7 +12,7 @@
 #include "serial/serial.h"
 
 #ifdef _WIN32
-#include "serial/win.h"
+#include "serial/impl/win.h"
 #else
 #include "serial/impl/unix.h"
 #endif
@@ -63,32 +63,18 @@ private:
   SerialImpl *pimpl_;
 };
 
-Serial::Serial()
-{
-	pimpl_ = 0;
-}
 Serial::Serial (const string &port, uint32_t baudrate, serial::Timeout timeout,
                 bytesize_t bytesize, parity_t parity, stopbits_t stopbits,
                 flowcontrol_t flowcontrol)
+ : pimpl_(new SerialImpl (port, baudrate, bytesize, parity,
+                                           stopbits, flowcontrol))
 {
-	Setup(port, baudrate, timeout, bytesize, parity, stopbits, flowcontrol);
+  pimpl_->setTimeout(timeout);
 }
 
 Serial::~Serial ()
 {
   delete pimpl_;
-}
-
-void Serial::Setup(const string &port, uint32_t baudrate, serial::Timeout timeout,
-	bytesize_t bytesize, parity_t parity, stopbits_t stopbits,
-	flowcontrol_t flowcontrol)
-{
-	if (pimpl_)
-		delete pimpl_;
-	pimpl_ = new SerialImpl(port, baudrate, bytesize, parity,
-		stopbits, flowcontrol);
-	pimpl_->setTimeout(timeout);
-
 }
 
 void
