@@ -588,6 +588,7 @@
     <ClCompile Include="include\ValueGroup.cpp" />
     <ClCompile Include="src\3DSLoader.cpp" />
     <ClCompile Include="src\InputKeyMap.cpp" />
+    <ClCompile Include="src\LocalNetworkPortAssigner.cpp" />
     <ClCompile Include="UI3DRenderNode.cpp" />
     <ClInclude Include="..\..\Dependencies\include\huffman\huffman.h" />
     <ClInclude Include="HuffmanCompression.h" />
@@ -613,6 +614,7 @@
     <ClInclude Include="include\IGUIElementCreator.h" />
     <ClInclude Include="include\IGUIElementRT.h" />
     <ClInclude Include="include\IGUITreeBox.h" />
+    <ClInclude Include="include\INetworkPortAssigner.h" />
     <ClInclude Include="include\InputKeyMap.h" />
     <ClInclude Include="include\InternetCacheManager.h" />
     <ClInclude Include="include\ISerialPort.h" />
@@ -620,6 +622,7 @@
     <ClInclude Include="include\ISQLManager.h" />
     <ClInclude Include="include\ISQLResult.h" />
     <ClInclude Include="include\IMonitorFileInformation.h" />
+    <ClInclude Include="include\LocalNetworkPortAssigner.h" />
     <ClInclude Include="include\mrayEngine.h" />
     <ClInclude Include="include\ISound.h" />
     <ClInclude Include="include\ISoundEmitter.h" />

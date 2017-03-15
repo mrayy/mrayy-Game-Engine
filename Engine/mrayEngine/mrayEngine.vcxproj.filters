@@ -2336,6 +2336,12 @@
     <ClInclude Include="include\ValueGroup.h">
       <Filter>Source Files\Base\Values</Filter>
     </ClInclude>
+    <ClInclude Include="include\INetworkPortAssigner.h">
+      <Filter>Source Files\network</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LocalNetworkPortAssigner.h">
+      <Filter>Source Files\network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\RTTI_OBJECTS.cpp">
@@ -3666,6 +3672,9 @@
     </ClCompile>
     <ClCompile Include="include\ValueGroup.cpp">
       <Filter>Source Files\Base\Values</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LocalNetworkPortAssigner.cpp">
+      <Filter>Source Files\network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
