@@ -11,6 +11,7 @@
 #include "tinyxml2.h"
 #include "Console.h"
 #include "NetworkValueController.h"
+#include "LocalNetworkPortAssigner.h"
 
 #include <windows.h>
 
@@ -74,6 +75,7 @@ ServiceLoader::~ServiceLoader()
 	gLogManager.log("Shutting down service", ELL_INFO);
 	_destroy();
 	delete m_renderContext;
+	delete network::INetworkPortAssigner::getInstancePtr();
 }
 
 bool ServiceLoader::Init(int argc, _TCHAR* argv[])
@@ -106,6 +108,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	}
 	new OS::WinFileSystem();
 	new Engine(new OS::WinOSystem());
+	new network::LocalNetworkPortAssigner();
 	gEngine.loadPlugins("plugins.stg");
 	gEngine.loadResourceFile("ServicesRes.stg");
 	gEngine.createDevice("OpenGL");
@@ -122,7 +125,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	m_sharedMemory.SetName("SH_TBee_Service");
 
 	m_sharedMemory.openWrite();
-	m_memory = (TBee::ModuleSharedMemory*)m_sharedMemory.GetData();
+	m_memory = m_sharedMemory.GetData<TBee::ModuleSharedMemory>();
 	if (!m_memory)
 	{
 		printf("Couldnt open shared memory! Make sure the service host manager is loaded first!\n");
@@ -132,19 +135,21 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 
 	Console::setColor(CONSOLE_CLR_INFO);
 	printf("Service Host: %s:%d\n", m_memory->hostAddress.toString().c_str(), m_memory->hostAddress.port);
+
 	
+	//load settings file
+	_loadSettings();
+
 	m_context.serviceLoader = this;
 	m_context.commChannel = network::INetwork::getInstance().createUDPClient();
-	m_context.commChannel->Open();
+	m_context.commChannel->Open(gNetworkPortAssigner.AssignPort("CommChannel",network::EPT_UDP,m_context.GetPortValue("CommChannel")));
 	m_context.localAddr.address = network::INetwork::getInstance().getLocalAddress();
 	m_context.localAddr.port = m_context.commChannel->Port();
 	m_context.sharedMemory = m_memory;
 	m_context.netValueController = new TBee::NetworkValueController();
-	m_context.netValueController->StartReceiver(0);
+	m_context.netValueController->StartReceiver(gNetworkPortAssigner.AssignPort("NetValueController", network::EPT_UDP, m_context.GetPortValue("NetValueController")));
 	m_context.netValueController->GetValues();
 
-	//load settings file
-	_loadSettings();
 
 	m_renderContext = new ServiceLoaderRenderContext();
 
@@ -193,19 +198,35 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 
 	return true;
 }
+
+void ServiceLoader::_sendMessage(const core::string& msg)
+{
+	xml::XMLElement* root = new xml::XMLElement("Root");
+	xml::XMLElement* e = new xml::XMLElement("Data");
+	root->addSubElement(e);
+	e->addAttribute("N", "ServiceModule");
+	e->addAttribute("V", msg);
+	xml::XMLWriter w;
+	w.addElement(root);
+	core::string data = w.flush();
+	m_context.commChannel->SendTo(&m_memory->hostAddress, data.c_str(), data.length() + 1);
+	delete e;
+
+}
 void ServiceLoader::_sendConnectMessage()
 {
+	core::string msg;
 	xml::XMLWriter w;
 	xml::XMLElement* e = new xml::XMLElement("ServiceModule");
 	e->addAttribute("Message", "Connect");
 	e->addAttribute("Name", m_serviceModule->GetServiceName());
-// 	e->addAttribute("IP", m_context.localAddr.toString());
+	// 	e->addAttribute("IP", m_context.localAddr.toString());
 	e->addAttribute("Port", core::StringConverter::toString(m_context.localAddr.port));
 	e->addAttribute("NetValue", core::StringConverter::toString(m_context.netValueController->GetPort()));
 	w.addElement(e);
-	core::string msg= w.flush();
+	msg = w.flush();
 
-	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
+	_sendMessage(msg);
 
 	delete e;
 }
@@ -214,14 +235,14 @@ void ServiceLoader::_sendDisconnectMessage()
 	gLogManager.log("Disconnecting service",ELL_INFO);
 	core::string msg = "<ServiceModule Message=\"Disconnect\"/>";
 
-	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
+	_sendMessage(msg);
 
 }
 void ServiceLoader::_sendPongMessage()
 {
 	core::string msg = "<ServiceModule Message=\"Pong\"/>";
 
-	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
+	_sendMessage(msg);
 
 }
 void ServiceLoader::_loadSettings()
@@ -233,21 +254,47 @@ void ServiceLoader::_loadSettings()
 	printf("%s\n", (gFileSystem.getAppPath() + "Modules\\" + name + ".xml").c_str());
 	if (m_valueTree.load(gFileSystem.getAppPath() + "Modules\\" + name + ".xml"))
 	{
-		xml::XMLElement* e = m_valueTree.getSubElement(name);
-		m_valueRootElement = e;
-		if (!e)
+		xml::XMLElement* elem = m_valueTree.getSubElement(name);
+		m_valueRootElement = elem;
+		if (!elem)
 			return;
-		e = e->getSubElement("Parameters");
-		if (!e)
-			return;
-		e = e->getSubElement("Param");
-		while (e)
 		{
-			SOptionElement v;
-			v.name = e->getValueString("Name");
-			v.value = e->getValueString("Value");
-			e = e->nextSiblingElement("Param");
-			m_context.appOptions.AddOption(v);
+			xml::XMLElement* e = elem->getSubElement("PortMap");
+			if (e)
+			{
+				xml::XMLAttribute*a = e->getAttribute("TargetHost");
+				if (a)
+				{
+					m_context.portHostAddr = new network::NetAddress(a->value);
+				}
+				e = e->getSubElement("Port");
+				while (e)
+				{
+					core::string name;
+					ushort port;
+					a = e->getAttribute("Name");
+					name = a->value;
+					a = e->getAttribute("TargetPort");
+					port = core::StringConverter::toInt(a->value);
+
+					m_context.portMap[name] = port;
+					e = e->nextSiblingElement("Port");
+				}
+			}
+		}
+		{
+			xml::XMLElement* e = elem->getSubElement("Parameters");
+			if (!e)
+				return;
+			e = e->getSubElement("Param");
+			while (e)
+			{
+				SOptionElement v;
+				v.name = e->getValueString("Name");
+				v.value = e->getValueString("Value");
+				e = e->nextSiblingElement("Param");
+				m_context.appOptions.AddOption(v);
+			}
 		}
 	}
 	else
@@ -482,14 +529,14 @@ void ServiceLoader::RequestLock()
 {
 	core::string msg;
 	"<Broadcast Message=\"ServiceLock\" Service=\"" + m_serviceModule->GetServiceName() + "\"/>";
-	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
+	_sendMessage(msg);
 
 }
 void ServiceLoader::RequestUnlock()
 {
 	core::string msg;
 	"<Broadcast Message=\"ServiceUnlock\" Service=\"" + m_serviceModule->GetServiceName() + "\"/>";
-	m_context.commChannel->SendTo(&m_memory->hostAddress, msg.c_str(), msg.length() + 1);
+	_sendMessage(msg);
 
 }
 //////////////////////////////////////////////////////////////////////////

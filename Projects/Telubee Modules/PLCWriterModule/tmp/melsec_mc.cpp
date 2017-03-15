@@ -26,22 +26,25 @@
 
 // ---------------------- PLC MC Protocol Driver function implementation -----------------------------------//
 
-MCClient::MCClient(int portnum, const char *ipaddr){
+MCClient::MCClient(int portnum, char *ipaddr){
 	WSAStartup(MAKEWORD(2, 0), &wsaData);
 	server.sin_family = AF_INET;
 	server.sin_port = htons(portnum);
 	server.sin_addr.S_un.S_addr = inet_addr(ipaddr);
 	sock = socket(AF_INET, SOCK_STREAM, 0);
+// 	unsigned long value = 1;
+// 	ioctlsocket(sock, FIONBIO, &value);
 	int ret = connect(sock, (struct sockaddr *)&server, sizeof(server));
 
 	if (ret != 0)
 	{
+		_connected = false;
 		printf("Melsec PLC Connection Error.. \r\n");
-		closesocket(sock);
-		sock = 0;
 	}
-	else
+	else{
 		printf("Melsec PLC Connected Succssfully at %s : %d \r\n", ipaddr, portnum);
+		_connected = true;
+	}
 }
 
 MCClient::~MCClient(){
@@ -140,14 +143,14 @@ int MCClient::batch_read(char* devname, char destination, int head_dev, mc_buff 
 		return 0;
 	}
 
-	printf("got %i bytes!\n", rx_sz);
+	//printf("got %i bytes!\n", rx_sz);
 	memcpy(&resp_header, rx_buf, sizeof(resp_header));
 
 
 	if (resp_header.complete_code == 0x0000) {
 		rez_datalen = resp_header.data_length - 2; // subtract 2 from data length to account for response code (word)
 		rez_wordlen = rez_datalen / 2;
-		printf("char data len = %u bytes (%i words).\n", rez_datalen, rez_wordlen);
+		//printf("char data len = %u bytes (%i words).\n", rez_datalen, rez_wordlen);
 		if (outbuf > 0) {
 			//memcpy(&cdatabuf, rx_buf + sizeof(resp_header), rez_datalen);
 			//memcpy(outbuf, rx_buf + sizeof(resp_header), rez_datalen);
@@ -157,6 +160,12 @@ int MCClient::batch_read(char* devname, char destination, int head_dev, mc_buff 
 				memcpy(&outbuf->torso, rx_buf+1 + sizeof(resp_header), rez_datalen);
 			else if (destination == SELECT_YBM)
 				memcpy(&outbuf->ybm, rx_buf+1 + sizeof(resp_header), rez_datalen);
+			else if (destination == SELECT_INTERLOCK)
+				memcpy(&outbuf->interlock, rx_buf + 1 + sizeof(resp_header), rez_datalen);
+			else if (destination == SELECT_COMMON)
+				memcpy(&outbuf->common, rx_buf + 1 + sizeof(resp_header), rez_datalen);
+			else if (destination == SELECT_GNSS)
+				memcpy(&outbuf->gnss, rx_buf + 1 + sizeof(resp_header), rez_datalen);
 
 			return rez_wordlen;
 		}
@@ -212,6 +221,12 @@ int MCClient::batch_write(char* devname, char destination, int head_dev, mc_buff
 		memcpy(tx_buf + 21, &inbuf->torso, sizeof(inbuf->torso));
 	else if (destination == SELECT_YBM)
 		memcpy(tx_buf + 21, &inbuf->ybm, sizeof(inbuf->ybm));
+	else if (destination == SELECT_INTERLOCK)
+		memcpy(tx_buf + 21, &inbuf->interlock, sizeof(inbuf->interlock));
+	else if (destination == SELECT_COMMON)
+		memcpy(tx_buf + 21, &inbuf->common, sizeof(inbuf->common));
+	else if (destination == SELECT_GNSS)
+		memcpy(tx_buf + 21, &inbuf->gnss, sizeof(inbuf->gnss));
 
 	// Tx
 	if ((send(sock, (char *)tx_buf, tx_sz, 0)) < tx_sz) {
@@ -228,7 +243,7 @@ int MCClient::batch_write(char* devname, char destination, int head_dev, mc_buff
 	memcpy(&resp_header, rx_buf, sizeof(resp_header));
 
 	if (resp_header.complete_code == 0x0000) {
-		printf("write %i bytes complete!\n", tx_sz);
+		//printf("write %i bytes complete!\n", tx_sz);
 	}
 
 	return -1;

@@ -37,10 +37,12 @@
 #define MELSEC_PLC	"192.168.1.32"		// for PLC
 #define PLC_PORT_TCP_XYRIS	49152		// Set this Port as MC Protocol for Xyris TCP Access in GX Works
 #define PLC_PORT_TCP_TORSO	49153		// Set this Port as MC Protocol for TORSO TCP Access in GX Works
+#define PLC_PORT_TCP_GNSS	49154		// Set this Port as MC Protocol for TORSO TCP Access in GX Works
 /* ..  */
 #define PLC_PORT_TCP_HMD	53248		// Set this Port as MC Protocol for HMD TCP Access in GX Works
 #define PLC_PORT_TCP_DISP	53249		// Set this Port as MC Protocol for Overall Display TCP Access in GX Works
-#define PLC_PORT_TCP_UNUSED	53250		// Set this Port as MC Protocol for Unused TCP Access in GX Works
+#define PLC_PORT_TCP_GNSSR	53250		// Set this Port as MC Protocol for Unused TCP Access in GX Works
+#define PLC_PORT_TCP_UNUSED	53251		// Set this Port as MC Protocol for Unused TCP Access in GX Works
 #define PLC_PORT_UDP		1026		// Set this Port as MC Protocol UDP Access in GX Works
 
 
@@ -56,7 +58,8 @@
 #define SELECT_TORSO				2
 #define SELECT_YBM					3
 #define SELECT_INTERLOCK			4
-#define SELECT_COMMON				5
+#define SELECT_GNSS					5
+#define SELECT_COMMON				6
 
 
 // MC Frame Header - Type 3E/Binary - Request
@@ -268,6 +271,12 @@ typedef struct {		// W0360 ~ W0365 (6 words)
 }mc_interlock;
 
 
+typedef struct {		// W00C0 ~ W00C3 (4 words)
+	unsigned int latitude;			// W00C0~C1 Offroad equipment battery voltage (*01)
+	unsigned int longitude;			// W00C2~C3 Offroad equipment battery current (*01)
+}mc_gnss;
+
+
 
 typedef struct {
 	mc_xyris xyris; 
@@ -275,6 +284,7 @@ typedef struct {
 	mc_ybm ybm; 
 	mc_common common;
 	mc_interlock interlock;
+	mc_gnss gnss; 
 }mc_buff;
 
 
@@ -291,9 +301,14 @@ private:
 	WSADATA wsaData;
 	struct sockaddr_in server;
 	SOCKET sock;
+
+	bool _connected;
 public:
 	MCClient(int portnum, char *ipaddr);
 	~MCClient();
+
+	bool IsConnected(){ return _connected; }
+
 	char* errmsg(unsigned short errnum);
 	unsigned char devcode(char devs[3]);
 

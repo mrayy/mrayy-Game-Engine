@@ -1,6 +1,6 @@
 
 /**
-*	NEDO-Obayashi - Data Acquisition Daemon (DAQ)
+*	Data Read / Write to Mitsubishi PLC 
 *	Charith Fernando. (charith@inmojo.com)
 *	Nichiha USA, Inc.
 *
@@ -22,24 +22,26 @@
 #include "StdAfx.h"
 #include "plc_config.h"
 
-
+bool verbose = false;
 
 // ---------------------- PLC MC Protocol Driver function implementation -----------------------------------//
 
-MCClient::MCClient(int portnum, char *ipaddr){
+MCClient::MCClient(int portnum, const char *ipaddr){
 	WSAStartup(MAKEWORD(2, 0), &wsaData);
 	server.sin_family = AF_INET;
 	server.sin_port = htons(portnum);
 	server.sin_addr.S_un.S_addr = inet_addr(ipaddr);
 	sock = socket(AF_INET, SOCK_STREAM, 0);
-// 	unsigned long value = 1;
-// 	ioctlsocket(sock, FIONBIO, &value);
 	int ret = connect(sock, (struct sockaddr *)&server, sizeof(server));
 
 	if (ret != 0)
-		printf("Melsec PLC Connection Error.. \r\n");
+	{
+		if(verbose)printf("Melsec PLC Connection Error.. \r\n");
+		closesocket(sock);
+		sock = 0;
+	}
 	else
-		printf("Melsec PLC Connected Succssfully at %s : %d \r\n", ipaddr, portnum);
+		if(verbose)printf("Melsec PLC Connected Succssfully at %s : %d \r\n", ipaddr, portnum);
 }
 
 MCClient::~MCClient(){
@@ -109,7 +111,7 @@ int MCClient::batch_read(char* devname, char destination, int head_dev, mc_buff 
 	unsigned short cdatabuf[1024];
 
 
-	// Setup header with defaults
+	// Setup header with defaultss
 	set_header_3e(&request_header);
 
 	// Set command
@@ -128,24 +130,24 @@ int MCClient::batch_read(char* devname, char destination, int head_dev, mc_buff 
 
 	// Tx
 	if ((send(sock, (char *)tx_buf, tx_sz, 0)) < tx_sz) {
-		printf("data send error!\n");
+		if(verbose)printf("data send error!\n");
 		return 0;
 	}
 
 	// Rx
 	if ((rx_sz = recv(sock, (char *)rx_buf, 4096, 0)) <= 0) {
-		printf("no ack received!\n");
+		if(verbose)printf("no ack received!\n");
 		return 0;
 	}
 
-	//printf("got %i bytes!\n", rx_sz);
+	if(verbose)printf("got %i bytes!\n", rx_sz);
 	memcpy(&resp_header, rx_buf, sizeof(resp_header));
 
 
 	if (resp_header.complete_code == 0x0000) {
 		rez_datalen = resp_header.data_length - 2; // subtract 2 from data length to account for response code (word)
 		rez_wordlen = rez_datalen / 2;
-		//printf("char data len = %u bytes (%i words).\n", rez_datalen, rez_wordlen);
+		if(verbose)printf("char data len = %u bytes (%i words).\n", rez_datalen, rez_wordlen);
 		if (outbuf > 0) {
 			//memcpy(&cdatabuf, rx_buf + sizeof(resp_header), rez_datalen);
 			//memcpy(outbuf, rx_buf + sizeof(resp_header), rez_datalen);
@@ -165,12 +167,12 @@ int MCClient::batch_read(char* devname, char destination, int head_dev, mc_buff 
 			return rez_wordlen;
 		}
 		else {
-			printf("invalid outbuf pointer!\n");
+			if(verbose)printf("invalid outbuf pointer!\n");
 		}
 	}
 	else {
-		printf("abnormal completion. [%04hX] %s\n", errmsg(resp_header.complete_code));
-		printf("abnormal response: [0x%04hX] %s", errmsg(resp_header.complete_code));
+		if(verbose)printf("abnormal completion. [%04hX] %s\n", errmsg(resp_header.complete_code));
+		if(verbose)printf("abnormal response: [0x%04hX] %s", errmsg(resp_header.complete_code));
 		return -1;
 	}
 
@@ -225,20 +227,20 @@ int MCClient::batch_write(char* devname, char destination, int head_dev, mc_buff
 
 	// Tx
 	if ((send(sock, (char *)tx_buf, tx_sz, 0)) < tx_sz) {
-		printf("data send error!\n");
+		if(verbose)printf("data send error!\n");
 		return 0;
 	}
 
 	// Rx
 	if ((rx_sz = recv(sock, (char *)rx_buf, 4096, 0)) <= 0) {
-		printf("no ack received!\n");
+		if(verbose)printf("no ack received!\n");
 		return 0;
 	}
 
 	memcpy(&resp_header, rx_buf, sizeof(resp_header));
 
 	if (resp_header.complete_code == 0x0000) {
-		//printf("write %i bytes complete!\n", tx_sz);
+		if(verbose)printf("write %i bytes complete!\n", tx_sz);
 	}
 
 	return -1;

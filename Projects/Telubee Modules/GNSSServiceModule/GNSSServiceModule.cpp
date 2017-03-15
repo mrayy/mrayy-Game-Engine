@@ -25,6 +25,7 @@ class GNSSServiceModuleImpl :public IServiceContextListener
 {
 public:
 
+
 	EServiceStatus m_status;
 	TBeeServiceContext* m_context;
 	bool m_connected;
@@ -32,8 +33,8 @@ public:
 	GNSSController* m_controller;
 
 	std::string m_port;
-	core::string m_plcIP;
-	int m_plcPort;
+//	core::string m_plcIP;
+//	int m_plcPort;
 public:
 
 public:
@@ -43,8 +44,8 @@ public:
 		m_status = EServiceStatus::Idle;
 		m_connected = false;
 		m_controller = new GNSSController();
-		m_plcPort = PLC_PORT_TCP_UNUSED;
-		m_plcIP = MELSEC_PLC;
+//		m_plcPort = PLC_PORT_TCP_UNUSED;
+	//	m_plcIP = MELSEC_PLC;
 	}
 
 	~GNSSServiceModuleImpl()
@@ -57,7 +58,7 @@ public:
 		m_context = context;
 
 		m_status = EServiceStatus::Inited;
-		m_controller->Init(m_port,m_plcIP,m_plcPort);
+		m_controller->Init(m_port/*,m_plcIP,m_plcPort*/);
 		
 		context->AddListener(this);
 //  		m_thread = OS::IThreadManager::getInstance().createThread(new RemoteRobotControlThread(this), OS::ETP_Normal);
@@ -93,7 +94,6 @@ public:
 	{
 		if (m_status != EServiceStatus::Running)
 			return;
-
 
 	}
 	void DebugRender(ServiceRenderContext* context)
@@ -195,6 +195,7 @@ bool GNSSServiceModule::LoadServiceSettings(xml::XMLElement* elem)
 	{
 		m_impl->m_port = a->value;
 	}
+	/*
 	a = elem->getAttribute("PLCIP");
 	if (a)
 	{
@@ -205,7 +206,7 @@ bool GNSSServiceModule::LoadServiceSettings(xml::XMLElement* elem)
 	{
 		m_impl->m_plcPort = core::StringConverter::toInt( a->value);
 	}
-
+	*/
 	return true;
 }
 

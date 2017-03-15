@@ -6,19 +6,24 @@
 #include "serial/serial.h"
 #include "plc_config.h"
 #include "IThread.h"
+#include "GNSSSharedMemory.h"
+#include "shmem.h"
 
 namespace mray
 {
 class GNSSController
 {
 protected:
+	mc_gnss* m_shData;
+	shmem m_sharedMemory;
+
 	core::string m_portname;
 	serial::Serial* m_serial;
-	MCClient *mc;
-	mc_buff mcWriteBuf;
+	//MCClient *mc;
+	//mc_buff mcWriteBuf;
 	GCPtr<OS::IThread> m_thread;
-	core::string _plcIP;
-	int _plcPort;
+	//core::string _plcIP;
+	//int _plcPort;
 
 	bool _isStarted;
 
@@ -35,15 +40,15 @@ protected:
 
 
 		// GGA - Global Positioning System Fixed Data
-		float nmea_longitude;
-		float nmea_latitude;
 		float utc_time;
+		double nmea_longitude;
+		double nmea_latitude;
 		char ns, ew;
 		int lock;
 		int satelites;
 		int satellites;
 		float hdop;
-		float msl_altitude;
+		double msl_altitude;
 		char msl_units;
 
 
@@ -62,7 +67,7 @@ protected:
 		float course_m; // magnetic
 		char course_m_unit;
 		char speed_k_unit;
-		float speed_km; // speek km/hr
+		float speed_km; // speed km/hr
 		char speed_km_unit;
 	};
 
@@ -75,9 +80,9 @@ public:
 	GNSSController();
 	~GNSSController();
 
-	bool Init(const core::string& portName,core::string plcIP,int plcPort);
+	bool Init(const core::string& portName/*,core::string plcIP,int plcPort*/);
 	void Shutdown();
-	bool IsOpen(){ return m_serial != 0 && mc!=0; }
+	bool IsOpen(){ return m_serial != 0 /*&& mc!=0*/; }
 	bool IsStarted(){ return _isStarted; }
 
 	void Start();

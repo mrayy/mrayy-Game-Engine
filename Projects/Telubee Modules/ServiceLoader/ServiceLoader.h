@@ -57,6 +57,8 @@ protected:
 	void _lockProcess(const std::string& requester);//request to lock this process until the requester finish its cpu usage
 	void _unlockProcess(const std::string& requester);
 
+	void _sendMessage(const core::string& msg);
+
 	//////////////////////////////////////////////////////////////////////////
 	void OnUserConnected(const TBee::UserConnectionData& data);
 	void OnUserDisconnected(const network::NetAddress& address);

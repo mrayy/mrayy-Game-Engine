@@ -30,9 +30,6 @@
     <ClInclude Include="include\Console.h">
       <Filter>Source Files\includes</Filter>
     </ClInclude>
-    <ClInclude Include="include\plc_config.h">
-      <Filter>Source Files\includes</Filter>
-    </ClInclude>
     <ClInclude Include="include\stdafx.h">
       <Filter>Source Files\includes</Filter>
     </ClInclude>
@@ -47,6 +44,9 @@
     </ClInclude>
     <ClInclude Include="UnityPlugin.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\plc_config.h">
+      <Filter>Source Files\includes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -65,7 +65,7 @@
     <ClCompile Include="PLCHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="melsec_mc.cpp">
+    <ClCompile Include="..\shared\melsec_mc.cpp">
       <Filter>Source Files\includes</Filter>
     </ClCompile>
   </ItemGroup>

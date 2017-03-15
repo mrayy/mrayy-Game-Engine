@@ -11,6 +11,9 @@
 #include "StringUtil.h"
 #include "plc_config.h"
 #include "INetwork.h"
+#include "GNSSSharedMemory.h"
+#include "ModuleSharedMemory.h"
+#include "shmem.h"
 #include <conio.h>
 
 namespace mray
@@ -34,6 +37,8 @@ public:
 
 	TBeeServiceContext* m_context;
 	
+	mc_gnss* m_gnssShMem;
+	shmem m_gnssSharedMemory;
 
 	MCClient *mc;
 
@@ -50,12 +55,38 @@ public:
 	int m_dataReceived;
 
 	HANDLE hThreadRecv;
+	HANDLE hThreadPLC;
+
 	static DWORD WINAPI timerThreadRecv(PLCWriterImpl *robot, LPVOID pdata)
 	{
 		robot->_ProcessReceive();
 		return 0;
 	}
+	static DWORD WINAPI timerThreadPLC(PLCWriterImpl *robot, LPVOID pdata)
+	{
+		robot->_ProcessPLC();
+		return 0;
+	}
 
+	void _ProcessPLC()
+	{
+		while (!isDone){
+			//update GNSS to PLC
+			if (m_gnssShMem)
+			{
+				// mcWriteBuf is internal copy of shmem for PLC , m_gnssShMem is the actual shared memory from GNSS service
+				memcpy(&mcWriteBuf.gnss, m_gnssShMem, sizeof(mc_gnss));
+				mc->batch_write("W", SELECT_GNSS, PLC_GNSS_OFFSET, &mcWriteBuf, PLC_GNSS_SIZE);
+			}
+
+			//update TORSO to PLC
+			mcWriteBuf.torso.userConnected = m_context->sharedMemory->UserConnected;
+			mc->batch_write("W", SELECT_TORSO, PLC_TORSO_OFFSET, &mcWriteBuf, PLC_TORSO_SIZE);
+			Sleep(10);
+			mc->batch_read("W", SELECT_INTERLOCK, PLC_INTERLOCK_OFFSET, &mcReadBuf, PLC_INTERLOCK_SIZE);
+			Sleep(10);
+		}
+	}
 	void _ProcessReceive()
 	{
 		const byte TORSO_DATA = 5;
@@ -77,13 +108,8 @@ public:
 				if (v == TORSO_DATA && len>sizeof(mcWriteBuf.torso)){
 					//read torso data
 					rdr.read(&mcWriteBuf.torso, sizeof(mcWriteBuf.torso));
-					//update torso plc
-				//	mc->batch_write("W", SELECT_TORSO, 0xA0, &mcWriteBuf, 0x20); 
 					Sleep(1);
 				}
-				//regardless of the message, reply with the entire data buffer
-			//	mc->batch_read("W", SELECT_INTERLOCK, 0x0360, &mcReadBuf, 0x06);
-				Sleep(1);
 				//reply with the data buffer
 				netClientReceiver->SendTo(&src, (const char*)&mcReadBuf, sizeof(mcReadBuf));
 			}
@@ -98,8 +124,8 @@ public:
 	PLCWriterImpl()
 	{
 		m_status = EServiceStatus::Idle;
-		m_plcPort= PLC_PORT_TCP_TORSO;
-		m_plcIP = MELSEC_PLC;
+		//m_plcPort= PLC_PORT_TCP_TORSO;
+		//m_plcIP = MELSEC_PLC;
 		m_dataReceived = 0;
 		 netClientReceiver = 0;
 
@@ -122,6 +148,19 @@ public:
 		context->AddListener(this);
 		m_status = EServiceStatus::Inited;
 
+		Sleep(1000);//wait until GNSS services inited
+		//start shared memory
+		m_gnssSharedMemory.SetDataSize(sizeof(mc_gnss));
+		m_gnssSharedMemory.SetName("SH_Tx_GNSS");
+		m_gnssSharedMemory.openRead();
+
+		m_gnssShMem = m_gnssSharedMemory.GetData<mc_gnss>();
+		if (!m_gnssShMem)
+		{
+			gLogManager.log("Failed open GNSS shared memory! Make sure GNSS service is running!", ELL_WARNING);
+		}
+
+
 		memset(&mcWriteBuf, 0, sizeof(mcWriteBuf)); // initializing test write data
 		memset(&mcReadBuf, 0, sizeof(mcReadBuf)); // initializing test read data
 		
@@ -135,6 +174,7 @@ public:
 
 		isDone = false;
 		hThreadRecv = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadRecv, this, NULL, NULL);
+		hThreadPLC = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&timerThreadPLC, this, NULL, NULL);
 
 		gLogManager.log("Done Initing.", ELL_INFO);
 	}
@@ -166,6 +206,7 @@ public:
 			netClientReceiver = 0;
 		}
 		TerminateThread(hThreadRecv, 0);
+		TerminateThread(hThreadPLC, 0);
 		m_status = EServiceStatus::Idle;
 	}
 
@@ -185,6 +226,15 @@ public:
 
 		core::string msg = "[" + PLCWriter::ModuleName + "] Service Status: " + IServiceModule::ServiceStatusToString(m_status);
 		context->RenderText(msg, 0, 0);
+
+		msg = "PLC Status:" + core::string(mc->IsConnected()?"Connected":"Disconnected");
+		context->RenderText(msg, 0, 0);
+
+		if (m_gnssShMem)
+		{
+			msg = "Lat, Lng:" + core::StringConverter::toString(m_gnssShMem->latitude) + "," + core::StringConverter::toString(m_gnssShMem->longitude) ;
+			context->RenderText(msg, 0, 0);
+		}
 
 		msg = "TORSO Data Received:" + core::StringConverter::toString(m_dataReceived);
 		context->RenderText(msg, 0, 0);

@@ -32,6 +32,12 @@ extern "C" EXPORT_API void PLCSetYbmUShort(PLCHandler* driver, EYbmDataField dat
 extern "C" EXPORT_API unsigned int PLCGetYbmUInt(PLCHandler* driver, EYbmDataField data);
 extern "C" EXPORT_API unsigned short PLCGetYbmUShort(PLCHandler* driver, EYbmDataField data);
 
+extern "C" EXPORT_API void PLCSetGnssUInt64(PLCHandler* driver, EGnssDataField data, unsigned __int64 v);
+extern "C" EXPORT_API void PLCSetGnssUShort(PLCHandler* driver, EGnssDataField data, unsigned short v);
+extern "C" EXPORT_API void PLCSetGnssInt(PLCHandler* driver, EGnssDataField data, int v);
+extern "C" EXPORT_API unsigned __int64 PLCGetGnssUInt64(PLCHandler* driver, EGnssDataField data);
+extern "C" EXPORT_API unsigned short PLCGetGnssUShort(PLCHandler* driver, EGnssDataField data);
+extern "C" EXPORT_API int PLCGetGnssInt(PLCHandler* driver, EGnssDataField data);
 
 extern "C" EXPORT_API unsigned short PLCGetCommonUShort(PLCHandler* driver, ECommonDataField data);
 extern "C" EXPORT_API short PLCGetCommonShort(PLCHandler* driver, ECommonDataField data);

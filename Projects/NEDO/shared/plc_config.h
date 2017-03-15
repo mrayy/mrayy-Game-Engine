@@ -1,5 +1,5 @@
 /**
-*	NEDO-Obayashi - Data Acquisition Daemon (DAQ)
+*	Data Read / Write to Mitsubishi PLC 
 *	Charith Fernando. (charith@inmojo.com)
 *	Nichiha USA, Inc.
 *
@@ -7,6 +7,7 @@
 *	Copyright (c) 2015-2016 Charith Fernando/TachiLab.org.
 *
 *	2015.11.04.
+*	updated on 2016.11.23 for GLONASS fields
 *
 *	This driver implements "MC Protocol" communications as described
 *	in Mitsubishi "MELSEC-Q/L MELSEC Communication Protocol Reference
@@ -23,7 +24,7 @@
 #ifndef _INC_PLCCONFIG_H
 #define _INC_PLCCONFIG_H
 
-#include <winsock2.h> // for socker communication
+#include <winsock2.h> // for socket communication
 #include <ws2tcpip.h> 
 #include <sys/types.h>
 #include <winsock2.h>			// link 32bit/64bit ws2_32.lib
@@ -118,6 +119,7 @@ typedef struct {
 } MELSEC_REGMAP;
 
 
+// data types and sizes can be fould here. https://msdn.microsoft.com/en-us/library/s3f49ktz.aspx
 
 typedef struct {		// W0000 ~ W001F (32 words)
 	unsigned short terminal;			// W0000	Xyris Terminal Connected
@@ -271,10 +273,18 @@ typedef struct {		// W0360 ~ W0365 (6 words)
 }mc_interlock;
 
 
-typedef struct {		// W00C0 ~ W00C3 (4 words)
-	unsigned int latitude;			// W00C0~C1 Offroad equipment battery voltage (*01)
-	unsigned int longitude;			// W00C2~C3 Offroad equipment battery current (*01)
+typedef struct {		// W00C0 ~ W00C14 (16 words)
+	unsigned short gps_locked;		// W00C0 1-5,9 0 - invalid, 4 > fixed
+	unsigned __int64 latitude;		// W00C1~C4	ddmm.mmmmmm (*0.000001)
+	unsigned __int64 longitude;		// W00C5~C8 dddmm.mmmmmm (*0.000001)
+	signed int altitude;			// W00C9~C10 99999.999 (*0.001)
+	unsigned short true_heading;	// W00C11 000.00 wrt TN (*0.01)
+	unsigned short magnetic_heading;// W00C12 000.00 wrt MN	(*0.01)
+	unsigned short ground_speed;	// W00C13 000.00 km/h (*0.01)
+	unsigned short pitch;			// W00C14 unused	
+	unsigned short roll;			// W00C15 unused
 }mc_gnss;
+
 
 
 
@@ -288,9 +298,27 @@ typedef struct {
 }mc_buff;
 
 
+const int PLC_XYRIS_OFFSET = 0x00;// offsetof(mc_buff, xyris);
+const int PLC_XYRIS_SIZE = 0x20;// sizeof(mc_xyris);
+const int PLC_TORSO_OFFSET = 0xA0;// offsetof(mc_buff, torso);
+const int PLC_TORSO_SIZE = 0x20;// sizeof(mc_torso);
+const int PLC_YBM_OFFSET = 0xE0;// offsetof(mc_buff, ybm);
+const int PLC_YBM_SIZE = 0x22;// sizeof(mc_ybm);
+const int PLC_COMMON_OFFSET = 0x034F;// offsetof(mc_buff, common);
+const int PLC_COMMON_SIZE = 0x05;// sizeof(mc_common);
+const int PLC_INTERLOCK_OFFSET = 0x0360;// offsetof(mc_buff, interlock);
+const int PLC_INTERLOCK_SIZE = 0x06;// sizeof(mc_interlock);
+const int PLC_GNSS_OFFSET = 0xC0;// offsetof(mc_buff, gnss);
+const int PLC_GNSS_SIZE = 0x14;// sizeof(mc_gnss);
+
+
 extern MELSEC_REGMAP regmap[];
 extern MELSEC_ERRMAP errmap[];
 
+
+
+
+//const int MC_GNSS_SIZE = sizeof(mc_gnss);
 
 
 

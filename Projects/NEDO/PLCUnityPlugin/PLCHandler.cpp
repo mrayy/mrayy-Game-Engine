@@ -153,6 +153,20 @@ unsigned long INTERLOCK_Ptr[] =
 
 };
 
+unsigned long GNSS_Ptr[] =
+{
+	// W0000 ~ W001F (32 words)
+	OFFSETOF(mc_gnss, gps_locked),
+	OFFSETOF(mc_gnss, latitude),
+	OFFSETOF(mc_gnss, longitude),
+	OFFSETOF(mc_gnss, altitude),
+	OFFSETOF(mc_gnss, true_heading),
+	OFFSETOF(mc_gnss, magnetic_heading),
+	OFFSETOF(mc_gnss, ground_speed),
+	OFFSETOF(mc_gnss, pitch),
+	OFFSETOF(mc_gnss, roll),
+
+};
 
 PLCHandler::PLCHandler()
 {
@@ -206,9 +220,9 @@ bool PLCHandler::WriteData()
 		return false;
 
 	int cnt = 0;
-	cnt  = m_mc->batch_write("W", SELECT_XYRIS, 0x00, &m_writeBuff, 0x20);
-	cnt += m_mc->batch_write("W", SELECT_TORSO, 0xA0, &m_writeBuff, 0x2D);
-	cnt += m_mc->batch_write("W", SELECT_XYRIS, 0x00, &m_writeBuff, 0x20);
+	cnt  = m_mc->batch_write("W", SELECT_XYRIS, PLC_XYRIS_OFFSET, &m_writeBuff, PLC_XYRIS_SIZE);
+	cnt += m_mc->batch_write("W", SELECT_TORSO, PLC_TORSO_OFFSET, &m_writeBuff, PLC_TORSO_SIZE);
+	//cnt += m_mc->batch_write("W", SELECT_XYRIS, 0x00, &m_writeBuff, PLC_XYRIS_SIZE);
 	return cnt > 0;
 }
 
@@ -218,11 +232,12 @@ bool PLCHandler::ReadData()
 		return false;
 
 	int cnt = 0;
-	cnt += m_mc->batch_read("W", SELECT_XYRIS, 0x00, &m_readBuff, 0x20);
-	cnt += m_mc->batch_read("W", SELECT_TORSO, 0xA0, &m_readBuff, 0x2D);
-	cnt += m_mc->batch_read("W", SELECT_YBM, 0xE0, &m_readBuff, 0x22);
-	cnt += m_mc->batch_read("W", SELECT_COMMON, 0x034F, &m_readBuff, 0x05);
-	cnt += m_mc->batch_read("W", SELECT_INTERLOCK, 0x0360, &m_readBuff, 0x06); 
+	cnt += m_mc->batch_read("W", SELECT_XYRIS, PLC_XYRIS_OFFSET, &m_readBuff, PLC_XYRIS_SIZE);
+	cnt += m_mc->batch_read("W", SELECT_TORSO, PLC_TORSO_OFFSET, &m_readBuff, PLC_TORSO_SIZE);
+	cnt += m_mc->batch_read("W", SELECT_YBM, PLC_YBM_OFFSET, &m_readBuff, PLC_YBM_SIZE);
+	cnt += m_mc->batch_read("W", SELECT_COMMON, PLC_COMMON_OFFSET, &m_readBuff, PLC_COMMON_SIZE);
+	cnt += m_mc->batch_read("W", SELECT_GNSS, PLC_GNSS_OFFSET, &m_readBuff, PLC_GNSS_SIZE);
+	cnt += m_mc->batch_read("W", SELECT_INTERLOCK, PLC_INTERLOCK_OFFSET, &m_readBuff, PLC_INTERLOCK_SIZE); 
 	return cnt > 0;
 }
 
@@ -305,6 +320,33 @@ unsigned char PLCHandler::GetYbmUChar(EYbmDataField data)
 }
 
 
+void PLCHandler::SetGnssDataUInt64(EGnssDataField data, unsigned __int64 value)
+{
+	*(unsigned __int64*)((char*)&m_writeBuff.gnss + GNSS_Ptr[data]) = value;
+}
+void PLCHandler::SetGnssDataInt(EGnssDataField data, int value)
+{
+	*(int*)((char*)&m_writeBuff.gnss + GNSS_Ptr[data]) = value;
+}
+void PLCHandler::SetGnssDataUShort(EGnssDataField data, unsigned short value)
+{
+	*(unsigned short*)((char*)&m_writeBuff.gnss + GNSS_Ptr[data]) = value;
+}
+unsigned __int64 PLCHandler::GetGnssUInt64(EGnssDataField data)
+{
+	return *(unsigned __int64*)((char*)&m_readBuff.gnss + GNSS_Ptr[data]);
+
+}
+signed int PLCHandler::GetGnssInt(EGnssDataField data)
+{
+	return *(int*)((char*)&m_readBuff.gnss + GNSS_Ptr[data]);
+
+}
+unsigned short PLCHandler::GetGnssUShort(EGnssDataField data)
+{
+	return *(unsigned short*)((char*)&m_readBuff.gnss + GNSS_Ptr[data]);
+
+}
 
 unsigned short PLCHandler::GetCommonFieldUShort(ECommonDataField data)
 {

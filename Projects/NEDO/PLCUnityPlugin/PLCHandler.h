@@ -8,6 +8,12 @@
 
 enum ETorsoDataField
 {
+	status,
+	userConnected,
+	robotConnected,
+	overCurrent,
+	cameraFPS,
+	oculusFPS,
 	J1RT,
 	J2RT,
 	J3RT,
@@ -20,17 +26,19 @@ enum ETorsoDataField
 	J4IK,
 	J5IK,
 	J6IK,
+	J1CT,
+	J2CT,
+	J3CT,
+	J4CT,
+	J5CT,
+	J6CT,
 	J1TQ,
 	J2TQ,
 	J3TQ,
 	J4TQ,
 	J5TQ,
 	J6TQ,
-	IMURoll,
-	IMUPitch,
-	IMUYaw,
-	Status,
-	CameraFPS,
+	unused,
 	Collision
 };
 
@@ -40,27 +48,27 @@ enum EXyrisDataField
 	terminal,
 	offline,
 	inOperation,
-	traverse,
-	subcraler,
+	inTraverse,
+	subcrawler,
 	offroad,
-	mainCrwlMtrRight,
-	mainCrwlMtrLeft,
-	mainCrwlRightRot,
-	mainCrwlLeftRot,
-	subCrwlPrevAngRight,
-	subCrwlPrevAngLeft,
-	subCrwlCurrAngRight,
-	subCrwlCurrAngLeft,
-	frontAngle,
-	sideAngle,
-	rightTraverse,
-	leftTraverse,
+	mainCrwlRightRPM,
+	mainCrwlLeftRPM,
+	mainCrwlRightRotDir,
+	mainCrwlLeftRotDir,
+	subCrwlFrontRight,
+	subCrwlFrontLeft,
+	subCrwlBackRight,
+	subCrwlBackLeft,
+	xyris_pitch,
+	xyris_roll,
+	traverseRight,
+	traverseLeft,
 	battVoltage,
 	battCurrent,
-	inForwardDir,
-	inTraverseControl,
-	maxSpeed,
-	traverseSpeed,
+	forwardControlMode,
+	traverseControlMode,
+	mainCrwlSpeedLimit,
+	subCrwlSpeedLimit,
 	maxTempLeft,
 	maxTempRight,
 	unused0,
@@ -134,6 +142,19 @@ enum EYbmDataField
 	rssi_robot
 };
 
+ enum EGnssDataField
+ {
+	 gps_locked,
+	 latitude,
+	 longitude,
+	 altitude,
+	 true_heading,
+	 magnetic_heading,
+	 ground_speed,
+	 gnss_pitch,
+	 gnss_roll
+ };
+
 class PLCHandler
 {
 protected:
@@ -173,6 +194,15 @@ public:
 	unsigned int GetYbmUInt(EYbmDataField data);
 	unsigned short GetYbmUShort(EYbmDataField data);
 	unsigned char GetYbmUChar(EYbmDataField data);
+
+
+	//Gnss Code
+	void SetGnssDataUInt64(EGnssDataField data, unsigned __int64 value);
+	void SetGnssDataInt(EGnssDataField data, int value);
+	void SetGnssDataUShort(EGnssDataField data, unsigned short value);
+	unsigned __int64 GetGnssUInt64(EGnssDataField data);
+	signed int GetGnssInt(EGnssDataField data);
+	unsigned short GetGnssUShort(EGnssDataField data);
 
 	unsigned short GetCommonFieldUShort(ECommonDataField data);
 	short GetCommonFieldShort(ECommonDataField data);

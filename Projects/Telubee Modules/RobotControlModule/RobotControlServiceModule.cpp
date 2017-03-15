@@ -104,7 +104,7 @@ public:
 			OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 			int reply = (int)EMessages::DepthSize;
 			int len = stream.write(&reply, sizeof(reply));
-			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+			m_context->commChannel->SendTo(m_context->GetTargetClientAddr(), (char*)buffer, len);
 		}
 	};
 
@@ -124,7 +124,7 @@ public:
 		int len = stream.write(&reply, sizeof(reply));
 		len += wrtr.binWriteInt(code);
 		len += wrtr.binWriteString(msg);
-		m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+		m_context->commChannel->SendTo(m_context->GetTargetClientAddr(), (char*)buffer, len);
 	}
 	virtual void OnRobotStatus(RobotHandler* sender, const RobotStatus& status)
 	{
@@ -435,7 +435,7 @@ public:
 				int reply = (int)EMessages::RobotStatus;
 				int len = stream.write(&reply, sizeof(reply));
 				len += stream.write(&st, sizeof(st));
-				m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+				m_context->commChannel->SendTo(m_context->GetTargetClientAddr(), (char*)buffer, len);
 			}
 		}
 #if 0 // these will be handled using shared memory
@@ -509,7 +509,7 @@ public:
 				len += stream.write(&count, sizeof(count));
 				for (int i = 0; i < count; ++i)
 					len += wrtr.binWriteFloat(vals[i]);
-				m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+				m_context->commChannel->SendTo(m_context->GetTargetClientAddr(), (char*)buffer, len);
 			}
 		}
 		else if (msg.equals_ignore_case("reinit"))

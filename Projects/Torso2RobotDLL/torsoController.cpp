@@ -23,8 +23,8 @@
 #include "IUDPClient.h"
 #include "INetwork.h"
 
-#define USE_TORSO_LAB
-//#define USE_TORSO_OBAYASHI
+//#define USE_TORSO_LAB
+#define USE_TORSO_OBAYASHI
 
 #ifdef USE_TORSO_LAB
 #define J3Enabled

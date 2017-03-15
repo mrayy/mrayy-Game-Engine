@@ -15,7 +15,7 @@
 #include "StringUtil.h"
 #include "AppSrcVideoSrc.h"
 #include "ModuleSharedMemory.h"
-
+#include "INetworkPortAssigner.h"
 #include <conio.h>
 
 namespace mray
@@ -37,7 +37,7 @@ public:
 
 	std::vector<uint> m_AudioPort;
 	bool m_portsReceived;
-	bool m_isVideoStarted;
+	bool m_isAudioStarted;
 	network::NetAddress m_remoteAddr;
 
 
@@ -49,7 +49,13 @@ public:
 	{
 		float x, y, z;
 	};
-	std::vector<int> m_audioInterfaceIndicies;
+	struct AudioInterface
+	{
+		int ID;
+		int channels;
+		int samplingRate;
+	};
+	std::vector<AudioInterface> m_audioInterfaceIndicies;
 	std::vector<Position> m_audioSpatialPosition;
 	bool m_isSpatialAudio;
 	std::vector<sound::InputStreamDeviceInfo> m_audioInterfaceList;
@@ -63,7 +69,7 @@ public:
 		m_streamers = new video::GstStreamBin();
 
 		m_portsReceived = false;
-		m_isVideoStarted = false;
+		m_isAudioStarted = false;
 		m_isSpatialAudio = false;
 	}
 	~AudioStreamerImpl()
@@ -96,7 +102,11 @@ public:
 			//Create audio streams based on the loaded interfaces
 			if (m_audioInterfaceIndicies.size() == 0)
 			{
-				m_audioInterfaceIndicies.push_back(-1);//add the default audio interface
+				AudioInterface iface;
+				iface.ID = -1;
+				iface.channels = 2;
+				iface.samplingRate = 44100;
+				m_audioInterfaceIndicies.push_back(iface);//add the default audio interface
 			}
 			printf("Creating Audio Streamer\n");
 
@@ -106,11 +116,12 @@ public:
 				video::GstNetworkAudioStreamer* streamer;
 				streamer = new video::GstNetworkAudioStreamer();
 
-				if (m_audioInterfaceIndicies[i]==-1)
+				if (m_audioInterfaceIndicies[i].ID==-1)
 					iface.deviceGUID = "";
 				else
-					iface.deviceGUID = m_audioInterfaceList[m_audioInterfaceIndicies[i]].deviceGUID;
-				iface.channelsCount = 2;
+					iface.deviceGUID = m_audioInterfaceList[m_audioInterfaceIndicies[i].ID].deviceGUID;
+				iface.channelsCount = m_audioInterfaceIndicies[i].channels;
+				iface.samplingRate = m_audioInterfaceIndicies[i].samplingRate;
 
 				streamer->SetAudioInterface(iface);
 
@@ -170,18 +181,31 @@ public:
 	{
 		if (!m_portsReceived || m_status != EServiceStatus::Running)
 			return;
-		gLogManager.log("Start Streaming.", ELL_INFO);
-		for (int i = 0; i < m_streamers->GetStreamsCount(); ++i)
+		gLogManager.log("Creating Streaming.", ELL_INFO);
+		for (int i = 0; i < m_AudioPort.size(); ++i)
 		{
+			core::string pname = "Audio" + core::StringConverter::toString(i);
+			m_AudioPort[i] = gNetworkPortAssigner.AssignPort(pname, network::EPT_UDP, m_context->GetPortValue(pname));
+		}
+		core::string clockIpAddr;
+		if (m_context->sharedMemory->gstClockPortStreamer != 0)
+		{
+			clockIpAddr = "127.0.0.1";
+		}
+		for (int i = 0; i < m_streamers->GetStreamsCount() && i < m_AudioPort.size(); ++i)
+		{
+			m_streamers->GetStreamerAt(i)->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortStreamer);
+			m_streamers->GetStreamerAt(i)->BindPorts(m_context->GetTargetClientAddr()->toString(), &m_AudioPort[i], 1, 0);
 			m_streamers->GetStreamerAt(i)->CreateStream();
-			if (m_context->sharedMemory->gstClockPortStreamer==0)
+			if (m_context->sharedMemory->gstClockPortStreamer == 0)
 				m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStreamerAt(i)->GetClockPort();
 		}
+		gLogManager.log("Start Streaming.", ELL_INFO);
 		m_streamers->Stream();
 
 		gLogManager.log("Stream started.", ELL_INFO);
 
-		m_isVideoStarted = true;
+		m_isAudioStarted = true;
 	}
 
 	void StartStream()
@@ -206,7 +230,7 @@ public:
 		gLogManager.log("Streams stopped.", ELL_INFO);
 
 		m_status = EServiceStatus::Stopped;
-		m_isVideoStarted = false;
+		m_isAudioStarted = false;
 		return true;
 	}
 
@@ -217,7 +241,7 @@ public:
 		if (m_status != EServiceStatus::Running)
 			return;
 
-		if (!m_isVideoStarted)
+		if (!m_isAudioStarted)
 			_startStream();
 		else
 		{
@@ -246,7 +270,8 @@ public:
 		context->RenderText(msg, 0, 0);
 		for (int i = 0; i < m_audioInterfaceIndicies.size(); ++i)
 		{
-			msg = "\t" + core::StringConverter::toString(i) + " - " + m_audioInterfaceList[m_audioInterfaceIndicies[i]].description;
+			msg = "\t" + core::StringConverter::toString(i) + " - " + m_audioInterfaceList[m_audioInterfaceIndicies[i].ID].description + " - Channels=" + core::StringConverter::toString(m_audioInterfaceIndicies[i].channels)
+				+ "@" + core::StringConverter::toString(m_audioInterfaceIndicies[i].samplingRate);
 			context->RenderText(msg, 0, 0);
 		}
 
@@ -315,7 +340,8 @@ public:
 		int reply = (int)EMessages::AudioConfig;
 		int len = stream.write(&reply, sizeof(reply));
 		len += wrtr.binWriteString(res);
-		m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+		gLogManager.log("Sending Audio Config",ELL_INFO);
+		m_context->commChannel->SendTo(m_context->GetTargetClientAddr(), (char*)buffer, len);
 		delete[]buffer;
 	}
 	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
@@ -334,22 +360,23 @@ public:
 		else if (msg == "AudioPort" && values.size() >= 1)
 		{
 			std::vector<uint> ports;
-			for (int i = 0; i < values.size();++i)
-				ports.push_back( core::StringConverter::toInt(values[i]));
-			if (ports == m_AudioPort)
+			ports.resize(values.size());
+			m_AudioPort.resize(values.size());
+			bool ok = (m_remoteAddr == m_context->remoteAddr);
+			for (int i = 0; i < values.size(); ++i){
+				ports[i] = core::StringConverter::toInt(values[i]);
+				ok &= (m_AudioPort[i] == ports[i]);
+				if (!m_context->portHostAddr)
+				{
+					m_context->portMap["Audio" + core::StringConverter::toString(i)] = ports[i];
+				}
+			}
+			if (ok)
 				return;
 			m_AudioPort = ports;
+			m_remoteAddr = m_context->remoteAddr;
 
-			core::string clockIpAddr;
-			if (m_context->sharedMemory->gstClockPortStreamer != 0)
-			{
-				clockIpAddr = "127.0.0.1";
-			}
 
-			for (int i = 0; i < m_streamers->GetStreamsCount() && i < m_AudioPort.size(); ++i)
-			{
-				m_streamers->GetStreamerAt(i)->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort[i], 1, 0);
-			}
 			//m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort, 1, 0, 0);
 
 			m_portsReceived = true;
@@ -396,11 +423,20 @@ public:
 		e = elem->getSubElement("AudioInterface");
 		while (e)
 		{
+			AudioInterface iface;
+			iface.ID = 0;
+			iface.samplingRate = 44100;
+			iface.channels = 2;
 			a = e->getAttribute("Index");
 			if (a)
-			{
-				m_audioInterfaceIndicies.push_back(core::StringConverter::toInt(a->value));
-			}
+				iface.ID = core::StringConverter::toInt(a->value);
+			a = e->getAttribute("Channels");
+			if (a)
+				iface.channels = core::StringConverter::toInt(a->value);
+			a = e->getAttribute("SamplingRate");
+			if (a)
+				iface.samplingRate = core::StringConverter::toInt(a->value);
+			m_audioInterfaceIndicies.push_back(iface);
 			e = e->nextSiblingElement("AudioInterface");
 		}
 

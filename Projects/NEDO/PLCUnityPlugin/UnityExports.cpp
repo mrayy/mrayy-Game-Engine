@@ -173,6 +173,59 @@ extern "C" EXPORT_API unsigned short PLCGetYbmUShort(PLCHandler* driver, EYbmDat
 	}
 	return 0;
 }
+
+
+extern "C" EXPORT_API void PLCSetGnssUInt64(PLCHandler* driver, EGnssDataField data, unsigned __int64 v)
+{
+	if (driver)
+	{
+		driver->SetGnssDataUInt64(data, v);
+	}
+}
+extern "C" EXPORT_API void PLCSetGnssUShort(PLCHandler* driver, EGnssDataField data, unsigned short v)
+{
+	if (driver)
+	{
+		driver->SetGnssDataUShort(data, v);
+	}
+}
+extern "C" EXPORT_API void PLCSetGnssInt(PLCHandler* driver, EGnssDataField data, int v)
+{
+	if (driver)
+	{
+		driver->SetGnssDataInt(data, v);
+	}
+}
+extern "C" EXPORT_API unsigned __int64 PLCGetGnssUInt64(PLCHandler* driver, EGnssDataField data)
+{
+	if (driver)
+	{
+		return driver->GetGnssUInt64(data);
+	}
+	return 0;
+}
+
+extern "C" EXPORT_API unsigned short PLCGetGnssUShort(PLCHandler* driver, EGnssDataField data)
+{
+	if (driver)
+	{
+		return driver->GetGnssUShort(data);
+	}
+	return 0;
+}
+
+extern "C" EXPORT_API int PLCGetGnssInt(PLCHandler* driver, EGnssDataField data)
+{
+	if (driver)
+	{
+		return driver->GetGnssInt(data);
+	}
+	return 0;
+}
+
+
+
+
 extern "C" EXPORT_API unsigned short PLCGetCommonUShort(PLCHandler* driver, ECommonDataField data)
 {
 
