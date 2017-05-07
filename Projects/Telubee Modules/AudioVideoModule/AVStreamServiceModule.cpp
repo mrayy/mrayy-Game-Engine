@@ -62,6 +62,7 @@ public:
 	ECameraType m_cameraType;
 	bool m_enableEyegaze;
 	math::vector2di m_eyegazeSize;
+	int m_eyegazeLevels;
 	math::vector2di m_resolution;
 	int m_fps;
 	CameraConfigurationManager* m_camConfigMngr;
@@ -228,6 +229,8 @@ public:
 
 		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze"));
 		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
+		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels"));
+		
 /*#else 
 #if USE_POINTGREY
 		m_cameraType = ECameraType::PointGrey;
@@ -425,6 +428,7 @@ public:
 			{
 				video::EyegazeCameraVideoSrc* cs = (video::EyegazeCameraVideoSrc*)src;
 				cs->SetEyegazeCrop(m_eyegazeSize.x, m_eyegazeSize.y);
+				cs->SetEyegazeLevels(m_eyegazeLevels);
 			}
 
 			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);

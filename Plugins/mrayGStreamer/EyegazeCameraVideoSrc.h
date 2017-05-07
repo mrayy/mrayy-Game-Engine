@@ -30,6 +30,7 @@ public:
 
 	void SetEyegazePos(const std::vector<math::vector2df>& poses);
 	void SetEyegazeCrop(int w, int h);
+	void SetEyegazeLevels(int levels);
 
 	void LinkWithPipeline(void* pipeline);
 

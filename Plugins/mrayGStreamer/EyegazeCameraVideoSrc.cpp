@@ -23,10 +23,12 @@ public:
 
 	bool m_eyePosDirty;
 	std::vector<math::vector2df> m_eyepos;
-	std::vector<GstElement*> m_videoRects;
+	std::vector<std::vector<GstElement*>> m_videoRects; //each element contains video rects at different levels for each eye
 	math::vector2di m_cropsize;
 
-	std::list<math::vector4di> m_gazeCashe;
+	std::list<std::vector<math::vector4di>> m_gazeCashe;
+
+	int m_levels; //number of levels to sample the image at a certain position (eye gaze)
 
 
 	GstMyListener *m_precodecListener;
@@ -37,7 +39,7 @@ public:
 	uint32_t m_lastRtpTS;
 
 	bool m_sent;
-	math::vector4di m_sendRect;
+	std::vector<math::vector4di> m_sendRect;
 
 public:
 	EyegazeCameraVideoSrcImpl()
@@ -49,6 +51,7 @@ public:
 		m_lastRtpTS = -1;
 		m_gazeMutex = OS::IThreadManager::getInstance().createMutex();
 		m_sent = true;
+		m_levels = 3;
 
 		//factorials of 640,480: (2)240, (4)120 , (5)96
 		//m_cropsize.set(240, 240);
@@ -80,17 +83,36 @@ public:
 		_UpdateEyegazePos();
 	}
 
-	math::vector4di GetCropRect(int i)
+	math::vector2d GetRectSize(int level)
+	{
+
+		//use formula:  Size=Level*(ImageSize - EyegazeCropSize)/LevelsCount +EyegazeCropSize 
+		return level*(m_impl->m_frameSize - m_cropsize) / m_levels + m_cropsize;
+	}
+
+	//level==0 --> gaze rect
+	//level==1 --> sample rect at level 1
+	//level==m_levels-1 --> Entire image rect
+	math::vector4di GetCropRect(int i,int level)
 	{
 		if (i >= m_eyepos.size())
 			return math::vector4di(0, 0, m_cropsize.x, m_cropsize.y);
+
+		math::vector2d targetSize = GetRectSize(level);
+
 		math::vector2di gazePos(m_impl->m_frameSize.x*m_eyepos[i].x, m_impl->m_frameSize.y*m_eyepos[i].y);
+		/*
 		gazePos.x = math::Max(math::Min(gazePos.x, m_impl->m_frameSize.x - m_cropsize.x / 2), m_cropsize.x / 2);
 		gazePos.y = math::Max(math::Min(gazePos.y, m_impl->m_frameSize.y - m_cropsize.y / 2), m_cropsize.y / 2);
 
 		math::vector4di cropRect(gazePos.x - m_cropsize.x / 2, m_impl->m_frameSize.x - (gazePos.x + m_cropsize.x / 2),
 			gazePos.y - m_cropsize.y / 2, m_impl->m_frameSize.y - (gazePos.y + m_cropsize.y / 2));//left,right,top,bottom
+			*/
+		gazePos.x = math::Max<int>(math::Min<int>(gazePos.x, m_impl->m_frameSize.x - targetSize.x / 2), targetSize.x / 2);
+		gazePos.y = math::Max<int>(math::Min<int>(gazePos.y, m_impl->m_frameSize.y - targetSize.y / 2), targetSize.y / 2);
 
+		math::vector4di cropRect(gazePos.x - targetSize.x / 2, m_impl->m_frameSize.x - (gazePos.x + targetSize.x / 2),
+			gazePos.y - targetSize.y / 2, m_impl->m_frameSize.y - (gazePos.y + targetSize.y / 2));//left,right,top,bottom
 		return cropRect;
 
 	}
@@ -100,16 +122,20 @@ public:
 			return;
 		m_eyePosDirty = false;
 		m_sent = false;
-		m_sendRect = GetCropRect(0);
+		m_sendRect.resize(m_levels);
 		//update video boxes
-		for (int i = 0; i < m_videoRects.size(); ++i)
+		for (int level = 0; level < m_levels; ++level)
 		{
-			if (!m_videoRects[i])
-				continue;
+			m_sendRect[level] = GetCropRect(0,level);
+			for (int i = 0; i < m_videoRects.size(); ++i)
+			{
+				if (!m_videoRects[i][level])
+					continue;
 
-			math::vector4di cropRect = m_sendRect;// GetCropRect(i);
-			g_object_set(m_videoRects[i],"left",cropRect.x,"right",cropRect.y,
-				"top", cropRect.z, "bottom", cropRect.w ,0);
+				math::vector4di cropRect = m_sendRect[level];// GetCropRect(i);
+				g_object_set(m_videoRects[i][level], "left", cropRect.x, "right", cropRect.y,
+					"top", cropRect.z, "bottom", cropRect.w, 0);
+			}
 		}
 	}
 	void SetEyegazeCrop(int w, int h)
@@ -122,9 +148,13 @@ public:
 		m_inited = true;
 		for (int i = 0; i < m_impl->m_cams.size(); ++i)
 		{
-			core::string name = "box_" + core::StringConverter::toString(i);
-			GstElement* e = gst_bin_get_by_name(GST_BIN(pipeline), name.c_str());
-			m_videoRects.push_back(e);
+			m_videoRects.push_back(std::vector<GstElement*>());
+			for (int level = 0; level < m_levels; ++level)
+			{
+				core::string name = "box_" + core::StringConverter::toString(i) + "_" + core::StringConverter::toString(level) ;
+				GstElement* e = gst_bin_get_by_name(GST_BIN(pipeline), name.c_str());
+				m_videoRects[i].push_back(e);
+			}
 		}
 		m_rtpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "rtplistener"));
 		if (m_rtpListener)
@@ -165,23 +195,27 @@ public:
 				{
 					m_lastRtpTS = packet.timestamp;
 					m_gazeMutex->lock();
-					math::vector4di gaze = m_gazeCashe.front();
+					std::vector<math::vector4di> gaze = m_gazeCashe.front();
 					m_gazeCashe.pop_front();
 					m_sent = true;
 					m_gazeMutex->unlock();
 
 					{
 						//static unsigned char buffer[2000];
-						static unsigned char data[20];
+						static unsigned char data[128];
+						unsigned char* ptr=data;
+						for (int i = 0; i < gaze.size(); ++i)
+						{
+							math::Swap(gaze[i].y, gaze[i].z);
 
-						math::Swap(gaze.y, gaze.z);
+							gaze[i].z = m_impl->m_frameSize.x - gaze[i].x - gaze[i].z;
+							gaze[i].w = m_impl->m_frameSize.y - gaze[i].y - gaze[i].w;
+							memcpy(ptr, &gaze[i], sizeof(math::vector4di));
+							ptr += sizeof(math::vector4di);
+						}
 
-						gaze.z = m_impl->m_frameSize.x - gaze.x - gaze.z;
-						gaze.w = m_impl->m_frameSize.y - gaze.y - gaze.w;
 
-						memcpy(data, &gaze, sizeof(math::vector4di));
-
-						int len = sizeof(math::vector4di) + map.size;
+						int len = sizeof(math::vector4di)*gaze.size() + map.size;
 
 
 						//add rtp padding
@@ -194,7 +228,7 @@ public:
 						gst_memory_map(mem, &info_out, GST_MAP_WRITE);
 						guint8 *out = info_out.data;
 
-						rtp_add_padding(map.data, map.size, data, sizeof(math::vector4di), out);
+						rtp_add_padding(map.data, map.size, data, sizeof(math::vector4di)*gaze.size(), out);
 
 						gst_memory_unmap(mem, &info_out);
 
@@ -205,7 +239,7 @@ public:
 			else{
 
 				m_gazeMutex->lock();
-				math::vector4di gaze = m_gazeCashe.front();
+				std::vector<math::vector4di> gaze = m_gazeCashe.front();
 				m_gazeCashe.pop_front();
 				m_gazeMutex->unlock();
 
@@ -362,9 +396,16 @@ std::string EyegazeCameraVideoSrc::_generateFullString()
 				tName = "t_" + core::StringConverter::toString(i);
 				mixerStr = "videomixer name="+mName;
 				//mixerStr += "  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_1::alpha=1  ";
-				mixerStr += "  sink_1::xpos=0 sink_1::ypos=0  sink_1::zorder=0 sink_1::alpha=1  ";
-				//mixerStr += "  sink_2::xpos=0 sink_2::ypos=" + core::StringConverter::toString(m_data->m_cropsize.y) + "  sink_2::zorder=0 sink_2::alpha=1  ";
-				mixerStr += "  sink_2::xpos=" + core::StringConverter::toString(m_data->m_cropsize.x) + " sink_2::ypos=0 sink_2::zorder=0 sink_2::alpha=1  ";
+				char buffer[256];
+				for (int level = 0; level < m_data->m_levels; ++level){
+					int xpos = m_data->m_cropsize.x*level;
+					sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", level, xpos, level, level, level, level);
+					mixerStr += buffer;
+					//mixerStr += "  sink_2::xpos=0 sink_2::ypos=" + core::StringConverter::toString(m_data->m_cropsize.y) + "  sink_2::zorder=0 sink_2::alpha=1  ";
+				}
+				sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", m_data->m_levels, m_data->m_cropsize.x*m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels);
+				//mixerStr += "  sink_2::xpos=" + core::StringConverter::toString(m_data->m_cropsize.x) + " sink_2::ypos=0 sink_2::zorder=0 sink_2::alpha=1  ";
+				mixerStr += buffer;
 
 				videoStr += mixerStr;
 
@@ -380,22 +421,26 @@ std::string EyegazeCameraVideoSrc::_generateFullString()
 				videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 					",height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ! videoconvert ! tee name=" + tName + " ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
-				if (!precodecSet)
-				{
-					videoStr += tName + ". ! mylistener name=precodec ! queue ! ";
-					precodecSet = true;
+				for (int level = 0; level < m_data->m_levels; ++level){
+					if (!precodecSet)
+					{
+						videoStr += tName + ". ! mylistener name=precodec ! queue ! ";
+						precodecSet = true;
+					}
+					else
+						videoStr += tName + ". ! queue ! ";
+
+					cropRect=m_data->GetCropRect(i,level);
+
+					//eyegaze string
+					videoStr += "  videobox name=box_" + core::StringConverter::toString(i) +"_"+ core::StringConverter::toString(level) +
+						" left=" + core::StringConverter::toString(cropRect.x) +
+						" right=" + core::StringConverter::toString(cropRect.y) +
+						" top=" + core::StringConverter::toString(cropRect.z) +
+						" bottom=" + core::StringConverter::toString(cropRect.w) +
+						" ! videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(m_data->m_cropsize.x) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) +
+						" ! videoconvert !" + mName + ".sink_" + core::StringConverter::toString(level)+" ";
 				}
-				else
-					videoStr += tName + ". ! queue ! ";
-
-				//eyegaze string
-				videoStr +=  "  videobox name=box_" + core::StringConverter::toString(i) + 
-					" left="   + core::StringConverter::toString(cropRect.x)+
-					" right="  + core::StringConverter::toString(cropRect.y)+
-					" top="    + core::StringConverter::toString(cropRect.z)+
-					" bottom=" + core::StringConverter::toString(cropRect.w)+
-					" ! videoconvert !" + mName + ".sink_1 ";
-
 
 				//scene string
 				//videoStr += tName + ". ! queue ! videoscale ! video/x-raw,width=" + core::StringConverter::toString(m_data->m_cropsize.x) + ",height=" + core::StringConverter::toString(sceneHeight) + " ! videoconvert ! " + mName + ".sink_2 ";
@@ -404,7 +449,7 @@ std::string EyegazeCameraVideoSrc::_generateFullString()
 				{
 					//videoStr += " ! videobox left=0 top=0 bottom=0 right=" + core::StringConverter::toString(lostWidth) ;
 				}
-				videoStr+=" !  videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + " ! videoconvert ! " + mName + ".sink_2 ";
+				videoStr += " !  videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + " ! videoconvert ! " + mName + ".sink_" + core::StringConverter::toString(m_data->m_levels) + " ";
 
 				videoStr += mName+". ";
 
@@ -441,6 +486,10 @@ void EyegazeCameraVideoSrc::SetEyegazePos(const std::vector<math::vector2df>& po
 void EyegazeCameraVideoSrc::SetEyegazeCrop(int w, int h)
 {
 	m_data->SetEyegazeCrop(w, h);
+}
+void EyegazeCameraVideoSrc::SetEyegazeLevels(int levels)
+{
+	m_data->m_levels = levels;
 }
 
 }
