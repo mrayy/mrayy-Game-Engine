@@ -155,6 +155,14 @@ std::string CameraVideoSrc::_generateFullString()
 	}
 	return videoStr;
 }
+
+
+
+std::string CameraVideoSrc::GetCameraStr(int i)
+{
+	return _generateString(i);
+}
+
 std::string CameraVideoSrc::GetPipelineStr(int index)
 {
 	std::string videoStr;
@@ -179,6 +187,10 @@ int CameraVideoSrc::GetStreamsCount()
 
 }
 
+math::vector2di CameraVideoSrc::GetFrameSize(int i)
+{
+	return m_impl->m_frameSize;
+}
 void CameraVideoSrc::SetSeparateStreams(bool separate)
 {
 	m_impl->m_separateStreams = separate;

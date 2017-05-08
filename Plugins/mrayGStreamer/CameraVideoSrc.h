@@ -34,8 +34,10 @@ public:
 	void SetCameraIndex(std::vector<int> cams);
 	void  SetResolution(int width, int height, int fps, bool free);
 	void SetCaptureType(const std::string &type);
-
+	virtual std::string GetCameraStr(int i);
 	virtual std::string GetPipelineStr(int i);
+
+	virtual math::vector2di GetFrameSize(int i);
 
 	virtual void LinkWithPipeline(void* pipeline);
 	int GetVideoSrcCount();

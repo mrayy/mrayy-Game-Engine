@@ -35,12 +35,14 @@ public:
 	virtual std::string BuildStringH264();
 	virtual std::string BuildStringVP8();
 
-	virtual std::string GetPipelineStr(int i)=0;
+	virtual std::string GetCameraStr(int i) = 0;
+	virtual std::string GetPipelineStr(int i) = 0;
 
 	virtual void LinkWithPipeline(void* pipeline) = 0;
 
 	virtual int GetVideoSrcCount(){ return 1; }
 	virtual int GetStreamsCount(){ return GetVideoSrcCount(); }
+	//virtual bool IsAvailable(int index) = 0;
 	virtual void  SetResolution(int width, int height, int fps, bool free){ m_fps = fps; }
 	virtual void SetBitRate(int biterate){ m_bitRate = biterate; }
 
@@ -56,6 +58,7 @@ public:
 
 	virtual void LoadParameters(xml::XMLElement* e);
 
+	virtual math::vector2di GetFrameSize(int i)=0;
 
 
 	virtual void Start() {};

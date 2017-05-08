@@ -30,13 +30,16 @@ public:
 		return true;
 	}
 	void  SetResolution(int width, int height, int fps, bool free);
-	
+
+	std::string GetCameraStr(int i);
 	std::string GetPipelineStr(int i);
 
 	void LinkWithPipeline(void* pipeline) ;
 
 	void SetVideoGrabber(const std::vector<IVideoGrabber*> &grabbers);
 	int GetVideoSrcCount();
+
+	virtual math::vector2di GetFrameSize(int i);
 
 	void Start() ;
 	void Pause() ;

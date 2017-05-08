@@ -195,6 +195,7 @@
     </Filter>
     <Filter Include="Source Files\Animation">
       <UniqueIdentifier>{01f1d179-9726-4a4e-a4ca-783ad5c264c7}</UniqueIdentifier>
+      <ParseFiles>false</ParseFiles>
     </Filter>
     <Filter Include="Source Files\Animation\JointQuery">
       <UniqueIdentifier>{0d40a7ef-c6a2-43e1-b20c-2361a92edec8}</UniqueIdentifier>
@@ -3592,9 +3593,6 @@
     <ClCompile Include="src\GUIElement3D.cpp">
       <Filter>Source Files\scene\3D UI</Filter>
     </ClCompile>
-    <ClCompile Include="src\GUIElementFactory.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
     <ClCompile Include="src\VideoResourceManager.cpp">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClCompile>
@@ -3676,6 +3674,7 @@
     <ClCompile Include="src\LocalNetworkPortAssigner.cpp">
       <Filter>Source Files\network</Filter>
     </ClCompile>
+    <ClCompile Include="src\GUIElementFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\TransformManipulator.h.old">

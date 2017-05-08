@@ -216,7 +216,7 @@ namespace video
 				videoStr += " name=src" + core::StringConverter::toString(i) + 
 					//" do-timestamp=true is-live=true "//"block=true"
 					" ! video/x-raw,format=" + format + ",width=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().x) +
-					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1,pixel-aspect-ratio= 1/1 ";
 
 				videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
 				videoStr += " ! videoconvert ";
@@ -265,6 +265,10 @@ void  AppSrcVideoSrc::SetResolution(int width, int height, int fps, bool free)
 	m_impl->SetResolution(width, height, fps, free);
 }
 
+std::string AppSrcVideoSrc::GetCameraStr(int i)
+{
+	return m_impl->BuildBaseGStr(i);
+}
 std::string AppSrcVideoSrc::GetPipelineStr(int i)
 {
 	std::string videoStr=m_impl->BuildBaseGStr(i);
@@ -289,6 +293,13 @@ void AppSrcVideoSrc::SetVideoGrabber(const std::vector<IVideoGrabber*> &grabbers
 }
 
 int AppSrcVideoSrc::GetVideoSrcCount(){ return m_impl->m_grabber.size(); }
+
+math::vector2di AppSrcVideoSrc::GetFrameSize(int i)
+{
+	if (i >= m_impl->m_grabber.size())
+		return math::vector2di::Zero;
+	return m_impl->m_grabber[i]->GetFrameSize();
+}
 
 void AppSrcVideoSrc::Start()
 {

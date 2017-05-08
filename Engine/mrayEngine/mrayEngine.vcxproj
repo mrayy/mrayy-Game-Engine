@@ -150,7 +150,7 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\Lib\$(Configuration)64</OutDir>
+    <OutDir>..\..\Lib\$(Configuration)64\</OutDir>
     <IntDir>..\..\Obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -229,6 +229,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>CompileAsCpp</CompileAs>
+      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
       <AdditionalDependencies>freetype265.lib;assimp.lib;mrayMath.lib;FreeImage.lib;zziplib.lib;zlib.lib;libexpatMT.lib;libPng.lib;NvTriStrip.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -589,31 +590,61 @@
     <ClCompile Include="src\3DSLoader.cpp" />
     <ClCompile Include="src\InputKeyMap.cpp" />
     <ClCompile Include="src\LocalNetworkPortAssigner.cpp" />
-    <ClCompile Include="UI3DRenderNode.cpp" />
+    <ClCompile Include="UI3DRenderNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClInclude Include="..\..\Dependencies\include\huffman\huffman.h" />
     <ClInclude Include="HuffmanCompression.h" />
     <ClInclude Include="include\3DSLoader.h" />
     <ClInclude Include="include\AImpSceneLoader.h" />
     <ClInclude Include="include\AtlasPacker.h" />
-    <ClInclude Include="include\BatchRenderer.h" />
+    <ClInclude Include="include\BatchRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\BinPacker.h" />
-    <ClInclude Include="include\BitmapFontData.h" />
+    <ClInclude Include="include\BitmapFontData.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\CommonValueProviders.h" />
     <ClInclude Include="include\DateTime.h" />
-    <ClInclude Include="include\DynamicFontGenerator.h" />
+    <ClInclude Include="include\DynamicFontGenerator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\FileTextureSource.h" />
-    <ClInclude Include="include\GUIElement3D.h" />
-    <ClInclude Include="include\GUIElementFactory.h" />
-    <ClInclude Include="include\GUIElementFactoryDef.h" />
-    <ClInclude Include="include\GUIElementRT.h" />
-    <ClInclude Include="include\GUIElementRT_Manager.h" />
-    <ClInclude Include="include\GUIManagerRT.h" />
-    <ClInclude Include="include\GUITreeNode.h" />
-    <ClInclude Include="include\ICustomParticleEmitter.h" />
+    <ClInclude Include="include\GUIElement3D.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIElementFactory.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIElementFactoryDef.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIElementRT.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIElementRT_Manager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIManagerRT.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUITreeNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ICustomParticleEmitter.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\IFileMonitor.h" />
-    <ClInclude Include="include\IGUIElementCreator.h" />
-    <ClInclude Include="include\IGUIElementRT.h" />
-    <ClInclude Include="include\IGUITreeBox.h" />
+    <ClInclude Include="include\IGUIElementCreator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIElementRT.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUITreeBox.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\INetworkPortAssigner.h" />
     <ClInclude Include="include\InputKeyMap.h" />
     <ClInclude Include="include\InternetCacheManager.h" />
@@ -639,76 +670,194 @@
     <ClInclude Include="include\LineSoundEmitter.h" />
     <ClInclude Include="include\PointSoundEmitter.h" />
     <ClInclude Include="include\SphereSoundEmitter.h" />
-    <ClInclude Include="include\CAdjacent.h" />
-    <ClInclude Include="include\CameraNode.h" />
-    <ClInclude Include="include\ICullable.h" />
-    <ClInclude Include="include\ICycles.h" />
-    <ClInclude Include="include\IMeshAnimator.h" />
-    <ClInclude Include="include\IMeshBuffer.h" />
-    <ClInclude Include="include\IMeshFileCreator.h" />
-    <ClInclude Include="include\IMovable.h" />
-    <ClInclude Include="include\IRenderable.h" />
-    <ClInclude Include="include\ISceneNode.h" />
-    <ClInclude Include="include\ISceneObjectsDesc.h" />
-    <ClInclude Include="include\ISceneVisitor.h" />
-    <ClInclude Include="include\ISkinCluster.h" />
-    <ClInclude Include="include\IViewNode.h" />
-    <ClInclude Include="include\LightNode.h" />
-    <ClInclude Include="include\MeshAnimatorManager.h" />
-    <ClInclude Include="include\MeshBufferData.h" />
-    <ClInclude Include="include\MeshFileCreatorManager.h" />
-    <ClInclude Include="include\MeshGenerator.h" />
-    <ClInclude Include="include\MeshSerializer.h" />
-    <ClInclude Include="include\SceneHelper.h" />
-    <ClInclude Include="include\SceneLoggerSystem.h" />
-    <ClInclude Include="include\SceneNodeCreator.h" />
-    <ClInclude Include="include\SkyBoxManager.h" />
-    <ClInclude Include="include\SMesh.h" />
-    <ClInclude Include="include\SMeshBuffer.h" />
-    <ClInclude Include="include\SMeshManipulator.h" />
-    <ClInclude Include="include\SMorphMeshBuffer.h" />
-    <ClInclude Include="include\StereoRenderer.h" />
+    <ClInclude Include="include\CAdjacent.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CameraNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ICullable.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ICycles.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IMeshAnimator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IMeshBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IMeshFileCreator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IMovable.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IRenderable.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISceneNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISceneObjectsDesc.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISceneVisitor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISkinCluster.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IViewNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\LightNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MeshAnimatorManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MeshBufferData.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MeshFileCreatorManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MeshGenerator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MeshSerializer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SceneHelper.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SceneLoggerSystem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SceneNodeCreator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SkyBoxManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SMesh.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SMeshBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SMeshManipulator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SMorphMeshBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\StereoRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\StreamReaderEx.h" />
     <ClInclude Include="include\StreamWriterEx.h" />
     <ClInclude Include="include\StringUtil.hpp" />
-    <ClInclude Include="include\TangentCalculater.h" />
+    <ClInclude Include="include\TangentCalculater.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\ITextureSource.h" />
     <ClInclude Include="include\TextureRTWrap.h" />
     <ClInclude Include="include\TextureSourceFactory.h" />
-    <ClInclude Include="include\UI3DRenderNode.h" />
+    <ClInclude Include="include\UI3DRenderNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\UniqueIDGenerator.h" />
     <ClInclude Include="include\ValueControllerManager.h" />
     <ClInclude Include="include\ValueGroup.h" />
     <ClInclude Include="include\VideoResourceManager.h" />
     <ClInclude Include="include\VideoTextureSource.h" />
-    <ClInclude Include="include\ViewPort.h" />
-    <ClInclude Include="include\ViewportListener.h" />
-    <ClInclude Include="include\CRotateConstraint.h" />
-    <ClInclude Include="include\IAnimators.h" />
-    <ClInclude Include="include\SAnimatorCircle.h" />
-    <ClInclude Include="include\SAnimatorDirection.h" />
-    <ClInclude Include="include\SAnimatorRotate.h" />
-    <ClInclude Include="include\SAnimatorSpline.h" />
-    <ClInclude Include="include\CUBEMapRenderNode.h" />
-    <ClInclude Include="include\GrassRenderNode.h" />
-    <ClInclude Include="include\ISkyShape.h" />
-    <ClInclude Include="include\ITerrain.h" />
-    <ClInclude Include="include\MeshRenderableNode.h" />
-    <ClInclude Include="include\MountPoint.h" />
-    <ClInclude Include="include\RoadNode.h" />
-    <ClInclude Include="include\SAnimatedSprite.h" />
-    <ClInclude Include="include\SBillboardBeam.h" />
-    <ClInclude Include="include\SBillboardChain.h" />
-    <ClInclude Include="include\SBillboardNode.h" />
-    <ClInclude Include="include\SLensEffect.h" />
-    <ClInclude Include="include\SLocator.h" />
-    <ClInclude Include="include\SLODAnimatedMesh.h" />
-    <ClInclude Include="include\spatchterrain.h" />
-    <ClInclude Include="include\SQ3BSPLevel.h" />
-    <ClInclude Include="include\SSkyBoxNode.h" />
-    <ClInclude Include="include\SSkyDomeNode.h" />
-    <ClInclude Include="include\SSkyPlaneNode.h" />
-    <ClInclude Include="include\STerrain.h" />
+    <ClInclude Include="include\ViewPort.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ViewportListener.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CRotateConstraint.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IAnimators.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SAnimatorCircle.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SAnimatorDirection.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SAnimatorRotate.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SAnimatorSpline.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CUBEMapRenderNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GrassRenderNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISkyShape.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ITerrain.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MeshRenderableNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MountPoint.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\RoadNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SAnimatedSprite.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SBillboardBeam.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SBillboardChain.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SBillboardNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SLensEffect.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SLocator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SLODAnimatedMesh.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\spatchterrain.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SQ3BSPLevel.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SSkyBoxNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SSkyDomeNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SSkyPlaneNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\STerrain.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClCompile Include="..\..\Dependencies\include\huffman\huffman.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -720,129 +869,360 @@
     <ClCompile Include="src\AImpSceneLoader.cpp" />
     <ClCompile Include="src\AtlasPacker.cpp" />
     <ClCompile Include="src\BinPacker.cpp" />
-    <ClCompile Include="src\BitmapFontData.cpp" />
+    <ClCompile Include="src\BitmapFontData.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\CommonValueProviders.cpp" />
     <ClCompile Include="src\DateTime.cpp" />
-    <ClCompile Include="src\DynamicFontGenerator.cpp" />
+    <ClCompile Include="src\DynamicFontGenerator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\FileTextureSource.cpp" />
-    <ClCompile Include="src\GUIElement3D.cpp" />
+    <ClCompile Include="src\GUIElement3D.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\GUIElementFactory.cpp" />
     <ClCompile Include="src\GUIElementRT_Manager.cpp">
       <FileType>CppHeader</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClInclude Include="src\ValueControllerManager.cpp" />
-    <CustomBuildStep Include="include\STextNode.h" />
-    <ClInclude Include="include\CConvexQuickHull.h" />
-    <ClInclude Include="include\IConvexHull.h" />
-    <ClInclude Include="include\ISceneManager.h" />
-    <ClInclude Include="include\ISceneSpatialSpace.h" />
-    <ClInclude Include="include\SceneManager.h" />
-    <ClInclude Include="include\SceneRegion.h" />
-    <ClInclude Include="include\BoxNodeSelector.h" />
-    <ClInclude Include="include\CTriangleSelector.h" />
-    <ClInclude Include="include\INodeSelectQuery.h" />
-    <ClInclude Include="include\RayNodeSelector.h" />
-    <ClInclude Include="include\ScreenNodeSelector.h" />
-    <ClInclude Include="include\BoneNode.h" />
-    <ClInclude Include="include\Skeleton.h" />
-    <ClInclude Include="include\IRenderGroup.h" />
-    <ClInclude Include="include\RenderGroup.h" />
-    <ClInclude Include="include\RenderManager.h" />
-    <ClInclude Include="include\RenderOperation.h" />
-    <ClInclude Include="include\XMLSceneLoader.h" />
-    <ClInclude Include="include\XMLTerrainReader.h" />
-    <ClInclude Include="include\DynamicGeometryBatch.h" />
-    <ClInclude Include="include\IGeometryBatch.h" />
-    <ClInclude Include="include\StaticGeometryBatch.h" />
-    <ClInclude Include="include\VertConstGeoInstancing.h" />
-    <ClInclude Include="include\GPUMorphAnimator.h" />
-    <ClInclude Include="include\GPUSkeletonAnimator.h" />
-    <ClInclude Include="include\IMorphAnimator.h" />
-    <ClInclude Include="include\ISkeletonAnimator.h" />
-    <ClInclude Include="include\MorphAnimator.h" />
-    <ClInclude Include="include\MorphTarget.h" />
-    <ClInclude Include="include\SkeletonAnimator.h" />
-    <ClInclude Include="include\CubeMapFaceRenderPass.h" />
-    <ClInclude Include="include\IRenderPass.h" />
-    <ClInclude Include="include\IRenderPassSubscriber.h" />
-    <ClInclude Include="include\NormalRenderPass.h" />
-    <ClInclude Include="include\ReflectionRenderPass.h" />
-    <ClInclude Include="include\ShadowRenderPass.h" />
-    <ClInclude Include="include\CurveManager.h" />
-    <ClInclude Include="include\CurveNode.h" />
-    <ClInclude Include="include\CircleTerrainBrush.h" />
-    <ClInclude Include="include\ITerrainBrush.h" />
-    <ClInclude Include="include\TerrainUtility.h" />
-    <ClInclude Include="include\RenderSceneVisitor.h" />
-    <ClInclude Include="include\RequestToRenderVisitor.h" />
-    <ClInclude Include="include\UpdateSceneVisitor.h" />
-    <ClInclude Include="include\DebugDrawManager.h" />
-    <ClInclude Include="include\IDebugDrawManager.h" />
-    <ClInclude Include="include\CPUParticleBillboardRenderer.h" />
-    <ClInclude Include="include\GPUParticleBillboardRenderer.h" />
-    <ClInclude Include="include\IParticle.h" />
-    <ClInclude Include="include\IParticleAffector.h" />
-    <ClInclude Include="include\IParticleAffectorFactory.h" />
-    <ClInclude Include="include\IParticleEmitterFactory.h" />
-    <ClInclude Include="include\IParticleRenderer.h" />
-    <ClInclude Include="include\ParticleEmitter.h" />
-    <ClInclude Include="include\SParticleSystem.h" />
-    <ClInclude Include="include\SParticleSystemFactory.h" />
-    <ClInclude Include="include\GUIElementRegion.h" />
-    <ClInclude Include="include\GUILoggerSystem.h" />
-    <ClInclude Include="include\GUIManagerFactory.h" />
-    <ClInclude Include="include\GUIOverlay.h" />
-    <ClInclude Include="include\GUIOverlayManager.h" />
-    <ClInclude Include="include\IGUIComponent.h" />
-    <ClInclude Include="include\IGUIElement.h" />
-    <ClInclude Include="include\IGUIElementVisitor.h" />
-    <ClInclude Include="include\IGUIManager.h" />
-    <ClInclude Include="include\IGUIPanelElement.h" />
-    <ClInclude Include="include\IGUISchemeBase.h" />
-    <ClInclude Include="include\IListItem.h" />
-    <ClInclude Include="include\ViewPort2D.h" />
-    <ClInclude Include="include\XMLOverlay.h" />
-    <ClInclude Include="include\GUIProfile.h" />
-    <ClInclude Include="include\GUITheme.h" />
-    <ClInclude Include="include\GUIThemeManager.h" />
-    <ClInclude Include="include\IGUITheme.h" />
-    <ClInclude Include="include\XML_GUITheme.h" />
-    <ClInclude Include="include\BaseFont.h" />
-    <ClInclude Include="include\FontAttributes.h" />
-    <CustomBuildStep Include="include\FTFont.h" />
-    <ClInclude Include="include\IFont.h" />
-    <ClInclude Include="include\ITextDecorateNode.h" />
-    <ClInclude Include="include\LanguageFontSpecification.h" />
-    <ClInclude Include="include\TexFont.h" />
-    <ClInclude Include="include\TextDecorateNodeFactory.h" />
-    <ClInclude Include="include\TextDecorator.h" />
-    <ClInclude Include="include\XML_Font.h" />
-    <ClInclude Include="include\ColorDecorateNode.h" />
-    <ClInclude Include="include\FontDecorateFont.h" />
-    <ClInclude Include="include\ImageDecorateNode.h" />
-    <ClInclude Include="include\SizeDecorateNode.h" />
-    <ClInclude Include="include\TextDecorateNode.h" />
-    <ClInclude Include="include\GUIBatchRenderer.h" />
-    <ClInclude Include="include\GUIMultiQuadRenderOperation.h" />
-    <ClInclude Include="include\GUIQuadRenderOperation.h" />
-    <ClInclude Include="include\IGUIRenderer.h" />
-    <ClInclude Include="include\IGUIRenderOperation.h" />
-    <ClInclude Include="include\GUIElementSelectorVisitor.h" />
-    <ClInclude Include="include\GUIXMLElementVisitor.h" />
-    <ClInclude Include="include\IGUIButton.h" />
-    <ClInclude Include="include\IGUICatagoryPanel.h" />
-    <ClInclude Include="include\IGUICategoryTab.h" />
-    <ClInclude Include="include\IGUICheckBox.h" />
-    <ClInclude Include="include\IGUIComboList.h" />
-    <ClInclude Include="include\IGUIEditBox.h" />
-    <ClInclude Include="include\IGUIListBox.h" />
-    <ClInclude Include="include\IGUIPanel.h" />
-    <ClInclude Include="include\IGUIPropertyGrid.h" />
-    <ClInclude Include="include\IGUIPropGridItem.h" />
-    <ClInclude Include="include\IGUISliderBar.h" />
-    <ClInclude Include="include\IGUIStackPanel.h" />
-    <ClInclude Include="include\IGUIStaticImage.h" />
-    <ClInclude Include="include\IGUIStaticText.h" />
+    <CustomBuildStep Include="include\STextNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </CustomBuildStep>
+    <ClInclude Include="include\CConvexQuickHull.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IConvexHull.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISceneManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISceneSpatialSpace.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SceneManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SceneRegion.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\BoxNodeSelector.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CTriangleSelector.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\INodeSelectQuery.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\RayNodeSelector.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ScreenNodeSelector.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\BoneNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\Skeleton.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IRenderGroup.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\RenderGroup.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\RenderManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\RenderOperation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\XMLSceneLoader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\XMLTerrainReader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\DynamicGeometryBatch.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGeometryBatch.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\StaticGeometryBatch.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\VertConstGeoInstancing.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GPUMorphAnimator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GPUSkeletonAnimator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IMorphAnimator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ISkeletonAnimator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MorphAnimator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MorphTarget.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SkeletonAnimator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CubeMapFaceRenderPass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IRenderPass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IRenderPassSubscriber.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\NormalRenderPass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ReflectionRenderPass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ShadowRenderPass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CurveManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CurveNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CircleTerrainBrush.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ITerrainBrush.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TerrainUtility.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\RenderSceneVisitor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\RequestToRenderVisitor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\UpdateSceneVisitor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\DebugDrawManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IDebugDrawManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\CPUParticleBillboardRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GPUParticleBillboardRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IParticle.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IParticleAffector.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IParticleAffectorFactory.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IParticleEmitterFactory.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IParticleRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ParticleEmitter.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SParticleSystem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SParticleSystemFactory.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIElementRegion.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUILoggerSystem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIManagerFactory.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIOverlay.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIOverlayManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIComponent.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIElement.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIElementVisitor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIPanelElement.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUISchemeBase.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IListItem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ViewPort2D.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\XMLOverlay.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIProfile.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUITheme.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIThemeManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUITheme.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\XML_GUITheme.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\BaseFont.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\FontAttributes.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <CustomBuildStep Include="include\FTFont.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </CustomBuildStep>
+    <ClInclude Include="include\IFont.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ITextDecorateNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\LanguageFontSpecification.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TexFont.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TextDecorateNodeFactory.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TextDecorator.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\XML_Font.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ColorDecorateNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\FontDecorateFont.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\ImageDecorateNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\SizeDecorateNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TextDecorateNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIBatchRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIMultiQuadRenderOperation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIQuadRenderOperation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIRenderOperation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIElementSelectorVisitor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\GUIXMLElementVisitor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIButton.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUICatagoryPanel.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUICategoryTab.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUICheckBox.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIComboList.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIEditBox.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIListBox.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIPanel.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIPropertyGrid.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIPropGridItem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUISliderBar.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIStackPanel.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIStaticImage.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IGUIStaticText.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\CLimitedStream.h" />
     <ClInclude Include="include\CMemoryStream.h" />
     <ClInclude Include="include\CMutexVar.h" />
@@ -1165,29 +1545,75 @@
     <ClInclude Include="include\CSettingsFile.h" />
     <ClInclude Include="include\EffectScript.h" />
     <ClInclude Include="include\MaterialScript.h" />
-    <ClInclude Include="include\ActionAnimationTrack.h" />
-    <ClInclude Include="include\AnimationController.h" />
-    <ClInclude Include="include\AnimationLoggerSystem.h" />
-    <ClInclude Include="include\AnimationMixer.h" />
-    <ClInclude Include="include\AnimationTrackGroup.h" />
-    <ClInclude Include="include\AnimationTypes.h" />
-    <ClInclude Include="include\IAnimationMixer.h" />
-    <ClInclude Include="include\IAnimationTrack.h" />
-    <ClInclude Include="include\IKeyFrame.h" />
-    <ClInclude Include="include\KeyAnimationTrack.h" />
-    <ClInclude Include="include\LookAtAnimation.h" />
-    <ClInclude Include="include\MorphAnimationMixer.h" />
-    <ClInclude Include="include\MorphAnimationTrack.h" />
-    <ClInclude Include="include\MorphTrackGroup.h" />
-    <ClInclude Include="include\TransAnimationGroup.h" />
-    <ClInclude Include="include\TransformationAnimationMixer.h" />
-    <ClInclude Include="include\TransformationAnimationTrack.h" />
-    <ClInclude Include="include\TransformKeyFrame.h" />
-    <ClInclude Include="include\BonesJointQuery.h" />
-    <ClInclude Include="include\IJointQuery.h" />
-    <ClInclude Include="include\IInverseKinmatics.h" />
-    <ClInclude Include="include\IKSimple.h" />
-    <ClInclude Include="include\IterativeIK.h" />
+    <ClInclude Include="include\ActionAnimationTrack.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\AnimationController.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\AnimationLoggerSystem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\AnimationMixer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\AnimationTrackGroup.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\AnimationTypes.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IAnimationMixer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IAnimationTrack.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IKeyFrame.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\KeyAnimationTrack.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\LookAtAnimation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MorphAnimationMixer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MorphAnimationTrack.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\MorphTrackGroup.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TransAnimationGroup.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TransformationAnimationMixer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TransformationAnimationTrack.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\TransformKeyFrame.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\BonesJointQuery.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IJointQuery.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IInverseKinmatics.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IKSimple.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\IterativeIK.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\CCubeTexture.h" />
     <ClInclude Include="include\ColorConverter.h" />
     <ClInclude Include="include\ColorCurve.h" />
@@ -1311,12 +1737,24 @@
     <ClInclude Include="include\IApplication.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\GUIElementRT.cpp" />
-    <ClCompile Include="src\GUIManagerRT.cpp" />
-    <ClCompile Include="src\GUITreeNode.cpp" />
-    <ClCompile Include="src\IGUIElementRT.cpp" />
-    <ClCompile Include="src\IGUITreeBox.cpp" />
-    <ClCompile Include="src\IListItem.cpp" />
+    <ClCompile Include="src\GUIElementRT.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIManagerRT.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUITreeNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIElementRT.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUITreeBox.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IListItem.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\InternetCacheManager.cpp" />
     <ClCompile Include="src\ISerialPort.cpp" />
     <ClCompile Include="src\MouseEvent.cpp" />
@@ -1329,50 +1767,128 @@
     <ClCompile Include="src\LineSoundEmitter.cpp" />
     <ClCompile Include="src\PointSoundEmitter.cpp" />
     <ClCompile Include="src\SphereSoundEmitter.cpp" />
-    <ClCompile Include="src\CAdjacent.cpp" />
-    <ClCompile Include="src\CameraNode.cpp" />
-    <ClCompile Include="src\ICullable.cpp" />
-    <ClCompile Include="src\IMovable.cpp" />
-    <ClCompile Include="src\IRenderable.cpp" />
-    <ClCompile Include="src\iscenenode.cpp" />
-    <ClCompile Include="src\ISceneObjectsDesc.cpp" />
-    <ClCompile Include="src\ISkinCluster.cpp" />
-    <ClCompile Include="src\LightNode.cpp" />
-    <ClCompile Include="src\MeshAnimatorManager.cpp" />
-    <ClCompile Include="src\MeshBufferData.cpp" />
-    <ClCompile Include="src\MeshFileCreatorManager.cpp" />
-    <ClCompile Include="src\MeshGenerator.cpp" />
-    <ClCompile Include="src\MeshSerializer.cpp" />
-    <ClCompile Include="src\SceneHelper.cpp" />
-    <ClCompile Include="src\SceneNodeCreator.cpp" />
-    <ClCompile Include="src\SkyBoxManager.cpp" />
-    <ClCompile Include="src\SMesh.cpp" />
-    <ClCompile Include="src\smeshbuffer.cpp" />
-    <ClCompile Include="src\SMeshManipulator.cpp" />
-    <ClCompile Include="src\SMorphMeshBuffer.cpp" />
-    <ClCompile Include="src\StereoRenderer.cpp" />
+    <ClCompile Include="src\CAdjacent.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CameraNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ICullable.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IMovable.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IRenderable.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\iscenenode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ISceneObjectsDesc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ISkinCluster.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\LightNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MeshAnimatorManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MeshBufferData.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MeshFileCreatorManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MeshGenerator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MeshSerializer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SceneHelper.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SceneNodeCreator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SkyBoxManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SMesh.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\smeshbuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SMeshManipulator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SMorphMeshBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\StereoRenderer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\StreamReaderEx.cpp" />
     <ClCompile Include="src\StreamWriterEx.cpp" />
-    <ClCompile Include="src\TangentCalculater.cpp" />
+    <ClCompile Include="src\TangentCalculater.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\TextureSourceFactory.cpp" />
     <ClCompile Include="src\VideoResourceManager.cpp" />
     <ClCompile Include="src\VideoTextureSource.cpp" />
-    <ClCompile Include="src\ViewPort.cpp" />
-    <ClCompile Include="src\CRotateConstraint.cpp" />
-    <ClCompile Include="src\SAnimatorCircle.cpp" />
-    <ClCompile Include="src\SAnimatorDirection.cpp" />
-    <ClCompile Include="src\SAnimatorRotate.cpp" />
-    <ClCompile Include="src\SAnimatorSpline.cpp" />
-    <ClCompile Include="src\CUBEMapRenderNode.cpp" />
-    <ClCompile Include="src\GrassRenderNode.cpp" />
-    <ClCompile Include="src\ISkyShape.cpp" />
-    <ClCompile Include="src\MeshRenderableNode.cpp" />
-    <ClCompile Include="src\MountPoint.cpp" />
-    <ClCompile Include="src\RoadNode.cpp" />
-    <ClCompile Include="src\SAnimatedSprite.cpp" />
-    <ClCompile Include="src\SBillboardBeam.cpp" />
-    <ClCompile Include="src\SBillboardChain.cpp" />
-    <ClCompile Include="src\SBillboardNode.cpp" />
+    <ClCompile Include="src\ViewPort.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CRotateConstraint.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SAnimatorCircle.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SAnimatorDirection.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SAnimatorRotate.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SAnimatorSpline.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CUBEMapRenderNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GrassRenderNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ISkyShape.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MeshRenderableNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MountPoint.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\RoadNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SAnimatedSprite.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SBillboardBeam.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SBillboardChain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SBillboardNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\SLensEffect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">true</ExcludedFromBuild>
@@ -1383,9 +1899,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\SLocator.cpp" />
-    <ClCompile Include="src\slodanimatedmesh.cpp" />
-    <ClCompile Include="src\SPatchTerrain.cpp" />
+    <ClCompile Include="src\SLocator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\slodanimatedmesh.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SPatchTerrain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\SQ3BSPLevel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">true</ExcludedFromBuild>
@@ -1396,10 +1918,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\SSkyBoxNode.cpp" />
-    <ClCompile Include="src\SSkyDomeNode.cpp" />
-    <ClCompile Include="src\SSkyPlaneNode.cpp" />
-    <ClCompile Include="src\STerrain.cpp" />
+    <ClCompile Include="src\SSkyBoxNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SSkyDomeNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SSkyPlaneNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\STerrain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\STextNode.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">true</ExcludedFromBuild>
@@ -1410,94 +1940,270 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\CConvexQuickHull.cpp" />
-    <ClCompile Include="src\IConvexHull.cpp" />
-    <ClCompile Include="src\ISceneManager.cpp" />
-    <ClCompile Include="src\scenemanager.cpp" />
-    <ClCompile Include="src\SceneRegion.cpp" />
-    <ClCompile Include="src\BoxNodeSelector.cpp" />
-    <ClCompile Include="src\CTriangleSelector.cpp" />
-    <ClCompile Include="src\RayNodeSelector.cpp" />
-    <ClCompile Include="src\ScreenNodeSelector.cpp" />
-    <ClCompile Include="src\BoneNode.cpp" />
-    <ClCompile Include="src\Skeleton.cpp" />
-    <ClCompile Include="src\RenderGroup.cpp" />
-    <ClCompile Include="src\RenderManager.cpp" />
-    <ClCompile Include="src\XMLSceneLoader.cpp" />
-    <ClCompile Include="src\XMLTerrainReader.cpp" />
-    <ClCompile Include="src\DynamicGeometryBatch.cpp" />
-    <ClCompile Include="src\IGeometryBatch.cpp" />
-    <ClCompile Include="src\StaticGeometryBatch.cpp" />
-    <ClCompile Include="src\VertConstGeoInstancing.cpp" />
-    <ClCompile Include="src\GPUMorphAnimator.cpp" />
-    <ClCompile Include="src\GPUSkeletonAnimator.cpp" />
-    <ClCompile Include="src\IMorphAnimator.cpp" />
-    <ClCompile Include="src\MorphAnimator.cpp" />
-    <ClCompile Include="src\SkeletonAnimator.cpp" />
-    <ClCompile Include="src\NormalRenderPass.cpp" />
-    <ClCompile Include="src\ReflectionRenderPass.cpp" />
-    <ClCompile Include="src\ShadowRenderPass.cpp" />
-    <ClCompile Include="src\CurveManager.cpp" />
-    <ClCompile Include="src\CurveNode.cpp" />
-    <ClCompile Include="src\CircleTerrainBrush.cpp" />
-    <ClCompile Include="src\ITerrainBrush.cpp" />
-    <ClCompile Include="src\TerrainUtility.cpp" />
-    <ClCompile Include="src\RenderSceneVisitor.cpp" />
-    <ClCompile Include="src\RequestToRenderVisitor.cpp" />
-    <ClCompile Include="src\UpdateSceneVisitor.cpp" />
-    <ClCompile Include="src\DebugDrawManager.cpp" />
-    <ClCompile Include="src\CPUParticleBillboardRenderer.cpp" />
-    <ClCompile Include="src\GPUParticleBillboardRenderer.cpp" />
-    <ClCompile Include="src\IParticle.cpp" />
-    <ClCompile Include="src\IParticleAffector.cpp" />
-    <ClCompile Include="src\ParticleEmitter.cpp" />
-    <ClCompile Include="src\SParticleSystem.cpp" />
-    <ClCompile Include="src\SParticleSystemFactory.cpp" />
-    <ClCompile Include="src\GUIOverlay.cpp" />
-    <ClCompile Include="src\GUIOverlayManager.cpp" />
-    <ClCompile Include="src\IGUIElement.cpp" />
-    <ClCompile Include="src\IGUIManager.cpp" />
-    <ClCompile Include="src\IGUIPanelElement.cpp" />
-    <ClCompile Include="src\IGUISchemeBase.cpp" />
-    <ClCompile Include="src\ViewPort2D.cpp" />
-    <ClCompile Include="src\XMLOverlay.cpp" />
-    <ClCompile Include="src\GUIProfile.cpp" />
-    <ClCompile Include="src\GUITheme.cpp" />
-    <ClCompile Include="src\GUIThemeManager.cpp" />
-    <ClCompile Include="src\IGUITheme.cpp" />
-    <ClCompile Include="src\XML_GUITheme.cpp" />
-    <ClCompile Include="src\BaseFont.cpp" />
-    <ClCompile Include="src\FontAttributes.cpp" />
-    <ClCompile Include="src\FTFont.cpp" />
-    <ClCompile Include="src\IFont.cpp" />
-    <ClCompile Include="src\ITextDecorateNode.cpp" />
-    <ClCompile Include="src\LanguageFontSpecification.cpp" />
-    <ClCompile Include="src\TexFont.cpp" />
-    <ClCompile Include="src\TextDecorateNodeFactory.cpp" />
-    <ClCompile Include="src\TextDecorator.cpp" />
-    <ClCompile Include="src\XML_Font.cpp" />
-    <ClCompile Include="src\ColorDecorateNode.cpp" />
-    <ClCompile Include="src\FontDecorateFont.cpp" />
-    <ClCompile Include="src\ImageDecorateNode.cpp" />
-    <ClCompile Include="src\SizeDecorateNode.cpp" />
-    <ClCompile Include="src\TextDecorateNode.cpp" />
-    <ClCompile Include="src\GUIBatchRenderer.cpp" />
-    <ClCompile Include="src\GUIMultiQuadRenderOperation.cpp" />
-    <ClCompile Include="src\GUIQuadRenderOperation.cpp" />
-    <ClCompile Include="src\GUIElementSelectorVisitor.cpp" />
-    <ClCompile Include="src\GUIXMLElementVisitor.cpp" />
-    <ClCompile Include="src\IGUIButton.cpp" />
-    <ClCompile Include="src\IGUICatagoryPanel.cpp" />
-    <ClCompile Include="src\IGUICheckBox.cpp" />
-    <ClCompile Include="src\IGUIComboList.cpp" />
-    <ClCompile Include="src\IGUIEditBox.cpp" />
-    <ClCompile Include="src\IGUIListBox.cpp" />
-    <ClCompile Include="src\IGUIPanel.cpp" />
-    <ClCompile Include="src\IGUIPropertyGrid.cpp" />
-    <ClCompile Include="src\IGUISliderBar.cpp" />
-    <ClCompile Include="src\IGUIStackPanel.cpp" />
-    <ClCompile Include="src\IGUIStaticImage.cpp" />
-    <ClCompile Include="src\IGUIStaticText.cpp" />
+    <ClCompile Include="src\CConvexQuickHull.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IConvexHull.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ISceneManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\scenemanager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SceneRegion.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\BoxNodeSelector.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CTriangleSelector.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\RayNodeSelector.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ScreenNodeSelector.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\BoneNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Skeleton.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\RenderGroup.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\RenderManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\XMLSceneLoader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\XMLTerrainReader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\DynamicGeometryBatch.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGeometryBatch.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\StaticGeometryBatch.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\VertConstGeoInstancing.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GPUMorphAnimator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GPUSkeletonAnimator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IMorphAnimator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MorphAnimator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SkeletonAnimator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\NormalRenderPass.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ReflectionRenderPass.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ShadowRenderPass.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CurveManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CurveNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CircleTerrainBrush.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ITerrainBrush.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\TerrainUtility.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\RenderSceneVisitor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\RequestToRenderVisitor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\UpdateSceneVisitor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\DebugDrawManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\CPUParticleBillboardRenderer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GPUParticleBillboardRenderer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IParticle.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IParticleAffector.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ParticleEmitter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SParticleSystem.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SParticleSystemFactory.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIOverlay.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIOverlayManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIElement.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIPanelElement.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUISchemeBase.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ViewPort2D.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\XMLOverlay.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIProfile.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUITheme.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIThemeManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUITheme.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\XML_GUITheme.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\BaseFont.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\FontAttributes.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\FTFont.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IFont.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ITextDecorateNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\LanguageFontSpecification.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\TexFont.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\TextDecorateNodeFactory.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\TextDecorator.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\XML_Font.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ColorDecorateNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\FontDecorateFont.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\ImageDecorateNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SizeDecorateNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\TextDecorateNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIBatchRenderer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIMultiQuadRenderOperation.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIQuadRenderOperation.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIElementSelectorVisitor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\GUIXMLElementVisitor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIButton.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUICatagoryPanel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUICheckBox.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIComboList.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIEditBox.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIListBox.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIPanel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIPropertyGrid.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUISliderBar.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIStackPanel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIStaticImage.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IGUIStaticText.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\CLimitedStream.cpp" />
     <ClCompile Include="src\CMemoryStream.cpp" />
     <ClCompile Include="src\CRC.cpp" />
@@ -2290,11 +2996,21 @@
     <ClCompile Include="src\CSettingsFile.cpp" />
     <ClCompile Include="src\EffectScript.cpp" />
     <ClCompile Include="src\MaterialScript.cpp" />
-    <ClCompile Include="src\ActionAnimationTrack.cpp" />
-    <ClCompile Include="src\AnimationController.cpp" />
-    <ClCompile Include="src\AnimationMixer.cpp" />
-    <ClCompile Include="src\AnimationTrackGroup.cpp" />
-    <ClCompile Include="src\IAnimationMixer.cpp" />
+    <ClCompile Include="src\ActionAnimationTrack.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\AnimationController.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\AnimationMixer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\AnimationTrackGroup.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IAnimationMixer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\IAnimationTrack.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
@@ -2312,14 +3028,29 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\KeyAnimationTrack.cpp" />
-    <ClCompile Include="src\LookAtAnimation.cpp" />
-    <ClCompile Include="src\MorphAnimationMixer.cpp" />
-    <ClCompile Include="src\MorphAnimationTrack.cpp" />
-    <ClCompile Include="src\MorphTrackGroup.cpp" />
-    <ClCompile Include="src\TransAnimationGroup.cpp" />
-    <ClCompile Include="src\TransformationAnimationMixer.cpp" />
+    <ClCompile Include="src\KeyAnimationTrack.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\LookAtAnimation.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MorphAnimationMixer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MorphAnimationTrack.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\MorphTrackGroup.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\TransAnimationGroup.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\TransformationAnimationMixer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\TransformationAnimationTrack.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
@@ -2337,6 +3068,7 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\TransformKeyFrame.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
@@ -2355,10 +3087,17 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\BonesJointQuery.cpp" />
-    <ClCompile Include="src\IKSimple.cpp" />
-    <ClCompile Include="src\IterativeIK.cpp" />
+    <ClCompile Include="src\BonesJointQuery.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IKSimple.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\IterativeIK.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\ColorConverter.cpp" />
     <ClCompile Include="src\ColorCurve.cpp" />
     <ClCompile Include="src\DefaultColors.cpp" />
@@ -2462,7 +3201,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <None Include="include\TransformManipulator.h.old" />
+    <None Include="include\TransformManipulator.h.old">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="include\Hashmap.inl" />
     <None Include="OverlaySchema.xsx">
       <DependentUpon>OverlaySchema.xsd</DependentUpon>
