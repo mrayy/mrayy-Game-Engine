@@ -487,6 +487,7 @@ void ServiceHostManager::_ProcessServiceMessage(const core::string data, network
 			m_serviceList[i].lastTime = ifo.lastTime;
 			m_serviceList[i].address = *src;
 			m_serviceList[i].netValuePort = ifo.netValuePort;
+			m_serviceList[i].pingSent = 0;
 			m_dataMutex->unlock();
 		}
 		else
