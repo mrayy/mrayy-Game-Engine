@@ -45,10 +45,12 @@ public:
 
 	bool m_sent;
 	std::vector<math::vector4di> m_sendRect;
+	int counter;
 
 public:
 	EyegazeCameraVideoSrcImpl()
 	{
+		counter = 0;
 		m_inited = false;
 		m_rtpListener = 0;
 		m_precodecListener = 0;
@@ -87,14 +89,14 @@ public:
 			return;
 		m_eyePosDirty = true;
 		m_eyepos= poses;
-		_UpdateEyegazePos();
+		//_UpdateEyegazePos();
 	}
 
 	math::vector2d GetRectSize(int level)
 	{
 
 		//use formula:  Size=Level*(ImageSize - EyegazeCropSize)/LevelsCount +EyegazeCropSize 
-		return level*(framesize - m_cropsize) / m_levels + m_cropsize;
+		return level*math::vector2di(250, 250) +/*level*(framesize - m_cropsize) / m_levels +*/ m_cropsize;
 	}
 
 	//level==0 --> gaze rect
@@ -125,10 +127,9 @@ public:
 	}
 	void _UpdateEyegazePos()
 	{
-		if (!m_eyePosDirty || !m_sent)
+		if (!m_eyePosDirty )
 			return;
 		m_eyePosDirty = false;
-		m_sent = false;
 		m_sendRect.resize(m_levels);
 		//update video boxes
 		for (int level = 0; level < m_levels; ++level)
@@ -154,6 +155,7 @@ public:
 		GstElement* pipeline = (GstElement*)p;
 		m_inited = true;
 		source->LinkWithPipeline(p);
+		m_videoRects.clear();
 		for (int i = 0; i < source->GetStreamsCount(); ++i)
 		{
 			m_videoRects.push_back(std::vector<GstElement*>());
@@ -181,14 +183,24 @@ public:
 	};
 	virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * buffer)
 	{
-		if (src == m_precodecListener)
+		if (src == m_precodecListener) //before encoder is applied, save the rect
 		{
-			//_UpdateEyegazePos();
+			//if (m_sent)
+			_UpdateEyegazePos();
+			//m_sent = false; 
+
 			m_gazeMutex->lock();
+			/*
+			for (int i = 0; i < m_levels; ++i)
+			{
+				g_object_get(m_videoRects[0][i], "left", &m_sendRect[i].x, "right", &m_sendRect[i].y,
+					"top", &m_sendRect[i].z, "bottom", &m_sendRect[i].w, 0);
+			}*/
+
 			m_gazeCashe.push_back(m_sendRect);
 			m_gazeMutex->unlock();
 		}
-		else if (src == m_rtpListener)
+		else if (src == m_rtpListener)//after rtp payloader
 		{
 
 			GstMapInfo map;
@@ -199,7 +211,7 @@ public:
 				RTPPacketData packet;
 				packet.timestamp = rtp_timestamp(map.data);
 				//packet.length = rtp_padding_payload((unsigned char*)map.data, map.size, packet.data);
-				if (packet.timestamp != m_lastRtpTS)
+				if (packet.timestamp != m_lastRtpTS)//inject eyegaze data to the first frame of the rtp stream
 				{
 					m_lastRtpTS = packet.timestamp;
 					m_gazeMutex->lock();
@@ -221,9 +233,12 @@ public:
 							memcpy(ptr, &gaze[i], sizeof(math::vector4di));
 							ptr += sizeof(math::vector4di);
 						}
+						int dataLen = sizeof(math::vector4di)*gaze.size()+4;
 
+						memcpy(ptr, &counter, sizeof(counter));
+						counter++;
 
-						int len = sizeof(math::vector4di)*gaze.size() + map.size;
+						int len = dataLen + map.size;
 
 
 						//add rtp padding
@@ -236,7 +251,7 @@ public:
 						gst_memory_map(mem, &info_out, GST_MAP_WRITE);
 						guint8 *out = info_out.data;
 
-						rtp_add_padding(map.data, map.size, data, sizeof(math::vector4di)*gaze.size(), out);
+						rtp_add_padding(map.data, map.size, data, dataLen, out);
 
 						gst_memory_unmap(mem, &info_out);
 
@@ -269,6 +284,11 @@ EyegazeCameraVideoSrc::~EyegazeCameraVideoSrc()
 {
 	delete m_data;
 }
+void EyegazeCameraVideoSrc::Close()
+{
+
+}
+
 std::string EyegazeCameraVideoSrc::BuildStringH264()
 {
 	if (false)
@@ -426,7 +446,14 @@ std::string EyegazeCameraVideoSrc::_generateFullString()
 				//videoStr += "videotestsrc pattern=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) +
 				//	",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + ",framerate=" + core::StringConverter::toString(m_fps)+"/1 ! "+mName+".sink_0 ";
 
-				videoStr += GetCameraStr(i) + "! tee name=" + tName + " ";
+				videoStr += GetCameraStr(i);
+				if (!precodecSet)
+				{
+					videoStr +=  "! mylistener name=precodec ";
+					precodecSet = true;
+				}
+
+				videoStr += "! tee name=" + tName + " ";
 				/*
 
 				videoStr += "ksvideosrc";
@@ -439,23 +466,18 @@ std::string EyegazeCameraVideoSrc::_generateFullString()
 					",height=" + core::StringConverter::toString(framesize.y) + " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ! videoconvert ! tee name=" + tName + " ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 					*/
 				for (int level = 0; level < m_data->m_levels; ++level){
-					if (!precodecSet)
-					{
-						videoStr += tName + ". ! mylistener name=precodec ! queue ! ";
-						precodecSet = true;
-					}
-					else
-						videoStr += tName + ". ! queue ! ";
+					videoStr += tName + ". ! queue ! ";
 
 					cropRect=m_data->GetCropRect(i,level);
 
 					//eyegaze string
-					videoStr += "  videobox name=box_" + core::StringConverter::toString(i) +"_"+ core::StringConverter::toString(level) +
+					videoStr += "  videobox name=box_" + core::StringConverter::toString(i) + "_" + core::StringConverter::toString(level) +
 						" left=" + core::StringConverter::toString(cropRect.x) +
 						" right=" + core::StringConverter::toString(cropRect.y) +
 						" top=" + core::StringConverter::toString(cropRect.z) +
-						" bottom=" + core::StringConverter::toString(cropRect.w) +
-						" ! videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(m_data->m_cropsize.x) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) +
+						" bottom=" + core::StringConverter::toString(cropRect.w);
+
+					videoStr += " ! videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(m_data->m_cropsize.x) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) +
 						" ! videoconvert !" + mName + ".sink_" + core::StringConverter::toString(level)+" ";
 				}
 
@@ -518,6 +540,11 @@ std::string EyegazeCameraVideoSrc::GetCameraStr(int i)
 		return "";
 	return m_data->source->GetCameraStr(i);
 }
+void  EyegazeCameraVideoSrc::SetResolution(int width, int height, int fps, bool free)
+{
+	m_data->source->SetResolution(width, height, fps, free);
+}
+
 std::string EyegazeCameraVideoSrc::GetPipelineStr(int i)
 {
 	std::string videoStr;

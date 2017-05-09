@@ -29,6 +29,7 @@ public:
 	std::string GetCameraStr(int i);
 	virtual std::string GetPipelineStr(int i);
 
+	virtual void  SetResolution(int width, int height, int fps, bool free);
 	virtual void SetSeparateStreams(bool separate){}
 	virtual bool IsSeparateStreams() { return false; }
 
@@ -44,6 +45,7 @@ public:
 	void LinkWithPipeline(void* pipeline);
 	virtual math::vector2di GetFrameSize(int i);
 
+	virtual void Close();
 };
 
 }

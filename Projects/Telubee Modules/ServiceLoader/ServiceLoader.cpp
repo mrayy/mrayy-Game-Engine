@@ -72,7 +72,7 @@ ServiceLoader::ServiceLoader()
 }
 ServiceLoader::~ServiceLoader()
 {
-	gLogManager.log("Shutting down service", ELL_INFO);
+	//gLogManager.log("Shutting down service", ELL_INFO);
 	_destroy();
 	delete m_renderContext;
 	delete network::INetworkPortAssigner::getInstancePtr();

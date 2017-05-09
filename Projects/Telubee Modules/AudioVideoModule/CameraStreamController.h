@@ -438,7 +438,7 @@ public:
 			}
 		}
 		video::ICustomVideoSrc* ret = 0;
-		if (false)
+		if (true)
 		{
 			video::CameraVideoSrc* src;
 			src = new video::CameraVideoSrc();
