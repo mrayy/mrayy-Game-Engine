@@ -437,29 +437,55 @@ public:
 				
 			}
 		}
-
-		video::CameraVideoSrc* src;
-		if (_eyegaze)
-		 src = new video::EyegazeCameraVideoSrc();
-		else 
+		video::ICustomVideoSrc* ret = 0;
+		if (false)
+		{
+			video::CameraVideoSrc* src;
 			src = new video::CameraVideoSrc();
-		src->SetCameraIndex(_captureDevices);
-		if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureJpeg)
-		{
-			src->SetCaptureType("JPEG");
-			src->SetEncoderType("H264");
+			src->SetCameraIndex(_captureDevices);
+			if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureJpeg)
+			{
+				src->SetCaptureType("JPEG");
+				src->SetEncoderType("H264");
+			}
+			else  if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureH264)
+			{
+				src->SetCaptureType("H264");
+				src->SetEncoderType("H264");
+			}
+			else {
+				src->SetCaptureType("RAW");
+				src->SetEncoderType("H264");
+			}
+
+			ret = src;
 		}
-		else  if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureH264)
+		else
 		{
-			src->SetCaptureType("H264");
-			src->SetEncoderType("H264");
-		}
-		else {
-			src->SetCaptureType("RAW");
-			src->SetEncoderType("H264");
+			video::AppSrcVideoSrc* src;
+			src = new video::AppSrcVideoSrc();
+
+			std::vector<video::IVideoGrabber*> devices;
+			for (int i = 0; i < _captureDevices.size(); ++i)
+			{
+				video::DirectShowVideoGrabber* dev = new video::DirectShowVideoGrabber();
+				devices.push_back( dev);
+				dev->SetDevice(_captureDevices[i]);
+			}
+
+			src->SetVideoGrabber(devices);
+
+			ret = src;
 		}
 
-		return src;
+		if (_eyegaze)
+		{
+			video::EyegazeCameraVideoSrc* res = new video::EyegazeCameraVideoSrc();
+			res->SetCameraSource(ret);
+			return res;
+		}
+
+		return ret;
 	}
 	virtual bool IsStereo(){ 
 		int count = 0;
