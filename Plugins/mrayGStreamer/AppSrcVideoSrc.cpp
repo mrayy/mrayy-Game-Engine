@@ -90,10 +90,9 @@ namespace video
 			}
 			return format;
 		}
-
+		
 		GstFlowReturn NeedBuffer(GstMySrc * sink, GstBuffer ** buffer, int index)
 		{
-
 
 			if (!m_grabber[index])
 			{
@@ -105,18 +104,19 @@ namespace video
 			//	gLogManager.log("AppSrcVideoSrc::NeedBuffer() - Failed to grab buffer " + core::StringConverter::toString(index), ELL_WARNING);
 				return GST_FLOW_ERROR;
 			}
-			m_grabber[index]->Lock();
+			//m_grabber[index]->Lock();
 
 			const video::ImageInfo* ifo = m_grabber[index]->GetLastFrame();
-			int len = ifo->imageDataSize;
-			GstMapInfo map;
-			GstBuffer* outbuf = gst_buffer_new_and_alloc(len);
-			gst_buffer_map(outbuf, &map, GST_MAP_WRITE);
-			memcpy(map.data, ifo->imageData, len);
+			*buffer = gst_buffer_new_wrapped_full(GST_MEMORY_FLAG_READONLY, ifo->imageData, ifo->imageDataSize, 0, ifo->imageDataSize, 0, 0);
+			//int len = ifo->imageDataSize;
+			//GstMapInfo map;
+			//GstBuffer* outbuf = gst_buffer_new_and_alloc(len);
+			//gst_buffer_map(outbuf, &map, GST_MAP_WRITE);
+			//memcpy(map.data, ifo->imageData, len);
 
-			gst_buffer_unmap(outbuf, &map);
-			m_grabber[index]->Unlock();
-			*buffer = outbuf;
+		//	gst_buffer_unmap(outbuf, &map);
+		//	m_grabber[index]->Unlock();
+		//	*buffer = outbuf;
 
 			//OS::IThreadManager::getInstance().sleep(5);
 			return GST_FLOW_OK;
@@ -220,7 +220,7 @@ namespace video
 
 				videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
 				videoStr += " ! videoconvert ";
-				//videoStr += " ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
+				videoStr += " ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
 				//videoStr += " ! queue ";
 				//	if (m_grabber[i]->GetImageFormat()!=video::EPixel_YUYV)
 
