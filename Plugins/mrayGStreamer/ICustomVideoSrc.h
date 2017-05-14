@@ -58,7 +58,7 @@ public:
 
 	virtual void LoadParameters(xml::XMLElement* e);
 
-	virtual math::vector2di GetFrameSize(int i)=0;
+	virtual math::vector2di GetFrameSize(int i) = 0;
 
 
 	virtual void Start() {};

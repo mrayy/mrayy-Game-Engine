@@ -26,7 +26,7 @@
 namespace mray
 {
 #define COMMUNICATION_PORT 6000
-#define PingTime 5000
+	int PingTime = 5000;
 
 	typedef bool(ServiceHostManager::*ProcessFunction)();
 class ServiceHostManagerThread :public OS::IThreadFunction
@@ -183,6 +183,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 		{
 			m_autoRestartService = true;
 			printf("Auto Restart Services: Enabled\n");
+		}
+		else if (strcmp(argv[i], "-p") == 0)
+		{
+			PingTime = atoi(argv[i + 1]);
+			i++;
 		}
 		else
 		{
@@ -537,7 +542,7 @@ bool ServiceHostManager::_ProcessServices()
 	std::vector<ServiceList::iterator> toRemove;
 	std::vector<core::string> servicesToRun;
 	ulong t=m_timer->getMilliseconds();
-#define MAX_TRIALS 1
+#define MAX_TRIALS 3
 	for (int i = 0; i < m_serviceList.size(); ++i)
 	{
 		if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port != 0)

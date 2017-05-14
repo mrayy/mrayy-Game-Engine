@@ -104,14 +104,19 @@ void GStreamerCore::_Init()
 	}
 	else
 	{
- 		g_log_set_handler(0, G_LOG_LEVEL_INFO, 0, 0);
+ 	/*	g_log_set_handler(0, G_LOG_LEVEL_INFO, 0, 0);
  		g_log_set_handler(0, G_LOG_LEVEL_DEBUG, 0, 0);
  		g_log_set_handler(0, G_LOG_LEVEL_MESSAGE, 0, 0);
  		g_log_set_handler(0, G_LOG_LEVEL_CRITICAL, 0, 0);
  		g_log_set_handler(0, G_LOG_FLAG_FATAL , 0, 0);
 		g_log_set_default_handler(0, 0);
-		_gst_debug_enabled = false;
+		g_log_set_handler_full()
+		GST_CAT_DEFAULT = 0;
 		_gst_debug_min = GST_LEVEL_NONE;
+
+		*/
+		_gst_debug_enabled = false;
+		g_setenv("GST_DEBUG", "*:0", 1);
 		/*
 		g_log_set_handler_full("", G_LOG_LEVEL_INFO, g_logFunction, 0, 0);
 		g_log_set_handler_full("", G_LOG_LEVEL_DEBUG, g_logFunction, 0, 0);

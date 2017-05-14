@@ -62,6 +62,7 @@ public:
 	ECameraType m_cameraType;
 	bool m_enableEyegaze;
 	math::vector2di m_eyegazeSize;
+	int m_eyegazeFoV;
 	int m_eyegazeLevels;
 	math::vector2di m_resolution;
 	int m_fps;
@@ -230,7 +231,7 @@ public:
 		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze"));
 		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
 		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels"));
-		
+		m_eyegazeFoV = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeFOV"));
 /*#else 
 #if USE_POINTGREY
 		m_cameraType = ECameraType::PointGrey;
@@ -427,6 +428,9 @@ public:
 			if (m_enableEyegaze)
 			{
 				video::EyegazeCameraVideoSrc* cs = (video::EyegazeCameraVideoSrc*)src;
+
+				m_eyegazeSize.x = m_eyegazeSize.y = m_resolution.x*(((float)m_eyegazeFoV) / m_camConfig->fov);
+
 				cs->SetEyegazeCrop(m_eyegazeSize.x, m_eyegazeSize.y);
 				cs->SetEyegazeLevels(m_eyegazeLevels);
 			}
@@ -652,21 +656,21 @@ public:
 	{
 		if (m_status != EServiceStatus::Running)
 			return false;
-		gLogManager.log("Stopping AVStreamService.",ELL_INFO);
+//		gLogManager.log("Stopping AVStreamService.",ELL_INFO);
 
 		m_streamers->Stop();
 		m_streamers->CloseAll();
-		Sleep(1000);
+	//	Sleep(1000);
 
-		gLogManager.log("Stopping Cameras.", ELL_INFO);
+	//	gLogManager.log("Stopping Cameras.", ELL_INFO);
 		m_cameraController->Stop();
-		gLogManager.log("Camera Stopped.", ELL_INFO);
+	//	gLogManager.log("Camera Stopped.", ELL_INFO);
 
 		if (m_audioPlayer)
 		{
-			gLogManager.log("Stopping Audio.", ELL_INFO);
+		//	gLogManager.log("Stopping Audio.", ELL_INFO);
 			m_audioPlayer->Close();
-			gLogManager.log("Audio Stopped.", ELL_INFO);
+		//	gLogManager.log("Audio Stopped.", ELL_INFO);
 		}
 
 		m_status = EServiceStatus::Stopped;
@@ -751,6 +755,18 @@ public:
 		msg = "   Bitrate:" + core::StringConverter::toString(m_currentSettings.bitrate);
 		context->RenderText(msg, 0, 0);
 
+		if (m_enableEyegaze)
+		{
+			msg = "Foveated Rendering Settings:" ;
+			context->RenderText(msg, 0, 0);
+			msg = "   FoV:" + core::StringConverter::toString(m_eyegazeFoV);
+			context->RenderText(msg, 0, 0);
+			msg = "   Size:" + core::StringConverter::toString(m_eyegazeSize);
+			context->RenderText(msg, 0, 0);
+			msg = "   Levels:" + core::StringConverter::toString(m_eyegazeLevels);
+			context->RenderText(msg, 0, 0);
+		}
+
 		if (m_status != EServiceStatus::Running)
 			return;
 		m_cameraController->DebugRender(context);
@@ -822,6 +838,8 @@ public:
 			ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_AudioPort));
 			gLogManager.log("AudioPlayerPort: " + core::StringConverter::toString(m_AudioPort), ELL_INFO);
 		}
+		ret->addAttribute("FrameSize", core::StringConverter::toString(m_cameraSource->GetFrameSize(0)));
+
 
 		w.addElement(ret);
 

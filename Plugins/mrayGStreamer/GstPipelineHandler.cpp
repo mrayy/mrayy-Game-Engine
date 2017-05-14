@@ -75,7 +75,7 @@ namespace video
 
 
 		//enable logging to stdout
-		g_signal_connect(m_data->gstPipeline, "deep-notify", G_CALLBACK(gst_object_default_deep_notify), NULL);
+		//g_signal_connect(m_data->gstPipeline, "deep-notify", G_CALLBACK(gst_object_default_deep_notify), NULL);
 
 
 #ifdef USE_GST_CLOCK

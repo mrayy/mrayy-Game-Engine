@@ -232,7 +232,7 @@ void ServiceLoader::_sendConnectMessage()
 }
 void ServiceLoader::_sendDisconnectMessage()
 {
-	gLogManager.log("Disconnecting service",ELL_INFO);
+//	gLogManager.log("Disconnecting service",ELL_INFO);
 	core::string msg = "<ServiceModule Message=\"Disconnect\"/>";
 
 	_sendMessage(msg);
@@ -324,7 +324,7 @@ void ServiceLoader::_destroy()
 	if (m_inited)
 	{
 		m_inited = false;
-		gLogManager.log("Destroying service", ELL_INFO);
+//		gLogManager.log("Destroying service", ELL_INFO);
 		_sendDisconnectMessage();
 
 		m_serviceModule->DestroyService();
@@ -372,7 +372,6 @@ void ServiceLoader::_UpdateServiceStatus()
 		m_serviceModule->StopService();
 	}
 }
-
 void ServiceLoader::Run()
 {
 	if (!m_inited)
@@ -387,6 +386,11 @@ void ServiceLoader::Run()
 		m_serviceModule->Update(dt);
 		_RenderInfo();
 		Sleep(dt*1000);
+
+		if (GetAsyncKeyState(VK_ESCAPE))
+		{
+			break;
+		}
 	}
 	
 }

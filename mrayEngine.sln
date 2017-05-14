@@ -492,6 +492,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceLoader", "Projects\Telubee Modules\ServiceLoader\ServiceLoader.vcxproj", "{0782E14E-D594-45D3-A47A-EFCA57347933}"
 	ProjectSection(ProjectDependencies) = postProject
 		{EC75C431-3C9B-439F-8D24-FE2F104C0972} = {EC75C431-3C9B-439F-8D24-FE2F104C0972}
+		{B1B74C8A-42D5-4F44-8087-D9DD5936BBED} = {B1B74C8A-42D5-4F44-8087-D9DD5936BBED}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceHostManager", "Projects\ServiceHostManager\ServiceHostManager.vcxproj", "{0D17BC20-9E02-434C-8FAF-76517AE39E62}"
