@@ -73,6 +73,8 @@ std::string CameraVideoSrc::_generateString(int i)
 		videoStr = "ksvideosrc";
 		videoStr += " name=src" + core::StringConverter::toString(i);
 		videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
+		
+		/*videoStr = "videotestsrc ";*/
 
 		//videoStr += "videotestsrc ";
 		//" do-timestamp=true is-live=true "//"block=true"
@@ -137,7 +139,7 @@ std::string CameraVideoSrc::_generateFullString()
 				videoStr += "ksvideosrc";
 				videoStr += " name=src" + core::StringConverter::toString(i);
 				videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
-
+				
 				//videoStr += "videotestsrc ";
 				//" do-timestamp=true is-live=true "//"block=true"
 				videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +

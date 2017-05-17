@@ -229,7 +229,7 @@ public:
 			m_cameraType=ECameraType::PointGrey ;
 
 		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze"));
-		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
+//		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
 		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels"));
 		m_eyegazeFoV = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeFOV"));
 /*#else 

@@ -683,7 +683,7 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	//qtomatrix(rotMat, q);
 	//MatrixtoXYZ((double*)rotMat, &angles.x, &angles.y, &angles.z);
 	math::vector3d angles;
-	//QuaternionToEuler(q, angles);
+	//QuaternionToEuler(q, angles); 
 
 	//QuaternionToEulerYZX(q2, angles);
 	if (false)

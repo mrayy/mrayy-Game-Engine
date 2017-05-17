@@ -287,28 +287,32 @@ namespace video
 
 			if (src == m_precodecListener) //before encoder is applied, save the rect
 			{
-				//if (m_sent)
-				_UpdateEyegazePos();
-				//m_sent = false; 
-
-				GazeData ds;
-				ds.pts = buffer->pts;
-				ds.gaze = m_sendRect;
-				m_gazeMutex->lock();
-				/*
-				for (int i = 0; i < m_levels; ++i)
+				if (m_sendRect.size() > 0)
 				{
-				g_object_get(m_videoRects[0][i], "left", &m_sendRect[i].x, "right", &m_sendRect[i].y,
-				"top", &m_sendRect[i].z, "bottom", &m_sendRect[i].w, 0);
-				}*/
-				m_gazeCashe.push_back(ds);
-				m_gazeMutex->unlock();
 
-				// 			GstMapInfo map;
-				// 			gst_buffer_map(buffer, &map, GST_MAP_READ);
-				// 
-				// 			gst_buffer_unmap(buffer, &map);
-				m_sent = true;
+					//if (m_sent)
+					_UpdateEyegazePos();
+					//m_sent = false; 
+
+					GazeData ds;
+					ds.pts = buffer->pts;
+					ds.gaze = m_sendRect;
+					m_gazeMutex->lock();
+					/*
+					for (int i = 0; i < m_levels; ++i)
+					{
+					g_object_get(m_videoRects[0][i], "left", &m_sendRect[i].x, "right", &m_sendRect[i].y,
+					"top", &m_sendRect[i].z, "bottom", &m_sendRect[i].w, 0);
+					}*/
+					m_gazeCashe.push_back(ds);
+					m_gazeMutex->unlock();
+
+					// 			GstMapInfo map;
+					// 			gst_buffer_map(buffer, &map, GST_MAP_READ);
+					// 
+					// 			gst_buffer_unmap(buffer, &map);
+					m_sent = true;
+				}
 			}
 			else if (src == m_rtpListener)//after rtp payloader
 			{
@@ -316,7 +320,6 @@ namespace video
 				GstMapInfo map;
 				gst_buffer_map(buffer, &map, GST_MAP_READ);
 
-				if (true)
 				{
 					RTPPacketData packet;
 					packet.timestamp = rtp_timestamp(map.data);
@@ -325,17 +328,20 @@ namespace video
 					{
 						m_lastRtpTS = packet.timestamp;
 						GazeData ds;
-						m_gazeMutex->lock();
-						// 					int count = 0;
-						// 					do {
-						//						count++;
-						ds = m_gazeCashe.front();
-						m_gazeCashe.pop_front();
+						if (m_gazeCashe.size() > 0)
+						{
+							m_gazeMutex->lock();
+							// 					int count = 0;
+							// 					do {
+							//						count++;
+							ds = m_gazeCashe.front();
+							m_gazeCashe.pop_front();
+							m_gazeMutex->unlock();
+						}
 						// 					} while (ds.pts != buffer->pts);
 						// 					if (count > 1)
 						// 						printf("exceeding!\n");
 						std::vector<math::vector4di> &gaze = ds.gaze;
-						m_gazeMutex->unlock();
 						math::vector2di framesize = source->GetFrameSize(0);
 
 						{
@@ -382,6 +388,7 @@ namespace video
 						}
 					}
 				}
+				/*
 				else{
 
 					m_gazeMutex->lock();
@@ -390,7 +397,7 @@ namespace video
 					m_gazeMutex->unlock();
 
 					memcpy(map.data + map.size - sizeof(ds.gaze), &ds.gaze, sizeof(ds.gaze));
-				}
+				}*/
 
 				gst_buffer_unmap(buffer, &map);
 
@@ -580,20 +587,23 @@ namespace video
 
 					mName = "mix_" + core::StringConverter::toString(i);
 					tName = "t_" + core::StringConverter::toString(i);
-					mixerStr = "videomixer name=" + mName;
-					//mixerStr += "  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_1::alpha=1  ";
-					char buffer[256];
-					for (int level = 0; level < m_data->m_levels; ++level){
-						int xpos = m_data->m_cropsize.x*level;
-						sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", level, xpos, level, level, level, level);
+					if (m_data->m_levels > 0)
+					{
+						mixerStr = "videomixer name=" + mName;
+						//mixerStr += "  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_1::alpha=1  ";
+						char buffer[256];
+						for (int level = 0; level < m_data->m_levels; ++level){
+							int xpos = m_data->m_cropsize.x*level;
+							sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", level, xpos, level, level, level, level);
+							mixerStr += buffer;
+							//mixerStr += "  sink_2::xpos=0 sink_2::ypos=" + core::StringConverter::toString(m_data->m_cropsize.y) + "  sink_2::zorder=0 sink_2::alpha=1  ";
+						}
+						sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", m_data->m_levels, m_data->m_cropsize.x*m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels);
+						//mixerStr += "  sink_2::xpos=" + core::StringConverter::toString(m_data->m_cropsize.x) + " sink_2::ypos=0 sink_2::zorder=0 sink_2::alpha=1  ";
 						mixerStr += buffer;
-						//mixerStr += "  sink_2::xpos=0 sink_2::ypos=" + core::StringConverter::toString(m_data->m_cropsize.y) + "  sink_2::zorder=0 sink_2::alpha=1  ";
-					}
-					sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", m_data->m_levels, m_data->m_cropsize.x*m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels);
-					//mixerStr += "  sink_2::xpos=" + core::StringConverter::toString(m_data->m_cropsize.x) + " sink_2::ypos=0 sink_2::zorder=0 sink_2::alpha=1  ";
-					mixerStr += buffer;
 
-					videoStr += mixerStr;
+						videoStr += mixerStr;
+					}
 
 					//videoStr += "videotestsrc pattern=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) +
 					//	",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + ",framerate=" + core::StringConverter::toString(m_fps)+"/1 ! "+mName+".sink_0 ";
@@ -653,10 +663,12 @@ namespace video
 						m_data->streamSize.x += GetFrameSize(i).x;
 
 					}
-					videoStr += " ! "+ mName + ".sink_" + core::StringConverter::toString(m_data->m_levels) + " ";//output to the mixer
+					if (m_data->m_levels > 0){
+						videoStr += " ! " + mName + ".sink_" + core::StringConverter::toString(m_data->m_levels) + " ";//output to the mixer
 
 
-					videoStr += mName + ". ";
+						videoStr += mName + ". ";
+					}
 
 					if (mixer)
 					{
