@@ -30,7 +30,7 @@ DirectShowVideoGrabber::DirectShowVideoGrabber()
 	{
 		s_videoInput=new videoInput();
 		s_videoInput->setVerbose(false);
-		s_videoInput->setComMultiThreaded(true);
+		//s_videoInput->setComMultiThreaded(true);
 		s_videoInput->setUseCallback(true);
 	}
 	m_textureImage.autoDel=true;

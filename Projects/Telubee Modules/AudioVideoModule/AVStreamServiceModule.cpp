@@ -232,6 +232,8 @@ public:
 //		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
 		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels"));
 		m_eyegazeFoV = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeFOV"));
+		if (m_eyegazeFoV == 0)
+			m_eyegazeFoV = 10;
 /*#else 
 #if USE_POINTGREY
 		m_cameraType = ECameraType::PointGrey;
