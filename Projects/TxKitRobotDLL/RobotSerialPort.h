@@ -31,6 +31,7 @@ protected:
 	RobotSerialPortImpl* m_impl;
 	int robot_vx, robot_vy, robot_rot;
 	float pan, tilt, roll;
+	float px, py, pz;
 	bool baseConnected;
 	int m_baseCounter;
 	ERobotControllerStatus _status;
@@ -42,6 +43,7 @@ protected:
 // 	int yamahaInitialize();
 // 	int yamahaXY_control(float pos_x, float pos_y, int control);
 	int head_control(float pan, float tilt, float roll);
+	int head_pos(float x, float y, float z);
 
 	void _ProcessRobot();
 	static DWORD WINAPI timerThreadRobot(RobotSerialPort *robot, LPVOID pdata);

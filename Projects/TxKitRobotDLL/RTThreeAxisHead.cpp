@@ -22,6 +22,9 @@ RTThreeAxisHead::~RTThreeAxisHead()
 	_turnServosOff(1);
 	_turnServosOff(2);
 	_turnServosOff(3);
+	_turnServosOff(4);
+	_turnServosOff(5);
+	_turnServosOff(6);
 	_flush();
 	Disconnect();
 }
@@ -59,6 +62,9 @@ bool RTThreeAxisHead::Connect(const core::string& port)
 	_turnServosOn(1);
 	_turnServosOn(2);
 	_turnServosOn(3);
+	_turnServosOn(4);
+	_turnServosOn(5);
+	_turnServosOn(6);
 	_turnProjector(false);
 	_flush();
 
@@ -216,7 +222,7 @@ void RTThreeAxisHead::_setServoPos(int id, int pos)
 	param[size++] = (byte)((val & 0xFF000000) >> 24);
 
 	// servo id set to control
-	set_packet(id, INST_WRITE, param, size);
+	set_packet(id, INST_REGWRITE, param, size);
 }
 
 void RTThreeAxisHead::set_packet(int id, int com, byte* param, int size)
@@ -269,6 +275,12 @@ void RTThreeAxisHead::_flush()
 	comROBOT->sendData((char*)_buffer, _bufferPos);
 	_bufferPos = 0;
 	Sleep(10);*/
+	int size = 0;
+	byte param[6];
+	const int INST_ACTION = 0x05; //action
+
+	// servo id set to control  0xFE is broadcast ID
+	set_packet(0xFE, INST_ACTION, param, size);
 
 }
 void RTThreeAxisHead::_sendCommand(const std::string& cmd)
@@ -276,21 +288,234 @@ void RTThreeAxisHead::_sendCommand(const std::string& cmd)
 	std::string str = cmd + " \n\r";
 	//comROBOT->sendData((char*)str.c_str(), str.length());
 }
+
+
+bool RTThreeAxisHead::judge_limit(double sr, double tr, double lim1, double lim2, double x, double y, double z)
+{
+	double len1, len2;
+
+	if (lim2 * lim2 - lim1 * lim1 > 0)
+	{
+		len1 = sqrt(lim2 * lim2 - (sr + lim1) * (sr + lim1));
+		len2 = sqrt((lim2 + lim1) * (lim2 + lim1) - sr * sr);
+		if (z > len1 && z < len2)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+//
+// check length
+//
+void RTThreeAxisHead::check_length(double sr, double tr, double x, double y, double z, double lim1, double lim2, double ph, double th)
+{
+	double len1, len2;
+
+	double px, py, pz;
+	double sx, sy, sz;
+	double tx, ty, tz;
+
+	sx = sr * cos(ph);
+	sy = sr * sin(ph);
+	sz = 0;
+
+	tx = tr * cos(ph) + x;
+	ty = tr * sin(ph) + y;
+	tz = z;
+
+	px = cos(th) * lim1 * cos(ph) + sx;
+	py = cos(th) * lim1 * sin(ph) + sy;
+	pz = lim1 * sin(th) + sz;
+
+	len1 = sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy) + (pz - sz) * (pz - sz));
+	len2 = sqrt((px - tx) * (px - tx) + (py - ty) * (py - ty) + (pz - tz) * (pz - tz));
+
+	//System.Windows.Forms.MessageBox.Show("sp=" + len1.ToString() + " pt=" + len2.ToString(), "length of sp, pt");
+}
+
+double RTThreeAxisHead::get_theta(double sr, double tr, double x, double y, double z, double lim1, double lim2, double ph)
+{
+	double th; //theta
+	double p, q, r;
+	double th1, th2;
+
+	double a = sr;
+	double b = lim1;
+	double c = lim2;
+	double d = tr;
+
+
+	if (sqrt(x * x + y * y + z * z) > lim1 + lim2) return 1000;
+
+	/*
+	p = lim1 * lim1 + sr * sr - 2 * sr * tr - 2 * sr * x * cos(ph) - 2 * sr * y * sin(ph) + tr * tr + 2 * tr * x * cos(ph) + 2 * tr * y * sin(ph) + x * y + y * y + z * z - lim2 * lim2;
+	q = -2 * lim1 * z ;
+	r = (2 * lim1 * sr - 2 * lim1 * tr - 2 * lim1 * x * cos(ph) - 2 * lim1 * y * sin(ph));
+
+	th1 = Acos((-p * r + q * Sqrt(-p * p + q * q + r * r)) / (q * q + r * r));
+	th2 = Acos(-(p * r + q * Sqrt(-p * p + q * q + r * r)) / (q * q + r * r));
+	*/
+
+	p = -a * a + 2 * a * d + 2 * a * x * cos(ph) + 2 * a * y * sin(ph) - b * b + c * c - d * d - 2 * d * x * cos(ph) - 2 * d * y * sin(ph) - x * x - y * y - z * z;
+	q = -2 * b * z;
+	r = -2 * a * b + 2 * b * d + 2 * b * x * cos(ph) + 2 * b * y * sin(ph);
+
+	th1 = -2 * atan((1 / (p - r)) * (q - sqrt(-p * p + q * q + r * r)));
+	th2 = -2 * atan((1 / (p - r)) * (q + sqrt(-p * p + q * q + r * r)));
+
+//	str += p.ToString() + " " + q.ToString() + " " + r.ToString() + " \n";
+//	str += "th1=" + th1.ToString() + " th2=" + th2.ToString();
+
+	// System.Windows.Forms.MessageBox.Show((-p * p + q * q + r * r).ToString()+" "+str +th2.ToString());
+	// System.Windows.Forms.MessageBox.Show(str, "IK");
+	th1 = sqrt(th1 * th1);
+	th2 = sqrt(th2 * th2);
+
+	th = (th1 >= th2 ? th2 : th1);
+	th = sqrt(th * th);
+
+	check_length(sr, tr, x, y, z, lim1, lim2, ph, th);
+
+	return th;
+}
+
+const double SERVO_OFFSET = 270.0;
+
+#ifdef MEDIUM_TORSO
+const double length_s = 90;
+const double length_t = 40;
+const double length_sp = 150; //lim1
+const double length_pt = 250; //lim2
+const double default_x = 0;
+const double default_y = 0;
+const double default_z = 300; // height of z
+const double ROBOTIS_P1_DEG = 0.088;
+const double MIN_Z = 250;
+const double ZERO_Z = 300;
+const double MAX_Z = 370;
+#else
+
+const double length_s = 90;
+const double length_t = 40;
+const double length_sp = 200; //lim1
+const double length_pt = 300; //lim2
+const double default_x = 0;
+const double default_y = 0;
+const double default_z = 300; // height of z
+const double ROBOTIS_P1_DEG = 0.088;
+const double MIN_Z = 320;
+const double ZERO_Z = 380;
+const double MAX_Z = 490;
+const double MIN_XY = 150;
+
+#endif
+
+//v=300
+// minV=200
+// maxV=400
+// --> v=300
+
+float smoothstep(float x){
+
+	//x = x*x*(3 - 2 * x);
+	return x*x*x*(x*(x * 6 - 15) + 10); //Ken Perlin formula
+	//return minV + x*(maxV - minV);
+}
+float SoftClamp(float v, float minV, float maxV)
+{
+		
+	float threshold = 30;//smooth clip the edges with threshold of 30mm
+	if (v > minV + threshold && v < maxV - threshold)
+		return v; //no clamping
+	if (v < minV  || v > maxV )
+		return v; //no clamping
+
+
+	// apply smoothstep
+	float diff = 0;
+	bool sign = 0;
+	if (v <= minV + threshold)
+	{
+		diff = v - (minV + threshold);
+		sign = 1;
+	}
+
+	if (v >= maxV - threshold)
+		diff = v-(maxV - threshold) ;
+	//normalize
+	diff = 0.5f+diff/(2*threshold);
+
+	float x = (smoothstep(diff) - 0.5f)*2*threshold;
+	if (!sign)
+		return maxV - threshold + x;
+	return minV + threshold + x;
+}
+void RTThreeAxisHead::SetPosition(const math::vector3d& pos)
+{
+
+	//pos in mm values
+
+	if (!IsConnected())
+		return;
+	math::vector3d p = pos;
+
+
+	//set position offset
+	//	p.x = pos.x + 1000;
+
+	//set servo limits (values in meter)
+	p.x = SoftClamp(pos.z * 1000, -MIN_XY, MIN_XY); //limit X axis
+	p.y = SoftClamp(-pos.x * 1000, -MIN_XY, MIN_XY); //limit Y axis
+	p.z = ZERO_Z + SoftClamp(pos.y * 1000, MIN_Z - ZERO_Z, MAX_Z - ZERO_Z); //limit Z axis
+
+
+	//p.x = 0;
+	//p.y = 0;
+	//p.z = 300;
+
+	printf("%f,%f,%f,\n ", p.x, p.y, p.z);
+	double sr = length_s;
+	double tr = length_t;
+	double lim1 = length_sp;
+	double lim2 = length_pt;
+
+	int ServoID[] = { 4, 5, 6 };
+	float ServoIAngle[] = { 0, 120, 240 };
+	for (int i = 0; i < 3; i++)
+	{
+		double ph = math::toRad(ServoIAngle[i]);
+		double theta = get_theta(sr, tr, p.x, p.y, p.z, lim1, lim2, ph);
+
+		theta = SERVO_OFFSET - math::toDeg(theta) ;
+		if (theta == 1000) 
+			break;
+		_setServoPos(ServoID[i], theta);
+
+	//	printf("%f, ", (float)theta);
+	}
+//	printf("\n");
+
+	_flush();
+	m_position = pos;
+}
 void RTThreeAxisHead::SetRotation(const math::vector3d& rotation)
 {
 	if (!IsConnected())
 		return;
 
 	t += 0.01f;
-	float r = sinf(t)* 60;
+	float r = sinf(t) * 60;
 
 
-	_setServoPos(1, rotation.z + 180);
-	_setServoPos(2, rotation.x + 180);
-	_setServoPos(3, rotation.y + 180 );
+	_setServoPos(1, -rotation.z + 180);
+	_setServoPos(2, -rotation.x + 180);
+	_setServoPos(3, rotation.y + 180);
 	_flush();
 	m_rotation = rotation;
 }
+
+
 math::vector3d RTThreeAxisHead::GetRotation()
 {
 	return m_rotation;

@@ -52,8 +52,12 @@ class RobotSerialPortImpl
 	public:
 #ifdef ROOMBA_CONTROLLER
 		mray::RoombaController* m_baseController;
-#else 
+#else
+#ifdef OMNI_CONTROLLER
 		mray::OmniBaseController* m_baseController;
+#else
+		mray::IBaseController* m_baseController;
+#endif
 #endif
 		mray::RTThreeAxisHead* m_headController;
 
@@ -71,14 +75,19 @@ class RobotSerialPortImpl
 #ifdef ROOMBA_CONTROLLER
 			m_baseController = new mray::RoombaController;
 #else 
+#ifdef OMNI_CONTROLLER
 			m_baseController = new mray::OmniBaseController;
+#else 
+			m_baseController = 0;
+#endif
 #endif
 			m_headController = new mray::RTThreeAxisHead();
 			listener = 0;
 		}
 		~RobotSerialPortImpl()
 		{
-			delete m_baseController;
+			if (m_baseController)
+				delete m_baseController;
 			delete m_headController;
 		}
 		void NotifyCollision(float l, float r)
@@ -154,6 +163,9 @@ void RobotSerialPort::_ProcessRobot()
 {
 	int ret = 0;
 
+	if (!m_impl->m_baseController)
+		_config.BaseEnabled = false;
+
 	if (_status!=EDisconnecting || _status!=EDisconnected)
 		_processData();
 	bool ok = false;
@@ -162,7 +174,7 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EIniting:
 		break;
 	case ERobotControllerStatus::EConnecting:
-		if (_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 		{
 			if (m_impl->m_basePort == "")
 				m_impl->m_basePort = _config.robotCOM;
@@ -212,9 +224,10 @@ void RobotSerialPort::_ProcessRobot()
 
 		//printf("thread h: %d \r", count++);
 		head_control(-pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
-		if (m_baseCounter > 120)
+		head_pos(px, py, pz);
+		if (m_baseCounter > 5)
 		{
-			base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
+		//	base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
 			m_baseCounter = 0;
 		}
 		m_baseCounter++;
@@ -226,7 +239,8 @@ void RobotSerialPort::_ProcessRobot()
 			printf("Disconnecting Robot\n", ret);
 		if (_config.BaseEnabled)
 		{
-			m_impl->m_baseController->DriveStop();
+			if (m_impl->m_baseController)
+				m_impl->m_baseController->DriveStop();
 			m_impl->m_baseController->Disconnect();
 		}
 		if (_config.HeadEnabled)
@@ -236,7 +250,8 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EDisconnected:
 		break;
 	case ERobotControllerStatus::EStopping:
-		m_impl->m_baseController->Disconnect();
+		if (m_impl->m_baseController)
+			m_impl->m_baseController->Disconnect();
 		m_impl->m_headController->Disconnect();
 		_status = ERobotControllerStatus::EStopped;
 		break;
@@ -378,7 +393,7 @@ int RobotSerialPort::base_control(int velocity_x, int velocity_y, int rotation, 
 
 	static int counter = 0;
 
-	if (!_config.BaseEnabled)
+	if (!_config.BaseEnabled || !m_impl->m_baseController)
 		return false;
 
 	if (!m_impl->m_baseController->IsConnected())
@@ -409,6 +424,16 @@ int RobotSerialPort::head_control(float pan, float tilt, float roll){
 	//gLogManager.log("Rotation", ELL_INFO);
 
 	m_impl->m_headController->SetRotation(math::vector3d(tilt,pan,roll));
+
+	return true;
+
+}
+int RobotSerialPort::head_pos(float x, float y, float z){
+	if (!_config.HeadEnabled)
+		return false;
+	//gLogManager.log("Rotation", ELL_INFO);
+
+	m_impl->m_headController->SetPosition(math::vector3d(x, y, z));
 
 	return true;
 
@@ -687,6 +712,9 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	pan = m_impl->mvRobot[HEAD][0]->getNext(-angles.x);
 	roll = m_impl->mvRobot[HEAD][2]->getNext(-angles.z);
 
+	px = (st.headPos[0]);
+	py = (st.headPos[1]);
+	pz = (st.headPos[2]);
 	
 	if (recordData)
 	{
@@ -760,7 +788,7 @@ std::string RobotSerialPort::ExecCommand(const std::string& cmd, const std::stri
 		if(_config.BaseEnabled)
 			return core::StringConverter::toString(m_impl->m_baseController->GetBatteryLevel());
 	}
-	else
+	else if (m_impl->m_baseController)
 		return m_impl->m_baseController->ExecCommand(cmd, args);
 	return "";
 }

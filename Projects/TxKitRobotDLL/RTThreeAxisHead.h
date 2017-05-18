@@ -15,6 +15,7 @@ class RTThreeAxisHead:public IHeadController
 	const int CURRENT_POSITION = 0x84; //XM current position address 4 byte
 	const int INST_READ = 0x02; //XM command read 
 	const int INST_WRITE = 0x03; //XM command write
+	const int INST_REGWRITE = 0x03; //XM command write
 	const int CENTER_POS = (360 / 2); //Slider position
 	const int MODE_POS = 0x01; // position get mode
 	const int MODE_ID = 0x02; //id get mode
@@ -34,6 +35,7 @@ protected:
 
 	bool connected;
 	math::vector3d m_rotation;
+	math::vector3d m_position;
 
 	byte _buffer[256];
 	int _bufferPos;
@@ -50,6 +52,10 @@ protected:
 	void _setServoPos(int id, int pos);
 	void _flush();
 	void set_packet(int id, int com, byte* param, int size);
+
+	bool judge_limit(double sr, double tr, double lim1, double lim2, double x, double y, double z);
+	void check_length(double sr, double tr, double x, double y, double z, double lim1, double lim2, double ph, double th);
+	double get_theta(double sr, double tr, double x, double y, double z, double lim1, double lim2, double ph);
 public:
 	RTThreeAxisHead();
 	virtual ~RTThreeAxisHead();
@@ -59,6 +65,7 @@ public:
 	virtual void Disconnect();
 
 	virtual void SetRotation(const math::vector3d& rotation);
+	virtual void SetPosition(const math::vector3d& pos);
 	virtual math::vector3d GetRotation() ;
 	void _onSerialData(int size, char *buffer);
 };
