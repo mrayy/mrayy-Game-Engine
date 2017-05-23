@@ -61,7 +61,7 @@ class CameraGrabberController :public ICameraSrcController
 {
 public:
 	std::vector<GCPtr<video::ICameraVideoGrabber>> cameras;
-
+	std::vector<_CameraInfo> cIfo;
 	~CameraGrabberController()
 	{
 		Stop();
@@ -69,26 +69,28 @@ public:
 	virtual void SetCameras(std::vector<_CameraInfo> c, ECameraType type)
 	{
 		ICameraSrcController::SetCameras(c, type);
-		cameras.resize(c.size());
-
+		cameras.clear();
+		cIfo.clear();
 		for (int i = 0; i < c.size(); ++i)
 		{
 			if (c[i].ifo.index >= 0)
 			{
+				cIfo.push_back(c[i]);
+				video::ICameraVideoGrabber* cam;
 				if (type == ECameraType::Ovrvision)
 				{
-					cameras[i] = new video::OVRVisionCam();
-					cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
+					cam = new video::OVRVisionCam();
+					//cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
 				}
 				else if (type == ECameraType::OvrvisionCompressed)
 				{
-					cameras[i] = new video::OVRvisionCamGrabber();
-					cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
+					cam = new video::OVRvisionCamGrabber();
+				//	cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
 				}
 				else if (type == ECameraType::Webcam )
 				{
-					cameras[i] = new video::DirectShowVideoGrabber();
-					cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
+					cam = new video::DirectShowVideoGrabber();
+					//cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
 				}
 #if USE_POINTGREY
 				else if (type == ECameraType::PointGrey)
@@ -102,6 +104,8 @@ public:
 					//	m_cameraIfo[0].camera->Start();
 				}
 #endif
+
+				cameras.push_back(cam);
 			}
 		}
 	}
@@ -110,7 +114,10 @@ public:
 		for (int i = 0; i < cameras.size(); ++i)
 		{
 			if (cameras[i])
+			{
+				cameras[i]->InitDevice(cIfo[i].ifo.index, cIfo[i].w, cIfo[i].h, cIfo[i].fps);
 				cameras[i]->Start();
+			}
 		}
 	}
 	virtual void Stop()

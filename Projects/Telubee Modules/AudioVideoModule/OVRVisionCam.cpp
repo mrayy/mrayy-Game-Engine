@@ -122,7 +122,7 @@ public:
 			return;
 		ovr_Ovrvision.Close();
 		BufferID = 0;
-		size = 0;
+	//	size = 0;
 		hasNewFrame[0] = hasNewFrame[1] = false;
 		imageData[0].clear();
 		imageData[1].clear();

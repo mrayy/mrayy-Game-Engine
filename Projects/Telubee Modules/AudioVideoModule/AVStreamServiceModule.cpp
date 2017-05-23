@@ -596,12 +596,6 @@ public:
 			core::string pname = "Video" + core::StringConverter::toString(i);
 			m_VideoPorts[i]=gNetworkPortAssigner.AssignPort(pname, network::EPT_UDP, m_context->GetPortValue(pname));
 		}
-		m_streamers->GetStream("Video")->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortStreamer);
-		m_streamers->GetStream("Video")->BindPorts(m_context->GetTargetClientAddr()->toString(),&m_VideoPorts[0],m_VideoPorts.size(),false);
-		m_streamers->GetStream("Video")->CreateStream();
-		if (m_context->sharedMemory->gstClockPortStreamer == 0)//only if first time
-			m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStream("Video")->GetClockPort();
-
 		//if (m_cameraType == ECameraType::PointGrey)
 		{
 			//Pointgrey cameras need to be started manually
@@ -609,6 +603,14 @@ public:
 			m_cameraController->Start();
 			Sleep(100);
 		}
+
+		m_cameraSource->SetResolution(m_resolution.x, m_resolution.y, m_fps, true);
+		m_streamers->GetStream("Video")->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortStreamer);
+		m_streamers->GetStream("Video")->BindPorts(m_context->GetTargetClientAddr()->toString(),&m_VideoPorts[0],m_VideoPorts.size(),false);
+		m_streamers->GetStream("Video")->CreateStream();
+		if (m_context->sharedMemory->gstClockPortStreamer == 0)//only if first time
+			m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStream("Video")->GetClockPort();
+
 		printf("Start Streaming.\n");
 		m_streamers->Stream();
 		Sleep(500);
@@ -821,6 +823,7 @@ public:
 		m_portsReceived = false;
 		for (int i = 0; i < m_VideoPorts.size(); ++i)
 			m_VideoPorts[i] = 0;
+
 	}
 
 

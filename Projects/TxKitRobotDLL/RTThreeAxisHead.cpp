@@ -404,11 +404,14 @@ const double default_x = 0;
 const double default_y = 0;
 const double default_z = 300; // height of z
 const double ROBOTIS_P1_DEG = 0.088;
-const double MIN_Z = 320;
-const double ZERO_Z = 380;
+const double MIN_Z = 350;
+const double ZERO_Z = 400;
 const double MAX_Z = 490;
-const double MIN_XY = 150;
-
+const double MIN_X = -180;
+const double MAX_X = 180;
+const double MIN_Y = -200;
+const double MAX_Y = 180;
+const double SMOOTH_LIMIT = 50;
 #endif
 
 //v=300
@@ -425,7 +428,7 @@ float smoothstep(float x){
 float SoftClamp(float v, float minV, float maxV)
 {
 		
-	float threshold = 30;//smooth clip the edges with threshold of 30mm
+	float threshold = SMOOTH_LIMIT;//smooth clip the edges with threshold of 30mm
 	if (v > minV + threshold && v < maxV - threshold)
 		return v; //no clamping
 	if (v < minV  || v > maxV )
@@ -465,8 +468,8 @@ void RTThreeAxisHead::SetPosition(const math::vector3d& pos)
 	//	p.x = pos.x + 1000;
 
 	//set servo limits (values in meter)
-	p.x = SoftClamp(pos.z * 1000, -MIN_XY, MIN_XY); //limit X axis
-	p.y = SoftClamp(-pos.x * 1000, -MIN_XY, MIN_XY); //limit Y axis
+	p.x = SoftClamp(pos.z * 1000, MIN_X, MAX_X); //limit X axis
+	p.y = SoftClamp(-pos.x * 1000, MIN_Y, MAX_Y); //limit Y axis
 	p.z = ZERO_Z + SoftClamp(pos.y * 1000, MIN_Z - ZERO_Z, MAX_Z - ZERO_Z); //limit Z axis
 
 
@@ -508,9 +511,9 @@ void RTThreeAxisHead::SetRotation(const math::vector3d& rotation)
 	float r = sinf(t) * 60;
 
 
-	_setServoPos(1, -rotation.z + 180);
-	_setServoPos(2, -rotation.x + 180);
-	_setServoPos(3, rotation.y + 180);
+	_setServoPos(1, rotation.z + 180);
+	_setServoPos(2, rotation.x + 180);
+	_setServoPos(3, -rotation.y + 180);
 	_flush();
 	m_rotation = rotation;
 }
