@@ -7,6 +7,7 @@
 // Author: MHD Yamen Saraiji
 
 #include "ICustomVideoSrc.h" 
+#include "CMyListener.h" 
 #include <vector>
 
 namespace mray
@@ -38,6 +39,8 @@ public:
 	virtual std::string GetPipelineStr(int i);
 
 	virtual math::vector2di GetFrameSize(int i);
+
+	void AddPostCaptureListener(IMyListenerCallback* listener);
 
 	virtual void LinkWithPipeline(void* pipeline);
 	int GetVideoSrcCount();

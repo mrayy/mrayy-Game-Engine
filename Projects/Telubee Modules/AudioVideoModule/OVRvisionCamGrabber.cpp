@@ -55,7 +55,7 @@ public:
 
 	ulong _lastTime;
 
-	math::vector2di size;
+	math::vector2di size,flatsize;
 	int fps;
 
 	OVR::Camprop type ;
@@ -74,12 +74,13 @@ public:
 		if (_inited)
 			return true;
 		_w = w; _h = h; _fps = _fps;
-		if (w < 800)
+		if (w ==640)
 			type = OVR::OV_CAMVR_VGA;
-		else if (w >= 800 && w < 1000)
+		else if (w ==960)
 			type = OVR::OV_CAMVR_FULL;
-		else
+		else if (w==1280)
 			type = OVR::OV_CAMVR_WIDE;
+		else return false;
 
 		try{
 			if (!ovr.Open(0, type, 0, NULL, true))
@@ -94,15 +95,19 @@ public:
 		size.x = ovr.GetCamWidth();
 		size.y = ovr.GetCamHeight();
 		fps = ovr.GetCamFramerate();
-		/*size.y *= 2;*/
+		/*size.y *= 2;
 		
 		if (size.x == 640)
 			size.y = 320;
 		else if (size.y == 950)
-			size.x = 640;
+			size.x = 640;*/
 
-		imageFormat = video::EPixel_B8G8R8;
-		_remapData = new uchar[size.x*size.y*PixelUtil::getPixelDescription(imageFormat).componentsCount];
+		flatsize = size;
+
+		imageFormat = video::EPixel_Alpha8;
+		int len = size.x*size.y*PixelUtil::getPixelDescription(imageFormat).elemSizeB;
+		flatsize.x *= 2 / PixelUtil::getPixelDescription(imageFormat).elemSizeB;
+		_remapData = new uchar[len];
 
 		ovr.Close();
 		OS::IThreadManager::getInstance().sleep(300);
@@ -172,6 +177,7 @@ public:
 	{
 		int w = ovr.GetCamWidth();
 		int h = ovr.GetCamHeight();
+		int buffersize=ovr.GetCamBuffersize();
 		int offset = w*h;
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
@@ -312,7 +318,7 @@ void OVRvisionCamGrabber::SetFrameSize(int w, int h)
 
 const math::vector2di& OVRvisionCamGrabber::GetFrameSize()
 {
-	return OVRvisionCamGrabberData::Instance()->size;
+	return OVRvisionCamGrabberData::Instance()->flatsize;
 }
 
 

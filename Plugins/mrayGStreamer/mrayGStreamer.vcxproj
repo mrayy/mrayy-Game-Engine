@@ -242,7 +242,9 @@
     <ClInclude Include="VideoAppSinkHandler.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AppSrcVideoSrc.cpp" />
+    <ClCompile Include="AppSrcVideoSrc.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
+    </ClCompile>
     <ClCompile Include="AudioAppSinkHandler.cpp" />
     <ClCompile Include="CameraVideoSrc.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>

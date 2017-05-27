@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "cMyListener.h"
+#include "ILogManager.h"
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
@@ -22,6 +23,7 @@ enum
 enum
 {
 	PROP_0,
+	PROP_CAPS,
 	PROP_SILENT
 };
 
@@ -81,6 +83,11 @@ gst_my_listener_class_init(GstMyListenerClass * klass)
 		"FIXME:Generic Template Element",
 		" <<user@hostname.org>>");
 
+	g_object_class_install_property(gobject_class, PROP_CAPS,
+		g_param_spec_boxed("caps", "Caps",
+		"The caps of the source pad", GST_TYPE_CAPS,
+		GParamFlags(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
 	gst_element_class_add_pad_template(gstelement_class,
 		gst_static_pad_template_get(&src_factory));
 	gst_element_class_add_pad_template(gstelement_class,
@@ -112,6 +119,7 @@ gst_my_listener_init(GstMyListener * filter)
 	filter->listeners = new MyListenerContainer();
 }
 
+
 static void
 gst_my_listener_finalize(GObject * object)
 {
@@ -119,6 +127,9 @@ gst_my_listener_finalize(GObject * object)
 
 	sink = GST_MyListener(object);
 
+	if (sink->caps)
+		gst_caps_unref(sink->caps);
+	sink->caps = NULL;
 	if (sink->listeners)
 	{
 		delete sink->listeners;
@@ -137,6 +148,36 @@ const GValue * value, GParamSpec * pspec)
 	case PROP_SILENT:
 		filter->silent = g_value_get_boolean(value);
 		break;
+	case PROP_CAPS:
+	{
+		const GstCaps *new_caps_val = gst_value_get_caps(value);
+
+		GstCaps *new_caps;
+
+		GstCaps *old_caps;
+
+		if (new_caps_val == NULL) {
+			new_caps = gst_caps_new_any();
+		}
+		else {
+			new_caps = gst_caps_copy(new_caps_val);
+		}
+
+		old_caps = filter->caps;
+		filter->caps = new_caps;
+		if (old_caps)
+			gst_caps_unref(old_caps);
+// 		else
+// 			GST_PAD_UNSET_PROXY_CAPS(filter->srcpad);
+// 		gst_pad_use_fixed_caps(filter->srcpad);
+		if (!gst_pad_set_caps(filter->srcpad, new_caps))
+		{
+			GST_ELEMENT_ERROR(filter, CORE, NEGOTIATION, (NULL),
+				("Failed to set pads for mylistener"));
+		//	gLogManager.log("Failed to set pads for mylistener", mray::ELL_WARNING);
+		}
+		break;
+	}
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 		break;
@@ -152,6 +193,9 @@ GValue * value, GParamSpec * pspec)
 	switch (prop_id) {
 	case PROP_SILENT:
 		g_value_set_boolean(value, filter->silent);
+		break;
+	case PROP_CAPS:
+		gst_value_set_caps(value, filter->caps);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -174,7 +218,6 @@ gst_my_listener_sink_event(GstPad * pad, GstObject * parent, GstEvent * event)
 	case GST_EVENT_CAPS:
 	{
 						   GstCaps * caps;
-
 						   gst_event_parse_caps(event, &caps);
 						   /* do something with the caps */
 

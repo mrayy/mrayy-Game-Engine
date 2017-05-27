@@ -51,6 +51,7 @@ struct _GstMyListener
 	GstElement element;
 
 	GstPad *sinkpad, *srcpad;
+	GstCaps* caps;
 
 	gboolean silent;
 
@@ -64,7 +65,6 @@ struct _GstMyListenerClass
 };
 
 GType gst_my_listener_get_type(void);
-
 
 G_END_DECLS
 

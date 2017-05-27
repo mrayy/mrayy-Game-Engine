@@ -258,17 +258,17 @@ public:
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
 				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
-				if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
-					m_cameraController = new CameraGrabberController();
-				else
+// 				if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
+// 					m_cameraController = new CameraGrabberController();
+// 				else
 				{
-					m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType);
+					m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType, m_cameraType);
 					((EncodedCameraStreamController*)m_cameraController)->EnableEyegaze(m_enableEyegaze);
 				}
 			}else 
 			{
 				gLogManager.log("Creating Encoded Capture Camera", ELL_INFO);
-				m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType);
+				m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType, m_cameraType);
 			}
 		}
 		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionByName("Quality")->getValue());
@@ -436,6 +436,8 @@ public:
 				cs->SetEyegazeCrop(m_eyegazeSize.x, m_eyegazeSize.y);
 				cs->SetEyegazeLevels(m_eyegazeLevels);
 			}
+
+			m_cameraController->SetResolution(m_resolution.x, m_resolution.y);
 
 			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);
 			src->SetBitRate(m_currentSettings.bitrate);
@@ -838,11 +840,11 @@ public:
 
 		xml::XMLElement* ret = m_camConfig->ExportToXML(&e);
 		ret->addAttribute("StreamsCount", core::StringConverter::toString(m_streamsCount));
-		if (m_audioPlayer)
-		{
-			ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_AudioPort));
-			gLogManager.log("AudioPlayerPort: " + core::StringConverter::toString(m_AudioPort), ELL_INFO);
-		}
+// 		if (m_audioPlayer)
+// 		{
+// 			ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_AudioPort));
+// 			gLogManager.log("AudioPlayerPort: " + core::StringConverter::toString(m_AudioPort), ELL_INFO);
+// 		}
 		ret->addAttribute("FrameSize", core::StringConverter::toString(m_cameraSource->GetFrameSize(0)));
 
 
@@ -865,6 +867,37 @@ public:
 		delete[]buffer;
 
 	}
+	void _SendAudioSettings()
+	{
+		if (!m_audioPlayer)
+			return;
+
+		//reply with camera settings
+		xml::XMLWriter w;
+		xml::XMLElement e("root");
+
+		xml::XMLElement* ret = m_camConfig->ExportToXML(&e);
+		ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_AudioPort));
+
+		w.addElement(ret);
+
+		core::string res = w.flush();
+
+		int bufferLen = res.length() + sizeof(int)* 10;
+		byte* buffer = new byte[bufferLen];
+
+		OS::CMemoryStream stream("", buffer, bufferLen, false, OS::BIN_WRITE);
+		OS::StreamWriter wrtr(&stream);
+
+		stream.seek(0, OS::ESeek_Set);
+		int reply = (int)EMessages::AudioPlayerConfig;
+		int len = stream.write(&reply, sizeof(reply));
+		len += wrtr.binWriteString(res);
+		m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+
+		delete[]buffer;
+
+	}
 	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
 	{
 
@@ -877,6 +910,10 @@ public:
 		if (msg == "CameraParameters")
 		{
 			_SendCameraSettings();
+		}else
+		if (msg == "AudioParameters")
+		{
+			_SendAudioSettings();
 		}
 		else if (msg == "VideoPorts" && values.size()>=m_streamsCount)
 		{

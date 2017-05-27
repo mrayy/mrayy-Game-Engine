@@ -27,7 +27,8 @@ enum class EMessages
 	Presence = 15,
 	NetValue = 16,
 	AudioConfig = 17,
-	CustomMessage = 18,	// When the message contents is not defined other place here
+	AudioPlayerConfig=18,
+	CustomMessage = 19,	// When the message contents is not defined other place here
 
 };
 

@@ -42,6 +42,7 @@ public:
 
 	virtual ~ICameraSrcController(){}
 
+	virtual void SetResolution(int w, int h){}
 	virtual void SetCameras(std::vector<_CameraInfo> c, ECameraType type){ this->cams = c; this->type = type; }
 	virtual void Start() {}
 	virtual void Stop() {}
@@ -115,7 +116,10 @@ public:
 		{
 			if (cameras[i])
 			{
-				cameras[i]->InitDevice(cIfo[i].ifo.index, cIfo[i].w, cIfo[i].h, cIfo[i].fps);
+				if (!cameras[i]->InitDevice(cIfo[i].ifo.index, cIfo[i].w, cIfo[i].h, cIfo[i].fps))
+				{
+					gLogManager.log("Failed to init camera index:" + core::StringConverter::toString(cIfo[i].ifo.index), ELL_ERROR);
+				}
 				cameras[i]->Start();
 			}
 		}
@@ -400,12 +404,59 @@ class EncodedCameraStreamController :public ICameraSrcController
 
 		}
 	}
+
+
+class ImageProcessorListener :public IMyListenerCallback
+{
+public:
+	 int width,height;
+	char* buffer;
+	ImageProcessorListener()
+	{
+		buffer = 0;
+	}
+	~ImageProcessorListener()
+	{
+		delete[] buffer;
+	}
+
+	void Init(int w, int h)
+	{
+		width = w;
+		height = h;
+
+		buffer = new char[width*height * 2];
+	}
+	virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * bfr)
+	{
+		if (!buffer)
+			return;
+		GstMapInfo map;
+		gst_buffer_map(bfr, &map, (GstMapFlags)GST_MAP_WRITE);
+		ushort*data = (ushort*)map.data;
+
+		int offset = width*height;
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int ps = (y * width) + x;
+				buffer[ps] = (data[ps] & 0x00FF);
+				buffer[ps + offset] = (data[ps] >> 8);
+			}
+		}
+		memcpy(map.data, buffer, width*height * 2);
+		gst_buffer_unmap(bfr, &map);
+
+	}
+};
 public:
 	TBee::TelubeeCameraConfiguration::ECameraCaptureType CaptureType;
+	ECameraType camtype;
 
+	ImageProcessorListener _ovrListener;
 
-	EncodedCameraStreamController(TBee::TelubeeCameraConfiguration::ECameraCaptureType t)
+	EncodedCameraStreamController(TBee::TelubeeCameraConfiguration::ECameraCaptureType t, ECameraType cam)
 	{
+		camtype = cam;
 		CaptureType = t;
 		_capDev = new capDeviceInput();
 		_eyegaze = false;
@@ -432,6 +483,13 @@ public:
 	void EnableEyegaze(bool e)
 	{
 		_eyegaze = e;
+	}
+
+	void SetResolution(int w, int h)
+	{
+		if (camtype == ECameraType::Ovrvision ||
+			camtype == ECameraType::OvrvisionCompressed)
+			_ovrListener.Init(w,h);
 	}
 
 	video::ICustomVideoSrc* CreateVideoSrc()
@@ -465,6 +523,11 @@ public:
 				src->SetEncoderType("H264");
 			}
 
+			if (camtype == ECameraType::Ovrvision ||
+				camtype == ECameraType::OvrvisionCompressed)
+			{
+				src->AddPostCaptureListener(&_ovrListener);
+			}
 			ret = src;
 		}
 		else

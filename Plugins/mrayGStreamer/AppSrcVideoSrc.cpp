@@ -87,6 +87,9 @@ namespace video
 			case EPixel_Alpha8:
 				format = "GRAY8";
 				break;
+			case EPixel_LUMINANCE16:
+				format = "YVYU";
+				break;
 			}
 			return format;
 		}
@@ -216,13 +219,15 @@ namespace video
 				videoStr += " name=src" + core::StringConverter::toString(i) + 
 					//" do-timestamp=true is-live=true "//"block=true"
 					" ! video/x-raw,format=" + format + ",width=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().x) +
-					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1,pixel-aspect-ratio= 1/1 ";
+					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1,pixel-aspect-ratio=1/1 ";
 
-				videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
+				//videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
 				videoStr += " ! videoconvert ";
-				videoStr += " ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
+				//videoStr += " ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
 				//videoStr += " ! queue ";
 				//	if (m_grabber[i]->GetImageFormat()!=video::EPixel_YUYV)
+
+			//	videoStr += " ! textoverlay shaded-background=yes  text=\"TxKit by Keio Media Design - Embodied Media Project \\n MHD Yamen Saraiji: yamen@kmd.keio.ac.jp\" valignment=bottom halignment=left font-desc=\"Sans, 72\"";
 
 				if (!m_freeSize)
 				{
