@@ -3222,10 +3222,6 @@
     </Xsd>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Dependencies\NvTriStrip\src\NvTriStrip\NvTriStrip.vcxproj">
-      <Project>{175a433b-41dd-4649-a81f-5830364d8fb1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\mrayMath\mrayMath.vcxproj">
       <Project>{3667a882-8484-4467-9e55-1ff212da9074}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
