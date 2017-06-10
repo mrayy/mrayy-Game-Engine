@@ -95,6 +95,7 @@ public:
 		size.x = ovr.GetCamWidth();
 		size.y = ovr.GetCamHeight();
 		fps = ovr.GetCamFramerate();
+
 		/*size.y *= 2;
 		
 		if (size.x == 640)
@@ -104,9 +105,9 @@ public:
 
 		flatsize = size;
 
-		imageFormat = video::EPixel_Alpha8;
+		imageFormat = video::EPixel_LUMINANCE16;
 		int len = size.x*size.y*PixelUtil::getPixelDescription(imageFormat).elemSizeB;
-		flatsize.x *= 2 / PixelUtil::getPixelDescription(imageFormat).elemSizeB;
+		flatsize.x *= 2;// / PixelUtil::getPixelDescription(imageFormat).elemSizeB;
 		_remapData = new uchar[len];
 
 		ovr.Close();
@@ -154,9 +155,12 @@ public:
 		size = 0;
 		hasNewFrame= false;
 		imageData.clear();
-		_inited = false;
-		delete[] _remapData;
-		_remapData = 0;
+		if (_inited)
+		{
+			_inited = false;
+			delete[] _remapData;
+			_remapData = 0;
+		}
 
 	}
 
@@ -328,7 +332,7 @@ void OVRvisionCamGrabber::SetImageFormat(video::EPixelFormat fmt)
 
 video::EPixelFormat OVRvisionCamGrabber::GetImageFormat()
 {
-	return OVRvisionCamGrabberData::Instance()->imageFormat;
+	return video::EPixel_Alpha8;// OVRvisionCamGrabberData::Instance()->imageFormat;
 }
 
 
@@ -375,6 +379,33 @@ void OVRvisionCamGrabber::Unlock()
 }
 void OVRvisionCamGrabber::SetParameter(const core::string& name, const core::string& value)
 {
+
+	bool isauto = (value == "auto");
+	float v = 0;
+	if (!isauto)
+		v = core::StringConverter::toFloat(value);
+
+	if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Exposure))
+	{
+		OVRvisionCamGrabberData::Instance()->ovr.SetCameraExposure(v);
+	}
+	else if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Gain))
+	{
+		OVRvisionCamGrabberData::Instance()->ovr.SetCameraGain(v);
+	}
+	else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Contrast))
+	{
+
+	}
+	else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Hue))
+	{
+	}
+	else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Saturation))
+	{
+	}
+	else  if (name.equals_ignore_case(video::ICameraVideoGrabber::Param_Sharpness))
+	{
+	}
 }
 
 core::string OVRvisionCamGrabber::GetParameter(const core::string& name)

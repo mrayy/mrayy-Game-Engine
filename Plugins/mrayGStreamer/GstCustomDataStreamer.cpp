@@ -166,7 +166,7 @@ public:
 		
 		pipline += " ! rtpgstpay pt=" + core::StringConverter::toString(m_payload) + " ";
 		m_pipeLineString = pipline + " ! "
-			"myudpsink name=dataSink ";
+			"udpsink name=dataSink ";
 
 	}
 	void _UpdatePorts()
@@ -174,12 +174,13 @@ public:
 
 		if (!GetPipeline())
 			return;
-#define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
-#define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
+// #define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
+// #define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
 
 
-		SET_SINK(dataSink, m_dataPort);
-
+	//	SET_SINK(dataSink, m_dataPort);
+		g_object_set(m_dataSink, "port", m_dataPort, 0);
+		g_object_set(m_dataSink, "host", m_ipAddr.c_str(), 0);
 	}
 
 

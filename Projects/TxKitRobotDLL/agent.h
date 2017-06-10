@@ -38,8 +38,10 @@ public:
 	char headCOM[10], robotCOM[10];
 	int robot_baudRate = 115200, head_baudRate = 115200;
 	float xAxis = 1, yAxis = 1, zAxis = 1;
+	float pxAxis = 1, pyAxis = 1, pzAxis = 1;
 	float xSpeed = 1, ySpeed = 1, Rotation = 1;
 	bool BaseEnabled = true, HeadEnabled = true;
+
 };
 
 RobotConfig _config;
@@ -104,6 +106,9 @@ void load_parameters(){
 	_config.xAxis = 1;
 	_config.yAxis = 1;
 	_config.zAxis = 1;
+	_config.pxAxis = 1;
+	_config.pyAxis = 1;
+	_config.pzAxis = 1;
 	_config.xSpeed = 1;
 	_config.ySpeed = 1;
 	_config.Rotation = 1;
@@ -154,6 +159,12 @@ void load_parameters(){
 					_config.yAxis = atof(token[1]);
 				else if (strcmp(token[0], "Z") == 0)
 					_config.zAxis = atof(token[1]);
+				else if (strcmp(token[0], "PX") == 0)
+					_config.pxAxis = atof(token[1]);
+				else if (strcmp(token[0], "PY") == 0)
+					_config.pyAxis = atof(token[1]);
+				else if (strcmp(token[0], "PZ") == 0)
+					_config.pzAxis = atof(token[1]);
 				else if (strcmp(token[0], "XSpeed") == 0)
 					_config.xSpeed = atof(token[1]);
 				else if (strcmp(token[0], "YSpeed") == 0)

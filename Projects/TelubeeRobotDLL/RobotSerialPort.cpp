@@ -210,7 +210,7 @@ void RobotSerialPort::_ProcessRobot()
 		head_control(-pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
 		if (m_baseCounter > 120)
 		{
-			base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
+			//base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
 			m_baseCounter = 0;
 		}
 		m_baseCounter++;

@@ -91,7 +91,7 @@ void TxKitHead::_sendCommand(const char* cmd, int len)
 	int ret=m_serial->read(buf, 6);
 	if (ret != 6)
 		gLogManager.log("Failed to read 6 bytes: "+core::StringConverter::toString(ret), ELL_INFO);*/
-	_sleep(1);
+	//_sleep(1);
 }
 
 void TxKitHead::SetRotation(const math::vector3d& rotation)

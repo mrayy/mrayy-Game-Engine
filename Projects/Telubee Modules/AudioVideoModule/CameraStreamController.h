@@ -434,7 +434,7 @@ public:
 		GstMapInfo map;
 		gst_buffer_map(bfr, &map, (GstMapFlags)GST_MAP_WRITE);
 		ushort*data = (ushort*)map.data;
-
+		
 		int offset = width*height;
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -444,6 +444,14 @@ public:
 			}
 		}
 		memcpy(map.data, buffer, width*height * 2);
+		/*	uchar*data = (uchar*)map.data;
+		int offset = width*height;
+		int len = width*height / 2;
+		int idx = 0;
+		for (int y = 0; y < len; y++) {
+			math::Swap(data[offset + idx], data[idx + 1]);
+			idx += 2;
+		}*/
 		gst_buffer_unmap(bfr, &map);
 
 	}

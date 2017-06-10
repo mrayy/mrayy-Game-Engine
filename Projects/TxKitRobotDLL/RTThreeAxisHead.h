@@ -30,12 +30,21 @@ class RTThreeAxisHead:public IHeadController
 	const int TORQUE_OFF = 0;
 	const int LED_ON = 1;
 	const int LED_OFF = 0;
+
+
+	const int RP2_PGAIN = 80;
+	const int RP2_DGAIN = 82;
+	const int RP2_IGAIN = 84;
+
+
 protected:
 	SFPDevice sfp_device;
 
 	bool connected;
 	math::vector3d m_rotation;
 	math::vector3d m_position;
+
+	math::vector3di m_pid[6];
 
 	byte _buffer[256];
 	int _bufferPos;
@@ -68,6 +77,10 @@ public:
 	virtual void SetPosition(const math::vector3d& pos);
 	virtual math::vector3d GetRotation() ;
 	void _onSerialData(int size, char *buffer);
+
+	void SetPgain(int id, int val);
+	void SetIgain(int id, int val);
+	void SetDgain(int id, int val);
 };
 
 }

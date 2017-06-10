@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "RTThreeAxisHead.h"
 #include "StringUtil.h"
+#include <fstream>
 
 
 
@@ -34,6 +35,11 @@ bool RTThreeAxisHead::Connect(const core::string& port)
 {
 	Disconnect();
 
+	for (int i = 0; i < 6;++i)
+	{
+		m_pid[i].set(800, 0, 0);
+	}
+
 	int numDevs;
 	numDevs = GetFTDIDeviceCount();
 
@@ -54,11 +60,30 @@ bool RTThreeAxisHead::Connect(const core::string& port)
 		return false;
 	}
 
+
+
 	DWORD status = FT_SetBaudRate(sfp_device.sfp_handle, 1000000);
 	//ChangeBaudRate(&sfp_device, 1000000);
 
 	t = 0;
 
+	{
+		//load PID values
+		std::ifstream confFile("PID.cfg");
+
+		if (confFile.is_open())
+		{
+			for (int i = 0; i < 6; ++i)
+			{
+				confFile >> m_pid[i].x >> m_pid[i].y >> m_pid[i].z;
+
+				SetPgain(i + 1, m_pid[i].x);
+				SetIgain(i + 1, m_pid[i].y);
+				SetDgain(i + 1, m_pid[i].z);
+			}
+			confFile.close();
+		}
+	}
 	_turnServosOn(1);
 	_turnServosOn(2);
 	_turnServosOn(3);
@@ -168,7 +193,49 @@ void RTThreeAxisHead::_turnServosOn(int id)
 
 	set_packet(id, INST_WRITE, param, size);
 }
+void RTThreeAxisHead::SetPgain(int id, int val)
+{
+	int size;
+	byte param[4];
 
+	size = 0;
+	// set parameters to move servo
+	param[size++] = (byte)(RP2_DGAIN & 0xFF);
+	param[size++] = (byte)((RP2_DGAIN >> 8) & 0xFF);
+	param[size++] = (byte)(val & 0xFF);
+	param[size++] = (byte)((val & 0xFF00) >> 8);
+
+	return set_packet(id, INST_WRITE, param, size);
+}
+void RTThreeAxisHead::SetIgain(int id, int val)
+{
+	int size;
+	byte param[4];
+
+	size = 0;
+	// set parameters to move servo
+	param[size++] = (byte)(RP2_DGAIN & 0xFF);
+	param[size++] = (byte)((RP2_DGAIN >> 8) & 0xFF);
+	param[size++] = (byte)(val & 0xFF);
+	param[size++] = (byte)((val & 0xFF00) >> 8);
+
+	return set_packet(id, INST_WRITE, param, size);
+}
+
+void RTThreeAxisHead::SetDgain(int id, int val)
+{
+	int size;
+	byte param[4];
+
+	size = 0;
+	// set parameters to move servo
+	param[size++] = (byte)(RP2_DGAIN & 0xFF);
+	param[size++] = (byte)((RP2_DGAIN >> 8) & 0xFF);
+	param[size++] = (byte)(val & 0xFF);
+	param[size++] = (byte)((val & 0xFF00) >> 8);
+
+	return set_packet(id, INST_WRITE, param, size);
+}
 void RTThreeAxisHead::_turnServosOff(int id)
 {
 	int size = 0;

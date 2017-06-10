@@ -224,7 +224,7 @@ void RobotSerialPort::_ProcessRobot()
 
 		//printf("thread h: %d \r", count++);
 		head_control(-pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
-		head_pos(px, py, pz);
+		head_pos(px*_config.pxAxis, py*_config.pyAxis, pz*_config.pzAxis);
 		if (m_baseCounter > 5)
 		{
 		//	base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);

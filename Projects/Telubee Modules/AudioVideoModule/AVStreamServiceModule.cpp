@@ -258,9 +258,9 @@ public:
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
 				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
-// 				if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
-// 					m_cameraController = new CameraGrabberController();
-// 				else
+ 				if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
+ 					m_cameraController = new CameraGrabberController();
+ 				else
 				{
 					m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType, m_cameraType);
 					((EncodedCameraStreamController*)m_cameraController)->EnableEyegaze(m_enableEyegaze);

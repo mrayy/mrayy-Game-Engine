@@ -16,6 +16,7 @@
 #include "GeomDepthRect.h"
 #include "OpenNIManager.h"
 #include "ofxDepthStreamCompression.h"
+#include "GstCustomDataStreamer.h"
 
 namespace mray
 {
@@ -38,6 +39,7 @@ public:
 
 	TBeeServiceContext* m_context;
 	
+	video::GstCustomDataStreamer* m_streamer;
 
 	OpenNIHandler* m_openNi;
 	GeomDepthRect m_depthRect;
@@ -46,12 +48,18 @@ public:
 
 	int _dataSize,_compSize;
 
+	bool m_portsReceived;
+
+	uint m_depthPort;
+
 
 public:
 	OpenNIServiceImpl()
 	{
 		m_status = EServiceStatus::Idle;
 		m_openNi = 0;
+		m_depthPort = 0;
+		m_portsReceived = false;
 	}
 	~OpenNIServiceImpl()
 	{
@@ -89,6 +97,10 @@ public:
 		m_openNi->Start(320,240);
 		m_compressor.setup(320, 240);
 		m_status = EServiceStatus::Running;
+
+		m_streamer = new video::GstCustomDataStreamer();
+		m_streamer->SetApplicationDataType("depth", true);
+		m_streamer->CreateStream();
 	}
 
 	bool StopService()
@@ -121,6 +133,8 @@ public:
 		if (m_status != EServiceStatus::Running)
 			return;
 		
+		if (!m_streamer->IsStreaming())
+			return;
 
 		auto d = m_openNi->GetNormalCalculator().GetDepthFrame();
 		if (d->GetSize().x ==0)
@@ -132,8 +146,10 @@ public:
 		_compSize= c.size();
 		_dataSize = d->GetRawDataLength(); 
 
-		ofxDepthCompressedFrame f;
-		f.fromCompressedData((char*)&c[0], c.size()*sizeof(short));
+		//ofxDepthCompressedFrame f;
+		//f.fromCompressedData((char*)&c[0], c.size()*sizeof(short));
+
+		m_streamer->AddDataFrame((uchar*)&c[0], c.size()*sizeof(short));
 	}
 
 
@@ -172,6 +188,8 @@ public:
 	}
 	virtual void OnUserDisconnected()
 	{
+		m_portsReceived = false;
+		m_depthPort = 0;
 	}
 
 
@@ -203,6 +221,17 @@ public:
 			int len = stream.write(&reply, sizeof(reply));
 			len += m_depthRect.WriteToStream(&stream);
 			m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
+		}
+		else if (msg.equals_ignore_case("DepthPort"))
+		{
+			int port = core::StringConverter::toInt(values[0]);
+			if (port != m_depthPort)
+			{
+				m_streamer->BindPorts(m_context->GetTargetClientAddr()->toString(), &m_depthPort, 1, false);
+				m_streamer->Stream();
+				m_depthPort = port;
+				m_portsReceived = true;
+			}
 		}
 
 	}
