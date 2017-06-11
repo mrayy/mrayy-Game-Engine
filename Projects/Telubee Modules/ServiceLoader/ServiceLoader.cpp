@@ -165,7 +165,13 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 		dllFunctionGetObjectPtr libGetModule;
 		libInitPtr = (dllFunctionPtr)m_moduleLib->getSymbolName("DLL_ServiceInit");
 		libGetModule = (dllFunctionGetObjectPtr)m_moduleLib->getSymbolName("DLL_GetServiceModule");
-
+		if (!libInitPtr)
+		{
+			m_sharedMemory.Detach();
+			_destroy();
+			delete Engine::getInstancePtr();
+			return false;
+		}
 		libInitPtr();
 		if (libGetModule)
 			m_serviceModule = (TBee::IServiceModule*)libGetModule();

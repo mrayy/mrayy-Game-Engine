@@ -91,6 +91,7 @@ namespace video
 
 
 		GstMyListener *m_precodecListener;
+		GstMyListener *m_prertpListener;
 		GstMyListener *m_rtpListener;
 
 		OS::IMutex* m_gazeMutex;
@@ -111,6 +112,7 @@ namespace video
 			counter = 0;
 			m_inited = false;
 			m_rtpListener = 0;
+			m_prertpListener = 0;
 			m_precodecListener = 0;
 			m_eyePosDirty = false;
 			m_lastRtpTS = -1;
@@ -133,6 +135,8 @@ namespace video
 		{
 			if (m_rtpListener)
 				m_rtpListener->listeners->RemoveListener(this);
+			if (m_prertpListener)
+				m_prertpListener->listeners->RemoveListener(this);
 			if (m_precodecListener)
 				m_precodecListener->listeners->RemoveListener(this);
 
@@ -225,7 +229,7 @@ namespace video
 			if (!m_inited || !m_eyePosDirty /*|| !m_sent*/)
 				return;
 			m_eyePosDirty = false;
-			m_sent = false;
+			//m_sent = false;
 
 			updateFPS.regFrame(gEngine.getTimer()->getSeconds());
 
@@ -270,6 +274,9 @@ namespace video
 			m_rtpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "rtplistener"));
 			if (m_rtpListener)
 				m_rtpListener->listeners->AddListener(this);
+			m_prertpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "preRtplistener"));
+			if (m_prertpListener)
+				m_prertpListener->listeners->AddListener(this);
 			m_precodecListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "precodec"));
 			if (m_precodecListener)
 				m_precodecListener->listeners->AddListener(this);
@@ -282,6 +289,7 @@ namespace video
 			unsigned short length;
 			unsigned char data[255];
 		};
+		GazeData _ds;
 		virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * buffer)
 		{
 
@@ -290,29 +298,36 @@ namespace video
 				if (m_sendRect.size() > 0)
 				{
 
-					//if (m_sent)
-					_UpdateEyegazePos();
-					//m_sent = false; 
-
+					if (m_sent)
+						_UpdateEyegazePos();
+					m_sent = false; 
 					GazeData ds;
 					ds.pts = buffer->pts;
 					ds.gaze = m_sendRect;
-					m_gazeMutex->lock();
+				//	m_gazeMutex->lock();
 					/*
 					for (int i = 0; i < m_levels; ++i)
 					{
 					g_object_get(m_videoRects[0][i], "left", &m_sendRect[i].x, "right", &m_sendRect[i].y,
 					"top", &m_sendRect[i].z, "bottom", &m_sendRect[i].w, 0);
-					}*/
-					m_gazeCashe.push_back(ds);
-					m_gazeMutex->unlock();
+					}
+					m_gazeCashe.push_back(ds);*/
+					_ds = ds;
+				//	m_gazeMutex->unlock();
+
 
 					// 			GstMapInfo map;
 					// 			gst_buffer_map(buffer, &map, GST_MAP_READ);
 					// 
 					// 			gst_buffer_unmap(buffer, &map);
-					m_sent = true;
 				}
+			}
+			else if (src == m_prertpListener)//before rtp
+			{
+				m_gazeMutex->lock();
+				m_gazeCashe.push_back(_ds);
+				m_gazeMutex->unlock();
+				m_sent = true;
 			}
 			else if (src == m_rtpListener)//after rtp payloader
 			{
@@ -328,16 +343,20 @@ namespace video
 					{
 						m_lastRtpTS = packet.timestamp;
 						GazeData ds;
-						if (m_gazeCashe.size() > 0)
+						m_gazeMutex->lock();
+						/*while (m_gazeCashe.size() > 0)
 						{
-							m_gazeMutex->lock();
 							// 					int count = 0;
 							// 					do {
 							//						count++;
 							ds = m_gazeCashe.front();
 							m_gazeCashe.pop_front();
-							m_gazeMutex->unlock();
-						}
+						}*/
+					//	ds = _ds;
+						ds = m_gazeCashe.front();
+						m_gazeCashe.pop_front();
+
+						m_gazeMutex->unlock();
 						// 					} while (ds.pts != buffer->pts);
 						// 					if (count > 1)
 						// 						printf("exceeding!\n");
@@ -471,7 +490,7 @@ namespace video
 		{
 			if (m_data->source == 0)
 				return "";
-			return m_data->source->BuildStringH264() + " ! mylistener name=rtplistener ";
+			return "! mylistener name=preRtplistener "+m_data->source->BuildStringH264() + " ! mylistener name=rtplistener ";
 		}
 	}
 
@@ -630,7 +649,7 @@ namespace video
 					",height=" + core::StringConverter::toString(framesize.y) + " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ! videoconvert ! tee name=" + tName + " ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 					*/
 					for (int level = 0; level < m_data->m_levels; ++level){
-						videoStr += tName + ". ! queue ";
+						videoStr += tName + ". ! queue "; //! queue
 
 						cropRect = m_data->GetCropRect(i, level);
 
@@ -650,12 +669,12 @@ namespace video
 
 					//scene string
 					//videoStr += tName + ". ! queue ! videoscale ! video/x-raw,width=" + core::StringConverter::toString(m_data->m_cropsize.x) + ",height=" + core::StringConverter::toString(sceneHeight) + " ! videoconvert ! " + mName + ".sink_2 ";
-					if (lostWidth > 0)
+					if (lostWidth > 0) 
 					{
 						//videoStr += " ! videobox left=0 top=0 bottom=0 right=" + core::StringConverter::toString(lostWidth) ;
 					}
 					if (m_data->m_levels > 0){
-						videoStr += tName + ". ! queue ";
+						videoStr += tName + ". ! queue "; //
 						videoStr += " !  videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + " ! videoconvert ";
 						m_data->streamSize.x += sceneWidth;
 					}

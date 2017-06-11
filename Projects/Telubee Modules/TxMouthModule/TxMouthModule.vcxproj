@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B1B74C8A-42D5-4F44-8087-D9DD5936BBED}</ProjectGuid>
+    <ProjectGuid>{38B4875C-1395-4D12-BC09-10362D6CCA3F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>AudioVideoModule</RootNamespace>
-    <ProjectName>AVStreamServiceModule</ProjectName>
+    <RootNamespace>TxMouthModule</RootNamespace>
+    <ProjectName>TxMouthServiceModule</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -58,38 +58,38 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-base-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-video-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-app-1.0.props" />
-    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-base-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-video-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-app-1.0.props" />
-    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-app-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-video-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-base-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-1.0.props" />
-    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-app-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-video-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-base-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-1.0.props" />
-    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-audio-1.0.props" />
     <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -108,7 +108,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\$(Configuration)64</OutDir>
+    <OutDir>..\..\..\bin\$(Configuration)64\</OutDir>
     <IntDir>..\..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -116,13 +116,13 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AUDIOVIDEOMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TxMouthMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ovrvisiond.lib;mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;FlyCaptureLibrary.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;FlyCaptureLibrary.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86)\lib;..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -131,13 +131,13 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AUDIOVIDEOMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TxMouthMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ovrvisiond.lib;mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;FlyCaptureLibrary.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;FlyCaptureLibrary.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86)\lib;..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -145,10 +145,10 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>Full</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;AUDIOVIDEOMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TxMouthMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -156,7 +156,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ovrvision.lib;mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;FlyCaptureLibrary.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;FlyCaptureLibrary.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86)\lib;..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -168,7 +168,7 @@
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;AUDIOVIDEOMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TxMouthMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -176,7 +176,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ovrvision.lib;mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;DirectShowVideo.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayEngine.lib;TelubeeLib.lib;mrayGStreamer.lib;mraySound.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86_64)\lib;..\..\..\lib\$(Configuration)64;..\..\..\Dependencies\lib\$(Configuration)64;</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -185,27 +185,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AudioVideoModule.h" />
-    <ClInclude Include="AVStreamServiceModule.h" />
-    <ClInclude Include="CameraProfile.h" />
-    <ClInclude Include="CameraStreamController.h" />
-    <ClInclude Include="capDevice.h" />
-    <ClInclude Include="GstVideoProvider.h" />
-    <ClInclude Include="OVRVisionCam.h" />
-    <ClInclude Include="OVRvisionCamGrabber.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TxMouthModule.h" />
+    <ClInclude Include="TxMouthService.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AudioVideoModule.cpp" />
-    <ClCompile Include="AVStreamServiceModule.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
-    </ClCompile>
-    <ClCompile Include="CameraProfile.cpp" />
-    <ClCompile Include="capDevice.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Full</Optimization>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
@@ -220,19 +205,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="GstVideoProvider.cpp" />
-    <ClCompile Include="OVRVisionCam.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
-    </ClCompile>
-    <ClCompile Include="OVRvisionCamGrabber.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TxMouthModule.cpp" />
+    <ClCompile Include="TxMouthService.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

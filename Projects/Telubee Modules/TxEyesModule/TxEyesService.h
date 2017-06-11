@@ -1,7 +1,7 @@
 
 
-#ifndef __AVStreamServiceModule__
-#define __AVStreamServiceModule__
+#ifndef __TxEyesService__
+#define __TxEyesService__
 
 #include "IServiceModule.h"
 #undef StartService
@@ -11,18 +11,18 @@ namespace mray
 namespace TBee
 {
 	
-	class AVStreamServiceModuleImpl;
-class AVStreamServiceModule:public IServiceModule
+	class TxEyesServiceImpl;
+class TxEyesService:public IServiceModule
 {
 public:
 	static const std::string ModuleName;
 
 	DECLARE_RTTI
 protected:
-	AVStreamServiceModuleImpl* m_impl;
+	TxEyesServiceImpl* m_impl;
 public:
-	AVStreamServiceModule();
-	virtual ~AVStreamServiceModule();
+	TxEyesService();
+	virtual ~TxEyesService();
 
 	virtual std::string GetServiceName() ;
 	virtual EServiceStatus GetServiceStatus() ;

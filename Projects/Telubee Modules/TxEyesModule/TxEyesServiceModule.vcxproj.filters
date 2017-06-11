@@ -27,16 +27,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AVStreamServiceModule.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="CameraProfile.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GstVideoProvider.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AudioVideoModule.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="CameraStreamController.h">
@@ -51,18 +45,18 @@
     <ClInclude Include="capDevice.h">
       <Filter>Source Files\cams</Filter>
     </ClInclude>
+    <ClInclude Include="TxEyesModule.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TxEyesService.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AudioVideoModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AVStreamServiceModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CameraProfile.cpp">
@@ -79,6 +73,12 @@
     </ClCompile>
     <ClCompile Include="capDevice.cpp">
       <Filter>Source Files\cams</Filter>
+    </ClCompile>
+    <ClCompile Include="TxEyesModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TxEyesService.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

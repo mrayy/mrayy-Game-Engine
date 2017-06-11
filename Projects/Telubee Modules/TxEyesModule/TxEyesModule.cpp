@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "AudioVideoModule.h"
-#include "AVStreamServiceModule.h"
+#include "TxEyesModule.h"
+#include "TxEyesService.h"
 
 
 namespace mray
@@ -15,7 +15,7 @@ namespace mray
 		class  CServiceModule
 		{
 		protected:
-			AVStreamServiceModule* m_impl;
+			TxEyesService* m_impl;
 		public:
 
 			static CServiceModule* instance;
@@ -25,7 +25,7 @@ namespace mray
 
 			virtual~CServiceModule();
 
-			AVStreamServiceModule* GetService()
+			TxEyesService* GetService()
 			{
 				return m_impl;
 			}
@@ -38,7 +38,7 @@ namespace mray
 		// see TelubeeRobotDLL.h for the class definition
 		CServiceModule::CServiceModule()
 		{
-			m_impl = new AVStreamServiceModule();
+			m_impl = new TxEyesService();
 
 		}
 
@@ -50,20 +50,20 @@ namespace mray
 
 	}
 
-	AUDIOVIDEOMODULE_API std::string DLL_GetServiceName()
+	TxEyesMODULE_API std::string DLL_GetServiceName()
 	{
-		return TBee::AVStreamServiceModule::ModuleName;
+		return TBee::TxEyesService::ModuleName;
 	}
-	AUDIOVIDEOMODULE_API void  DLL_ServiceInit()
+	TxEyesMODULE_API void  DLL_ServiceInit()
 	{
 		printf("[%s] Init\n", DLL_GetServiceName().c_str());
 		TBee::CServiceModule::instance = new TBee::CServiceModule();
 	}
-	AUDIOVIDEOMODULE_API void*  DLL_GetServiceModule()
+	TxEyesMODULE_API void*  DLL_GetServiceModule()
 	{
 		return TBee::CServiceModule::instance->GetService();
 	}
-	AUDIOVIDEOMODULE_API void  DLL_SreviceDestroy()
+	TxEyesMODULE_API void  DLL_SreviceDestroy()
 	{
 		if (TBee::CServiceModule::instance)
 		{

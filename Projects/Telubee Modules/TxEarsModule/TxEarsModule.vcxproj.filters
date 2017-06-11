@@ -24,39 +24,24 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AVStreamServiceModule.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="TxEarsService.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CameraProfile.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GstVideoProvider.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AudioVideoModule.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraStreamController.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="TxEarsModule.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AudioVideoModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AVStreamServiceModule.cpp">
+    <ClCompile Include="TxEarsModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CameraProfile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GstVideoProvider.cpp">
+    <ClCompile Include="TxEarsService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,11 +1,10 @@
 
 
 #include "stdafx.h"
-#include "AudioStreamer.h"
+#include "TxEarsService.h"
 #include "TBeeServiceContext.h"
 #include "GstStreamBin.h"
 #include "IThreadManager.h"
-#include "GstNetworkVideoStreamer.h"
 #include "GstNetworkAudioStreamer.h"
 #include "DirectSoundInputStream.h"
 #include "CommunicationMessages.h"
@@ -23,12 +22,12 @@ namespace mray
 namespace TBee
 {
 
-IMPLEMENT_RTTI(AudioStreamer, IServiceModule);
+IMPLEMENT_RTTI(TxEarsService, IServiceModule);
 
-const std::string AudioStreamer::ModuleName("AudioStreamer");
+const std::string TxEarsService::ModuleName("TxEarsService");
 
 
-class AudioStreamerImpl :public video::IGStreamerStreamerListener, public IServiceContextListener
+class TxEarsServiceImpl :public video::IGStreamerStreamerListener, public IServiceContextListener
 {
 public:
 
@@ -62,7 +61,7 @@ public:
 
 
 public:
-	AudioStreamerImpl()
+	TxEarsServiceImpl()
 	{
 		m_status = EServiceStatus::Idle;
 
@@ -72,7 +71,7 @@ public:
 		m_isAudioStarted = false;
 		m_isSpatialAudio = false;
 	}
-	~AudioStreamerImpl()
+	~TxEarsServiceImpl()
 	{
 		Destroy();
 		m_streamers = 0;
@@ -155,7 +154,7 @@ public:
 	tmpV = g->AddValue(new Type(Name, 0)); \
 		if (value != "")\
 		tmpV->parse(value); \
-		tmpV->OnChanged += newClassDelegate1("", this, &AudioStreamerImpl::_OnAudioPropertyChanged);
+		tmpV->OnChanged += newClassDelegate1("", this, &TxEarsServiceImpl::_OnAudioPropertyChanged);
 
 
 	}
@@ -254,7 +253,7 @@ public:
 	void DebugRender(ServiceRenderContext* context)
 	{
 
-		core::string msg = "[" + AudioStreamer::ModuleName + "] Service Status: " + IServiceModule::ServiceStatusToString(m_status);
+		core::string msg = "[" + TxEarsService::ModuleName + "] Service Status: " + IServiceModule::ServiceStatusToString(m_status);
 
 		if (m_status == EServiceStatus::Running && m_portsReceived == false)
 		{
@@ -371,7 +370,7 @@ public:
 					m_context->portMap["Audio" + core::StringConverter::toString(i)] = ports[i];
 				}
 			}
-			if (ok)
+			if (m_portsReceived && ok)
 				return;
 			m_AudioPort = ports;
 			m_remoteAddr = m_context->remoteAddr;
@@ -446,70 +445,70 @@ public:
 	}
 };
 
-AudioStreamer::AudioStreamer()
+TxEarsService::TxEarsService()
 {
-	m_impl = new AudioStreamerImpl();
+	m_impl = new TxEarsServiceImpl();
 }
 
-AudioStreamer::~AudioStreamer()
+TxEarsService::~TxEarsService()
 {
 	delete m_impl;
 }
 
 
-std::string AudioStreamer::GetServiceName()
+std::string TxEarsService::GetServiceName()
 {
-	return AudioStreamer::ModuleName;
+	return TxEarsService::ModuleName;
 }
 
-EServiceStatus AudioStreamer::GetServiceStatus()
+EServiceStatus TxEarsService::GetServiceStatus()
 {
 	return m_impl->m_status;
 }
 
-void AudioStreamer::InitService(ServiceContext* context)
+void TxEarsService::InitService(ServiceContext* context)
 {
 	m_impl->Init((TBeeServiceContext*)context);
 }
 
-EServiceStatus AudioStreamer::StartService(ServiceContext* context)
+EServiceStatus TxEarsService::StartService(ServiceContext* context)
 {
 	m_impl->StartStream();
 	return m_impl->m_status;
 }
 
-bool AudioStreamer::StopService()
+bool TxEarsService::StopService()
 {
 	return m_impl->StopStream();
 }
 
-void AudioStreamer::DestroyService()
+void TxEarsService::DestroyService()
 {
 	m_impl->Destroy();
 }
 
 
-void AudioStreamer::Update(float dt)
+void TxEarsService::Update(float dt)
 {
 	m_impl->Update();
 }
 
-void AudioStreamer::Render(ServiceRenderContext* contex)
+void TxEarsService::Render(ServiceRenderContext* contex)
 {
 	m_impl->Render(contex);
 }
 
-void AudioStreamer::DebugRender(ServiceRenderContext* contex)
+void TxEarsService::DebugRender(ServiceRenderContext* contex)
 {
 	m_impl->DebugRender(contex);
 }
 
-bool AudioStreamer::LoadServiceSettings(xml::XMLElement* e)
+bool TxEarsService::LoadServiceSettings(xml::XMLElement* e)
 {
 	return m_impl->LoadServiceSettings(e);
 }
 
-void AudioStreamer::ExportServiceSettings(xml::XMLElement* e)
+void TxEarsService::ExportServiceSettings(xml::XMLElement* e)
 {
 }
 

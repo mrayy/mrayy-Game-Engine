@@ -462,8 +462,10 @@ public:
 
 	ImageProcessorListener _ovrListener;
 
+	bool ksSupport;
 	EncodedCameraStreamController(TBee::TelubeeCameraConfiguration::ECameraCaptureType t, ECameraType cam)
 	{
+		ksSupport = true;
 		camtype = cam;
 		CaptureType = t;
 		_capDev = new capDeviceInput();
@@ -472,6 +474,10 @@ public:
 	virtual ~EncodedCameraStreamController()
 	{
 		delete _capDev;
+	}
+	void EnableKernelStreaming(bool ks)
+	{
+		ksSupport = ks;
 	}
 	virtual void Start()
 	{
@@ -511,7 +517,7 @@ public:
 			}
 		}
 		video::ICustomVideoSrc* ret = 0;
-		if (true)
+		if (ksSupport)
 		{
 			video::CameraVideoSrc* src;
 			src = new video::CameraVideoSrc();

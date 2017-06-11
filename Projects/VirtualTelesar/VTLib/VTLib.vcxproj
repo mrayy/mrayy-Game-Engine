@@ -279,12 +279,6 @@
   <ItemGroup>
     <None Include="ReadMe.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Engine\mrayGameLayer\mrayGameLayer.vcxproj">
-      <Project>{3e142eb9-7eef-4649-bf74-b21bc7d53a0e}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\..\..\Engine\BuildRules\overlay.targets" />

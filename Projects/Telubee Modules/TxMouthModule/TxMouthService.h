@@ -1,7 +1,7 @@
 
 
-#ifndef __AudioStreamer__
-#define __AudioStreamer__
+#ifndef __TxMouthService__
+#define __TxMouthService__
 
 #include "IServiceModule.h"
 #undef StartService
@@ -11,18 +11,18 @@ namespace mray
 namespace TBee
 {
 	
-	class AudioStreamerImpl;
-class AudioStreamer:public IServiceModule
+	class TxMouthServiceImpl;
+class TxMouthService:public IServiceModule
 {
 public:
 	static const std::string ModuleName;
 
 	DECLARE_RTTI
 protected:
-	AudioStreamerImpl* m_impl;
+	TxMouthServiceImpl* m_impl;
 public:
-	AudioStreamer();
-	virtual ~AudioStreamer();
+	TxMouthService();
+	virtual ~TxMouthService();
 
 	virtual std::string GetServiceName() ;
 	virtual EServiceStatus GetServiceStatus() ;

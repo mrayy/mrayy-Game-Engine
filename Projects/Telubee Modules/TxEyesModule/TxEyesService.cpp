@@ -6,7 +6,7 @@
 #define USE_POINTGREY 1
 #endif
 
-#include "AVStreamServiceModule.h"
+#include "TxEyesService.h"
 #include "TBeeServiceContext.h"
 #include "GstStreamBin.h"
 #include "ICameraVideoGrabber.h"
@@ -14,11 +14,8 @@
 #include "IThreadManager.h"
 #include "CameraProfile.h"
 #include "GstNetworkVideoStreamer.h"
-#include "GstNetworkAudioStreamer.h"
 #include "DirectShowVideoGrabber.h"
 #include "GstCustomVideoStreamer.h"
-#include "GstNetworkAudioPlayer.h"
-#include "DirectSoundInputStream.h"
 #include "CommunicationMessages.h"
 #include "StreamReader.h"
 #include "XMLTree.h"
@@ -49,12 +46,12 @@ namespace TBee
 
 //#define FOVE_PEPPER
 
-IMPLEMENT_RTTI(AVStreamServiceModule, IServiceModule);
+IMPLEMENT_RTTI(TxEyesService, IServiceModule);
 
-const std::string AVStreamServiceModule::ModuleName("AVStreamServiceModule");
+const std::string TxEyesService::ModuleName("TxEyesService");
 
 
-class AVStreamServiceModuleImpl :public video::IGStreamerStreamerListener, public IServiceContextListener
+class TxEyesServiceImpl :public video::IGStreamerStreamerListener, public IServiceContextListener
 {
 public:
 
@@ -72,7 +69,6 @@ public:
 	int m_streamsCount;
 	//video::VideoGrabberTexture m_cameraTextures[2];
 
-	bool m_supportAudio;
 	xml::XMLTree m_streamingParameters;
 	xml::XMLElement* m_paramsElement;
 
@@ -97,7 +93,6 @@ public:
 	video::ICustomVideoSrc* m_cameraSource;
 
 	std::vector<uint> m_VideoPorts;
-	uint m_AudioPort;
 	bool m_portsReceived;
 	bool m_isVideoStarted;
 	network::NetAddress m_remoteAddr;
@@ -115,10 +110,9 @@ public:
 
 	TBeeServiceContext* m_context;
 
-	video::GstNetworkAudioPlayer* m_audioPlayer;
 
 public:
-	AVStreamServiceModuleImpl()
+	TxEyesServiceImpl()
 	{
 		m_status = EServiceStatus::Idle;
 		m_cameraProfileManager = new CameraProfileManager();
@@ -129,8 +123,6 @@ public:
 		LoadCameraSettings("StreamingProfiles.xml");
 
 		m_streamsCount = 0;
-		m_audioPlayer = 0;
-		m_supportAudio = false;
 		/*
 		m_VideoPorts[0] = 7000;
 		m_VideoPorts[1] = 7001;*/
@@ -143,7 +135,7 @@ public:
 		m_maxGain = 0.25;
 		m_autoGain = false;
 	}
-	~AVStreamServiceModuleImpl()
+	~TxEyesServiceImpl()
 	{
 		Destroy();
 		m_streamers = 0;
@@ -283,7 +275,6 @@ public:
 			m_resolution.set(1280, 720);
 		else if (res == "2-FullHD")
 			m_resolution.set(1920, 1080);*/
-		m_supportAudio = context->appOptions.GetOptionByName("Audio")->getValue() == "Yes";
 
 		std::vector<_CameraInfo> m_cameraIfo;
 
@@ -490,12 +481,6 @@ public:
 			m_streamers->AddStream(streamer, "Audio");
 		}*/
 
-		if (m_supportAudio)
-		{
-			m_audioPlayer = new video::GstNetworkAudioPlayer();
-			m_AudioPort = gNetworkPortAssigner.AssignPort("AudioPlayer", network::EPT_UDP, m_context->GetPortValue("AudioPlayer"));
-		}
-		else m_audioPlayer = 0;
 		printf("Finished streams\n");
 
 
@@ -540,7 +525,7 @@ public:
 	tmpV = g->AddValue(new Type(Name, 0)); \
 		if (value != "")\
 		tmpV->parse(value); \
-		tmpV->OnChanged += newClassDelegate1("", this, &AVStreamServiceModuleImpl::_OnCameraPropertyChanged);
+		tmpV->OnChanged += newClassDelegate1("", this, &TxEyesServiceImpl::_OnCameraPropertyChanged);
 
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Exposure);
 		ADD_CAMERA_VALUE(FloatValue, video::ICameraVideoGrabber::Param_Gain);
@@ -572,11 +557,6 @@ public:
 		delete m_cameraController;
 		m_cameraController = 0;
 
-		if (m_audioPlayer)
-		{
-			m_audioPlayer->Close();
-			delete m_audioPlayer;
-		}
 
 		m_status = EServiceStatus::Idle;
 	}
@@ -637,24 +617,6 @@ public:
 		m_portsReceived = true;
 		m_streamers->GetStream("Video")->BindPorts(m_context->remoteAddr.toString(), m_VideoPorts, 2, 0, 0);
 #endif
-		if (m_audioPlayer)
-		{
-			m_audioPlayer->Close();
-
-			core::string clockIpAddr;
-			if (m_context->sharedMemory->gstClockPortPlayer != 0)
-			{
-				clockIpAddr = "127.0.0.1";
-			}
-			m_audioPlayer->SetIPAddress(m_context->GetTargetClientAddr()->toString(), m_AudioPort, 0);
-			m_audioPlayer->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortPlayer);
-			m_audioPlayer->CreateStream();
-			m_audioPlayer->Play();
-			if (m_context->sharedMemory->gstClockPortPlayer == 0)//only if first time
-				m_context->sharedMemory->gstClockPortPlayer = m_audioPlayer->GetClockPort();
-
-			gLogManager.log("Starting audio player at port: " + core::StringConverter::toString(m_audioPlayer->GetPort(0)), ELL_INFO);
-		}
 		_startVideoStream();
 	}
 
@@ -671,13 +633,6 @@ public:
 	//	gLogManager.log("Stopping Cameras.", ELL_INFO);
 		m_cameraController->Stop();
 	//	gLogManager.log("Camera Stopped.", ELL_INFO);
-
-		if (m_audioPlayer)
-		{
-		//	gLogManager.log("Stopping Audio.", ELL_INFO);
-			m_audioPlayer->Close();
-		//	gLogManager.log("Audio Stopped.", ELL_INFO);
-		}
 
 		m_status = EServiceStatus::Stopped;
 		m_isVideoStarted = false;
@@ -743,7 +698,7 @@ public:
 	void DebugRender(ServiceRenderContext* context)
 	{
 
-		core::string msg = "[" + AVStreamServiceModule::ModuleName + "] Service Status: " + IServiceModule::ServiceStatusToString(m_status);
+		core::string msg = "[" + TxEyesService::ModuleName + "] Service Status: " + IServiceModule::ServiceStatusToString(m_status);
 
 		if (m_status == EServiceStatus::Running && (!m_portsReceived && m_context->portHostAddr == 0))
 		{
@@ -867,37 +822,6 @@ public:
 		delete[]buffer;
 
 	}
-	void _SendAudioSettings()
-	{
-		if (!m_audioPlayer)
-			return;
-
-		//reply with camera settings
-		xml::XMLWriter w;
-		xml::XMLElement e("root");
-
-		xml::XMLElement* ret = m_camConfig->ExportToXML(&e);
-		ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_AudioPort));
-
-		w.addElement(ret);
-
-		core::string res = w.flush();
-
-		int bufferLen = res.length() + sizeof(int)* 10;
-		byte* buffer = new byte[bufferLen];
-
-		OS::CMemoryStream stream("", buffer, bufferLen, false, OS::BIN_WRITE);
-		OS::StreamWriter wrtr(&stream);
-
-		stream.seek(0, OS::ESeek_Set);
-		int reply = (int)EMessages::AudioPlayerConfig;
-		int len = stream.write(&reply, sizeof(reply));
-		len += wrtr.binWriteString(res);
-		m_context->commChannel->SendTo(&m_context->remoteAddr, (char*)buffer, len);
-
-		delete[]buffer;
-
-	}
 	virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
 	{
 
@@ -910,10 +834,6 @@ public:
 		if (msg == "CameraParameters")
 		{
 			_SendCameraSettings();
-		}else
-		if (msg == "AudioParameters")
-		{
-			_SendAudioSettings();
 		}
 		else if (msg == "VideoPorts" && values.size()>=m_streamsCount)
 		{
@@ -993,70 +913,70 @@ public:
 	}
 };
 
-AVStreamServiceModule::AVStreamServiceModule()
+TxEyesService::TxEyesService()
 {
-	m_impl = new AVStreamServiceModuleImpl();
+	m_impl = new TxEyesServiceImpl();
 }
 
-AVStreamServiceModule::~AVStreamServiceModule()
+TxEyesService::~TxEyesService()
 {
 	delete m_impl;
 }
 
 
-std::string AVStreamServiceModule::GetServiceName()
+std::string TxEyesService::GetServiceName()
 {
-	return AVStreamServiceModule::ModuleName;
+	return TxEyesService::ModuleName;
 }
 
-EServiceStatus AVStreamServiceModule::GetServiceStatus()
+EServiceStatus TxEyesService::GetServiceStatus()
 {
 	return m_impl->m_status;
 }
 
-void AVStreamServiceModule::InitService(ServiceContext* context)
+void TxEyesService::InitService(ServiceContext* context)
 {
 	m_impl->Init((TBeeServiceContext*)context);
 }
 
-EServiceStatus AVStreamServiceModule::StartService(ServiceContext* context)
+EServiceStatus TxEyesService::StartService(ServiceContext* context)
 {
 	m_impl->StartStream();
 	return m_impl->m_status;
 }
 
-bool AVStreamServiceModule::StopService()
+bool TxEyesService::StopService()
 {
 	return m_impl->StopStream();
 }
 
-void AVStreamServiceModule::DestroyService()
+void TxEyesService::DestroyService()
 {
 	m_impl->Destroy();
 }
 
 
-void AVStreamServiceModule::Update(float dt)
+void TxEyesService::Update(float dt)
 {
 	m_impl->Update();
 }
 
-void AVStreamServiceModule::Render(ServiceRenderContext* contex)
+void TxEyesService::Render(ServiceRenderContext* contex)
 {
 	m_impl->Render(contex);
 }
 
-void AVStreamServiceModule::DebugRender(ServiceRenderContext* contex)
+void TxEyesService::DebugRender(ServiceRenderContext* contex)
 {
 	m_impl->DebugRender(contex);
 }
 
-bool AVStreamServiceModule::LoadServiceSettings(xml::XMLElement* e)
+bool TxEyesService::LoadServiceSettings(xml::XMLElement* e)
 {
 	return m_impl->LoadServiceSettings(e);
 }
 
-void AVStreamServiceModule::ExportServiceSettings(xml::XMLElement* e)
+void TxEyesService::ExportServiceSettings(xml::XMLElement* e)
 {
 }
 
