@@ -166,7 +166,7 @@
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TxEyesMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TxEyesMODULE_EXPORTS;OVRVISION_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

@@ -63,7 +63,7 @@ namespace mray
 	{
 		return TBee::CServiceModule::instance->GetService();
 	}
-	TxEarsMODULE_API void  DLL_SreviceDestroy()
+	TxEarsMODULE_API void  DLL_ServiceDestroy()
 	{
 		if (TBee::CServiceModule::instance)
 		{

@@ -1,5 +1,8 @@
 
 #include "stdafx.h"
+
+#ifdef OVRVISION_SUPPORT
+
 #include "OVRVisionCam.h"
 #include "IThreadManager.h"
 #include <ovrvision\ovrvision_pro.h>
@@ -305,3 +308,4 @@ core::string OVRVisionCam::GetParameter(const core::string& name){ return core::
 
 }
 }
+#endif

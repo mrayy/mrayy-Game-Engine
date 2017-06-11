@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{38B4875C-1395-4D12-BC09-10362D6CCA3F}</ProjectGuid>
+    <ProjectGuid>{9616AB0C-CCD1-4BE8-AF90-C2C9EA49C9EA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TxMouthModule</RootNamespace>
     <ProjectName>TxMouthServiceModule</ProjectName>

@@ -340,7 +340,7 @@ void ServiceLoader::_destroy()
 		if (m_moduleLib)
 		{
 			dllFunctionPtr libDestroyPtr;
-			libDestroyPtr = (dllFunctionPtr)m_moduleLib->getSymbolName("DLL_SreviceDestroy");
+			libDestroyPtr = (dllFunctionPtr)m_moduleLib->getSymbolName("DLL_ServiceDestroy");
 			if (libDestroyPtr)
 				libDestroyPtr();
 		}

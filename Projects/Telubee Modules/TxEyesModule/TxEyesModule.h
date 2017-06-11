@@ -24,7 +24,7 @@ namespace mray
 	TxEyesMODULE_API std::string DLL_GetServiceName();
 	TxEyesMODULE_API void  DLL_ServiceInit();
 	TxEyesMODULE_API void*  DLL_GetServiceModule();
-	TxEyesMODULE_API void  DLL_SreviceDestroy();
+	TxEyesMODULE_API void  DLL_ServiceDestroy();
 }
 
 

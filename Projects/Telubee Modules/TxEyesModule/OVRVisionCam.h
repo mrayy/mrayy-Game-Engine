@@ -3,6 +3,7 @@
 #ifndef __OVRVISIONCAM__
 #define __OVRVISIONCAM__
 
+#ifdef OVRVISION_SUPPORT
 #include "ICameraVideoGrabber.h"
 
 namespace mray
@@ -53,6 +54,7 @@ public:
 
 }
 }
+#endif
 
 
 #endif

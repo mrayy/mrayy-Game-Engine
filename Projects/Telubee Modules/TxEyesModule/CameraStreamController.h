@@ -17,7 +17,6 @@ namespace mray
 namespace TBee
 {
 
-
 enum class ECameraType
 {
 	Webcam,
@@ -78,6 +77,7 @@ public:
 			{
 				cIfo.push_back(c[i]);
 				video::ICameraVideoGrabber* cam;
+#ifdef OVRVISION_SUPPORT
 				if (type == ECameraType::Ovrvision)
 				{
 					cam = new video::OVRVisionCam();
@@ -88,7 +88,9 @@ public:
 					cam = new video::OVRvisionCamGrabber();
 				//	cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
 				}
-				else if (type == ECameraType::Webcam )
+				else
+#endif
+				if (type == ECameraType::Webcam )
 				{
 					cam = new video::DirectShowVideoGrabber();
 					//cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720

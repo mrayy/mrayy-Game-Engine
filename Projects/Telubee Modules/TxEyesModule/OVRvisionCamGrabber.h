@@ -1,4 +1,5 @@
 
+#ifdef OVRVISION_SUPPORT
 
 #ifndef __OVRVISIONCAMGRABBER__
 #define __OVRVISIONCAMGRABBER__
@@ -55,4 +56,5 @@ public:
 }
 
 
+#endif
 #endif

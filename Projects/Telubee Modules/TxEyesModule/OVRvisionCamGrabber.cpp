@@ -1,6 +1,8 @@
 
 
 #include "stdafx.h"
+
+#ifdef OVRVISION_SUPPORT
 #include "OVRvisionCamGrabber.h"
 #include "IThreadManager.h"
 #include "PixelUtil.h"
@@ -415,3 +417,4 @@ core::string OVRvisionCamGrabber::GetParameter(const core::string& name)
 
 }
 }
+#endif

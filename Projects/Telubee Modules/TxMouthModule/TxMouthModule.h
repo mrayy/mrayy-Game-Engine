@@ -24,7 +24,7 @@ namespace mray
 	TxMouthMODULE_API std::string DLL_GetServiceName();
 	TxMouthMODULE_API void  DLL_ServiceInit();
 	TxMouthMODULE_API void*  DLL_GetServiceModule();
-	TxMouthMODULE_API void  DLL_SreviceDestroy();
+	TxMouthMODULE_API void  DLL_ServiceDestroy();
 }
 
 
