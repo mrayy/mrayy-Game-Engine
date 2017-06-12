@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "RobotControlServiceModule.h"
+#include "TxBodyService.h"
 #include "TBeeServiceContext.h"
 #include "IRobotController.h"
 #include "RobotHandler.h"
@@ -18,11 +18,11 @@ namespace mray
 namespace TBee
 {
 
-IMPLEMENT_RTTI(RobotControlServiceModule, IServiceModule)
-	const std::string RobotControlServiceModule::ModuleName("RobotControlServiceModule");
+IMPLEMENT_RTTI(TxBodyService, IServiceModule)
+	const std::string TxBodyService::ModuleName("TxBodyService");
 
 
-class RobotControlServiceModuleImpl :public IServiceContextListener, public IRobotHandlerListener
+class TxBodyServiceImpl :public IServiceContextListener, public IRobotHandlerListener
 {
 public:
 
@@ -30,9 +30,9 @@ public:
 
 	class RobotControlThread :public OS::IThreadFunction
 	{
-		RobotControlServiceModuleImpl* owner;
+		TxBodyServiceImpl* owner;
 	public:
-		RobotControlThread(RobotControlServiceModuleImpl* o){
+		RobotControlThread(TxBodyServiceImpl* o){
 			owner = o;
 		}
 		virtual void execute(OS::IThread*caller, void*arg)
@@ -130,7 +130,7 @@ public:
 	{
 	};
 public:
-	RobotControlServiceModuleImpl()
+	TxBodyServiceImpl()
 	{
 		m_RobotHandler = 0;
 		m_status = EServiceStatus::Idle;
@@ -143,7 +143,7 @@ public:
 		fclose(dataFile);
 	}
 
-	~RobotControlServiceModuleImpl()
+	~TxBodyServiceImpl()
 	{
 		Destroy();
 	}
@@ -524,65 +524,65 @@ public:
 };
 
 
-RobotControlServiceModule::RobotControlServiceModule()
+TxBodyService::TxBodyService()
 {
-	m_impl = new RobotControlServiceModuleImpl();
+	m_impl = new TxBodyServiceImpl();
 }
 
-RobotControlServiceModule::~RobotControlServiceModule()
+TxBodyService::~TxBodyService()
 {
 	delete m_impl;
 }
 
 
-std::string RobotControlServiceModule::GetServiceName()
+std::string TxBodyService::GetServiceName()
 {
-	return RobotControlServiceModule::ModuleName;
+	return TxBodyService::ModuleName;
 }
 
-EServiceStatus RobotControlServiceModule::GetServiceStatus()
+EServiceStatus TxBodyService::GetServiceStatus()
 {
 	return m_impl->m_status;
 }
 
-void RobotControlServiceModule::InitService(ServiceContext* context)
+void TxBodyService::InitService(ServiceContext* context)
 {
 	m_impl->Init((TBeeServiceContext*)context);
 }
 
-EServiceStatus RobotControlServiceModule::StartService(ServiceContext* context)
+EServiceStatus TxBodyService::StartService(ServiceContext* context)
 {
 	m_impl->Start();
 	return m_impl->m_status;
 }
 
-bool RobotControlServiceModule::StopService()
+bool TxBodyService::StopService()
 {
 	return m_impl->Stop();
 }
 
-void RobotControlServiceModule::DestroyService()
+void TxBodyService::DestroyService()
 {
 	m_impl->Destroy();
 }
 
 
-void RobotControlServiceModule::Update(float dt)
+void TxBodyService::Update(float dt)
 {
 	m_impl->Update(dt);
 }
 
-void RobotControlServiceModule::Render(ServiceRenderContext* contex)
+void TxBodyService::Render(ServiceRenderContext* contex)
 {
 	m_impl->Render(contex);
 }
 
-void RobotControlServiceModule::DebugRender(ServiceRenderContext* contex)
+void TxBodyService::DebugRender(ServiceRenderContext* contex)
 {
 	m_impl->DebugRender(contex);
 }
 
-bool RobotControlServiceModule::LoadServiceSettings(xml::XMLElement* elem)
+bool TxBodyService::LoadServiceSettings(xml::XMLElement* elem)
 {
 	xml::XMLElement* e = elem->getSubElement("RobotParameters");
 	if (e)
@@ -602,7 +602,7 @@ bool RobotControlServiceModule::LoadServiceSettings(xml::XMLElement* elem)
 	return true;
 }
 
-void RobotControlServiceModule::ExportServiceSettings(xml::XMLElement* e)
+void TxBodyService::ExportServiceSettings(xml::XMLElement* e)
 {
 }
 

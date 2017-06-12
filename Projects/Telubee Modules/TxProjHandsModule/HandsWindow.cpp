@@ -166,7 +166,7 @@ void HandsWindow::OnConnected(const core::string &ipaddr, int handsPort, bool rt
 {
 	if (!IsActive())
 		return;
-	m_player->SetIPAddress(ipaddr, handsPort, 0, rtcp);
+	m_player->SetIPAddress(ipaddr, handsPort, rtcp);
 }
 
 void HandsWindow::OnUpdate(float dt)

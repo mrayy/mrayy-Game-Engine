@@ -1,7 +1,7 @@
 
 
-#ifndef __RobotControlServiceModule__
-#define __RobotControlServiceModule__
+#ifndef __TxProjHandsService__
+#define __TxProjHandsService__
 
 #include "IServiceModule.h"
 #undef StartService
@@ -12,19 +12,19 @@ namespace mray
 namespace TBee
 {
 
-	class RobotControlServiceModuleImpl;
-class RobotControlServiceModule :public IServiceModule
+	class TxProjHandsServiceImpl;
+class TxProjHandsService :public IServiceModule
 {
 public:
 	static const std::string ModuleName;
 
 	DECLARE_RTTI
 protected:
-	RobotControlServiceModuleImpl* m_impl;
+	TxProjHandsServiceImpl* m_impl;
 
 public:
-	RobotControlServiceModule();
-	virtual ~RobotControlServiceModule();
+	TxProjHandsService();
+	virtual ~TxProjHandsService();
 
 	virtual std::string GetServiceName();
 	virtual EServiceStatus GetServiceStatus();

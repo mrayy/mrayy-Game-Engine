@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "HandsWindowServiceModule.h"
+#include "TxProjHandsService.h"
 #include "TBeeServiceContext.h"
 #include "StringUtil.h"
 #include "CMemoryStream.h"
@@ -16,13 +16,13 @@ namespace mray
 namespace TBee
 {
 
-IMPLEMENT_RTTI(HandsWindowServiceModule, IServiceModule)
-const std::string HandsWindowServiceModule::ModuleName("HandsWindowServiceModule");
+IMPLEMENT_RTTI(TxProjHandsService, IServiceModule)
+const std::string TxProjHandsService::ModuleName("TxProjHandsService");
 
 
 
 
-class HandsWindowServiceModuleImpl :public IServiceContextListener, public video::IRenderWindowListener
+class TxProjHandsServiceImpl :public IServiceContextListener, public video::IRenderWindowListener
 {
 public:
 
@@ -34,7 +34,7 @@ public:
 	bool m_connected;
 public:
 
-	HandsWindowServiceModuleImpl()
+	TxProjHandsServiceImpl()
 	{
 		m_handsWindow = new HandsWindow();
 		m_status = EServiceStatus::Idle;
@@ -42,7 +42,7 @@ public:
 		m_connected = false;
 	}
 
-	~HandsWindowServiceModuleImpl()
+	~TxProjHandsServiceImpl()
 	{
 		Destroy();
 	}
@@ -159,70 +159,70 @@ public:
 };
 
 
-HandsWindowServiceModule::HandsWindowServiceModule()
+TxProjHandsService::TxProjHandsService()
 {
-	m_impl = new HandsWindowServiceModuleImpl();
+	m_impl = new TxProjHandsServiceImpl();
 }
 
-HandsWindowServiceModule::~HandsWindowServiceModule()
+TxProjHandsService::~TxProjHandsService()
 {
 	delete m_impl;
 }
 
 
-std::string HandsWindowServiceModule::GetServiceName()
+std::string TxProjHandsService::GetServiceName()
 {
-	return HandsWindowServiceModule::ModuleName;
+	return TxProjHandsService::ModuleName;
 }
 
-EServiceStatus HandsWindowServiceModule::GetServiceStatus()
+EServiceStatus TxProjHandsService::GetServiceStatus()
 {
 	return m_impl->m_status;
 }
 
-void HandsWindowServiceModule::InitService(ServiceContext* context)
+void TxProjHandsService::InitService(ServiceContext* context)
 {
 	m_impl->Init((TBeeServiceContext*)context);
 }
 
-EServiceStatus HandsWindowServiceModule::StartService(ServiceContext* context)
+EServiceStatus TxProjHandsService::StartService(ServiceContext* context)
 {
 	m_impl->Start();
 	return m_impl->m_status;
 }
 
-bool HandsWindowServiceModule::StopService()
+bool TxProjHandsService::StopService()
 {
 	return m_impl->Stop();
 }
 
-void HandsWindowServiceModule::DestroyService()
+void TxProjHandsService::DestroyService()
 {
 	m_impl->Destroy();
 }
 
 
-void HandsWindowServiceModule::Update(float dt)
+void TxProjHandsService::Update(float dt)
 {
 	m_impl->Update(dt);
 }
 
-void HandsWindowServiceModule::Render(ServiceRenderContext* contex)
+void TxProjHandsService::Render(ServiceRenderContext* contex)
 {
 	m_impl->Render(contex);
 }
 
-void HandsWindowServiceModule::DebugRender(ServiceRenderContext* contex)
+void TxProjHandsService::DebugRender(ServiceRenderContext* contex)
 {
 	m_impl->DebugRender(contex);
 }
 
-bool HandsWindowServiceModule::LoadServiceSettings(xml::XMLElement* elem)
+bool TxProjHandsService::LoadServiceSettings(xml::XMLElement* elem)
 {
 	return m_impl->LoadServiceSettings(elem);
 }
 
-void HandsWindowServiceModule::ExportServiceSettings(xml::XMLElement* e)
+void TxProjHandsService::ExportServiceSettings(xml::XMLElement* e)
 {
 }
 

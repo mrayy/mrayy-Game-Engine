@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{932D0B94-E40C-40A6-AB9F-D6970DD699CB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>TelubeeRobotDLL</RootNamespace>
+    <RootNamespace>TxKitRobotDLL</RootNamespace>
     <SccProjectName>
     </SccProjectName>
     <SccLocalPath>
@@ -79,6 +79,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\..\obj\$(Configuration)64</OutDir>
+    <IntDir>..\..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -87,8 +89,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\obj\$(Configuration)64</OutDir>
-    <IntDir>..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
+    <OutDir>..\..\..\obj\$(Configuration)64</OutDir>
+    <IntDir>..\..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

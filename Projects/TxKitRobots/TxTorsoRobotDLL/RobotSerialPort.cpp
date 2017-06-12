@@ -7,13 +7,11 @@
 #include "serial.h"
 #include "agent.h"
 #include "movingAverage.h"
-#include "TxKitRobotDLL.h"
 #include "Point3d.h"
 #include "quaternion.h"
-#include "RoombaController.h"
-#include "OmniBaseController.h"
 #include "RTThreeAxisHead.h"
 #include "StringUtil.h"
+#include "IBaseController.h"
 #include "ILogManager.h"
 
 float testPosx = 100.00;
@@ -299,70 +297,6 @@ std::string RobotSerialPort::ScanePorts()
 {
 	return "";
 
-	char portName[64];
-	vector<serial::PortInfo> devices_found = serial::list_ports();
-
-	vector<serial::PortInfo>::iterator iter = devices_found.begin();
-
-	while (iter != devices_found.end())
-	{
-		serial::PortInfo device = *iter++;
-
-		serial::Serial port;
-		if (false)
-		{
-			Tserial_event s;
-			s.connect((char*)device.port.c_str(), _config.head_baudRate, SERIAL_PARITY_ODD, 8, FALSE, TRUE);
-			if (s.isconnected())
-			{
-				std::string cmd = "#q \n\r";
-				s.sendData((char*)cmd.c_str(),cmd.length());//try to stop all logging
-				Sleep(300);
-				s.disconnect();
-			}
-		}
-		port.Setup(device.port, _config.head_baudRate);
-		try
-		{
-			port.open();
-		}
-		catch (serial::SerialException* e)
-		{
-			printf("%s\n", e->what());
-			continue;
-		}
-
-		if (port.isOpen()){
-			port.write("#q \n\r");
-			Sleep(300);
-			port.read(port.available());
-			port.flushInput();
-			port.flushOutput();
-			Sleep(100);
-			if (port.write("#t \n\r") > 0)
-			{
-				Sleep(500);
-				std::string type = port.read(port.available());
-				std::vector<core::string> lst = processSerialOutput(type);
-				if (lst.size()>0)
-				{
-					gLogManager.log("Found device [" + device.port + "] : " +lst[0],ELL_INFO);
-
-					if (lst[0] == "RobotBase")
-					{
-						m_impl->m_basePort = device.port;
-					}
-					else if (lst[0] == "RobotHead")
-					{
-						m_impl->m_headPort = device.port;
-					}
-				}
-			}
-			port.close();
-
-		}
-	}
-	return "";
 }
 void RobotSerialPort::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 {

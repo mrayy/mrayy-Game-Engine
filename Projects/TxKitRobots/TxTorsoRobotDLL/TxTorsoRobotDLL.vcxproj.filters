@@ -45,13 +45,7 @@
     <ClInclude Include="RobotSerialPort.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="RoombaController.h">
-      <Filter>Source Files\Robot</Filter>
-    </ClInclude>
     <ClInclude Include="IBaseController.h">
-      <Filter>Source Files\Robot</Filter>
-    </ClInclude>
-    <ClInclude Include="OmniBaseController.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
     <ClInclude Include="serial\win.h">
@@ -69,9 +63,6 @@
     <ClInclude Include="IRobotComponent.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
-    <ClInclude Include="TxKitRobotDLL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RTThreeAxisHead.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
@@ -80,6 +71,9 @@
     </ClInclude>
     <ClInclude Include="SFP10X_COM.h">
       <Filter>Source Files\FTDI</Filter>
+    </ClInclude>
+    <ClInclude Include="TelubeeRobotDLL.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -98,12 +92,6 @@
     <ClCompile Include="RobotSerialPort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RoombaController.cpp">
-      <Filter>Source Files\Robot</Filter>
-    </ClCompile>
-    <ClCompile Include="OmniBaseController.cpp">
-      <Filter>Source Files\Robot</Filter>
-    </ClCompile>
     <ClCompile Include="serial\list_ports_win.cc">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -113,14 +101,14 @@
     <ClCompile Include="serial\win.cc">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="TxKitRobotDLL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RTThreeAxisHead.cpp">
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
     <ClCompile Include="SFP10X_COM.cpp">
       <Filter>Source Files\FTDI</Filter>
+    </ClCompile>
+    <ClCompile Include="TelubeeRobotDLL.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

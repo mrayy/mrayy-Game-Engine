@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "RobotControlModule.h"
-#include "RobotControlServiceModule.h"
+#include "TxBodyModule.h"
+#include "TxBodyService.h"
 
 
 namespace mray
@@ -15,7 +15,7 @@ class IServiceModule;
 class  CServiceModule
 {
 protected:
-	RobotControlServiceModule* m_impl;
+	TxBodyService* m_impl;
 public:
 
 	static CServiceModule* instance;
@@ -25,7 +25,7 @@ public:
 
 	virtual~CServiceModule();
 
-	RobotControlServiceModule* GetService()
+	TxBodyService* GetService()
 	{
 		return m_impl;
 	}
@@ -38,7 +38,7 @@ CServiceModule* CServiceModule::instance = 0;
 // see TelubeeRobotDLL.h for the class definition
 CServiceModule::CServiceModule()
 {
-	m_impl = new RobotControlServiceModule();
+	m_impl = new TxBodyService();
 
 }
 
@@ -52,7 +52,7 @@ CServiceModule::~CServiceModule(void)
 
 ROBOTCONTROLMODULE_API std::string DLL_GetServiceName()
 {
-	return TBee::RobotControlServiceModule::ModuleName;
+	return TBee::TxBodyService::ModuleName;
 }
 ROBOTCONTROLMODULE_API void  DLL_ServiceInit()
 {
@@ -63,7 +63,7 @@ ROBOTCONTROLMODULE_API void*  DLL_GetServiceModule()
 {
 	return TBee::CServiceModule::instance->GetService();
 }
-ROBOTCONTROLMODULE_API void  DLL_SreviceDestroy()
+ROBOTCONTROLMODULE_API void  DLL_ServiceDestroy()
 {
 	if (TBee::CServiceModule::instance)
 	{

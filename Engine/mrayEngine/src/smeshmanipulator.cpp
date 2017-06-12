@@ -586,7 +586,7 @@ void SMeshManipulator::calculateBoundingSphere(IMeshBuffer*mesh,math::vector3d&c
 
 bool SMeshManipulator::ConvertTrisToTriStrips(const ushort *ind,int iCnt,ushort** retIndicies,ushort& retCount)
 {
-
+#if 0
 	PrimitiveGroup *groups;
 	ushort numGroups;
 	if(!GenerateStrips(ind,iCnt,&groups,&numGroups,false))
@@ -596,10 +596,12 @@ bool SMeshManipulator::ConvertTrisToTriStrips(const ushort *ind,int iCnt,ushort*
 	*retIndicies=new ushort[retCount];
 	mraySystem::memCopy(*retIndicies,groups[0].indices,sizeof(ushort)*retCount);
 	delete [] groups;
+#endif
 	return true;
 }
 bool SMeshManipulator::ConvertTrisToTriStrips(IMeshBuffer*mesh)
 {
+#if 0
 	if(mesh->getRenderType()!=video::MR_TRIANGLES)
 		return false;
 
@@ -624,7 +626,8 @@ bool SMeshManipulator::ConvertTrisToTriStrips(IMeshBuffer*mesh)
 	mesh->setRenderType(video::MR_TRIANGLE_STRIP);
 
 	delete [] groups;
-	delete [] idx;
+	delete[] idx;
+#endif
 	return true;
 }
 

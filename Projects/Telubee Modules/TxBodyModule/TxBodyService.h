@@ -1,7 +1,7 @@
 
 
-#ifndef __HandsWindowServiceModule__
-#define __HandsWindowServiceModule__
+#ifndef __TxBodyService__
+#define __TxBodyService__
 
 #include "IServiceModule.h"
 #undef StartService
@@ -12,19 +12,19 @@ namespace mray
 namespace TBee
 {
 
-	class HandsWindowServiceModuleImpl;
-class HandsWindowServiceModule :public IServiceModule
+	class TxBodyServiceImpl;
+class TxBodyService :public IServiceModule
 {
 public:
 	static const std::string ModuleName;
 
 	DECLARE_RTTI
 protected:
-	HandsWindowServiceModuleImpl* m_impl;
+	TxBodyServiceImpl* m_impl;
 
 public:
-	HandsWindowServiceModule();
-	virtual ~HandsWindowServiceModule();
+	TxBodyService();
+	virtual ~TxBodyService();
 
 	virtual std::string GetServiceName();
 	virtual EServiceStatus GetServiceStatus();
