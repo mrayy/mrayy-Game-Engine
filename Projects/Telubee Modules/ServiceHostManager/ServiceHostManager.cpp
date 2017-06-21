@@ -616,7 +616,6 @@ void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const 
 void ServiceHostManager::OnUserDisconnected(TBee::RobotCommunicator* sender, const network::NetAddress& address)
 {
 	m_memory->UserConnected =  false;
-	m_memory->robotData.connected = false;
 	m_dataStreamer->Stop();
 	m_memory->gstClockPortStreamer = 0;
 	m_memory->gstClockPortPlayer = 0;
@@ -635,7 +634,7 @@ void ServiceHostManager::OnUserDataArrived(network::NetAddress* addr, const char
 	}
 }
 
-void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value)
+void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::string& target,const core::string& msg, const core::string& value)
 {
 	const int BufferLen = 65537;
 	uchar buffer[BufferLen];
@@ -649,116 +648,69 @@ void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::st
 
 
 
-	std::vector<core::string> vals;
-	vals = core::StringUtil::Split(value, ",");
-	if (m.equals_ignore_case("commPort"))
+	if (target == "")
 	{
-		TBee::SharedMemoryLock m(m_memory);
-		m_memory->userConnectionData.userData.clientAddress.port = _GetPortValue("UserCommPort", core::StringConverter::toInt(value));;
-		m_memory->userCommPort = m_memory->userConnectionData.userData.clientAddress.port;
-	}
-	else if (m.equals_ignore_case("detect"))
-	{
-		printf("Robot scan message was received, sending presence message.\n");
-		//detect message arrived from a broadcast, reply to let the src about our existence!
-		int reply = (int)TBee::EMessages::Presence;
-		int len = stream.write(&reply, sizeof(reply));
-		len += m_info.Write(&wrtr);
-		network::NetAddress retAddr ;
-		retAddr.address = addr->address;
-		retAddr.port = core::StringConverter::toInt(value);
-		m_commLink->SendTo(&retAddr, (char*)buffer, len);
-	}
-	else if (m.equals_ignore_case("NetValuePort"))
-	{
-		//check the requested service name
-		printf("Requesting net value port for :%s\n", vals[0].c_str());
-		int i=GetServiceByName(vals[0]);
-		if (i != -1)
+		std::vector<core::string> vals;
+		vals = core::StringUtil::Split(value, ",");
+		if (m.equals_ignore_case("commPort"))
 		{
-			printf("Sending net value port for %s : %d\n", m_serviceList[i].name.c_str(), m_serviceList[i].netValuePort);
-			int reply = (int)TBee::EMessages::NetValue;
+			TBee::SharedMemoryLock m(m_memory);
+			m_memory->userConnectionData.userData.clientAddress.port = _GetPortValue("UserCommPort", core::StringConverter::toInt(value));;
+			m_memory->userCommPort = m_memory->userConnectionData.userData.clientAddress.port;
+		}
+		else if (m.equals_ignore_case("detect"))
+		{
+			printf("Robot scan message was received, sending presence message.\n");
+			//detect message arrived from a broadcast, reply to let the src about our existence!
+			int reply = (int)TBee::EMessages::Presence;
 			int len = stream.write(&reply, sizeof(reply));
-			len += wrtr.binWriteString(m_serviceList[i].name);		//write service name
-			len += wrtr.writeValue(m_serviceList[i].netValuePort);	//write service net value port number
+			len += m_info.Write(&wrtr);
 			network::NetAddress retAddr;
 			retAddr.address = addr->address;
-			retAddr.port = core::StringConverter::toInt(vals[1]);
+			retAddr.port = core::StringConverter::toInt(value);
 			m_commLink->SendTo(&retAddr, (char*)buffer, len);
 		}
-	}
-	else if (m.equals_ignore_case("Speed") && vals.size() == 2)
+		else if (m.equals_ignore_case("NetValuePort"))
+		{
+			//check the requested service name
+			printf("Requesting net value port for :%s\n", vals[0].c_str());
+			int i = GetServiceByName(vals[0]);
+			if (i != -1)
+			{
+				printf("Sending net value port for %s : %d\n", m_serviceList[i].name.c_str(), m_serviceList[i].netValuePort);
+				int reply = (int)TBee::EMessages::NetValue;
+				int len = stream.write(&reply, sizeof(reply));
+				len += wrtr.binWriteString(m_serviceList[i].name);		//write service name
+				len += wrtr.writeValue(m_serviceList[i].netValuePort);	//write service net value port number
+				network::NetAddress retAddr;
+				retAddr.address = addr->address;
+				retAddr.port = core::StringConverter::toInt(vals[1]);
+				m_commLink->SendTo(&retAddr, (char*)buffer, len);
+			}
+		}
+		else if (m.equals_ignore_case("ServiceModule"))
+		{
+			_ProcessServiceMessage(value, addr);
+		}
+	}else 
 	{
-		m_memory->robotData.speed[0] = atof(vals[0].c_str());
-		m_memory->robotData.speed[1] = atof(vals[1].c_str());
-		//limit the speed
-		m_memory->robotData.speed[0] = math::clamp<float>(m_memory->robotData.speed[0], -1, 1);
-		m_memory->robotData.speed[1] = math::clamp<float>(m_memory->robotData.speed[1], -1, 1);
-		m_memory->robotData.speed[0] = (m_memory->robotData.speed[0]);
-		m_memory->robotData.speed[1] = (m_memory->robotData.speed[1]);
-
-	}
-	else if (m.equals_ignore_case("Rotation") && vals.size() == 1)
-	{
-		m_memory->robotData.rotation = atof(vals[0].c_str());
-		m_memory->robotData.rotation = math::clamp<float>(m_memory->robotData.rotation, -1, 1);
-	}
-	else if (m.equals_ignore_case("RobotConnect"))
-	{
-		m_memory->robotData.connected = core::StringConverter::toBool(vals[0].c_str());
-	}
-	else if (m.equals_ignore_case("HeadRotation"))
-	{
-		m_memory->robotData.headRotation[0] = atof(vals[0].c_str());
-		m_memory->robotData.headRotation[1] = atof(vals[1].c_str());
-		m_memory->robotData.headRotation[2] = atof(vals[2].c_str());
-		m_memory->robotData.headRotation[3] = atof(vals[3].c_str());
-	}
-	else if (m.equals_ignore_case("HeadPosition"))
-	{
-		m_memory->robotData.headPos[0] = atof(vals[0].c_str());
-		m_memory->robotData.headPos[1] = atof(vals[1].c_str());
-		m_memory->robotData.headPos[2] = atof(vals[2].c_str());
-	}
-	else if (m.equals_ignore_case("ServiceModule"))
-	{
-		_ProcessServiceMessage(value,addr);
-	}
-	else
-	{
+		bool broadcast = target.equals_ignore_case("all");
 		//printf("Forwarding Message: %s\n", msg.c_str());
 		core::string buffer;
 		buffer = "<Data Message=\"" + msg + "\" Value=\"" + value + "\"/>";
 		//forward the message to the services
 		for (int i = 0; i < m_serviceList.size(); ++i)
 		{
-			//	printf("Sending Ping to %s\n", m_serviceList[i].name.c_str());
-			if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port!=0)
-				m_commLink->SendTo(&m_serviceList[i].address, buffer.c_str(), buffer.length()+1);
+			if (broadcast || m_serviceList[i].name.equals_ignore_case(target))
+			{
+				//	printf("Sending Ping to %s\n", m_serviceList[i].name.c_str());
+				if (m_serviceList[i].address.address != 0 && m_serviceList[i].address.port != 0)
+					m_commLink->SendTo(&m_serviceList[i].address, buffer.c_str(), buffer.length()+1);
+				if(!broadcast)
+					break;
+			}
 		}
 	}
-#if USE_OPENNI
-	else
-	if (m.equals_ignore_case("depthSize") && m_depthSend)
-	{
-		int reply = (int)EMessages::DepthSize;
-		int len = stream.write(&reply, sizeof(reply));
-		math::vector2di sz = m_openNi->GetSize();
-		len += stream.write(&sz, sizeof(sz));
-		m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-	}
-	else
-	if (m.equals_ignore_case("depth") && m_depthSend)
-	{
-		math::rectf rc = core::StringConverter::toRect(value);
-		TBee::DepthFrame* f = m_openNi->GetNormalCalculator().GetDepthFrame();
-		m_depthRect.SetFrame(f, rc);
-		int reply = (int)EMessages::DepthData;
-		int len = stream.write(&reply, sizeof(reply));
-		len += m_depthRect.WriteToStream(&stream);
-		m_serviceContext.commChannel->SendTo(&m_serviceContext.remoteAddr, (char*)buffer, len);
-	}
-#endif
 }
 
 }

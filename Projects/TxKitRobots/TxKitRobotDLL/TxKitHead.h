@@ -12,11 +12,33 @@ class TxKitHead:public IHeadController
 {
 protected:
 
+	struct ServoParameters
+	{
+		int PGain ;
+		int Deadband ;
+		int Damping ;
+		int Response ;
+		int Speed ;
+	};
+
+	static const ServoParameters DEFAULT_PARAMETERS[3];
+	static const float DEFAULT_LIMITS[3][2];
+
 	bool connected;
-	math::vector3d m_rotation;
+	float m_rotation[3];
 	serial::Serial* m_serial;
 
-	void _sendCommand(const char* cmd,int len);
+	ServoParameters m_parameters[3];
+	float m_limits[3][2];
+
+	unsigned short m_lastValues[3];
+
+	bool m_EEPROMset;
+
+	bool _writeEEPROM();
+	int _sendCommand(const uint8_t* cmd, int len, uint8_t* reply, int rlen, int waitTime=0);
+	
+
 public:
 	TxKitHead();
 	virtual ~TxKitHead();

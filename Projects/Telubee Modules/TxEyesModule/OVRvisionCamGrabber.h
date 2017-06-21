@@ -50,6 +50,8 @@ public:
 
 	virtual void SetParameter(const core::string& name, const core::string& value);
 	virtual core::string GetParameter(const core::string& name);
+
+	core::string GetCameraSettings();
 };
 
 }

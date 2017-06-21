@@ -456,12 +456,15 @@ void
 Serial::SerialImpl::flushInput ()
 {
 //  THROW (IOException, "flushInput is not supported on Windows.");
+	PurgeComm(fd_, PURGE_RXCLEAR);
+
 }
 
 void
 Serial::SerialImpl::flushOutput ()
 {
- // THROW (IOException, "flushOutput is not supported on Windows.");
+	// THROW (IOException, "flushOutput is not supported on Windows.")
+	PurgeComm(fd_, PURGE_TXCLEAR);
 }
 
 void

@@ -45,6 +45,7 @@ kernel & user mode
 // Compiling on Windows
 #include <windows.h>
 
+#define FTD2XX_STATIC
 // The following ifdef block is the standard way of creating macros
 // which make exporting from a DLL simpler.  All files within this DLL
 // are compiled with the FTD2XX_EXPORTS symbol defined on the command line.
@@ -226,6 +227,7 @@ enum {
 	FT_DEVICE_4222H_3,
     FT_DEVICE_4222_PROG,
     FT_DEVICE_900,
+    FT_DEVICE_930,
     FT_DEVICE_UMFTPD3A,
 };
 

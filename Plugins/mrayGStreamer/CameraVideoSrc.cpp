@@ -109,7 +109,6 @@ void CameraVideoSrc::SetCaptureType(const std::string &type)
 std::string CameraVideoSrc::GetEncodingStr()
 {
 	std::string videoStr;
-
 	if (m_encoder == "H264")
 	{
 
@@ -146,12 +145,15 @@ std::string CameraVideoSrc::_generateString(int i)
 		videoStr += " name=src" + core::StringConverter::toString(i);
 		videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
 		
-		/*videoStr = "videotestsrc ";*/
+		//videoStr = "videotestsrc ";/**/
 
 		//videoStr += "videotestsrc ";
 		//" do-timestamp=true is-live=true "//"block=true"
 		videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
-			",height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+			",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+		if (m_fps > 0)
+			videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
+		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 		
 	}
 	else
@@ -215,12 +217,14 @@ std::string CameraVideoSrc::_generateFullString()
 				//videoStr += "videotestsrc ";
 				//" do-timestamp=true is-live=true "//"block=true"
 				videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
-					",height=" + core::StringConverter::toString(m_impl->m_frameSize.y) +
-					" ! videorate max-rate=" + core::StringConverter::toString(m_fps)+
-					" ! mylistener name=imagecap " +
+					",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+				if (m_fps > 0)
+					videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
+
+				videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+				videoStr += " ! mylistener name=imagecap ";
 // 					" caps=\"video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 // 					",height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + ",format=GRAY8\" ";
-					" ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 				if (mixer)
 				{
 					videoStr += +" ! mix.sink_" + core::StringConverter::toString(counter) + " ";

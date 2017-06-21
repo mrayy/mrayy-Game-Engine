@@ -122,9 +122,12 @@ void IXMLNetMessageHandler::ProcessPacket(network::NetAddress* addr, const char*
 	tinyxml2::XMLElement* node = root->FirstChildElement("Data");
 	while (node)
 	{
+		std::string target ;//target
+		if (node->Attribute("T"))
+			target = node->Attribute("T");
 		std::string name = node->Attribute("N");//name of the value
 		std::string value = node->Attribute("V");//name of the value
-		_HandleData(addr, name, value);
+		_HandleData(addr, target,name, value);
 		node = node->NextSiblingElement("Data");
 	}
 }

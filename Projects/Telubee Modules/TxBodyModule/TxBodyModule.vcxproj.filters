@@ -20,10 +20,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RobotControlServiceModule.h">
+    <ClInclude Include="TxBodyModule.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="RobotControlModule.h">
+    <ClInclude Include="TxBodyService.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -31,13 +31,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RobotControlModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RobotControlServiceModule.cpp">
+    <ClCompile Include="TxBodyModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TxBodyService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

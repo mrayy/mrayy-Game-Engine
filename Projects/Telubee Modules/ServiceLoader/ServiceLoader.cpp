@@ -169,6 +169,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 		{
 			m_sharedMemory.Detach();
 			_destroy();
+			gLogManager.log("Failed to load service!", ELL_ERROR);
 			delete Engine::getInstancePtr();
 			return false;
 		}

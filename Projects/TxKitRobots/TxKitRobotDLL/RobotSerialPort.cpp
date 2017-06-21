@@ -10,12 +10,15 @@
 #include "TelubeeRobotDLL.h"
 #include "Point3d.h"
 #include "quaternion.h"
-#include "RoombaController.h"
-#include "OmniBaseController.h"
-#include "ThreeAxisHead.h"
+#include "IBaseController.h"
+//#include "RoombaController.h"
+//#include "OmniBaseController.h"
+//#include "ThreeAxisHead.h"
 #include "TxKitHead.h"
 #include "StringUtil.h"
 #include "ILogManager.h"
+#include "Tserial_event.h"
+#include "serial.h"
 
 float testPosx = 100.00;
 float testPosy = 100.00; 
@@ -54,7 +57,7 @@ class RobotSerialPortImpl
 #ifdef ROOMBA_CONTROLLER
 		mray::RoombaController* m_baseController;
 #else 
-		mray::OmniBaseController* m_baseController;
+		mray::IBaseController* m_baseController;
 #endif
 		typedef TxKitHead TXHeadType;
 		TXHeadType* m_headController;
@@ -73,7 +76,7 @@ class RobotSerialPortImpl
 #ifdef ROOMBA_CONTROLLER
 			m_baseController = new mray::RoombaController;
 #else 
-			m_baseController = new mray::OmniBaseController;
+			m_baseController = 0;// new mray::OmniBaseController;
 #endif
 			m_headController = new TXHeadType();
 			listener = 0;
@@ -110,7 +113,7 @@ RobotSerialPort::RobotSerialPort()
 	m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
 
 	_status = ERobotControllerStatus::EStopped;
-
+	m_headCounter = 0;
 	//ConnectRobot();
 	_setupCaps();
 
@@ -138,7 +141,7 @@ DWORD RobotSerialPort::timerThreadRobot(RobotSerialPort *robot, LPVOID pdata){
 	int count = 0;
 	while (!isDone){
 		robot->_ProcessRobot();
-		Sleep(2);
+		Sleep(1);
 		if (!threadStart)
 			Sleep(100);
 	}
@@ -158,7 +161,7 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EIniting:
 		break;
 	case ERobotControllerStatus::EConnecting:
-		if (_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 		{
 			if (m_impl->m_basePort == "")
 				m_impl->m_basePort = _config.robotCOM;
@@ -202,12 +205,19 @@ void RobotSerialPort::_ProcessRobot()
 		}
 		m_baseCounter = 0;
 		if (ok)
+		{
 			_status = ERobotControllerStatus::EConnected;
+		}
 		break;
 	case ERobotControllerStatus::EConnected:
 
 		//printf("thread h: %d \r", count++);
-		head_control(-pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
+		//if (m_headCounter > 5)
+		{
+			head_control(pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
+			m_headCounter = 0;
+		}
+		m_headCounter++;
 		if (m_baseCounter > 120)
 		{
 			//base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
@@ -220,7 +230,7 @@ void RobotSerialPort::_ProcessRobot()
 		gLogManager.log("Disconnecting Robot", ELL_INFO);
 		if (debug_print)
 			printf("Disconnecting Robot\n", ret);
-		if (_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 		{
 			m_impl->m_baseController->DriveStop();
 			m_impl->m_baseController->Disconnect();
@@ -232,7 +242,8 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EDisconnected:
 		break;
 	case ERobotControllerStatus::EStopping:
-		m_impl->m_baseController->Disconnect();
+		if (m_impl->m_baseController)
+			m_impl->m_baseController->Disconnect();
 		m_impl->m_headController->Disconnect();
 		_status = ERobotControllerStatus::EStopped;
 		break;
@@ -374,7 +385,7 @@ int RobotSerialPort::base_control(int velocity_x, int velocity_y, int rotation, 
 
 	static int counter = 0;
 
-	if (!_config.BaseEnabled)
+	if (!_config.BaseEnabled || !m_impl->m_baseController)
 		return false;
 
 	if (!m_impl->m_baseController->IsConnected())
@@ -661,21 +672,6 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 
 	if (GetRobotStatus() != EConnected)
 		return;
-
-	//todo: send the data to control the robot
-
-	int v_scale = 900;
-	int r_scale = 1000;
-
-	float v_size;
-
-	robot_vx = m_impl->mvRobot[BASE][0]->getNext(st.speed[0] * v_scale);
-	robot_vy = m_impl->mvRobot[BASE][1]->getNext(st.speed[1]*v_scale);
-	robot_rot = m_impl->mvRobot[BASE][2]->getNext(st.rotation*r_scale);
-
-//	robotX = m_impl->mvRobot[BASE][0]->getNext(st.X * 1000);
-//	robotY = m_impl->mvRobot[BASE][1]->getNext(st.Z * 1000);
-
 	//mray::math::Point3d<double> angles;
 	mray::math::quaternion q2(st.headRotation[0], st.headRotation[1], st.headRotation[2], st.headRotation[3]);
 	mray::math::quaternion q(q2.w,q2.z,q2.x,q2.y);
@@ -689,19 +685,19 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	if (false)
 	{
 		q.toEulerAngles(angles);
-		tilt = m_impl->mvRobot[HEAD][1]->getNext(-angles.y);
-		pan = m_impl->mvRobot[HEAD][0]->getNext(-angles.z);
-		roll = m_impl->mvRobot[HEAD][2]->getNext(-angles.x);
+		tilt = m_impl->mvRobot[HEAD][1]->getNext(angles.y);
+		pan = m_impl->mvRobot[HEAD][0]->getNext(angles.z);
+		roll = m_impl->mvRobot[HEAD][2]->getNext(angles.x);
 	}
 	else
 	{
 		double res[3];
 		quaternion2Euler(q2, res, RotSeq::xzy);
-		q.toEulerAngles(angles);
+		//q.toEulerAngles(angles);
 
-		tilt = m_impl->mvRobot[HEAD][1]->getNext(-res[2]);
-		pan = m_impl->mvRobot[HEAD][0]->getNext(-res[0]);
-		roll = m_impl->mvRobot[HEAD][2]->getNext(-res[1]);
+		tilt = m_impl->mvRobot[HEAD][1]->getNext(res[2]);
+		pan = m_impl->mvRobot[HEAD][0]->getNext(res[0]);
+		roll = m_impl->mvRobot[HEAD][2]->getNext(res[1]);
 	}
 
 	baseConnected = st.connected;
@@ -728,46 +724,55 @@ void RobotSerialPort::ShutdownRobot()
 
 bool RobotSerialPort::GetJointValues(std::vector<float>& values)
 {
-	return false;
+	values.resize(3*2);
+	math::vector3d rot=m_impl->m_headController->GetRotation();
+	values[0] = tilt;
+	values[1] = rot.x;
+	values[2] = pan;
+	values[3] = rot.y;
+	values[4] = roll;
+	values[5] = rot.z;
+	return true;
 }
 
 std::string RobotSerialPort::ExecCommand(const std::string& cmd, const std::string& args)
 {
 	if (cmd == CMD_Start)
 	{
-		if (_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 			m_impl->m_baseController->Start();
 		return "";
 	}
 	if (cmd == CMD_Stop)
 	{
-		if (_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 			m_impl->m_baseController->Stop();
 		return "";
 	}
 	 if (cmd == CMD_IsStarted)
 	{
-		 if (_config.BaseEnabled)
+		 if (_config.BaseEnabled && m_impl->m_baseController)
 			return core::StringConverter::toString(m_impl->m_baseController->IsStarted());
 	}
 	
 	if (cmd == CMD_GetSensorCount)
 	{
-		if (_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 			return core::StringConverter::toString(m_impl->m_baseController->GetSensorCount());
 
 	}
 	else if (cmd == CMD_GetSensorValue)
 	{
-		if (_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 			return core::StringConverter::toString(m_impl->m_baseController->GetSensorValue(core::StringConverter::toInt(args)));
 	}
 	else if (cmd == CMD_GetBatteryLevel)
 	{
-		if(_config.BaseEnabled)
+		if (_config.BaseEnabled && m_impl->m_baseController)
 			return core::StringConverter::toString(m_impl->m_baseController->GetBatteryLevel());
 	}
 	else
+		if (m_impl->m_baseController)
 		return m_impl->m_baseController->ExecCommand(cmd, args);
 	return "";
 }

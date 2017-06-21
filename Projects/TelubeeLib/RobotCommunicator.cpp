@@ -27,7 +27,7 @@ void RobotCommunicator::_OnDataArrived(network::NetAddress* addr,const char* buf
 		m_listener->OnUserDataArrived(addr, buffer);
 
 }
-void RobotCommunicator::_HandleData(network::NetAddress* srcaddr,const core::string& name, const core::string& value)
+void RobotCommunicator::_HandleData(network::NetAddress* srcaddr, const core::string& target, const core::string& name, const core::string& value)
 {
 
 	std::vector<core::string> vals;
@@ -35,49 +35,54 @@ void RobotCommunicator::_HandleData(network::NetAddress* srcaddr,const core::str
 
 	OS::ScopedLock lock(m_dataMutex);
 
-	if (name == "Connect")// && vals.size() == 6)
-	{/*
-		int videoPort = atoi(vals[1].c_str());
-		int audioPort = atoi(vals[2].c_str());
-		int handsPort = atoi(vals[3].c_str());
-		int clockPort = atoi(vals[4].c_str());
-		bool rtcp = core::StringConverter::toBool(vals[5].c_str())
-		network::NetAddress addr = network::NetAddress(vals[0], videoPort);;*/
-		//if (addr.address != m_userStatus.address.address || addr.port!=m_userStatus.address.port)
-		{
-			//printf("Connect Message: %s\n", srcaddr->toString().c_str());
-			m_userStatus.receivedAddress = *srcaddr;
-			m_userStatus.clientAddress = *srcaddr;// .setIP(vals[0]);
-			if (m_listener)
+	bool handled = false;
+	if (target == ""){
+		if (name == "Connect")// && vals.size() == 6)
+		{/*
+			int videoPort = atoi(vals[1].c_str());
+			int audioPort = atoi(vals[2].c_str());
+			int handsPort = atoi(vals[3].c_str());
+			int clockPort = atoi(vals[4].c_str());
+			bool rtcp = core::StringConverter::toBool(vals[5].c_str())
+			network::NetAddress addr = network::NetAddress(vals[0], videoPort);;*/
+			//if (addr.address != m_userStatus.address.address || addr.port!=m_userStatus.address.port)
 			{
-				UserConnectionData data;
-				data.userData = m_userStatus;
-				/*data.videoPort = videoPort;
-				data.audioPort = audioPort;
-				data.handsPort = handsPort;
-				data.clockPort = clockPort;
-				data.rtcp = rtcp;*/
-				m_listener->OnUserConnected(this, data);
+				//printf("Connect Message: %s\n", srcaddr->toString().c_str());
+				m_userStatus.receivedAddress = *srcaddr;
+				m_userStatus.clientAddress = *srcaddr;// .setIP(vals[0]);
+				if (m_listener)
+				{
+					UserConnectionData data;
+					data.userData = m_userStatus;
+					/*data.videoPort = videoPort;
+					data.audioPort = audioPort;
+					data.handsPort = handsPort;
+					data.clockPort = clockPort;
+					data.rtcp = rtcp;*/
+					m_listener->OnUserConnected(this, data);
+				}
 			}
+			handled = true;
+		}
+		else if (name == "Disconnect" && vals.size() == 2)
+		{
+			//printf("Disconnect Message: %s\n", srcaddr->toString().c_str());
+			network::NetAddress addr = network::NetAddress(vals[0], atoi(vals[1].c_str()));
+			addr.address = srcaddr->address;
+			if (addr.address == m_userStatus.clientAddress.address)
+			{
+				if (m_listener)
+				{
+					m_listener->OnUserDisconnected(this, m_userStatus.clientAddress);
+				}
+			}
+			handled = true;
 		}
 	}
-	else if (name == "Disconnect" && vals.size() == 2)
-	{
-		//printf("Disconnect Message: %s\n", srcaddr->toString().c_str());
-		network::NetAddress addr = network::NetAddress(vals[0], atoi(vals[1].c_str()));
-		addr.address = srcaddr->address;
-		if (addr.address == m_userStatus.clientAddress.address)
-		{
-			if (m_listener)
-			{
-				m_listener->OnUserDisconnected(this, m_userStatus.clientAddress);
-			}
-		}
-	}
-	else
+	if (!handled)
 	{
 		if (m_listener)
-			m_listener->OnUserMessage(srcaddr, name, value);
+			m_listener->OnUserMessage(srcaddr, target,name, value);
 	}
 }
 

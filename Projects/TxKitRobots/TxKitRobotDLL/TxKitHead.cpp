@@ -5,6 +5,7 @@
 #include "StringUtil.h"
 
 #include <windowsx.h>
+#include <fstream>
 
 
 namespace mray
@@ -16,145 +17,285 @@ namespace mray
 		0x2
 	};
 
+	const TxKitHead::ServoParameters TxKitHead::DEFAULT_PARAMETERS[] = {
+		{ 5, 5, 64, 5, 127 }, //tilt
+		{ 5, 10, 64, 5, 127 }, //yaw
+		{ 5, 5, 64, 5, 127 }  //roll
+	};
+
+	const float TxKitHead::DEFAULT_LIMITS[][2] = {
+		{ -20, 20 }, //tilt
+		{ -90, 90 }, //yaw
+		{ -20, 20 }  //roll
+	};
 
 
-TxKitHead::TxKitHead()
-{
-	connected = false;
-	m_serial = 0;
-}
-TxKitHead::~TxKitHead()
-{
-	Disconnect();
-	if (m_serial)
-		delete m_serial;
-}
-
-
-bool TxKitHead::Connect(const core::string& port)
-{
-	Disconnect();
-	gLogManager.log("Connecting", ELL_INFO);
-	m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(1000),serial::eightbits,serial::parity_even);
-	connected = m_serial->isOpen();
-	if (!connected)
+	TxKitHead::TxKitHead()
 	{
-	//	printf("Failed to connect robot\n");
+		connected = false;
+		m_serial = 0;
+		m_EEPROMset = false;
+		{
+			memcpy(m_limits, DEFAULT_LIMITS, sizeof(DEFAULT_LIMITS));
+			memcpy(m_parameters, DEFAULT_PARAMETERS, sizeof(DEFAULT_PARAMETERS));
+			//load PID values
+			std::ifstream confFile("TxKitSettings.cfg");
+
+			if (confFile.is_open())
+			{
+				printf("Loading TxKitSettings File\n");
+				for (int i = 0; i < 3; ++i)
+				{
+					confFile >> m_parameters[i].PGain >> m_parameters[i].Deadband >> m_parameters[i].Damping >> m_parameters[i].Response >> m_parameters[i].Speed;
+
+					m_parameters[i].PGain = math::clamp(m_parameters[i].PGain, 0, 10);
+					m_parameters[i].Deadband = math::clamp(m_parameters[i].Deadband, 0, 10);
+					m_parameters[i].Damping = math::clamp(m_parameters[i].Speed, 0, 127);
+					m_parameters[i].Response = math::clamp(m_parameters[i].Response, 0, 10);
+					m_parameters[i].Speed = math::clamp(m_parameters[i].Speed, 0, 127);
+				}
+				for (int i = 0; i < 3; ++i)
+				{
+					confFile >> m_limits[i][0] >> m_limits[i][1];
+				}
+				confFile.close();
+			}
+		}
+
+	}
+	TxKitHead::~TxKitHead()
+	{
+		Disconnect();
+		if (m_serial)
+			delete m_serial;
+	}
+
+
+	bool TxKitHead::_writeEEPROM()
+	{
+		if (m_EEPROMset)
+			return true;
+		for (int index = 0; index < 3; ++index)
+		{
+			printf("Updating servo[%d] EEPROM\n", ServoCODE[index]);
+
+			uint8_t sCommand[68];
+			sCommand[0] = 0xA0 | ServoCODE[index];//Read command
+			sCommand[1] = 0x00;//EEPROM access
+			uint8_t reply[68];
+
+			int ret = _sendCommand(sCommand, 2 * sizeof(char), reply, 68);
+			if (ret == 68)
+			{
+				uint8_t EEPROM[64];
+				memcpy(EEPROM, reply + 4, 64);
+				/*
+				int PGain = (((EEPROM[6] & 0x0f) << 4)) | (EEPROM[7] & 0x0f);
+				int Deadband = (((EEPROM[8] & 0x0f) << 4)) | (EEPROM[9] & 0x0f);
+				int Damping = (((EEPROM[10] & 0x0f) << 4)) | (EEPROM[11] & 0x0f);
+				int Response = (((EEPROM[50] & 0x0f) << 4)) | (EEPROM[51] & 0x0f);
+				int Speed = (((EEPROM[4] & 0x0f) << 4)) | (EEPROM[5] & 0x0f);
+
+				printf("P.Gain: %d\n", PGain);
+				printf("Deadband: %d\n", Deadband);
+				printf("Damping: %d\n", Damping);
+				printf("Response: %d\n", Response);
+				printf("Speed: %d\n", Speed);
+
+				Speed = 4;
+
+				EEPROM[4] = (Speed >> 4) & 0x0f;
+				EEPROM[5] = Speed & 0x0f;*/
+
+				EEPROM[4] = (m_parameters[index].Speed >> 4) & 0x0f;
+				EEPROM[5] = m_parameters[index].Speed & 0x0f;
+
+				EEPROM[6] = (m_parameters[index].PGain >> 4) & 0x0f;
+				EEPROM[7] = m_parameters[index].PGain & 0x0f;
+
+				EEPROM[8] = (m_parameters[index].Deadband >> 4) & 0x0f;
+				EEPROM[9] = m_parameters[index].Deadband & 0x0f;
+
+				EEPROM[10] = (m_parameters[index].Damping >> 4) & 0x0f;
+				EEPROM[11] = m_parameters[index].Damping & 0x0f;
+
+				EEPROM[50] = (m_parameters[index].Response >> 4) & 0x0f;
+				EEPROM[51] = m_parameters[index].Response & 0x0f;
+
+				sCommand[0] = 0xC0 | ServoCODE[index];//Write command
+				sCommand[1] = 0x00;//EEPROM access
+
+				memcpy(sCommand + 2, EEPROM, 64 * sizeof(uint8_t));
+				int ret = _sendCommand(sCommand, 66 * sizeof(char), reply, 68 * sizeof(char), 500);
+				if (ret != 68)
+				{
+					printf("Failed to write to EEPROM\n");
+					continue;
+				}
+			}
+			else {
+				printf("Failed to read from EEPROM\n");
+				continue;
+			}
+		}
+
+		uint8_t reply;
+		int ret;
+
+		do{
+			ret = m_serial->read(&reply, 1);
+		} while (ret > 0);
+
+		m_EEPROMset = true;
+		return true;
+	}
+	bool TxKitHead::Connect(const core::string& port)
+	{
+		Disconnect();
+		m_lastValues[0] = m_lastValues[1] = m_lastValues[2] = 0;
+		gLogManager.log("Connecting", ELL_INFO);
+		m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(100), serial::eightbits, serial::parity_even);
+		connected = m_serial->isOpen();
+		if (!connected)
+		{
+			//	printf("Failed to connect robot\n");
+			delete m_serial;
+			m_serial = 0;
+		}
+		else
+		{
+			gLogManager.log("Connected", ELL_INFO);
+			//comROBOT->setRxSize(15);
+			//_sendCommand("#ea");//enable angle logging
+
+			//read EEPROM
+			//_writeEEPROM();
+		}
+		//comROBOT->owner = this;
+		return connected;
+	}
+	bool TxKitHead::IsConnected()
+	{
+		return connected;
+	}
+	void TxKitHead::Disconnect()
+	{
+		if (!m_serial)
+			return;
+
+		SetRotation(0);
+		_sleep(100);
+
+		uint8_t sCommand[] = { 0, 0, 0 };
+		uint8_t reply[6];
+		for (int i = 0; i < 3; ++i){
+
+			sCommand[0] = 0x80 | ServoCODE[i];//(PosCtrlCMD << 5)
+			sCommand[1] = 0;
+			sCommand[2] = 0;
+			_sendCommand(sCommand, 3 * sizeof(char), reply, 6);
+			//	printf("%d,%d,%d,%d\n", value,(int)sCommand[0], (int)sCommand[1], (int)sCommand[2]);
+		}
+		m_lastValues[0] = m_lastValues[1] = m_lastValues[2] = 0;
+		_sleep(100);
+		m_serial->close();
+		connected = false;
 		delete m_serial;
 		m_serial = 0;
 	}
-	else
+
+	int TxKitHead::_sendCommand(const uint8_t* cmd, int len, uint8_t* reply, int rlen, int waitTime)
 	{
-		gLogManager.log("Connected", ELL_INFO);
-		//comROBOT->setRxSize(15);
-		//_sendCommand("#ea");//enable angle logging
-	}
-	//comROBOT->owner = this;
-	return connected;
-}
-bool TxKitHead::IsConnected()
-{
-	return connected;
-}
-void TxKitHead::Disconnect()
-{
-	if (!m_serial)
-		return;
+		m_serial->flushInput();
+		m_serial->flushOutput();
+		//comROBOT->sendData((char*)cmd, len);
+		m_serial->write((const uint8_t*)cmd, len);
 
-	SetRotation(0);
-	_sleep(100);
+		if (waitTime>0)
+			_sleep(waitTime);
 
-	char sCommand[] = { 0, 0, 0 };
-	for (int i = 0; i < 3; ++i){
+		int ret = m_serial->read(reply, rlen);
 
-		sCommand[0] = 0x80 | ServoCODE[i];//(PosCtrlCMD << 5)
-		sCommand[1] = 0;
-		sCommand[2] = 0;
-		_sendCommand(sCommand, 3 * sizeof(char));
-		//	printf("%d,%d,%d,%d\n", value,(int)sCommand[0], (int)sCommand[1], (int)sCommand[2]);
+		return ret;
+		//if (ret != 6)
+		//	gLogManager.log("Failed to read 6 bytes: "+core::StringConverter::toString(ret), ELL_INFO);
+		//_sleep(1);
 	}
 
-	m_serial->close();
-	connected = false;
-	delete m_serial;
-	m_serial = 0;
-}
-
-void TxKitHead::_sendCommand(const char* cmd, int len)
-{
-	m_serial->flushInput();
-	m_serial->flushOutput();
-	//comROBOT->sendData((char*)cmd, len);
-	m_serial->write((const uint8_t*) cmd, len);
-	/*
-	uint8_t buf[9];
-	int ret=m_serial->read(buf, 6);
-	if (ret != 6)
-		gLogManager.log("Failed to read 6 bytes: "+core::StringConverter::toString(ret), ELL_INFO);*/
-	//_sleep(1);
-}
-
-void TxKitHead::SetRotation(const math::vector3d& rotation)
-{
-	float rot[3];
-	rot[0] = 0.5f + math::clamp(rotation.x, -18.0f, 24.0f) / 270.0f; //pitch
-	rot[1] = 0.5f + math::clamp(rotation.y, -90.0f, 90.0f) / 270.0f; //yaw
-	rot[2] = 0.5f + math::clamp(rotation.z, -20.0f, 20.0f) / 270.0f; //roll
-
-	const int MinValue = 3500;
-	const int MaxValue = 11500;
-
-	const int PosCtrlCMD = 0x4;//0b100
-
-
-	const char bitMask = 0x7F;
-
-	char sCommand[3 ];
-	for (int i = 0; i < 3; ++i){
-		rot[i] = MinValue + rot[i] * (MaxValue - MinValue);
-		unsigned short value = rot[i];
-
-		sCommand[ 0] = 0x80 | ServoCODE[i];//(PosCtrlCMD << 5)
-		sCommand[1] = (value >> 7) & bitMask;
-		sCommand[ 2] = value & bitMask;
-		_sendCommand(sCommand, 3 * sizeof(char));
-	//	printf("%d,%d,%d,%d\n", value,(int)sCommand[0], (int)sCommand[1], (int)sCommand[2]);
-	}
-
-
-
-	m_rotation = rotation;
-}
-math::vector3d TxKitHead::GetRotation()
-{
-	return m_rotation;
-}
-
-void TxKitHead::_onSerialData(int size, char *buffer)
-{
-	return;
-	char* ptr = buffer;
-	buffer[size - 1] = 0;
-	while (*ptr)
+	void TxKitHead::SetRotation(const math::vector3d& rotation)
 	{
-		if (*ptr == '@')
-		{
-			++ptr;
-			break;
+		float rot[3];
+
+
+		for (int i = 0; i < 3; ++i)
+			rot[i] = 0.5f + math::clamp(rotation[i], m_limits[i][0], m_limits[i][1]) / 270.0f; //pitch
+
+
+		const int MinValue = 3500;
+		const int MaxValue = 11500;
+
+		const int PosCtrlCMD = 0x4;//0b100
+
+		uint8_t reply[8];
+
+		float encoders[3] = { 0, 0, 0 };
+		uint8_t sCommand[3];
+		for (int i = 0; i < 3; ++i){
+			rot[i] = MinValue + rot[i] * (MaxValue - MinValue);
+			unsigned short value = rot[i];
+			if (value == m_lastValues[i])
+			{
+				//		encoders[i] = m_rotation[i];
+				//		continue;
+			}
+			m_lastValues[i] = value;
+			sCommand[0] = (uint8_t)(0x80 | ServoCODE[i]);//(PosCtrlCMD << 5)
+			sCommand[1] = (uint8_t)((value >> 7) & 0x7F);
+			sCommand[2] = (uint8_t)(value & 0x7F);
+			int ret = _sendCommand(sCommand, 3 * sizeof(uint8_t), reply, 6,4);
+
+			if (ret == 6)
+			{
+				ret = ((reply[4] & 0x7F) << 7) | (reply[5] & 0x7F);
+			//	printf("%d:%d , %d:%d\n", sCommand[1], sCommand[2], reply[4], reply[5]);
+
+				m_rotation[i] = ((float)(ret - MinValue) / (MaxValue - MinValue));
+				m_rotation[i] = (m_rotation[i] - 0.5f)*270.0f;
+
+			}
+
+
 		}
-		++ptr;
+
+		//printf("Out: %f,%f,%f\n", encoders[0], encoders[1], encoders[2]);
 	}
-	if (!*ptr)
-		return;
-	std::vector<core::string> lst = core::StringUtil::Split(ptr, " ");
-	if (lst.size() == 0)
-		return;
-	if (lst[0] == "angles ")//angles
+	math::vector3d TxKitHead::GetRotation()
 	{
-		m_rotation.x = core::StringConverter::toFloat(lst[1]);
-		m_rotation.y = core::StringConverter::toFloat(lst[2]);
-		m_rotation.z = core::StringConverter::toFloat(lst[3]);
+		return math::vector3d(m_rotation[0], m_rotation[1], m_rotation[2]);
 	}
-}
+
+	void TxKitHead::_onSerialData(int size, char *buffer)
+	{
+		return;
+		char* ptr = buffer;
+		buffer[size - 1] = 0;
+		while (*ptr)
+		{
+			if (*ptr == '@')
+			{
+				++ptr;
+				break;
+			}
+			++ptr;
+		}
+		if (!*ptr)
+			return;
+		std::vector<core::string> lst = core::StringUtil::Split(ptr, " ");
+		if (lst.size() == 0)
+			return;
+		if (lst[0] == "angles ")//angles
+		{
+		}
+	}
 
 }

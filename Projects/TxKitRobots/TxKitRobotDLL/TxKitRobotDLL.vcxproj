@@ -167,7 +167,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TELUBEEROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -197,16 +197,13 @@
     <ClInclude Include="IHeadController.h" />
     <ClInclude Include="IRobotComponent.h" />
     <ClInclude Include="movingAverage.h" />
-    <ClInclude Include="OmniBaseController.h" />
     <ClInclude Include="RobotSerialPort.h" />
-    <ClInclude Include="RoombaController.h" />
     <ClInclude Include="serial\serial.h" />
     <ClInclude Include="serial\v8stdint.h" />
     <ClInclude Include="serial\win.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TelubeeRobotDLL.h" />
-    <ClInclude Include="ThreeAxisHead.h" />
     <ClInclude Include="Tserial_event.h" />
     <ClInclude Include="TxKitHead.h" />
   </ItemGroup>
@@ -226,15 +223,10 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="movingAverage.cpp" />
-    <ClCompile Include="OmniBaseController.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
-    </ClCompile>
     <ClCompile Include="RobotSerialPort.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="RoombaController.cpp" />
     <ClCompile Include="serial\list_ports_win.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -254,7 +246,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TelubeeRobotDLL.cpp" />
-    <ClCompile Include="ThreeAxisHead.cpp" />
     <ClCompile Include="TxKitHead.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

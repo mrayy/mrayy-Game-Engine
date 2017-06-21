@@ -29,13 +29,12 @@ protected:
 	mray::TBee::RobotCapabilities m_caps;
 
 	RobotSerialPortImpl* m_impl;
-	int robot_vx, robot_vy, robot_rot;
 	float pan, tilt, roll;
 	bool baseConnected;
 	int m_baseCounter;
+	int m_headCounter;
 	ERobotControllerStatus _status;
 	IRobotStatusProvider* m_robotStatusProvider;
-
 	HANDLE m_robotThread;
 
 	int base_control(int velocity_x, int velocity_y, int rotation, int control);

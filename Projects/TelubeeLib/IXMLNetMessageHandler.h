@@ -14,7 +14,7 @@ class IXMLNetMessageHandler
 {
 protected:
 	virtual void _OnDataArrived(network::NetAddress* addr, const char* buffer){}
-	virtual void _HandleData(network::NetAddress* addr, const core::string& name, const core::string& value) = 0;
+	virtual void _HandleData(network::NetAddress* addr, const core::string& target, const core::string& name, const core::string& value) = 0;
 	void ProcessPacket(network::NetAddress* addr, const char* buffer);
 
 	network::IUDPClient* m_client;

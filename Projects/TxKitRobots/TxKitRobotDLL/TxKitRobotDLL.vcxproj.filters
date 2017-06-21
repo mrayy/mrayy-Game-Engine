@@ -45,13 +45,7 @@
     <ClInclude Include="TelubeeRobotDLL.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="RoombaController.h">
-      <Filter>Source Files\Robot</Filter>
-    </ClInclude>
     <ClInclude Include="IBaseController.h">
-      <Filter>Source Files\Robot</Filter>
-    </ClInclude>
-    <ClInclude Include="OmniBaseController.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
     <ClInclude Include="serial\win.h">
@@ -64,9 +58,6 @@
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="IHeadController.h">
-      <Filter>Source Files\Robot</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreeAxisHead.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
     <ClInclude Include="IRobotComponent.h">
@@ -91,15 +82,6 @@
     </ClCompile>
     <ClCompile Include="RobotSerialPort.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RoombaController.cpp">
-      <Filter>Source Files\Robot</Filter>
-    </ClCompile>
-    <ClCompile Include="OmniBaseController.cpp">
-      <Filter>Source Files\Robot</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreeAxisHead.cpp">
-      <Filter>Source Files\Robot</Filter>
     </ClCompile>
     <ClCompile Include="TxKitHead.cpp">
       <Filter>Source Files\Robot</Filter>

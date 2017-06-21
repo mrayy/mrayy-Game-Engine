@@ -117,9 +117,11 @@ public:
 		m_status = EServiceStatus::Idle;
 		m_cameraProfileManager = new CameraProfileManager();
 		m_camConfigMngr = new CameraConfigurationManager();
+		printf("Loading camera configurations\n");
 		m_camConfigMngr->LoadConfigurations("CameraConfigurations.xml");
 
 		m_streamers = new video::GstStreamBin();
+		printf("Loading streaming profiles\n");
 		LoadCameraSettings("StreamingProfiles.xml");
 
 		m_streamsCount = 0;
@@ -209,6 +211,7 @@ public:
 		m_context = context;
 		m_resolution.set(1280, 720);
 
+		printf("Initing..\n");
 //#if USE_POINTGREY && USE_WEBCAMERA
 		core::string camType= context->appOptions.GetOptionByName("CameraConnection")->getValue();
 		if (camType == "DirectShow")
@@ -236,11 +239,18 @@ public:
 #endif*/
 		m_cameraProfile = context->appOptions.GetOptionValue("CameraProfile");
 
+		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionByName("Quality")->getValue());
+		if (context->appOptions.GetOptionByName("AutoGain"))
+			m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionByName("AutoGain")->getValue());
+		else m_autoGain = false;
+
+		printf("Parameters loaded..\n");
 		{
 
 			m_camConfig = m_camConfigMngr->GetCameraConfiguration(m_cameraProfile);
 			if (!m_camConfig)
 				gLogManager.log("Couldn't find camera configurations! : " + m_cameraProfile, ELL_ERROR);
+			printf("Camera Configuration loaded..\n");
 
 			gLogManager.log("Capture Type:" + core::StringConverter::toString(m_camConfig->captureType), ELL_INFO);
 
@@ -250,7 +260,7 @@ public:
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
 				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
- 				if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
+ 				if ( (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed))
  					m_cameraController = new CameraGrabberController();
  				else
 				{
@@ -262,11 +272,8 @@ public:
 				gLogManager.log("Creating Encoded Capture Camera", ELL_INFO);
 				m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType, m_cameraType);
 			}
+			printf("Camera controller created..\n");
 		}
-		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionByName("Quality")->getValue());
-		if (context->appOptions.GetOptionByName("AutoGain"))
-			m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionByName("AutoGain")->getValue());
-		else m_autoGain = false;
 		/*core::string res = context->appOptions.GetOptionByName("StreamResolution")->getValue();
 		
 		if (res == "0-VGA")

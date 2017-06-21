@@ -80,8 +80,15 @@ public:
 			type = OVR::OV_CAMVR_VGA;
 		else if (w ==960)
 			type = OVR::OV_CAMVR_FULL;
-		else if (w==1280)
-			type = OVR::OV_CAMVR_WIDE;
+		else if (w == 1280)
+		{
+			if (h <= 800)
+				type = OVR::OV_CAMVR_WIDE;
+			else 
+				type = OVR::OV_CAMHD_FULL;
+		}
+		else if (w == 1920)
+			type = OVR::OV_CAM5MP_FHD;
 		else return false;
 
 		try{
@@ -109,7 +116,7 @@ public:
 
 		imageFormat = video::EPixel_LUMINANCE16;
 		int len = size.x*size.y*PixelUtil::getPixelDescription(imageFormat).elemSizeB;
-		flatsize.x *= 2;// / PixelUtil::getPixelDescription(imageFormat).elemSizeB;
+		//flatsize.x *= 2;// / PixelUtil::getPixelDescription(imageFormat).elemSizeB;
 		_remapData = new uchar[len];
 
 		ovr.Close();
@@ -123,6 +130,8 @@ public:
 	{
 		if (!_inited)
 			Init(_w, _h, _fps);
+		if (!_inited)
+			return false;
 		if (isOpen())return true;
 		try{
 			if (!ovr.Open(0, type, 0, NULL, true))
@@ -197,7 +206,7 @@ public:
 
 	bool GrabFrame()
 	{
-		if (isOpen() && HasNewFrame())
+		if (isOpen() && HasNewFrame() && _remapData)
 		{
 			fpsCalc.regFrame(gEngine.getTimer()->getSeconds());
 			_lock->lock();
@@ -334,7 +343,7 @@ void OVRvisionCamGrabber::SetImageFormat(video::EPixelFormat fmt)
 
 video::EPixelFormat OVRvisionCamGrabber::GetImageFormat()
 {
-	return video::EPixel_Alpha8;// OVRvisionCamGrabberData::Instance()->imageFormat;
+	return OVRvisionCamGrabberData::Instance()->imageFormat;
 }
 
 
@@ -412,7 +421,16 @@ void OVRvisionCamGrabber::SetParameter(const core::string& name, const core::str
 
 core::string OVRvisionCamGrabber::GetParameter(const core::string& name)
 {
+	if (name.equals_ignore_case("settings"))
+	{
+		return OVRvisionCamGrabberData::Instance()->ovr.GetOVRSettings();
+	}
 	return core::string::Empty;
+}
+
+core::string OVRvisionCamGrabber::GetCameraSettings()
+{
+	return OVRvisionCamGrabberData::Instance()->ovr.GetOVRSettings();
 }
 
 }

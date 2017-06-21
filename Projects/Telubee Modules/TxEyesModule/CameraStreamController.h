@@ -81,12 +81,12 @@ public:
 				if (type == ECameraType::Ovrvision)
 				{
 					cam = new video::OVRVisionCam();
-					//cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
+					cam->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
 				}
 				else if (type == ECameraType::OvrvisionCompressed)
 				{
 					cam = new video::OVRvisionCamGrabber();
-				//	cameras[i]->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
+					cam->InitDevice(c[i].ifo.index, c[i].w, c[i].h, c[i].fps);//1280, 720
 				}
 				else
 #endif
@@ -114,6 +114,7 @@ public:
 	}
 	virtual void Start()
 	{
+		gLogManager.log("Initing cameras.", ELL_INFO);
 		for (int i = 0; i < cameras.size(); ++i)
 		{
 			if (cameras[i])
@@ -434,14 +435,18 @@ public:
 		if (!buffer)
 			return;
 		GstMapInfo map;
-		gst_buffer_map(bfr, &map, (GstMapFlags)GST_MAP_WRITE);
+		gst_buffer_map(bfr, &map, (GstMapFlags)GST_MAP_READ);
 		ushort*data = (ushort*)map.data;
+		if (!data){
+			gst_buffer_unmap(bfr, &map);
+			return;
+		}
 		
 		int offset = width*height;
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int ps = (y * width) + x;
-				buffer[ps] = (data[ps] & 0x00FF);
+				buffer[ps] = (data[ps] & 0xFF);
 				buffer[ps + offset] = (data[ps] >> 8);
 			}
 		}
@@ -510,6 +515,7 @@ public:
 
 	video::ICustomVideoSrc* CreateVideoSrc()
 	{
+		gLogManager.log("Initing camera grabber", ELL_INFO);
 		for (int i = 0; i < cams.size(); ++i)
 		{
 			if (cams[i].ifo.index>=0)
@@ -563,6 +569,7 @@ public:
 
 			ret = src;
 		}
+		gLogManager.log("Done initing camera grabber", ELL_INFO);
 
 		if (_eyegaze)
 		{

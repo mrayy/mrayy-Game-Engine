@@ -115,7 +115,7 @@ public:
 	int gstClockPortPlayer;
 
 	//bool IsStarted; //indicate if the services should run or not
-	RobotStatus robotData;	//robot control data
+	//RobotStatus robotData;	//robot control data
 };
 
 }

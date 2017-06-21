@@ -216,13 +216,14 @@ namespace video
 				//ksvideosrc
 
 				videoStr = "appsrc";
-				videoStr += " name=src" + core::StringConverter::toString(i) + 
+				videoStr += " name=src" + core::StringConverter::toString(i) +
 					//" do-timestamp=true is-live=true "//"block=true"
 					" ! video/x-raw,format=" + format + ",width=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().x) +
-					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1,pixel-aspect-ratio=1/1 ";
+					",height=" + core::StringConverter::toString(m_grabber[i]->GetFrameSize().y)+",pixel-aspect-ratio=1/1,framerate=100/1 ";
 
-				//videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
-				videoStr += " ! videoconvert ";
+				if (m_fps > 0)
+					videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
+				videoStr += " ! queue ! videoconvert  ";
 				//videoStr += " ! video/x-raw,format=I420 ";//",framerate=1/" + core::StringConverter::toString(m_fps);// !videoflip method = 1  ";
 				//videoStr += " ! queue ";
 				//	if (m_grabber[i]->GetImageFormat()!=video::EPixel_YUYV)

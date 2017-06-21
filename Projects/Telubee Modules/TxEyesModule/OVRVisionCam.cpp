@@ -4,6 +4,7 @@
 #ifdef OVRVISION_SUPPORT
 
 #include "OVRVisionCam.h"
+#include "ILogManager.h"
 #include "IThreadManager.h"
 #include <ovrvision\ovrvision_pro.h>
 
@@ -58,6 +59,7 @@ public:
 	}
 	bool Init(int w, int h, int fps)
 	{
+		gLogManager.log("Initing OVRvision camera with settings:" + core::StringConverter::toString(math::vector2di(w, h)), ELL_INFO);
 		_w = w; _h = h; _fps = _fps;
 		if ( w < 800)
 			type = OVR::OV_CAMVR_VGA;

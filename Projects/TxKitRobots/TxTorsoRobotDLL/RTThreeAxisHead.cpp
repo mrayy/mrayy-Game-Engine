@@ -544,7 +544,7 @@ void RTThreeAxisHead::SetPosition(const math::vector3d& pos)
 	//p.y = 0;
 	//p.z = 300;
 
-	printf("%f,%f,%f,\n ", p.x, p.y, p.z);
+	//printf("%f,%f,%f,\n ", p.x, p.y, p.z);
 	double sr = length_s;
 	double tr = length_t;
 	double lim1 = length_sp;

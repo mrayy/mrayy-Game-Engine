@@ -42,6 +42,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{CE1A8229-F182-4F46-893A-32B4967DB4DA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxEyesServiceModule", "Projects\Telubee Modules\TxEyesModule\TxEyesServiceModule.vcxproj", "{B1B74C8A-42D5-4F44-8087-D9DD5936BBED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A3BB9F46-E552-48A2-8D04-637B8E420568} = {A3BB9F46-E552-48A2-8D04-637B8E420568}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxMouthServiceModule", "Projects\Telubee Modules\TxMouthModule\TxMouthModule.vcxproj", "{9616AB0C-CCD1-4BE8-AF90-C2C9EA49C9EA}"
 EndProject
@@ -50,6 +53,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{F9507B77-823C-4D92-96BB-0474C4B86E6E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceLoader", "Projects\Telubee Modules\ServiceLoader\ServiceLoader.vcxproj", "{0782E14E-D594-45D3-A47A-EFCA57347933}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B1B74C8A-42D5-4F44-8087-D9DD5936BBED} = {B1B74C8A-42D5-4F44-8087-D9DD5936BBED}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceHostManager", "Projects\Telubee Modules\ServiceHostManager\ServiceHostManager.vcxproj", "{0D17BC20-9E02-434C-8FAF-76517AE39E62}"
 EndProject
