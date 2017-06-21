@@ -161,7 +161,7 @@ void VideoWindow::OnConnected(const core::string &ipaddr, int VideoPort, bool rt
 {
 	if (!IsActive())
 		return;
-	m_player->SetIPAddress(ipaddr, VideoPort, rtcp);
+	m_player->SetIPAddress(ipaddr, VideoPort, 0, rtcp);
 }
 
 void VideoWindow::OnUpdate(float dt)
