@@ -31,6 +31,7 @@
 #include "INetworkPortAssigner.h"
 
 #include <conio.h>
+#include <XMLTextNode.h>
 
 #if !USE_POINTGREY
 #include "FlyCameraVideoGrabber.h"
@@ -809,6 +810,20 @@ public:
 // 		}
 		ret->addAttribute("FrameSize", core::StringConverter::toString(m_cameraSource->GetFrameSize(0)));
 
+		if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
+		{
+			//add ovrvision setting string
+			if ((CameraGrabberController*)m_cameraController)
+			{
+				CameraGrabberController* c=(CameraGrabberController*)m_cameraController;
+				if (c->cameras.size() > 0 && c->cameras[0])
+				{
+					core::string settings= c->cameras[0]->GetParameter("settings");
+					xml::XMLTextNode* node = new xml::XMLTextNode(settings);
+					ret->addSubElement(node);
+				}
+			}
+		}
 
 		w.addElement(ret);
 
