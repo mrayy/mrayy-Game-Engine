@@ -15,7 +15,7 @@
 #define ___FuzzyAndOpt___
 
 #include "FuzzyTerm.h"
-#include <mArray.h>
+//#include <mArray.h>
 
 namespace mray{
 namespace AI{
@@ -24,7 +24,7 @@ class FuzzyAndOpt:public FuzzyTerm
 {
 private:
 protected:
-	core::array<FuzzyTerm*> m_terms;
+	std::vector<FuzzyTerm*> m_terms;
 public:
 	FuzzyAndOpt();
 	FuzzyAndOpt(FuzzyTerm*t1,FuzzyTerm*t2);

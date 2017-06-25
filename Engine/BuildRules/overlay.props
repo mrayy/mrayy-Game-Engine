@@ -11,7 +11,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Overlay>
-      <CommandLineTemplate>$(MRAY_ENGINE)\bin\release\GUISchemeGenerator.exe %(FullPath) $(ProjectDir)</CommandLineTemplate>
+      <CommandLineTemplate>$(MRAY_ENGINE)\bin\release64\GUISchemeGenerator.exe %(FullPath) $(ProjectDir)</CommandLineTemplate>
       <Outputs>%(FullPath).h</Outputs>
       <ExecutionDescription>Compiling : %(Filename)</ExecutionDescription>
     </Overlay>

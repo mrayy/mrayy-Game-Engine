@@ -237,11 +237,11 @@ void GLWin32RenderWindow::Create(const math::vector2di& size,bool fullScreen,con
 				m_position+=monitor->GetStartPosition();
 		}
 
-#ifdef MRAY_GLDEVICE_LIB
+//#ifdef MRAY_GLDEVICE_LIB
 		HINSTANCE hinst = GetModuleHandle( NULL );
-#else
-	HINSTANCE hinst = GetModuleHandle(mT("mrayGLDevice.dll"));
-#endif
+//#else
+//	HINSTANCE hinst = GetModuleHandle(mT("mrayGLDevice.dll"));
+//#endif
 		//HINSTANCE hinst=GetModuleHandle(0);
 
 		WNDCLASS wc={ CS_OWNDC, Win32RenderWindowUtil::_WndProc, 0, 0, hinst,

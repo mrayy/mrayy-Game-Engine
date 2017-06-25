@@ -7,7 +7,7 @@
 		<CustomBuildRule
 			Name="Overlay"
 			DisplayName="Overlay"
-			CommandLine="$(MRAY_ENGINE)\bin\release\GUISchemeGenerator.exe $(InputPath) $(ProjectDir)"
+			CommandLine="$(MRAY_ENGINE)\bin\release64\GUISchemeGenerator.exe $(InputPath) $(ProjectDir)"
 			Outputs="$(InputPath).h"
 			FileExtensions="*.gui"
 			ExecutionDescription="Compiling : $(InputName)"

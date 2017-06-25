@@ -16,7 +16,7 @@
 #define ___IFuzzyClustering___
 
 
-#include <mArray.h>
+//#include <mArray.h>
 #include <GenericMatrix.h>
 
 namespace mray{

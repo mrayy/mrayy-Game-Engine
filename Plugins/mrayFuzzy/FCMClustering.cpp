@@ -75,7 +75,7 @@ bool FCMClustering::DoClustering(const math::GenericMatrix &Z,int c,float tolera
 	float**diffVecPtr=diffVector.getMat();
 	const float**samplesPtr=Z.getMat();
 
-	core::array<int> ZeroDistSamples;
+	std::vector<int> ZeroDistSamples;
 	ZeroDistSamples.resize(c);
 
 	//iteration counters
