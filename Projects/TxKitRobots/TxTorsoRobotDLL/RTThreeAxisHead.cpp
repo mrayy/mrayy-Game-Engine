@@ -574,21 +574,27 @@ void RTThreeAxisHead::SetRotation(const math::vector3d& rotation)
 	if (!IsConnected())
 		return;
 
-	t += 0.01f;
-	float r = sinf(t) * 60;
+	math::vector3d rot;
+	rot.x = math::clamp<float>(rotation.x, -40, 60);
+	rot.y = math::clamp<float>(rotation.y, -100, 100);
+	rot.z = math::clamp<float>(rotation.z, -50, 50);
 
-
-	_setServoPos(1, rotation.z + 180);
-	_setServoPos(2, rotation.x + 180);
-	_setServoPos(3, -rotation.y + 180);
+	_setServoPos(1, rot.z + 180);
+	_setServoPos(2, rot.x + 180);
+	_setServoPos(3, rot.y + 180);
 	_flush();
-	m_rotation = rotation;
+	m_rotation = rot;
+	m_rotation.y = -m_rotation.y;
 }
 
 
 math::vector3d RTThreeAxisHead::GetRotation()
 {
 	return m_rotation;
+}
+math::vector3d RTThreeAxisHead::GetPosition()
+{
+	return m_position;
 }
 
 void RTThreeAxisHead::_onSerialData(int size, char *buffer)
