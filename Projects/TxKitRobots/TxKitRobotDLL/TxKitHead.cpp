@@ -224,11 +224,12 @@ namespace mray
 
 	void TxKitHead::SetRotation(const math::vector3d& rotation)
 	{
+		float orot[3];
 		float rot[3];
 
 
 		for (int i = 0; i < 3; ++i)
-			rot[i] = 0.5f + math::clamp(rotation[i], m_limits[i][0], m_limits[i][1]) / 270.0f; //pitch
+			orot[i] = 0.5f + math::clamp(rotation[i], m_limits[i][0], m_limits[i][1]) / 270.0f; //pitch
 
 
 		const int MinValue = 3500;
@@ -241,7 +242,7 @@ namespace mray
 		float encoders[3] = { 0, 0, 0 };
 		uint8_t sCommand[3];
 		for (int i = 0; i < 3; ++i){
-			rot[i] = MinValue + rot[i] * (MaxValue - MinValue);
+			rot[i] = MinValue + orot[i] * (MaxValue - MinValue);
 			unsigned short value = rot[i];
 			if (value == m_lastValues[i])
 			{
@@ -254,7 +255,7 @@ namespace mray
 			sCommand[2] = (uint8_t)(value & 0x7F);
 			int ret = _sendCommand(sCommand, 3 * sizeof(uint8_t), reply, 6,4);
 
-			if (ret == 6)
+			if (false && ret == 6)
 			{
 				ret = ((reply[4] & 0x7F) << 7) | (reply[5] & 0x7F);
 			//	printf("%d:%d , %d:%d\n", sCommand[1], sCommand[2], reply[4], reply[5]);
@@ -262,6 +263,10 @@ namespace mray
 				m_rotation[i] = ((float)(ret - MinValue) / (MaxValue - MinValue));
 				m_rotation[i] = (m_rotation[i] - 0.5f)*270.0f;
 
+			}
+			else{
+				m_rotation[i] = orot[i];
+				m_rotation[i] = (m_rotation[i] - 0.5f)*270.0f;
 			}
 
 

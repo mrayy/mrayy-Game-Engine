@@ -221,7 +221,7 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EConnected:
 
 		//printf("thread h: %d \r", count++);
-		head_control(-pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
+		head_control(pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
 		head_pos(px*_config.pxAxis, py*_config.pyAxis, pz*_config.pzAxis);
 		if (m_baseCounter > 5)
 		{
@@ -642,9 +642,9 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	//q2.toEulerAngles(angles);
 	//QuaternionToEuler(q, angles);
 
-	tilt = m_impl->mvRobot[HEAD][1]->getNext(-angles.y);
-	pan = m_impl->mvRobot[HEAD][0]->getNext(-angles.x);
-	roll = m_impl->mvRobot[HEAD][2]->getNext(-angles.z);
+	tilt = m_impl->mvRobot[HEAD][1]->getNext(angles.y);
+	pan = m_impl->mvRobot[HEAD][0]->getNext(angles.x);
+	roll = m_impl->mvRobot[HEAD][2]->getNext(angles.z);
 
 	px = (st.headPos[0]);
 	py = (st.headPos[1]);
@@ -683,7 +683,23 @@ void RobotSerialPort::ShutdownRobot()
 
 bool RobotSerialPort::GetJointValues(std::vector<float>& values)
 {
-	return false;
+	values.resize(6 * 2);
+	math::vector3d rot = m_impl->m_headController->GetRotation();
+	math::vector3d pos = m_impl->m_headController->GetPosition();
+	values[0] = tilt;
+	values[1] = rot.x;
+	values[2] = pan;
+	values[3] = rot.y;
+	values[4] = roll;
+	values[5] = rot.z;
+
+	values[6] = px;
+	values[7] = pos.x;
+	values[8] = py;
+	values[9] = pos.y;
+	values[10] = pz;
+	values[11] = pos.z;
+	return true;
 }
 
 std::string RobotSerialPort::ExecCommand(const std::string& cmd, const std::string& args)

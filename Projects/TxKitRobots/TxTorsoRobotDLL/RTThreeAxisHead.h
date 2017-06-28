@@ -75,7 +75,8 @@ public:
 
 	virtual void SetRotation(const math::vector3d& rotation);
 	virtual void SetPosition(const math::vector3d& pos);
-	virtual math::vector3d GetRotation() ;
+	virtual math::vector3d GetRotation();
+	virtual math::vector3d GetPosition();
 	void _onSerialData(int size, char *buffer);
 
 	void SetPgain(int id, int val);
