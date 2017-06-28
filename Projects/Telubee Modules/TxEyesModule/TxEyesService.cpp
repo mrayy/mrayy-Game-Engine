@@ -49,7 +49,7 @@ namespace TBee
 
 IMPLEMENT_RTTI(TxEyesService, IServiceModule);
 
-const std::string TxEyesService::ModuleName("TxEyesService");
+const std::string TxEyesService::ModuleName("TxEyesServiceModule");
 
 
 class TxEyesServiceImpl :public video::IGStreamerStreamerListener, public IServiceContextListener

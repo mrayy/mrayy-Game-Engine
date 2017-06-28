@@ -23,7 +23,7 @@ namespace TBee
 
 IMPLEMENT_RTTI(TxMouthService, IServiceModule);
 
-const std::string TxMouthService::ModuleName("TxMouthService");
+const std::string TxMouthService::ModuleName("TxMouthServiceModule");
 
 
 class TxMouthServiceImpl :public video::IGStreamerStreamerListener, public IServiceContextListener

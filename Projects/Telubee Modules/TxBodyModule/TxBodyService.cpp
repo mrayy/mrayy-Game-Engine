@@ -19,7 +19,7 @@ namespace TBee
 {
 
 IMPLEMENT_RTTI(TxBodyService, IServiceModule)
-	const std::string TxBodyService::ModuleName("TxBodyService");
+	const std::string TxBodyService::ModuleName("TxBodyServiceModule");
 
 
 class TxBodyServiceImpl :public IServiceContextListener, public IRobotHandlerListener

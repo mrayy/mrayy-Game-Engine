@@ -24,7 +24,7 @@ namespace TBee
 
 IMPLEMENT_RTTI(TxEarsService, IServiceModule);
 
-const std::string TxEarsService::ModuleName("TxEarsService");
+const std::string TxEarsService::ModuleName("TxEarsServiceModule");
 
 
 class TxEarsServiceImpl :public video::IGStreamerStreamerListener, public IServiceContextListener

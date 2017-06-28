@@ -44,6 +44,8 @@ namespace mray
 
 	};
 
+
+
 	class ServiceLoaderRenderContext :public TBee::ServiceRenderContext
 	{
 		math::vector2di m_currPos;
@@ -69,6 +71,8 @@ ServiceLoader::ServiceLoader()
 {
 	m_inited = false;
 	m_valueRootElement = 0;
+
+	m_benchmarks = new Benchmarks();
 }
 ServiceLoader::~ServiceLoader()
 {
@@ -76,6 +80,7 @@ ServiceLoader::~ServiceLoader()
 	_destroy();
 	delete m_renderContext;
 	delete network::INetworkPortAssigner::getInstancePtr();
+	delete m_benchmarks;
 }
 
 bool ServiceLoader::Init(int argc, _TCHAR* argv[])
@@ -413,6 +418,11 @@ void ServiceLoader::_RenderInfo()
 
 	m_renderContext->RenderText(core::string("Status: ") + (m_memory->UserConnected ? "User Connected" : "User Disconnected"), 0, 1, video::SColor(CONSOLE_CLR_INFO, 1));
 	m_renderContext->RenderText(core::string("Update Rate: ") + core::StringConverter::toString(m_memory->dataRate), 0, 1, video::SColor(CONSOLE_CLR_INFO, 1));
+
+	m_renderContext->RenderText(core::string("Performance: ") , 0, 1, video::SColor(CONSOLE_CLR_INFO, 1));
+	m_renderContext->RenderText(core::string("CPU Usage      : ") + core::StringConverter::toString((int)m_benchmarks->CPUProcessUsage->getCurrentValue())+"%", 5, 0, video::SColor(CONSOLE_CLR_INFO, 1));
+	m_renderContext->RenderText(core::string("Physical Memory: ") + core::StringConverter::toString((int)(m_benchmarks->PhysicalMemoryUsage->getCurrentValue() / (1024 * 1024))) + "MB", 5, 0, video::SColor(CONSOLE_CLR_INFO, 1));
+	m_renderContext->RenderText(core::string("Virtual Memory : ") + core::StringConverter::toString((int)(m_benchmarks->VirtualMemoryUsage->getCurrentValue() / (1024 * 1024))) + "MB", 5, 0, video::SColor(CONSOLE_CLR_INFO, 1));
 	if (m_memory->UserConnected)
 	{
 		m_renderContext->RenderText("User IP Address:" + m_memory->userConnectionData.userData.clientAddress.toString(), 0, 1, video::SColor(CONSOLE_CLR_SUCCESS, 1));

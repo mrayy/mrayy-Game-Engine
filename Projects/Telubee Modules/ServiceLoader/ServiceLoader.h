@@ -8,6 +8,7 @@
 #include "IServiceModule.h"
 #include "IUDPClient.h"
 #include "XMLTree.h"
+#include "Benchmarks.h"
 
 namespace mray
 {
@@ -29,6 +30,8 @@ protected:
 	TBee::TBeeServiceContext m_context;
 	xml::XMLTree m_valueTree;
 	xml::XMLElement* m_valueRootElement;
+
+	Benchmarks* m_benchmarks;
 
 	std::string m_moduleName;
 	bool m_inited;

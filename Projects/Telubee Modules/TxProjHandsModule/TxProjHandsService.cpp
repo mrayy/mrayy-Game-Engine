@@ -17,7 +17,7 @@ namespace TBee
 {
 
 IMPLEMENT_RTTI(TxProjHandsService, IServiceModule)
-const std::string TxProjHandsService::ModuleName("TxProjHandsService");
+const std::string TxProjHandsService::ModuleName("TxProjHandsServiceModule");
 
 
 
