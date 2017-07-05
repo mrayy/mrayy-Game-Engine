@@ -13,6 +13,8 @@
 #include "StringConverter.h"
 #include "ILogManager.h"
 #include "IThreadManager.h"
+#include "CMyListener.h"
+#include "AveragePer.h"
 
 #include <gst/app/gstappsrc.h>
 namespace mray
@@ -20,7 +22,7 @@ namespace mray
 namespace video
 {
 
-class GstNetworkVideoStreamerImpl :public GstPipelineHandler,public IPipelineListener
+class GstNetworkVideoStreamerImpl :public GstPipelineHandler,public IPipelineListener,public IMyListenerCallback
 {
 protected:
 
@@ -38,15 +40,19 @@ protected:
 
 	video::ImageInfo m_tmp;
 
+	AveragePer m_bytesSent;
+
 	struct VideoSrcData
 	{
 		VideoSrcData()
 		{
 			o = 0;
 			videoSink = 0;
+			preSent = 0;
 		}
 		GstNetworkVideoStreamerImpl* o;
 
+		GstMyListener* preSent;
 		GstElement* videoSink;
 	};
 	std::vector<VideoSrcData> m_srcData;
@@ -114,7 +120,7 @@ public:
 		}
 		else
 		{
-			videoStr += " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port=" + core::StringConverter::toString(m_videoPorts[i]) + " host=" + m_ipAddr + " sync=true ";
+			videoStr += " ! mylistener name=preSent" + core::StringConverter::toString(i) + " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port=" + core::StringConverter::toString(m_videoPorts[i]) + " host=" + m_ipAddr + " sync=true ";
 			//videoStr += "! fpsdisplaysink sync=false";
 		}
 		return videoStr;
@@ -169,6 +175,13 @@ public:
 
 	}
 
+	virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * buffer)
+	{
+		GstMapInfo map;
+		gst_buffer_map(buffer, &map, GST_MAP_READ);
+		m_bytesSent.Add(map.size);
+		gst_buffer_unmap(buffer, &map);
+	}
 	void BindPorts(const std::string& addr, uint *videoPorts, uint count, bool rtcp)
 	{
 		if (count != m_videoSrc->GetStreamsCount())
@@ -231,6 +244,13 @@ public:
 		SetPipeline(pipeline);
 		_UpdatePorts();
 		m_videoSrc->LinkWithPipeline(static_cast<void*>(pipeline));
+		for (int i = 0; i < m_videoSrc->GetStreamsCount(); ++i)
+		{
+			core::string name="preSent" + core::StringConverter::toString(i);
+			m_srcData[i].preSent = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline),name.c_str()));
+			if (m_srcData[i].preSent)
+				m_srcData[i].preSent->listeners->AddListener(this);
+		}
 		/*
 		printf("Starting video streams\nPort Numbers:\n");
 		for (int i=0;i<m_srcData.size();++i)
@@ -257,6 +277,10 @@ public:
 		GstPipelineHandler::Close();
 	}
 
+	int GetAverageBytesSent()
+	{
+		return m_bytesSent.GetAverage();
+	}
 
 	virtual void OnPipelineReady(GstPipelineHandler* p){ m_owner->__FIRE_OnStreamerReady(m_owner); }
 	virtual void OnPipelinePlaying(GstPipelineHandler* p){ m_owner->__FIRE_OnStreamerStarted(m_owner); }
@@ -283,6 +307,10 @@ void GstNetworkVideoStreamer::Stop()
 }
 
 
+int GstNetworkVideoStreamer::GetAverageBytesSent()
+{
+	return m_impl->GetAverageBytesSent();
+}
 void GstNetworkVideoStreamer::BindPorts(const std::string& addr, uint *videoPorts, uint count, bool rtcp)
 {
 	m_impl->BindPorts(addr, videoPorts,count, rtcp);

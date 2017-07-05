@@ -47,6 +47,7 @@ public:
 	void LinkWithPipeline(void* pipeline);
 	virtual math::vector2di GetFrameSize(int i);
 
+	virtual int GetCurrentFPS();
 
 	virtual void Start();
 	virtual void Pause();

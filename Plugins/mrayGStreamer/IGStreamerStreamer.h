@@ -43,6 +43,7 @@ public:
 	virtual ulong GetClockBase();
 	virtual void SetClockAddr(const core::string& host, int port);
 	virtual int GetClockPort();
+	virtual int GetAverageBytesSent(){ return 0; }
 };
 
 }

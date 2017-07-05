@@ -728,7 +728,7 @@ bool RobotSerialPort::GetJointValues(std::vector<float>& values)
 	values[0] = tilt;
 	values[1] = rot.x;
 	values[2] = pan;
-	values[3] = rot.y;
+	values[3] = -rot.y;
 	values[4] = roll;
 	values[5] = rot.z;
 	return true;

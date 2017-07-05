@@ -72,7 +72,6 @@ ServiceLoader::ServiceLoader()
 	m_inited = false;
 	m_valueRootElement = 0;
 
-	m_benchmarks = new Benchmarks();
 }
 ServiceLoader::~ServiceLoader()
 {
@@ -123,6 +122,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 	GCPtr<StreamLogger> logger = new StreamLogger(true);
 	logger->setStream(gFileSystem.createTextFileWriter( logFile));
 	gLogManager.addLogDevice(logger);
+	m_benchmarks = new Benchmarks();
 
 	network::createWin32Network();
 

@@ -45,6 +45,8 @@ public:
 	virtual void LinkWithPipeline(void* pipeline);
 	int GetVideoSrcCount();
 
+	virtual int GetCurrentFPS();
+
 	int GetStreamsCount();
 
 };

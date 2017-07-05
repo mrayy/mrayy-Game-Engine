@@ -121,6 +121,7 @@ public:
 
 		m_audioSrc = gst_bin_get_by_name(GST_BIN(GetPipeline()), "audioSrc");
 		g_object_set(m_audioSrc, "port", m_audioPort, 0);
+		gLogManager.log("GstNetworkAudioPlayer::Started at port: " + core::StringConverter::toString(m_audioPort), ELL_INFO);
 	//	SET_SRC(audioSrc, m_audioPort);
 		if (m_rtcp)
 		{

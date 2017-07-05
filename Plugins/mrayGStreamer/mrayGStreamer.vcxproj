@@ -206,13 +206,16 @@
   <ItemGroup>
     <ClInclude Include="AppSrcVideoSrc.h" />
     <ClInclude Include="AudioAppSinkHandler.h" />
+    <ClInclude Include="AveragePer.h" />
     <ClInclude Include="CameraVideoSrc.h" />
     <ClInclude Include="CMyListener.h" />
     <ClInclude Include="CMySink.h" />
     <ClInclude Include="CMySrc.h" />
     <ClInclude Include="CMyUDPSink.h" />
     <ClInclude Include="CMyUDPSrc.h" />
+    <ClInclude Include="CustomAudioGrabber.h" />
     <ClInclude Include="EyegazeCameraVideoSrc.h" />
+    <ClInclude Include="GstAppNetAudioStreamer.h" />
     <ClInclude Include="GstCustomDataStreamer.h" />
     <ClInclude Include="GstNetworkVideoStreamer.h" />
     <ClInclude Include="GstCustomVideoStreamer.h" />
@@ -229,6 +232,7 @@
     <ClInclude Include="GStreamerPlayback.h" />
     <ClInclude Include="GstStreamBin.h" />
     <ClInclude Include="IAppSinkHandler.h" />
+    <ClInclude Include="IAudioGrabber.h" />
     <ClInclude Include="ICustomVideoSrc.h" />
     <ClInclude Include="IGStreamerPlayer.h" />
     <ClInclude Include="IGstAppListener.h" />
@@ -236,6 +240,7 @@
     <ClInclude Include="GstVideoPlayer.h" />
     <ClInclude Include="IGStreamerStreamer.h" />
     <ClInclude Include="IStreamListener.h" />
+    <ClInclude Include="LocalAudioGrabber.h" />
     <ClInclude Include="rtp.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -246,6 +251,9 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
     </ClCompile>
     <ClCompile Include="AudioAppSinkHandler.cpp" />
+    <ClCompile Include="AveragePer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
+    </ClCompile>
     <ClCompile Include="CameraVideoSrc.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
     </ClCompile>
@@ -254,14 +262,18 @@
     <ClCompile Include="CMySrc.cpp" />
     <ClCompile Include="CMyUDPSink.cpp" />
     <ClCompile Include="CMyUDPSrc.cpp" />
+    <ClCompile Include="CustomAudioGrabber.cpp" />
     <ClCompile Include="EyegazeCameraVideoSrc.cpp" />
+    <ClCompile Include="GstAppNetAudioStreamer.cpp" />
     <ClCompile Include="GstCustomDataStreamer.cpp" />
     <ClCompile Include="GstNetworkVideoStreamer.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
     </ClCompile>
     <ClCompile Include="GstCustomVideoStreamer.cpp" />
     <ClCompile Include="GstLocalVideoPlayer.cpp" />
-    <ClCompile Include="GstNetworkAudioPlayer.cpp" />
+    <ClCompile Include="GstNetworkAudioPlayer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
+    </ClCompile>
     <ClCompile Include="GstNetworkAudioStreamer.cpp" />
     <ClCompile Include="GstNetworkMultipleVideoPlayer.cpp" />
     <ClCompile Include="GstPipelineHandler.cpp" />
@@ -276,6 +288,7 @@
     <ClCompile Include="ICustomVideoSrc.cpp" />
     <ClCompile Include="IGStreamerPlayer.cpp" />
     <ClCompile Include="IGStreamerStreamer.cpp" />
+    <ClCompile Include="LocalAudioGrabber.cpp" />
     <ClCompile Include="rtp.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

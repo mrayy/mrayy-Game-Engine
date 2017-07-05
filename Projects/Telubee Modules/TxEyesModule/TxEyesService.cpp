@@ -29,6 +29,7 @@
 #include "capDevice.h"
 #include "ModuleSharedMemory.h"
 #include "INetworkPortAssigner.h"
+#include "Benchmarks.h"
 
 #include <conio.h>
 #include <XMLTextNode.h>
@@ -111,6 +112,9 @@ public:
 
 	TBeeServiceContext* m_context;
 
+	Benchmarks m_benchmarks;
+	FILE* benchmarkFile;
+	ulong m_benchLastTime;
 
 public:
 	TxEyesServiceImpl()
@@ -137,9 +141,13 @@ public:
 		m_lastGainUpdate = 0;
 		m_maxGain = 0.25;
 		m_autoGain = false;
+		benchmarkFile = fopen("TxEyesServiceImpl.benchmark", "w");
+		fprintf(benchmarkFile, "FPS\tBytes\tCPU\tMem\n");
+		m_benchLastTime = gEngine.getTimer()->getMilliseconds();
 	}
 	~TxEyesServiceImpl()
 	{
+		fclose(benchmarkFile);
 		Destroy();
 		m_streamers = 0;
 		delete m_cameraProfileManager;
@@ -423,6 +431,7 @@ public:
 			video::GstNetworkVideoStreamer* hs = new video::GstNetworkVideoStreamer();
 			hs->AddListener(this);
 
+
 			
 			video::ICustomVideoSrc* src = m_cameraController->CreateVideoSrc();
 			m_cameraSource = src;
@@ -690,6 +699,15 @@ public:
 			}*/
 		}
 
+		ulong t=gEngine.getTimer()->getMilliseconds();
+		if (t-m_benchLastTime>1000)
+		{
+			m_benchLastTime = t;
+			fprintf(benchmarkFile, "%d\t%d\t%d\t%d\n", m_cameraSource->GetCurrentFPS(), m_streamers->GetStream("Video")->GetAverageBytesSent(),
+				(int)m_benchmarks.CPUProcessUsage->getCurrentValue(), (int)m_benchmarks.PhysicalMemoryUsage->getCurrentValue());
+
+		}
+
 		m_cameraController->Update();
 
 		if (kbhit())
@@ -723,6 +741,14 @@ public:
 		context->RenderText(msg, 0, 0);
 		msg = "   Bitrate:" + core::StringConverter::toString(m_currentSettings.bitrate);
 		context->RenderText(msg, 0, 0);
+
+		msg = "Stream Status:";
+		context->RenderText(msg, 0, 0);
+		msg = "   Current FPS:" + core::StringConverter::toString(m_cameraSource->GetCurrentFPS());
+		context->RenderText(msg, 0, 0);
+		msg = "   Average Sent Bytes:" + core::StringConverter::toString(m_streamers->GetStream("Video")->GetAverageBytesSent()/1024)+"KB";
+		context->RenderText(msg, 0, 0);
+
 
 		if (m_enableEyegaze)
 		{

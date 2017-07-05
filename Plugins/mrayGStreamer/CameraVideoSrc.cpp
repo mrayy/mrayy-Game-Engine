@@ -3,6 +3,7 @@
 #include "CameraVideoSrc.h"
 #include "StringConverter.h"
 #include "CMyListener.h"
+#include "AveragePer.h"
 
 
 namespace mray
@@ -18,6 +19,8 @@ public:
 	std::vector<int> m_cams;
 	math::vector2di m_frameSize;
 	bool m_separateStreams;
+
+	AveragePer m_currentFps;
 
 	//ImageProcessorListener listener;
 
@@ -42,6 +45,8 @@ public:
 	{
 		for (IMyListenerCallback* i : listeners)
 			i->ListenerOnDataChained(src, bfr);
+
+		m_currentFps.Add(1);
 	}
 
 	void SetCameraIndex(std::vector<int> cams)
@@ -80,6 +85,11 @@ public:
 	int GetStreamsCount()
 	{
 		return m_separateStreams ? m_cams.size() : 1;
+	}
+
+	int GetCurrentFPS()
+	{
+		return m_currentFps.GetAverage();
 	}
 };
 
@@ -153,7 +163,7 @@ std::string CameraVideoSrc::_generateString(int i)
 			",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 		if (m_fps > 0)
 			videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
-		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+		videoStr += " ! mylistener name=imagecap ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 		
 	}
 	else
@@ -286,6 +296,12 @@ bool CameraVideoSrc::IsSeparateStreams()
 {
 	return m_impl->m_separateStreams;
 }
+
+int CameraVideoSrc::GetCurrentFPS()
+{
+	return m_impl->GetCurrentFPS();
+}
+
 
 }
 }

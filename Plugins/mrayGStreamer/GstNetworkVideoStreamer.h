@@ -45,7 +45,7 @@ public:
 	
 	void SetVideoSrc(ICustomVideoSrc* src);
 
-
+	virtual int GetAverageBytesSent();
 
 	bool CreateStream();
 	void Stream();

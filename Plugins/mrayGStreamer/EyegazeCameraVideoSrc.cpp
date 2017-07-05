@@ -8,9 +8,10 @@
 #include "IThreadManager.h"
 #include "IMutex.h"
 
+//#include "AveragePer.h"
 #include "FPSCalc.h"
-#include "Engine.h"
 #include "ITimer.h"
+#include "Engine.h"
 
 #include <gst/gst.h>
 
@@ -23,51 +24,11 @@ namespace video
 	{
 	public:
 
-		class BytesAverage
-		{
-			uint m_bytesCount;
-			ulong m_timestamp;
-
-			uint m_averageBytes;
-			uint m_totalBytes;
-		public:
-
-			DelegateEvent1< int> OnSample;
-
-			BytesAverage(){
-				Reset();
-			}
-			void AddBytes(uint count)
-			{
-				m_bytesCount += count;
-				m_totalBytes += count;
-
-				ulong ts = gEngine.getTimer()->getMilliseconds();
-				if (ts - m_timestamp > 1000){
-					m_timestamp = ts;
-					m_averageBytes = m_bytesCount;
-					m_bytesCount = 0;
-					OnSample(m_averageBytes);
-				}
-			}
-
-			void Reset()
-			{
-				m_bytesCount = 0;
-				m_totalBytes = 0;
-				m_averageBytes = 0;
-				m_timestamp = gEngine.getTimer()->getMilliseconds();
-			}
-
-			uint GetAverageBytes(){
-				return m_averageBytes;
-			}
-		};
 
 		bool m_inited;
 
 		bool m_eyePosDirty;
-		BytesAverage m_sentBytes;
+	//	AveragePer m_sentBytes;
 
 		ICustomVideoSrc* source;
 
@@ -122,8 +83,8 @@ namespace video
 			m_separateStreams = false;
 			source = 0;
 
-			m_sentBytes.OnSample += newClassDelegate1("", this, &EyegazeCameraVideoSrcImpl::OnBytesAverage);
-			averageBytesFile = fopen("BytesSent.txt", "w");
+			//m_sentBytes.OnSample += newClassDelegate1("", this, &EyegazeCameraVideoSrcImpl::OnBytesAverage);
+			//averageBytesFile = fopen("BytesSent.txt", "w");
 
 			//factorials of 640,480: (2)240, (4)120 , (5)96
 			//m_cropsize.set(240, 240);
@@ -146,7 +107,7 @@ namespace video
 		}
 
 		void OnBytesAverage(int bytes){
-			fprintf(averageBytesFile,"%d\t", bytes);
+	//		fprintf(averageBytesFile,"%d\t", bytes);
 		}
 
 		void SetEyegazePos(const std::vector<math::vector2d>& poses)
@@ -416,11 +377,11 @@ namespace video
 					m_gazeMutex->unlock();
 
 					memcpy(map.data + map.size - sizeof(ds.gaze), &ds.gaze, sizeof(ds.gaze));
-				}*/
+					}*/
+//				m_sentBytes.Add(map.size);
 
 				gst_buffer_unmap(buffer, &map);
 
-				m_sentBytes.AddBytes(map.size);
 
 			}
 		}
@@ -675,7 +636,7 @@ namespace video
 					}
 					if (m_data->m_levels > 0){
 						videoStr += tName + ". ! queue "; //
-						videoStr += " !  videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + " ! videoconvert ";
+						videoStr += " !  videoscale add-borders=false method=6 sharpen=0 envelope=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + " ! videoconvert ";
 						m_data->streamSize.x += sceneWidth;
 					}
 					else{
@@ -709,7 +670,7 @@ namespace video
 			}
 		}
 
-		fprintf(m_data->averageBytesFile, "%dx%d\n", m_data->streamSize.x, m_data->streamSize.y);
+		//fprintf(m_data->averageBytesFile, "%dx%d\n", m_data->streamSize.x, m_data->streamSize.y);
 		return videoStr;
 	}
 
@@ -782,7 +743,10 @@ namespace video
 		return m_data->m_levels;
 	}
 
-
+	int EyegazeCameraVideoSrc::GetCurrentFPS()
+	{
+		return m_data->source->GetCurrentFPS();
+	}
 }
 }
 

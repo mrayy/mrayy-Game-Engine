@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Benchmarks.h"
+#include "Engine.h"
+#include "ITimer.h"
 
 
 #include <windows.h>
@@ -94,11 +96,16 @@ namespace mray
 
 
 		Average _value;
+		double lastV;
+
+		ulong lastT;
 
 	public:
 		void init(){
 			SYSTEM_INFO sysInfo;
 			FILETIME ftime, fsys, fuser;
+
+			lastT = gEngine.getTimer()->getMilliseconds();
 
 			GetSystemInfo(&sysInfo);
 			numProcessors = sysInfo.dwNumberOfProcessors;
@@ -110,9 +117,17 @@ namespace mray
 			GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
 			memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
 			memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+
+			lastV = 0;
 		}
 
 		double getCurrentValue(){
+
+			ulong t=gEngine.getTimer()->getMilliseconds();
+			if (t - lastT < 1000)
+				return lastV;
+			lastT = t;
+
 			FILETIME ftime, fsys, fuser;
 			ULARGE_INTEGER now, sys, user;
 			double percent;
@@ -130,7 +145,8 @@ namespace mray
 			lastCPU = now;
 			lastUserCPU = user;
 			lastSysCPU = sys;
-
+			lastV = percent * 100;
+			return lastV;
 			return _value.Add(percent * 100);
 		}
 

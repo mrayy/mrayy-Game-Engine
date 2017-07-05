@@ -279,6 +279,9 @@
     <ClInclude Include="CrashHandler.h">
       <Filter>Source Files\OS</Filter>
     </ClInclude>
+    <ClInclude Include="Benchmarks.h">
+      <Filter>Source Files\OS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -432,6 +435,9 @@
       <Filter>Source Files\OS</Filter>
     </ClCompile>
     <ClCompile Include="CrashHandler.cpp">
+      <Filter>Source Files\OS</Filter>
+    </ClCompile>
+    <ClCompile Include="Benchmarks.cpp">
       <Filter>Source Files\OS</Filter>
     </ClCompile>
   </ItemGroup>

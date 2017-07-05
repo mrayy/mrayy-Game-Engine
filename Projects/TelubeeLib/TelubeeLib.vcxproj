@@ -161,8 +161,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>pdh.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\lib\$(Configuration)64;..\..\Dependencies\lib\$(Configuration)64;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -174,6 +173,7 @@
     <ClInclude Include="BaseAppState.h" />
     <ClInclude Include="BaseRenderState.h" />
     <ClInclude Include="AppData.h" />
+    <ClInclude Include="Benchmarks.h" />
     <ClInclude Include="CameraConfigurationManager.h" />
     <ClInclude Include="CameraTextureSource.h" />
     <ClInclude Include="CommunicationMessages.h" />
@@ -301,6 +301,7 @@
     <ClCompile Include="ApplicationStateManager.cpp" />
     <ClCompile Include="BaseAppState.cpp" />
     <ClCompile Include="BaseRenderState.cpp" />
+    <ClCompile Include="Benchmarks.cpp" />
     <ClCompile Include="CameraConfigurationManager.cpp" />
     <ClCompile Include="CameraTextureSource.cpp" />
     <ClCompile Include="CommunicationMessages.cpp" />

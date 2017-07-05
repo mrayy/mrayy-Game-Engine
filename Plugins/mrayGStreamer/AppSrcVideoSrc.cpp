@@ -6,6 +6,8 @@
 #include "CMySrc.h"
 #include "CMyUDPSink.h"
 #include "ILogManager.h"
+#include "AveragePer.h"
+#include "CMyListener.h"
 
 
 namespace mray
@@ -16,8 +18,9 @@ namespace video
 	class AppSrcVideoSrcImpl
 	{
 	public:
-		struct VideoSrcData
+		class VideoSrcData:public IMyListenerCallback
 		{
+		public:
 			VideoSrcData()
 			{
 				videoSrc = 0;
@@ -25,12 +28,18 @@ namespace video
 				sourceID = 0;
 				o = 0;
 			}
+			virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * buffer)
+			{
+				currentFPS.Add(1);
+			}
 			GstAppSrcCallbacks srcCB;
 			GstAppSrc* videoSrc;
 			//GstMySrc * videoSrc;
 			int index;
 			AppSrcVideoSrcImpl* o;
 			int sourceID;
+
+			AveragePer currentFPS;
 
 
 		};
@@ -181,6 +190,13 @@ namespace video
 				m_videoSrc[i].videoSrc = GST_APP_SRC(gst_bin_get_by_name(GST_BIN((GstElement*)pipeline), name.c_str()));
 				m_videoSrc[i].o = this;
 				m_videoSrc[i].index = i;
+
+				GstMyListener* imageCapL = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "imagecap"));
+				if (imageCapL)
+				{
+					imageCapL->listeners->AddListener(&m_videoSrc[i]);
+
+				}
 				if (m_videoSrc[i].videoSrc){
 					printf("Linking Video Src:%d\n", i);
 					gst_base_src_set_blocksize(GST_BASE_SRC(m_videoSrc[i].videoSrc), 640 * 480 * 3);
@@ -236,6 +252,7 @@ namespace video
 						",height=" + core::StringConverter::toString(m_frameSize.y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1";
 
 				}
+				videoStr += "! mylistener name=postCap" + core::StringConverter::toString(i);
 			}
 			else{
 				videoStr = "mysrc name=src" + core::StringConverter::toString(i) +
@@ -243,7 +260,8 @@ namespace video
 			}
 			//add time stamp
 
-			return videoStr;
+
+			return videoStr ;
 		}
 
 		void Close()
@@ -253,6 +271,23 @@ namespace video
 				if (m_videoSrc[i].videoSrc)
 					gst_element_send_event(GST_ELEMENT(m_videoSrc[i].videoSrc), gst_event_new_eos());
 			}
+		}
+
+		int GetCurrentFPS()
+		{
+			int total = 0;
+			int n = 0;
+			for (int i = 0; i < m_videoSrc.size(); ++i)
+			{
+				if (m_videoSrc[i].videoSrc)
+				{
+					total += m_videoSrc[i].currentFPS.GetAverage();
+					n++;
+				}
+			}
+			if (n == 0)
+				return 0;
+			return total / n;
 		}
 	};
 
@@ -317,6 +352,11 @@ void AppSrcVideoSrc::Pause()
 void AppSrcVideoSrc::Close()
 {
 
+}
+
+int AppSrcVideoSrc::GetCurrentFPS()
+{
+	return m_impl->GetCurrentFPS();
 }
 
 }

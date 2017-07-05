@@ -56,10 +56,10 @@
       <Filter>StreamType\Player</Filter>
     </ClCompile>
     <ClCompile Include="AppSrcVideoSrc.cpp">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClCompile>
     <ClCompile Include="CameraVideoSrc.cpp">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClCompile>
     <ClCompile Include="AudioAppSinkHandler.cpp">
       <Filter>Handlers</Filter>
@@ -68,7 +68,7 @@
       <Filter>Handlers</Filter>
     </ClCompile>
     <ClCompile Include="ICustomVideoSrc.cpp">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClCompile>
     <ClCompile Include="GstCustomDataStreamer.cpp">
       <Filter>StreamType\Streamer</Filter>
@@ -77,13 +77,25 @@
       <Filter>StreamType\Streamer</Filter>
     </ClCompile>
     <ClCompile Include="EyegazeCameraVideoSrc.cpp">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClCompile>
     <ClCompile Include="CMyListener.cpp">
       <Filter>Elements</Filter>
     </ClCompile>
     <ClCompile Include="rtp.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="AveragePer.cpp">
+      <Filter>StreamType</Filter>
+    </ClCompile>
+    <ClCompile Include="GstAppNetAudioStreamer.cpp">
+      <Filter>StreamType\Streamer</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalAudioGrabber.cpp">
+      <Filter>StreamType\Streamer\AudioGrabbers</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomAudioGrabber.cpp">
+      <Filter>StreamType\Streamer\AudioGrabbers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -150,13 +162,13 @@
       <Filter>StreamType\Player</Filter>
     </ClInclude>
     <ClInclude Include="ICustomVideoSrc.h">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClInclude>
     <ClInclude Include="AppSrcVideoSrc.h">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClInclude>
     <ClInclude Include="CameraVideoSrc.h">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClInclude>
     <ClInclude Include="AudioAppSinkHandler.h">
       <Filter>Handlers</Filter>
@@ -171,13 +183,26 @@
       <Filter>StreamType\Streamer</Filter>
     </ClInclude>
     <ClInclude Include="EyegazeCameraVideoSrc.h">
-      <Filter>StreamType\Streamer\CustomSrc</Filter>
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClInclude>
     <ClInclude Include="CMyListener.h">
       <Filter>Elements</Filter>
     </ClInclude>
     <ClInclude Include="rtp.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="AveragePer.h" />
+    <ClInclude Include="GstAppNetAudioStreamer.h">
+      <Filter>StreamType\Streamer</Filter>
+    </ClInclude>
+    <ClInclude Include="IAudioGrabber.h">
+      <Filter>StreamType\Streamer\AudioGrabbers</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalAudioGrabber.h">
+      <Filter>StreamType\Streamer\AudioGrabbers</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomAudioGrabber.h">
+      <Filter>StreamType\Streamer\AudioGrabbers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -205,7 +230,10 @@
     <Filter Include="Handlers">
       <UniqueIdentifier>{6812035b-b5ea-4dcc-92ea-c3208a262540}</UniqueIdentifier>
     </Filter>
-    <Filter Include="StreamType\Streamer\CustomSrc">
+    <Filter Include="StreamType\Streamer\AudioGrabbers">
+      <UniqueIdentifier>{8c460d32-1b95-479d-8c8b-c3c4fd92729c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StreamType\Streamer\VideoGrabber">
       <UniqueIdentifier>{5cab6854-0d3e-4da6-9ca4-d44b78c79800}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

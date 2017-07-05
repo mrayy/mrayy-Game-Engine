@@ -41,6 +41,8 @@ public:
 
 	virtual math::vector2di GetFrameSize(int i);
 
+	virtual int GetCurrentFPS();
+
 	void Start() ;
 	void Pause() ;
 	void Close() ;
