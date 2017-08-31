@@ -29,6 +29,7 @@ protected:
 	serial::Serial* m_serial;
 
 	ServoParameters m_parameters[3];
+	bool m_paramsLoaded;
 	float m_limits[3][2];
 
 	unsigned short m_lastValues[3];

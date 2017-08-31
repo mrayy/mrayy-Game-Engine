@@ -4,7 +4,9 @@
 #include "StringConverter.h"
 #include "CMyListener.h"
 #include "AveragePer.h"
+#include "ILogManager.h"
 
+#include <hash_map>
 
 namespace mray
 {
@@ -20,13 +22,13 @@ public:
 	math::vector2di m_frameSize;
 	bool m_separateStreams;
 
-	AveragePer m_currentFps;
+	std::vector<AveragePer> m_currentFps;
 
 	//ImageProcessorListener listener;
 
-	GstMyListener *m_imagecapListener;
+	std::vector<GstMyListener*> m_imagecapListener;
 
-	std::vector<IMyListenerCallback*> listeners;
+	std::hash_map<int, std::vector<IMyListenerCallback*>> listeners;
 
 public:
 	CameraVideoSrcImpl()
@@ -34,7 +36,6 @@ public:
 		m_frameSize.set(1280, 720);
 		m_captureType = "RAW";
 		m_separateStreams = false;
-		m_imagecapListener = 0;
 	}
 	virtual ~CameraVideoSrcImpl()
 	{
@@ -43,15 +44,30 @@ public:
 
 	virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * bfr)
 	{
-		for (IMyListenerCallback* i : listeners)
-			i->ListenerOnDataChained(src, bfr);
+		int index = -1;
+		for (int i = 0; i < m_imagecapListener.size(); ++i)
+		{
+			if (src == m_imagecapListener[i])
+			{
+				index = i;
+				break;
+			}
+		}
+		if (index == -1)
+			return;
+		if (listeners.find(index) != listeners.end())
+		{
+			for (IMyListenerCallback* i : listeners[index])
+				i->ListenerOnDataChained(src, bfr);
+		}
 
-		m_currentFps.Add(1);
+		m_currentFps[index].Add(1);
 	}
 
 	void SetCameraIndex(std::vector<int> cams)
 	{
 		m_cams = cams;
+		m_currentFps.resize(cams.size());
 	}
 	void  SetResolution(int width, int height, int fps, bool free)
 	{
@@ -65,18 +81,26 @@ public:
 
 	void LinkWithPipeline(void* pipeline)
 	{
-
-		m_imagecapListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "imagecap"));
-		if (m_imagecapListener)
+		m_imagecapListener.clear();
+		for (int i = 0; i < m_cams.size(); ++i)
 		{
-			m_imagecapListener->listeners->AddListener(this);
-			
+			GstMyListener *l = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), ("imagecap" + core::StringConverter::toString(i)).c_str()));
+			if (l)
+			{
+				l->listeners->AddListener(this);
+			}
+
+			m_imagecapListener.push_back(l);
 		}
 	}
 
-	void AddListener(IMyListenerCallback* l)
+	void AddListener(IMyListenerCallback* l, int i)
 	{
-		listeners.push_back(l);
+		if (listeners.find(i) == listeners.end())
+		{
+			listeners.insert(make_pair(i, std::vector<IMyListenerCallback*>()));
+		}
+		listeners[i].push_back(l);
 	}
 	int GetVideoSrcCount()
 	{
@@ -87,9 +111,11 @@ public:
 		return m_separateStreams ? m_cams.size() : 1;
 	}
 
-	int GetCurrentFPS()
+	int GetCurrentFPS(int i)
 	{
-		return m_currentFps.GetAverage();
+		if (i >= m_currentFps.size())
+			return -1;
+		return m_currentFps[i].GetAverage();
 	}
 };
 
@@ -129,6 +155,9 @@ std::string CameraVideoSrc::GetEncodingStr()
 				" speed-preset=superfast pass=cbr tune=zerolatency sync-lookahead=0 rc-lookahead=0 sliced-threads=true key-int-max=5"
 				" psy-tune=1 ";*/
 
+			//videoStr += "! x264enc speed-preset=superfast ! avdec_h264 ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+				//	" height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " !videoconvert ";
+
 			videoStr += BuildStringH264();
 		}
 
@@ -161,10 +190,12 @@ std::string CameraVideoSrc::_generateString(int i)
 		//" do-timestamp=true is-live=true "//"block=true"
 		videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 			",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+ //		videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x*2) +
+// 			" height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " ";
 		if (m_fps > 0)
 			videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
-		videoStr += " ! mylistener name=imagecap ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
-		
+		videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i) + " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+
 	}
 	else
 		videoStr="videotestsrc ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
@@ -228,11 +259,15 @@ std::string CameraVideoSrc::_generateFullString()
 				//" do-timestamp=true is-live=true "//"block=true"
 				videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 					",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+
 				if (m_fps > 0)
 					videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
 
 				videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
-				videoStr += " ! mylistener name=imagecap ";
+				videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+// 				videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+// 					" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+
 // 					" caps=\"video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 // 					",height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + ",format=GRAY8\" ";
 				if (mixer)
@@ -280,9 +315,9 @@ int CameraVideoSrc::GetStreamsCount()
 
 }
 
-void CameraVideoSrc::AddPostCaptureListener(IMyListenerCallback* listener)
+void CameraVideoSrc::AddPostCaptureListener(IMyListenerCallback* listener, int i)
 {
-	m_impl->AddListener(listener);
+	m_impl->AddListener(listener,i);
 }
 math::vector2di CameraVideoSrc::GetFrameSize(int i)
 {
@@ -297,9 +332,9 @@ bool CameraVideoSrc::IsSeparateStreams()
 	return m_impl->m_separateStreams;
 }
 
-int CameraVideoSrc::GetCurrentFPS()
+int CameraVideoSrc::GetCurrentFPS(int i)
 {
-	return m_impl->GetCurrentFPS();
+	return m_impl->GetCurrentFPS(i);
 }
 
 

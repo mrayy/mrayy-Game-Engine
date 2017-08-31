@@ -524,7 +524,7 @@ void ServiceHostManager::_ProcessServiceMessage(const core::string data, network
 			m_serviceList[i].pingSent = 0;
 			m_dataMutex->unlock();
 		}
-	}if (msg == "Broadcast") // broadcast message to all services
+	}else if (msg == "Broadcast") // broadcast message to all services
 	{
 		for (int i = 0; i < m_serviceList.size(); ++i)
 		{
@@ -534,6 +534,33 @@ void ServiceHostManager::_ProcessServiceMessage(const core::string data, network
 				m_commLink->SendTo(&m_serviceList[i].address, data.c_str(), data.length());
 			m_dataMutex->unlock();
 		}
+	}
+	else if (msg == "Pong")
+	{
+		int i = GetServiceByAddress(src);
+		if (i != -1)
+		{
+			//printf("Pong message recevied from :%s\n", m_serviceList[i].name.c_str());
+			m_dataMutex->lock();
+			m_serviceList[i].lastTime = m_timer->getMilliseconds();
+			m_serviceList[i].pingSent = 0;
+			m_dataMutex->unlock();
+		}
+	}
+	else if(msg == "RegCap")
+	{
+		m_capabilities.AddValue(root->Attribute("Cat"), root->Attribute("Name"), root->Attribute("Value"));
+		_resendCapabilities();
+	}
+	else if (msg == "RmvCap")
+	{
+		m_capabilities.RemoveValue(root->Attribute("Cat"), root->Attribute("Name"));
+		_resendCapabilities();
+	}
+	else if (msg == "RmvCapCat")
+	{
+		m_capabilities.RemoveCategory(root->Attribute("Cat"));
+		_resendCapabilities();
 	}
 }
 
@@ -611,6 +638,8 @@ void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const 
 	m_memory->UserConnected = true;
 	m_memory->userConnectionData = data;
 
+	_resendCapabilities();
+
 
 }
 void ServiceHostManager::OnUserDisconnected(TBee::RobotCommunicator* sender, const network::NetAddress& address)
@@ -632,6 +661,31 @@ void ServiceHostManager::OnUserDataArrived(network::NetAddress* addr, const char
 		m_memory->dataRate = _currDataRate;
 		_currDataRate = 0;
 	}
+}
+
+
+void ServiceHostManager::_resendCapabilities()
+{
+	if (!m_memory->UserConnected)
+		return;
+	const int BufferLen = 65537;
+	uchar buffer[BufferLen];
+	OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
+	OS::StreamWriter wrtr(&stream);
+	xml::XMLWriter xmlWrtr;
+
+	int reply = (int)TBee::EMessages::Capabilities;
+	int len = stream.write(&reply, sizeof(reply));
+
+	xml::XMLElement* caps = m_capabilities.GetAsXML();
+	xmlWrtr.addElement(caps);
+	core::string xmlStr = xmlWrtr.flush();
+	delete caps;
+
+	len += wrtr.binWriteString(xmlStr);
+	network::NetAddress retAddr;
+	retAddr = m_memory->userConnectionData.userData.clientAddress;
+	m_commLink->SendTo(&retAddr, (char*)buffer, len);
 }
 
 void ServiceHostManager::OnUserMessage(network::NetAddress* addr, const core::string& target,const core::string& msg, const core::string& value)

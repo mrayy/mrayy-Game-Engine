@@ -160,6 +160,8 @@ public:
 		m_RobotHandler->GetRobotController()->ParseParameters(m_robotValueMap);
 		m_RobotHandler->SetListener(this);
 
+		m_context->serviceLoader->RegisterCapability(TxBodyService::ModuleName, "BodySupported","Yes") ;
+
 		m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 
 		//m_RobotHandler->Initialize();
@@ -172,6 +174,7 @@ public:
 	{
 		if (m_status == EServiceStatus::Idle)
 			return;
+		m_context->serviceLoader->RemoveCapabilityCategory(TxBodyService::ModuleName);
 		m_status = EServiceStatus::Idle;
 		m_context->RemoveListener(this);
 

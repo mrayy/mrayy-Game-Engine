@@ -114,9 +114,9 @@ public:
 
 		flatsize = size;
 
-		imageFormat = video::EPixel_LUMINANCE16;
+		imageFormat = video::EPixel_LUMINANCE8;
 		int len = size.x*size.y*PixelUtil::getPixelDescription(imageFormat).elemSizeB;
-		//flatsize.x *= 2;// / PixelUtil::getPixelDescription(imageFormat).elemSizeB;
+		flatsize.x *= 2;// / PixelUtil::getPixelDescription(imageFormat).elemSizeB;
 		_remapData = new uchar[len];
 
 		ovr.Close();
@@ -265,6 +265,7 @@ int OVRvisionCamGrabberData::_refcounter = 0;
 OVRvisionCamGrabber::OVRvisionCamGrabber()
 {
 	OVRvisionCamGrabberData::Ref();
+	gLogManager.log("Creating OVRVision Camera Grabber", ELL_INFO);
 }
 
 OVRvisionCamGrabber::~OVRvisionCamGrabber()

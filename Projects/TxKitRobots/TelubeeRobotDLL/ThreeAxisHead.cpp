@@ -11,7 +11,7 @@ namespace mray
 {
 
 
-	void head_SerialEventManager(uint32 object, uint32 event){
+	void head_SerialEventManager(Tserial_event * object, uint32 event){
 		char *buffer;
 		int   size;
 		Tserial_event *com;
@@ -52,7 +52,7 @@ bool ThreeAxisHead::Connect(const core::string& port)
 
 	comROBOT = new Tserial_event();
 	comROBOT->setManager(head_SerialEventManager);
-	connected = comROBOT->connect((char*)port.c_str(), 115200, SERIAL_PARITY_ODD, 8, FALSE, TRUE) == 0;
+	connected = comROBOT->connect((char*)port.c_str(), 115200, SERIAL_PARITY_NONE, 8, FALSE, FALSE) == 0;
 	if (!comROBOT->isconnected())
 	{
 	//	printf("Failed to connect robot\n");
@@ -61,8 +61,9 @@ bool ThreeAxisHead::Connect(const core::string& port)
 	}
 	else
 	{
-		comROBOT->setRxSize(15);
-		//_sendCommand("#ea");//enable angle logging
+		comROBOT->owner = this;
+		comROBOT->setRxSize(10);
+		_sendCommand("#ea");//enable angle logging
 	}
 	return comROBOT && comROBOT->isconnected();
 }
@@ -96,7 +97,7 @@ void ThreeAxisHead::SetRotation(const math::vector3d& rotation)
 	char sCommand[128];
 	sprintf_s(sCommand, 128, "#d %d %d %d", (int)(rotation.y * 100), (int)(rotation.x * 100), (int)(rotation.z * 100));
 	_sendCommand(sCommand);
-	m_rotation = rotation;
+	//m_rotation = rotation;
 }
 math::vector3d ThreeAxisHead::GetRotation()
 {
@@ -106,26 +107,54 @@ math::vector3d ThreeAxisHead::GetRotation()
 void ThreeAxisHead::_onSerialData(int size, char *buffer)
 {
 	char* ptr = buffer;
-	buffer[size - 1] = 0;
+	buffer[size ] = 0;
 	while (*ptr)
 	{
-		if (*ptr == '@')
-		{
-			++ptr;
-			break;
-		}
+		_buffer+=*ptr;
 		++ptr;
 	}
-	if (!*ptr)
+
+	char data[50];
+	int cnt = 0;
+	int idx = 0;
+	int i = 0;
+	for (i = 0; i < _buffer.size();++i)
+	{	
+
+		if (_buffer[i] == '@')
+		{
+			if (cnt == 0)
+			{
+				cnt = 1;
+			}
+			continue;
+		}
+		if (cnt == 0)
+			continue;
+		if (_buffer[i] == '\r')
+		{
+			if(cnt==1){
+				cnt = 2;
+				break;
+			}
+			continue;
+		}
+		data[idx] = _buffer[i];
+		++idx;
+	}
+	if (cnt!=2)
 		return;
-	std::vector<core::string> lst = core::StringUtil::Split(ptr, " ");
-	if (lst.size() == 0)
+	data[idx] = 0;
+	_buffer = _buffer.substr(i, _buffer.size() - i );
+	std::vector<core::string> lst = core::StringUtil::Split(data, " ");
+	if (lst.size() != 2)
 		return;
-	if (lst[0] == "angles ")//angles
+	if (lst[0] == "ang")//angles
 	{
+		lst = core::StringUtil::Split(lst[1], ",");
+		m_rotation.y = core::StringConverter::toFloat(lst[0]);
 		m_rotation.x = core::StringConverter::toFloat(lst[1]);
-		m_rotation.y = core::StringConverter::toFloat(lst[2]);
-		m_rotation.z = core::StringConverter::toFloat(lst[3]);
+		m_rotation.z = core::StringConverter::toFloat(lst[2]);
 	}
 }
 

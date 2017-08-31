@@ -222,6 +222,8 @@ class EncodedCameraStreamController :public ICameraSrcController
 	std::vector<int> _captureDevices;
 	capDeviceInput* _capDev;
 	bool _eyegaze;
+	
+
 	core::string _GetParameter(int device,const core::string& name)
 	{
 		if (device == -1 )
@@ -321,6 +323,7 @@ class EncodedCameraStreamController :public ICameraSrcController
 		if (isauto)
 			flags = 0x1;// VideoProcAmp_Flags_Auto;
 		else flags = 0x2;// VideoProcAmp_Flags_Manual;
+
 
 #define setValue(param)\
 		if (isauto)\
@@ -446,8 +449,10 @@ public:
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int ps = (y * width) + x;
-				buffer[ps] = (data[ps] & 0xFF);
-				buffer[ps + offset] = (data[ps] >> 8);
+
+//				data[ps] = data[ps] & 0x00FF;
+ 				buffer[ps] = (data[ps] & 0x00FF);
+ 				buffer[ps + offset] = (data[ps] >> 8);
 			}
 		}
 		memcpy(map.data, buffer, width*height * 2);
@@ -466,8 +471,9 @@ public:
 public:
 	TBee::TelubeeCameraConfiguration::ECameraCaptureType CaptureType;
 	ECameraType camtype;
-
+	video::OVRvisionCamGrabber* _ovrCam;
 	ImageProcessorListener _ovrListener;
+	core::string _ovrSettings;
 
 	bool ksSupport;
 	EncodedCameraStreamController(TBee::TelubeeCameraConfiguration::ECameraCaptureType t, ECameraType cam)
@@ -477,17 +483,22 @@ public:
 		CaptureType = t;
 		_capDev = new capDeviceInput();
 		_eyegaze = false;
+		_ovrCam = 0;
+
 	}
 	virtual ~EncodedCameraStreamController()
 	{
 		delete _capDev;
+		delete _ovrCam;
 	}
 	void EnableKernelStreaming(bool ks)
 	{
 		ksSupport = ks;
 	}
+
 	virtual void Start()
 	{
+		gLogManager.log("Starting camera grabber", ELL_INFO);
 		for (int i = 0; i < _captureDevices.size(); ++i)
 		{
 			_capDev->setupDevice(_captureDevices[i]);
@@ -548,7 +559,15 @@ public:
 			if (camtype == ECameraType::Ovrvision ||
 				camtype == ECameraType::OvrvisionCompressed)
 			{
-				src->AddPostCaptureListener(&_ovrListener);
+				gLogManager.log("Linking Overvision",ELL_INFO);
+				src->AddPostCaptureListener(&_ovrListener,0);
+				if (!_ovrCam)
+				{
+					_ovrCam = new video::OVRvisionCamGrabber();
+					_ovrCam->InitDevice(0,960,950,60);
+					_ovrSettings = _ovrCam->GetCameraSettings();
+					_ovrCam->Stop();
+				}
 			}
 			ret = src;
 		}
@@ -593,11 +612,18 @@ public:
 		for (int i = 0; i < _captureDevices.size(); ++i)
 		{
 			_setParam(_captureDevices[i], name, value);
-			
+			gLogManager.log("Changing Camera Parameter:" + name + " to:" + _GetParameter(_captureDevices[i], video::ICameraVideoGrabber::Param_Gain), ELL_INFO);
+
 		}
 	}
 	virtual core::string GetCameraParameterValue(const core::string& name, int i)
 	{
+		if (name == "settings" &&
+			(camtype == ECameraType::Ovrvision ||
+			camtype == ECameraType::OvrvisionCompressed))
+		{
+			return _ovrSettings;
+		}
 		return _GetParameter(_captureDevices[i],name);
 		
 	}

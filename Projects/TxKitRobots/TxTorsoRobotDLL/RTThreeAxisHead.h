@@ -32,9 +32,9 @@ class RTThreeAxisHead:public IHeadController
 	const int LED_OFF = 0;
 
 
-	const int RP2_PGAIN = 80;
-	const int RP2_DGAIN = 82;
-	const int RP2_IGAIN = 84;
+	const int RP2_DGAIN = 80;
+	const int RP2_IGAIN = 82;
+	const int RP2_PGAIN = 84;
 
 
 protected:

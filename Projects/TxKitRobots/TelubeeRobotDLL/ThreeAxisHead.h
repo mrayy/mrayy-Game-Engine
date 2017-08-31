@@ -16,6 +16,8 @@ protected:
 	bool connected;
 	math::vector3d m_rotation;
 
+	std::string _buffer;
+
 	void _sendCommand(const std::string& cmd);
 public:
 	ThreeAxisHead();

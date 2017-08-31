@@ -60,7 +60,7 @@ public:
 
 	virtual math::vector2di GetFrameSize(int i) = 0;
 
-	virtual int GetCurrentFPS(){ return 0; }
+	virtual int GetCurrentFPS(int i){ return -1; }
 
 
 	virtual void Start() {};

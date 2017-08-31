@@ -83,6 +83,7 @@ public:
 			return;
 
 		m_context = context;
+		m_context->serviceLoader->RegisterCapability(TxEarsService::ModuleName, "EarsSupported", "Yes");
 		{
 			sound::DirectSoundInputStream inputStream;
 			inputStream.ListDevices(m_audioInterfaceList);
@@ -165,6 +166,7 @@ public:
 	{
 		if (m_status == EServiceStatus::Idle)
 			return;
+		m_context->serviceLoader->RemoveCapabilityCategory(TxEarsService::ModuleName);
 		 
 		StopStream();
 		m_streamers->CloseAll();

@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "TxProjHandsModule.h"
-#include "TxProjHandsService.h"
+#include "TxHandsModule.h"
+#include "TxHandsService.h"
 
 
 namespace mray
@@ -15,7 +15,7 @@ class IServiceModule;
 class  CServiceModule
 {
 protected:
-	TxProjHandsService* m_impl;
+	TxHandsService* m_impl;
 public:
 
 	static CServiceModule* instance;
@@ -25,7 +25,7 @@ public:
 
 	virtual~CServiceModule();
 
-	TxProjHandsService* GetService()
+	TxHandsService* GetService()
 	{
 		return m_impl;
 	}
@@ -38,7 +38,7 @@ CServiceModule* CServiceModule::instance = 0;
 // see TelubeeRobotDLL.h for the class definition
 CServiceModule::CServiceModule()
 {
-	m_impl = new TxProjHandsService();
+	m_impl = new TxHandsService();
 
 }
 
@@ -52,7 +52,7 @@ CServiceModule::~CServiceModule(void)
 
 HandsWindowMODULE_API std::string DLL_GetServiceName()
 {
-	return TBee::TxProjHandsService::ModuleName;
+	return TBee::TxHandsService::ModuleName;
 }
 HandsWindowMODULE_API void  DLL_ServiceInit()
 {

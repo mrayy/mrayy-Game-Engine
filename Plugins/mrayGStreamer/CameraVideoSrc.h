@@ -40,12 +40,12 @@ public:
 
 	virtual math::vector2di GetFrameSize(int i);
 
-	void AddPostCaptureListener(IMyListenerCallback* listener);
+	void AddPostCaptureListener(IMyListenerCallback* listener,int i);
 
 	virtual void LinkWithPipeline(void* pipeline);
 	int GetVideoSrcCount();
 
-	virtual int GetCurrentFPS();
+	virtual int GetCurrentFPS(int i);
 
 	int GetStreamsCount();
 

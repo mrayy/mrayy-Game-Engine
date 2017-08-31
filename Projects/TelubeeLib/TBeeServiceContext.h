@@ -24,6 +24,7 @@ namespace TBee
 		virtual void OnUserConnected(const UserConnectionData& data){}
 		virtual void OnUserDisconnected(){}
 		virtual void OnUserMessage(network::NetAddress* addr, const core::string& msg, const core::string& value){}
+
 	};
 	
 	class IServiceLoader
@@ -31,6 +32,10 @@ namespace TBee
 	public:
 		virtual void RequestLock(){}
 		virtual void RequestUnlock(){}
+
+		virtual void RegisterCapability(const core::string& category, const core::string& name, const core::string& value){}
+		virtual void RemoveCapability(const core::string& category, const core::string& name){}
+		virtual void RemoveCapabilityCategory(const core::string& category){}
 	};
 
 class TBeeServiceContext:public ServiceContext,public ListenerContainer<IServiceContextListener*>
@@ -84,6 +89,7 @@ public:
 		return &remoteAddr;
 
 	}
+
 };
 
 class TbeeServiceRenderContext:public ServiceRenderContext

@@ -362,7 +362,7 @@ void Tserial_event::OnEvent (unsigned long events)
 		if ((ModemStat &  MS_RING_ON)!= 0)
 		{
 			if (manager!=0)
-				manager((uint32) this, SERIAL_RING);
+				manager(this, SERIAL_RING);
 		}
 	}
 
@@ -371,12 +371,12 @@ void Tserial_event::OnEvent (unsigned long events)
 		if ((ModemStat &  MS_RLSD_ON)!= 0)
 		{
 			if (manager!=0)
-				manager((uint32) this, SERIAL_CD_ON);
+				manager(this, SERIAL_CD_ON);
 		}
 		else
 		{
 			if (manager!=0)
-				manager((uint32) this, SERIAL_CD_OFF);
+				manager(this, SERIAL_CD_OFF);
 		}
 	}
 }
@@ -395,7 +395,7 @@ void Tserial_event::run(void)
 	WaitCommEventInProgress = 0;
 
 	if (manager!=0)
-		manager((uint32) this, SERIAL_CONNECTED);
+		manager(this, SERIAL_CONNECTED);
 
 	GetLastError();               // just to clear any pending error
 	SetEvent(serial_events[SIG_READ_DONE]);
@@ -457,7 +457,7 @@ void Tserial_event::run(void)
 					received_size  = result_nbr;
 					rx_in_progress = 0; // read has ended
 					if ((result_nbr!=0) &&(manager!=0))
-						manager((uint32) this, SERIAL_DATA_ARRIVAL);
+						manager(this, SERIAL_DATA_ARRIVAL);
 				}
 				else
 				{
@@ -475,7 +475,7 @@ void Tserial_event::run(void)
 					ResetEvent(serial_events[SIG_WRITER]);
 					tx_in_progress = 0;
 					if (manager!=0)
-						manager((uint32) this, SERIAL_DATA_SENT);
+						manager( this, SERIAL_DATA_SENT);
 				}
 				else
 				{
@@ -537,6 +537,6 @@ void Tserial_event::run(void)
 	serial_handle = INVALID_HANDLE_VALUE;
 
 	if (manager!=0)
-		manager((uint32) this, SERIAL_DISCONNECTED);
+		manager(this, SERIAL_DISCONNECTED);
 }
 

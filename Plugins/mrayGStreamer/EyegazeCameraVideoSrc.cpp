@@ -46,6 +46,7 @@ namespace video
 			std::vector<math::vector4di> gaze;
 		};
 
+		std::list<GazeData> m_gazeCasheTmp;
 		std::list<GazeData> m_gazeCashe;
 
 		int m_levels; //number of levels to sample the image at a certain position (eye gaze)
@@ -274,6 +275,9 @@ namespace video
 					}
 					m_gazeCashe.push_back(ds);*/
 					_ds = ds;
+					m_gazeMutex->lock();
+					m_gazeCasheTmp.push_back(_ds);
+					m_gazeMutex->unlock();
 				//	m_gazeMutex->unlock();
 
 
@@ -286,7 +290,12 @@ namespace video
 			else if (src == m_prertpListener)//before rtp
 			{
 				m_gazeMutex->lock();
-				m_gazeCashe.push_back(_ds);
+				if (m_gazeCasheTmp.size() > 0)
+				{
+					m_gazeCashe.push_back(m_gazeCasheTmp.front());
+					m_gazeCasheTmp.pop_front();
+				}
+				else m_gazeCashe.push_back(_ds);
 				m_gazeMutex->unlock();
 				m_sent = true;
 			}
@@ -743,9 +752,9 @@ namespace video
 		return m_data->m_levels;
 	}
 
-	int EyegazeCameraVideoSrc::GetCurrentFPS()
+	int EyegazeCameraVideoSrc::GetCurrentFPS(int i)
 	{
-		return m_data->source->GetCurrentFPS();
+		return m_data->source->GetCurrentFPS(i);
 	}
 }
 }

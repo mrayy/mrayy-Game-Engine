@@ -79,6 +79,9 @@ public:
 	void RequestLock();
 	void RequestUnlock();
 
+	void RegisterCapability(const core::string& category, const core::string& name, const core::string& value);
+	void RemoveCapability(const core::string& category, const core::string& name);
+	void RemoveCapabilityCategory(const core::string& category);
 };
 
 }

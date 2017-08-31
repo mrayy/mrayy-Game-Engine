@@ -50,6 +50,8 @@ void RobotCommunicator::_HandleData(network::NetAddress* srcaddr, const core::st
 				//printf("Connect Message: %s\n", srcaddr->toString().c_str());
 				m_userStatus.receivedAddress = *srcaddr;
 				m_userStatus.clientAddress = *srcaddr;// .setIP(vals[0]);
+				if (vals.size()>1)
+					m_userStatus.clientAddress.port = core::StringConverter::toInt( vals[1]);
 				if (m_listener)
 				{
 					UserConnectionData data;

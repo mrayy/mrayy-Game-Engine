@@ -154,7 +154,10 @@ bool NetworkValueController::_Process()
 		xml::XMLTree t;
 
 		if (!xml::IXMLParser::getInstance().parserXML(ptr, &t))
+		{
+			gLogManager.log("NetworkValueController::_Process() - Failed to parse XML data", ELL_WARNING);
 			return 0;
+		}
 
 		xml::XMLElement* root = t.getSubElement("ValueGroup");
 		if (!root)

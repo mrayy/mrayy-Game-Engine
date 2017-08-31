@@ -87,7 +87,8 @@
 #define SERIAL_CD_OFF            6
 
 typedef unsigned long uint32;
-typedef void (*type_myCallBack) (uint32 object, uint32 event);
+class Tserial_event;
+typedef void(*type_myCallBack) (Tserial_event* object, uint32 event);
 
 #ifndef __BORLANDC__
 #define BOOL bool  

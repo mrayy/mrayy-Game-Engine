@@ -589,5 +589,30 @@ void ServiceLoader::OnUserDisconnected( const network::NetAddress& address)
 	m_context.__FIRE_OnUserDisconnected();
 }
 
+
+void ServiceLoader::RegisterCapability(const core::string& category, const core::string& name, const core::string& value)
+{
+	core::string msg;
+	msg="<ServiceModule Message=\"RegCap\" Cat=\"" + category + "\" Name=\"" + name + "\" Value=\"" + value + "\"/>";
+	_sendMessage(msg);
+
+}
+
+void ServiceLoader::RemoveCapability(const core::string& category, const core::string& name)
+{
+	core::string msg;
+	msg = "<ServiceModule Message=\"RmvCap\" Cat=\"" + category + "\" Name=\"" + name + "\"/>";
+	_sendMessage(msg);
+
+}
+
+void ServiceLoader::RemoveCapabilityCategory(const core::string& category)
+{
+	core::string msg;
+	msg = "<ServiceModule Message=\"RmvCapCat\" Cat=\"" + category + "\"/>";
+	_sendMessage(msg);
+
+}
+
 }
 

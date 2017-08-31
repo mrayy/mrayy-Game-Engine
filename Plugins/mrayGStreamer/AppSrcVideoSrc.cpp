@@ -97,7 +97,7 @@ namespace video
 				format = "GRAY8";
 				break;
 			case EPixel_LUMINANCE16:
-				format = "YVYU";
+				format = "YUY2";
 				break;
 			}
 			return format;
@@ -252,7 +252,7 @@ namespace video
 						",height=" + core::StringConverter::toString(m_frameSize.y) + ",framerate=" + core::StringConverter::toString(m_fps) + "/1";
 
 				}
-				videoStr += "! mylistener name=postCap" + core::StringConverter::toString(i);
+				videoStr += "! mylistener name=postCap" + core::StringConverter::toString(i)+" ";
 			}
 			else{
 				videoStr = "mysrc name=src" + core::StringConverter::toString(i) +
@@ -273,21 +273,12 @@ namespace video
 			}
 		}
 
-		int GetCurrentFPS()
+		int GetCurrentFPS(int i)
 		{
-			int total = 0;
-			int n = 0;
-			for (int i = 0; i < m_videoSrc.size(); ++i)
-			{
-				if (m_videoSrc[i].videoSrc)
-				{
-					total += m_videoSrc[i].currentFPS.GetAverage();
-					n++;
-				}
-			}
-			if (n == 0)
-				return 0;
-			return total / n;
+			if (m_videoSrc.size() >= i)
+				return -1;
+
+			return m_videoSrc[i].currentFPS.GetAverage();
 		}
 	};
 
@@ -354,9 +345,9 @@ void AppSrcVideoSrc::Close()
 
 }
 
-int AppSrcVideoSrc::GetCurrentFPS()
+int AppSrcVideoSrc::GetCurrentFPS(int i)
 {
-	return m_impl->GetCurrentFPS();
+	return m_impl->GetCurrentFPS(i);
 }
 
 }

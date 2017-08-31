@@ -691,12 +691,12 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	else
 	{
 		double res[3];
-		quaternion2Euler(q2, res, RotSeq::xzy);
+		quaternion2Euler(q2, res, RotSeq::yxz);
 		//q.toEulerAngles(angles);
 
-		tilt = m_impl->mvRobot[HEAD][1]->getNext(res[2]);
-		pan = m_impl->mvRobot[HEAD][0]->getNext(res[0]);
-		roll = m_impl->mvRobot[HEAD][2]->getNext(res[1]);
+		tilt = m_impl->mvRobot[HEAD][1]->getNext(res[1]);//2
+		pan = m_impl->mvRobot[HEAD][0]->getNext(res[2]); //0
+		roll = m_impl->mvRobot[HEAD][2]->getNext(res[0]);//1
 	}
 
 	baseConnected = st.connected;
@@ -726,11 +726,11 @@ bool RobotSerialPort::GetJointValues(std::vector<float>& values)
 	values.resize(3*2);
 	math::vector3d rot=m_impl->m_headController->GetRotation();
 	values[0] = tilt;
-	values[1] = rot.x;
+	values[1] = -rot.x;
 	values[2] = pan;
-	values[3] = -rot.y;
+	values[3] =-rot.y;
 	values[4] = roll;
-	values[5] = rot.z;
+	values[5] = -rot.z;
 	return true;
 }
 

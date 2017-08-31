@@ -78,7 +78,7 @@ class GstNetworkVideoPlayerImpl :public GstPipelineHandler,IPipelineListener
 
 	core::string m_pipeLineString;
 
-	GstMyUDPSrc* m_videoSrc;
+	GstElement* m_videoSrc;
 	GstMyUDPSrc* m_videoRtcpSrc;
 	GstMyUDPSink* m_videoRtcpSink;
 
@@ -108,7 +108,7 @@ public:
 	{
 		core::string videoStr =
 			//video rtp
-			"myudpsrc name=videoSrc !"
+			"udpsrc name=videoSrc !"
 			//"udpsrc port=7000 buffer-size=2097152 do-timestamp=true !"
 			"application/x-rtp ";
 		if (m_rtcp)
@@ -123,7 +123,7 @@ public:
 				" appsink name=videoSink "
 
 				//video rtcp
-				"myudpsrc name=videoRtcpSrc ! rtpbin.recv_rtcp_sink_0 "
+				"udpsrc name=videoRtcpSrc ! rtpbin.recv_rtcp_sink_0 "
 				"rtpbin.send_rtcp_src_0 !  myudpsink name=videoRtcpSink sync=false async=false ";
 		}
 		else
@@ -182,9 +182,10 @@ public:
 #define SET_SRC(name,p) m_##name=GST_MyUDPSrc(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(p);}
 #define SET_SINK(name,p) m_##name=GST_MyUDPSink(gst_bin_get_by_name(GST_BIN(GetPipeline()), #name)); if(m_##name){m_##name->SetPort(m_ipAddr,p);}
 
-		SET_SRC(videoSrc, m_videoPort);
-		SET_SINK(videoRtcpSink, (m_videoPort + 1));
-		SET_SRC(videoRtcpSrc, (m_videoPort + 2));
+		g_object_set(m_videoSrc, "port", m_videoPort, 0);
+// 		SET_SRC(videoSrc, m_videoPort);
+// 		SET_SINK(videoRtcpSink, (m_videoPort + 1));
+// 		SET_SRC(videoRtcpSrc, (m_videoPort + 2));
 
 	}
 
@@ -235,6 +236,7 @@ public:
 		_BuildPipelineH264();
 
 		GError *err = 0;
+		gLogManager.log("GstNetworkVideoPlayer: creating stream using pipeline: " + m_pipeLineString, ELL_WARNING);
 		GstElement* p = gst_parse_launch(m_pipeLineString.c_str(), &err);
 		if (err)
 		{
@@ -245,10 +247,11 @@ public:
 		SetPipeline(p);
 		printf("Connecting Video stream with IP:%s\n", m_ipAddr.c_str());
 
-		_UpdatePorts();
 
+		m_videoSrc = gst_bin_get_by_name(GST_BIN(p), "videoSrc");
 		m_videoSink = GST_APP_SINK(gst_bin_get_by_name(GST_BIN(p), "videoSink"));
 
+		_UpdatePorts();
 		m_videoHandler.SetSink(m_videoSink);
 		g_signal_connect(m_videoSink, "new-sample", G_CALLBACK(new_buffer), this);
 		//attach videosink callbacks
@@ -297,8 +300,8 @@ public:
 
 	virtual void Close()
 	{
-		if (m_videoSrc && m_videoSrc->m_client)
-			m_videoSrc->m_client->Close();
+// 		if (m_videoSrc && m_videoSrc->m_client)
+// 			m_videoSrc->m_client->Close();
 		GstPipelineHandler::Close();
 		m_videoHandler.Close();
 	}
@@ -329,8 +332,9 @@ public:
 	}
 	virtual int GetPort(int i)
 	{
-		if (m_videoSrc && m_videoSrc->m_client)
-			return m_videoSrc->m_client->Port();
+// 		if (m_videoSrc && m_videoSrc->m_client)
+// 			return m_videoSrc->m_client->Port();
+		g_object_get(m_videoSrc, "port", &m_videoPort);
 		return m_videoPort;
 	}
 

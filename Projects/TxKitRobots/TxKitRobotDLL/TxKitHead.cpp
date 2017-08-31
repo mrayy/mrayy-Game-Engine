@@ -50,7 +50,7 @@ namespace mray
 
 					m_parameters[i].PGain = math::clamp(m_parameters[i].PGain, 0, 10);
 					m_parameters[i].Deadband = math::clamp(m_parameters[i].Deadband, 0, 10);
-					m_parameters[i].Damping = math::clamp(m_parameters[i].Speed, 0, 127);
+					m_parameters[i].Damping = math::clamp(m_parameters[i].Damping, 0, 127);
 					m_parameters[i].Response = math::clamp(m_parameters[i].Response, 0, 10);
 					m_parameters[i].Speed = math::clamp(m_parameters[i].Speed, 0, 127);
 				}
@@ -58,8 +58,11 @@ namespace mray
 				{
 					confFile >> m_limits[i][0] >> m_limits[i][1];
 				}
+				m_paramsLoaded = true;
 				confFile.close();
 			}
+			else
+				m_paramsLoaded = false;
 		}
 
 	}
@@ -73,7 +76,7 @@ namespace mray
 
 	bool TxKitHead::_writeEEPROM()
 	{
-		if (m_EEPROMset)
+		if (m_EEPROMset || !m_paramsLoaded)
 			return true;
 		for (int index = 0; index < 3; ++index)
 		{
@@ -84,7 +87,7 @@ namespace mray
 			sCommand[1] = 0x00;//EEPROM access
 			uint8_t reply[68];
 
-			int ret = _sendCommand(sCommand, 2 * sizeof(char), reply, 68);
+			int ret = _sendCommand(sCommand, 2 * sizeof(char), reply, 68,250);
 			if (ret == 68)
 			{
 				uint8_t EEPROM[64];
@@ -96,20 +99,16 @@ namespace mray
 				int Response = (((EEPROM[50] & 0x0f) << 4)) | (EEPROM[51] & 0x0f);
 				int Speed = (((EEPROM[4] & 0x0f) << 4)) | (EEPROM[5] & 0x0f);
 
-				printf("P.Gain: %d\n", PGain);
-				printf("Deadband: %d\n", Deadband);
-				printf("Damping: %d\n", Damping);
-				printf("Response: %d\n", Response);
-				printf("Speed: %d\n", Speed);
-
-				Speed = 4;
-
-				EEPROM[4] = (Speed >> 4) & 0x0f;
-				EEPROM[5] = Speed & 0x0f;*/
-
+				gLogManager.log("P.Gain: " + core::StringConverter::toString(PGain),ELL_INFO);
+				gLogManager.log("Deadband:" + core::StringConverter::toString(Deadband), ELL_INFO);
+				gLogManager.log("Damping: " + core::StringConverter::toString(Damping), ELL_INFO);
+				gLogManager.log("Response: " + core::StringConverter::toString(Response), ELL_INFO);
+				gLogManager.log("Speed: " + core::StringConverter::toString(Speed), ELL_INFO);
+				
+				*/
 				EEPROM[4] = (m_parameters[index].Speed >> 4) & 0x0f;
 				EEPROM[5] = m_parameters[index].Speed & 0x0f;
-
+				 
 				EEPROM[6] = (m_parameters[index].PGain >> 4) & 0x0f;
 				EEPROM[7] = m_parameters[index].PGain & 0x0f;
 
@@ -129,12 +128,15 @@ namespace mray
 				int ret = _sendCommand(sCommand, 66 * sizeof(char), reply, 68 * sizeof(char), 500);
 				if (ret != 68)
 				{
-					printf("Failed to write to EEPROM\n");
+					gLogManager.log("TxKitHead::_writeEEPROM() - Failed to write to EEPROM:" + core::StringConverter::toString(index) , ELL_WARNING);
 					continue;
+				}
+				else{
+					gLogManager.log("TxKitHead::_writeEEPROM() -EEPROM Updated Successfully:" + core::StringConverter::toString(index), ELL_SUCCESS);
 				}
 			}
 			else {
-				printf("Failed to read from EEPROM\n");
+				gLogManager.log("TxKitHead::_writeEEPROM() -EEPROM Updated Successfully:" + core::StringConverter::toString(index), ELL_WARNING);
 				continue;
 			}
 		}
@@ -154,7 +156,7 @@ namespace mray
 		Disconnect();
 		m_lastValues[0] = m_lastValues[1] = m_lastValues[2] = 0;
 		gLogManager.log("Connecting", ELL_INFO);
-		m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(100), serial::eightbits, serial::parity_even);
+		m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(30), serial::eightbits, serial::parity_even);
 		connected = m_serial->isOpen();
 		if (!connected)
 		{
@@ -169,7 +171,9 @@ namespace mray
 			//_sendCommand("#ea");//enable angle logging
 
 			//read EEPROM
-			//_writeEEPROM();
+			//Note: for some reason the servo IDs are changed when calling write EEPROM function.
+			// This function is disabled for the time being
+			_writeEEPROM();
 		}
 		//comROBOT->owner = this;
 		return connected;
@@ -253,7 +257,7 @@ namespace mray
 			sCommand[0] = (uint8_t)(0x80 | ServoCODE[i]);//(PosCtrlCMD << 5)
 			sCommand[1] = (uint8_t)((value >> 7) & 0x7F);
 			sCommand[2] = (uint8_t)(value & 0x7F);
-			int ret = _sendCommand(sCommand, 3 * sizeof(uint8_t), reply, 6,4);
+			int ret = _sendCommand(sCommand, 3 * sizeof(uint8_t), reply, 6,2);
 
 			if (false && ret == 6)
 			{

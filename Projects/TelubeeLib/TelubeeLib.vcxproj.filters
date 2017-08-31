@@ -282,6 +282,9 @@
     <ClInclude Include="Benchmarks.h">
       <Filter>Source Files\OS</Filter>
     </ClInclude>
+    <ClInclude Include="CategoryDictionary.h">
+      <Filter>Source Files\Data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -439,6 +442,9 @@
     </ClCompile>
     <ClCompile Include="Benchmarks.cpp">
       <Filter>Source Files\OS</Filter>
+    </ClCompile>
+    <ClCompile Include="CategoryDictionary.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

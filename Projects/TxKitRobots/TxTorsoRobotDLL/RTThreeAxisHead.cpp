@@ -200,8 +200,8 @@ void RTThreeAxisHead::SetPgain(int id, int val)
 
 	size = 0;
 	// set parameters to move servo
-	param[size++] = (byte)(RP2_DGAIN & 0xFF);
-	param[size++] = (byte)((RP2_DGAIN >> 8) & 0xFF);
+	param[size++] = (byte)(RP2_PGAIN & 0xFF);
+	param[size++] = (byte)((RP2_PGAIN >> 8) & 0xFF);
 	param[size++] = (byte)(val & 0xFF);
 	param[size++] = (byte)((val & 0xFF00) >> 8);
 
@@ -214,8 +214,8 @@ void RTThreeAxisHead::SetIgain(int id, int val)
 
 	size = 0;
 	// set parameters to move servo
-	param[size++] = (byte)(RP2_DGAIN & 0xFF);
-	param[size++] = (byte)((RP2_DGAIN >> 8) & 0xFF);
+	param[size++] = (byte)(RP2_IGAIN & 0xFF);
+	param[size++] = (byte)((RP2_IGAIN >> 8) & 0xFF);
 	param[size++] = (byte)(val & 0xFF);
 	param[size++] = (byte)((val & 0xFF00) >> 8);
 

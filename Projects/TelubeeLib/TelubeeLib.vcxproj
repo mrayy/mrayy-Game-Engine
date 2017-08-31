@@ -176,6 +176,7 @@
     <ClInclude Include="Benchmarks.h" />
     <ClInclude Include="CameraConfigurationManager.h" />
     <ClInclude Include="CameraTextureSource.h" />
+    <ClInclude Include="CategoryDictionary.h" />
     <ClInclude Include="CommunicationMessages.h" />
     <ClInclude Include="CrashHandler.h" />
     <ClInclude Include="FlyingTelubeeRobotCommunicator.h" />
@@ -304,6 +305,7 @@
     <ClCompile Include="Benchmarks.cpp" />
     <ClCompile Include="CameraConfigurationManager.cpp" />
     <ClCompile Include="CameraTextureSource.cpp" />
+    <ClCompile Include="CategoryDictionary.cpp" />
     <ClCompile Include="CommunicationMessages.cpp" />
     <ClCompile Include="CrashHandler.cpp" />
     <ClCompile Include="FlyingTelubeeRobotCommunicator.cpp" />

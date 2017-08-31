@@ -72,6 +72,7 @@ public:
 
 		context->AddListener(this);
 		m_status = EServiceStatus::Inited;
+		m_context->serviceLoader->RegisterCapability(TxMouthService::ModuleName, "MouthSupported", "Yes");
 
 		gLogManager.log("Done Initing.", ELL_INFO);
 	}
@@ -100,7 +101,8 @@ public:
 	{
 		if (m_status == EServiceStatus::Idle)
 			return;
-		 
+		m_context->serviceLoader->RemoveCapabilityCategory(TxMouthService::ModuleName);
+
 		StopStream();
 
 		m_context->RemoveListener(this);

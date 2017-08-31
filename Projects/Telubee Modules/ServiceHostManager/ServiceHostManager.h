@@ -11,6 +11,7 @@
 #include "TBRobotInfo.h"
 #include "XMLTree.h"
 #include "GstCustomDataStreamer.h"
+#include "CategoryDictionary.h"
 
 #include <windows.h>
 
@@ -38,6 +39,8 @@ protected:
 	TBee::RobotCommunicator* m_robotCommunicator;
 
 	video::GstCustomDataStreamer* m_dataStreamer;
+
+	CategoryDictionary m_capabilities;
 
 	int _currDataRate;
 	double _lastTime;
@@ -88,6 +91,8 @@ protected:
 	bool _ProcessServices();
 
 	void _loadSettings();
+
+	void _resendCapabilities();
 public:
 	ServiceHostManager();
 	virtual ~ServiceHostManager();

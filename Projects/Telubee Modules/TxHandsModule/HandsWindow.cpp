@@ -78,9 +78,9 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 		OptionContainer opt;
 		opt["title"].value = "Hands Window";
 		opt["VSync"].value = "false";
-		opt["top"].value = "0";
-		opt["left"].value = "0";
-		opt["border"].value = "none";
+// 		opt["top"].value = "0";
+// 		opt["left"].value = "0";
+// 		opt["border"].value = "none";
 
 		video::IMonitorDevice* monitor = video::IMonitorDeviceManager::getInstance().GetMonitor(m_handsMonitor);
 		if (!monitor)
@@ -97,7 +97,7 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 		{
 			HWND hWnd;
 			m_handsWnd->GetCustomParam("WINDOW", &hWnd);
-			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		//	SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 			if (false)
 			{
@@ -160,6 +160,7 @@ void HandsWindow::OnDisable()
 	if (!IsActive())
 		return;
 	m_player->Stop();
+	m_player->Close();
 }
 
 void HandsWindow::OnConnected(const core::string &ipaddr, int handsPort, bool rtcp)

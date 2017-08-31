@@ -269,7 +269,7 @@ public:
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
 				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
- 				if ( (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed))
+ 				if ( false && (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed))
  					m_cameraController = new CameraGrabberController();
  				else
 				{
@@ -426,7 +426,7 @@ public:
 			// Now close cameras
 			m_cameraController->Stop();
 
-			printf("Creating Video Streamer\n");
+			gLogManager.log("Creating Video Streamer",ELL_INFO);
 
 			video::GstNetworkVideoStreamer* hs = new video::GstNetworkVideoStreamer();
 			hs->AddListener(this);
@@ -525,6 +525,7 @@ public:
 
 		context->AddListener(this);
 		m_status = EServiceStatus::Inited;
+		m_context->serviceLoader->RegisterCapability(TxEyesService::ModuleName, "EyesSupported", "Yes");
 
 		printf("Done Initing.\n");
 	}
@@ -565,6 +566,7 @@ public:
 		 
 // 		m_cameraTextures[0].Set(0, 0);
 // 		m_cameraTextures[1].Set(0, 0);
+		m_context->serviceLoader->RemoveCapabilityCategory(TxEyesService::ModuleName);
 
 		StopStream();
 
@@ -573,7 +575,7 @@ public:
 		m_cameraController->Stop();
 		delete m_cameraController;
 		m_cameraController = 0;
-
+		
 
 		m_status = EServiceStatus::Idle;
 	}
@@ -703,7 +705,13 @@ public:
 		if (t-m_benchLastTime>1000)
 		{
 			m_benchLastTime = t;
-			fprintf(benchmarkFile, "%d\t%d\t%d\t%d\n", m_cameraSource->GetCurrentFPS(), m_streamers->GetStream("Video")->GetAverageBytesSent(),
+			int c = 0;
+			for (int i = 0; i < m_cameraSource->GetStreamsCount(); ++i)
+			{
+				c += m_cameraSource->GetCurrentFPS(i);
+			}
+			c /= (float)m_cameraSource->GetStreamsCount();
+			fprintf(benchmarkFile, "%d\t%d\t%d\t%d\n", c, m_streamers->GetStream("Video")->GetAverageBytesSent(),
 				(int)m_benchmarks.CPUProcessUsage->getCurrentValue(), (int)m_benchmarks.PhysicalMemoryUsage->getCurrentValue());
 
 		}
@@ -744,8 +752,11 @@ public:
 
 		msg = "Stream Status:";
 		context->RenderText(msg, 0, 0);
-		msg = "   Current FPS:" + core::StringConverter::toString(m_cameraSource->GetCurrentFPS());
-		context->RenderText(msg, 0, 0);
+		for (int i = 0; i < m_cameraSource->GetStreamsCount(); ++i)
+		{
+			msg = "   FPS ["+core::StringConverter::toString(i)+"]:" + core::StringConverter::toString(m_cameraSource->GetCurrentFPS(i));
+			context->RenderText(msg, 0, 0);
+		}
 		msg = "   Average Sent Bytes:" + core::StringConverter::toString(m_streamers->GetStream("Video")->GetAverageBytesSent()/1024)+"KB";
 		context->RenderText(msg, 0, 0);
 
@@ -839,13 +850,24 @@ public:
 		if (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed)
 		{
 			//add ovrvision setting string
-			if ((CameraGrabberController*)m_cameraController)
+			if ((EncodedCameraStreamController*)m_cameraController)
 			{
-				CameraGrabberController* c=(CameraGrabberController*)m_cameraController;
+				EncodedCameraStreamController* c = (EncodedCameraStreamController*)m_cameraController;
+
+				{
+					core::string settings = c->GetCameraParameterValue("settings", 0);
+					xml::XMLTextNode* node = new xml::XMLTextNode(settings);
+					//gLogManager.log("camera settings:" + settings, ELL_INFO);
+					ret->addSubElement(node);
+				}
+			}else if ((CameraGrabberController*)m_cameraController)
+			{
+				CameraGrabberController* c = (CameraGrabberController*)m_cameraController;
 				if (c->cameras.size() > 0 && c->cameras[0])
 				{
 					core::string settings= c->cameras[0]->GetParameter("settings");
 					xml::XMLTextNode* node = new xml::XMLTextNode(settings);
+				//	gLogManager.log("camera settings:" + settings, ELL_INFO);
 					ret->addSubElement(node);
 				}
 			}
