@@ -16,7 +16,7 @@ public:
 
 	virtual std::string GetType() = 0;
 
-	virtual bool Connect(const core::string& port) = 0;
+	virtual bool Connect(const core::string& port,bool autoSearchPort=true) = 0;
 	virtual bool IsConnected() = 0;
 	virtual void Disconnect() = 0;
 

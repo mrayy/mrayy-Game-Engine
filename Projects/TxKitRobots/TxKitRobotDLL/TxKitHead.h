@@ -45,7 +45,7 @@ public:
 	virtual ~TxKitHead();
 
 
-	virtual bool Connect(const core::string& port);
+	virtual bool Connect(const core::string& port,bool autoSearch=true);
 	virtual bool IsConnected();
 	virtual void Disconnect();
 

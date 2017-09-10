@@ -11,6 +11,8 @@
 namespace mray
 {
 
+	static const std::string HeadPnPID = "FTDIBUS\VID_165C+PID_0008+KOUSBCNVA\0000";
+
 	const int ServoCODE[] = {
 		0x3,
 		0x1,
@@ -151,11 +153,27 @@ namespace mray
 		m_EEPROMset = true;
 		return true;
 	}
-	bool TxKitHead::Connect(const core::string& port)
+	bool TxKitHead::Connect(const core::string& p, bool autoSearch)
 	{
 		Disconnect();
 		m_lastValues[0] = m_lastValues[1] = m_lastValues[2] = 0;
-		gLogManager.log("Connecting", ELL_INFO);
+
+		core::string port = p;
+
+		if (autoSearch)
+		{
+			std::vector<serial::PortInfo> ports= serial::list_ports();
+			for (int i = 0; i < ports.size(); ++i)
+			{
+				if (ports[i].pnpId.find(HeadPnPID)>=0)
+				{
+					port = ports[i].port;
+					break;
+				}
+			}
+
+		}
+		gLogManager.log("Connecting to: "+port, ELL_INFO);
 		m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(30), serial::eightbits, serial::parity_even);
 		connected = m_serial->isOpen();
 		if (!connected)

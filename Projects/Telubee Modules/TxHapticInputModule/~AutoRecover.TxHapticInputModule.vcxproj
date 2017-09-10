@@ -19,15 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{932D0B94-E40C-40A6-AB9F-D6970DD699CB}</ProjectGuid>
+    <ProjectGuid>{038C074D-F559-4085-B07E-A59626BA4FFE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>TxKitRobotDLL</RootNamespace>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccProvider>
-    </SccProvider>
+    <RootNamespace>TxHapticInputModule</RootNamespace>
+    <ProjectName>TxHapticInputModule</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -67,29 +62,37 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-1.0.props" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-app-1.0.props" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-video-1.0.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-1.0.props" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-app-1.0.props" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-net-1.0.props" />
+    <Import Project="$(GST_SDK_PATH)\share\vs\2010\libs\gstreamer-video-1.0.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\Lib\$(Configuration)</OutDir>
-    <IntDir>..\..\obj\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>..\..\..\Bin\$(Configuration)</OutDir>
+    <IntDir>..\..\..\obj\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\obj\$(Configuration)64</OutDir>
+    <OutDir>..\..\..\Bin\$(Configuration)64</OutDir>
     <IntDir>..\..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\Lib\$(Configuration)</OutDir>
-    <IntDir>..\..\obj\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>..\..\..\bin\$(Configuration)64\</OutDir>
+    <IntDir>..\..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\obj\$(Configuration)64</OutDir>
+    <OutDir>..\..\..\Bin\$(Configuration)64</OutDir>
     <IntDir>..\..\..\obj\$(Configuration)64\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -97,71 +100,54 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TELUBEEROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TxHapticInputModule_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>mrayMath.lib;mrayEngine.lib;TelubeeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(MRAY_ENGINE)\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>TelubeeLib.lib;mrayWin32.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent />
-    <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)\$(TargetFileName) </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TELUBEEROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TxHapticInputModule_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>mrayMath.lib;mrayEngine.lib;TelubeeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(MRAY_ENGINE)\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>TelubeeLib.lib;mrayWin32.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent />
-    <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)\$(TargetFileName) </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TELUBEEROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TxHapticInputModule_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>
+      </SDLCheck>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Plugins\mraySound;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayFSM;..\..\..\Plugins\DirectShowVideo;..\..\..\Plugins\FlyCaptureLibrary;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;..\..\..\Engine\mrayOIS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(MRAY_ENGINE)\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mrayMath.lib;mrayEngine.lib;TelubeeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86)\lib;..\..\..\lib\$(Configuration);..\..\..\Dependencies\lib\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mrayWin32.lib;TelubeeLib.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;mrayOIS.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
-    <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)\$(TargetFileName) </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -170,38 +156,29 @@
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TELUBEEROBOTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TxHapticInputModule_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>
+      </SDLCheck>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Plugins\mraySound;..\..\..\Engine\mrayMath;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;..\..\..\Engine\mrayOIS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(MRAY_ENGINE)\lib\$(Configuration)64;$(MRAY_ENGINE)\Dependencies\lib\$(Configuration)64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mrayMath.lib;mrayEngine.lib;TelubeeLib.lib;setupapi.lib;serial.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86_64)\lib;..\..\..\lib\$(Configuration)64;..\..\..\Dependencies\lib\$(Configuration)64;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mrayWin32.lib;TelubeeLib.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;mrayOIS.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
-    <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)64\$(TargetFileName) </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="agent.h" />
-    <ClInclude Include="IBaseController.h" />
-    <ClInclude Include="IHeadController.h" />
-    <ClInclude Include="IRobotComponent.h" />
-    <ClInclude Include="movingAverage.h" />
-    <ClInclude Include="RobotSerialPort.h" />
+    <ClInclude Include="TxHapticInputModule.h" />
+    <ClInclude Include="TxHapticInputService.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TelubeeRobotDLL.h" />
-    <ClInclude Include="TxKitHead.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -218,19 +195,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="movingAverage.cpp" />
-    <ClCompile Include="RobotSerialPort.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
-    </ClCompile>
+    <ClCompile Include="TxHapticInputModule.cpp" />
+    <ClCompile Include="TxHapticInputService.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TelubeeRobotDLL.cpp" />
-    <ClCompile Include="TxKitHead.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

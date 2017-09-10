@@ -4,7 +4,6 @@
 #pragma warning(X:4005)
 
 #include "RobotSerialPort.h"
-#include "serial.h"
 #include "agent.h"
 #include "movingAverage.h"
 #include "TelubeeRobotDLL.h"
@@ -17,8 +16,6 @@
 #include "TxKitHead.h"
 #include "StringUtil.h"
 #include "ILogManager.h"
-#include "Tserial_event.h"
-#include "serial.h"
 
 float testPosx = 100.00;
 float testPosy = 100.00; 
@@ -65,6 +62,8 @@ class RobotSerialPortImpl
 		std::string m_headPort;
 		std::string m_basePort;
 
+		bool autoFindPort;
+
 		//Tserial_event *comHEAD;		// Serial Port
 		MovAvg *mvRobot[2][3];		// 1 - base, 2 - head moving avarage 
 
@@ -73,6 +72,7 @@ class RobotSerialPortImpl
 		RobotSerialPortImpl(RobotSerialPort* o)
 		{
 			m_owner = o;
+			autoFindPort=true;
 #ifdef ROOMBA_CONTROLLER
 			m_baseController = new mray::RoombaController;
 #else 
@@ -165,7 +165,7 @@ void RobotSerialPort::_ProcessRobot()
 		{
 			if (m_impl->m_basePort == "")
 				m_impl->m_basePort = _config.robotCOM;
-			ret = m_impl->m_baseController->Connect(m_impl->m_basePort);
+			ret = m_impl->m_baseController->Connect(m_impl->m_basePort, m_impl->autoFindPort);
 			if (ret){
 
 				gLogManager.log("Robot Connected", ELL_INFO);
@@ -188,7 +188,7 @@ void RobotSerialPort::_ProcessRobot()
 		{
 			if (m_impl->m_headPort == "")
 				m_impl->m_headPort = _config.headCOM;
-			ret = m_impl->m_headController->Connect(m_impl->m_headPort);
+			ret = m_impl->m_headController->Connect(m_impl->m_headPort, m_impl->autoFindPort);
 			if (ret){
 				gLogManager.log("Head Connected", ELL_INFO);
 				if (debug_print)
@@ -290,7 +290,7 @@ void RobotSerialPort::_setupCaps()
 std::string RobotSerialPort::ScanePorts()
 {
 	return "";
-
+	/*
 	char portName[64];
 	vector<serial::PortInfo> devices_found = serial::list_ports();
 
@@ -354,7 +354,7 @@ std::string RobotSerialPort::ScanePorts()
 
 		}
 	}
-	return "";
+	return "";*/
 }
 void RobotSerialPort::InitializeRobot(IRobotStatusProvider* robotStatusProvider)
 {
@@ -779,5 +779,9 @@ std::string RobotSerialPort::ExecCommand(const std::string& cmd, const std::stri
 
 void RobotSerialPort::ParseParameters(const std::map<std::string, std::string>& valueMap)
 {
-
+	std::map<std::string, std::string>::const_iterator it = valueMap.find("AutoPort");
+	if (it != valueMap.end())
+	{
+		m_impl->autoFindPort = core::StringConverter::toBool(it->second);
+	}
 }
