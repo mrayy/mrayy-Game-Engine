@@ -100,6 +100,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxEmptyModule", "Projects\T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxHapticInputModule", "Projects\Telubee Modules\TxHapticInputModule\TxHapticInputModule.vcxproj", "{038C074D-F559-4085-B07E-A59626BA4FFE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mrayCore", "Engine\mrayCore\mrayCore.vcxproj", "{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Unicode|Mixed Platforms = Debug_Unicode|Mixed Platforms
@@ -968,6 +970,30 @@ Global
 		{038C074D-F559-4085-B07E-A59626BA4FFE}.Release|Win32.Build.0 = Release|Win32
 		{038C074D-F559-4085-B07E-A59626BA4FFE}.Release|x64.ActiveCfg = Release|x64
 		{038C074D-F559-4085-B07E-A59626BA4FFE}.Release|x64.Build.0 = Release|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug_Unicode|Mixed Platforms.ActiveCfg = Debug_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug_Unicode|Mixed Platforms.Build.0 = Debug_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug_Unicode|Win32.ActiveCfg = Debug_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug_Unicode|Win32.Build.0 = Debug_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug_Unicode|x64.ActiveCfg = Debug_Unicode|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug_Unicode|x64.Build.0 = Debug_Unicode|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug|Mixed Platforms.ActiveCfg = debug|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug|Mixed Platforms.Build.0 = debug|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug|Win32.ActiveCfg = debug|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug|Win32.Build.0 = debug|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug|x64.ActiveCfg = debug|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Debug|x64.Build.0 = debug|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release_Unicode|Mixed Platforms.ActiveCfg = Release_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release_Unicode|Mixed Platforms.Build.0 = Release_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release_Unicode|Win32.ActiveCfg = Release_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release_Unicode|Win32.Build.0 = Release_Unicode|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release_Unicode|x64.ActiveCfg = Release_Unicode|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release_Unicode|x64.Build.0 = Release_Unicode|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release|Win32.ActiveCfg = Release|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release|Win32.Build.0 = Release|Win32
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release|x64.ActiveCfg = Release|x64
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -980,6 +1006,7 @@ Global
 		{E8A2E5C1-C2BD-4A2B-9FE4-4A246FE29BC0} = {9F1F1199-BFBE-4EE3-A5CA-AB0A1760F45E}
 		{6FAB3F6F-5A7E-48B8-A3DF-C6D96BE762BB} = {9F1F1199-BFBE-4EE3-A5CA-AB0A1760F45E}
 		{4E3B7074-0A47-4767-93B2-6A7D84BD7B34} = {9F1F1199-BFBE-4EE3-A5CA-AB0A1760F45E}
+		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B} = {9F1F1199-BFBE-4EE3-A5CA-AB0A1760F45E}
 		{F45C4FD9-A7A0-4CAC-99FB-3EF1D9CE923A} = {1CC1D72F-A2EE-4165-B32A-E32B103CC83A}
 		{7286D75E-0E49-4BA1-B2E0-FD0E28D09B41} = {1CC1D72F-A2EE-4165-B32A-E32B103CC83A}
 		{A3BB9F46-E552-48A2-8D04-637B8E420568} = {1CC1D72F-A2EE-4165-B32A-E32B103CC83A}

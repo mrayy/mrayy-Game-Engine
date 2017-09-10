@@ -191,7 +191,7 @@ uint CustomAudioGrabber::GetSamplingRate()
 }
 uint CustomAudioGrabber::GetChannelsCount()
 {
-	m_impl->GetChannelsCount();
+	return m_impl->GetChannelsCount();
 }
 
 bool CustomAudioGrabber::GrabFrame()

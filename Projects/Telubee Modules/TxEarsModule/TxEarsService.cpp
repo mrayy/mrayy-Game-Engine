@@ -5,14 +5,14 @@
 #include "TBeeServiceContext.h"
 #include "GstStreamBin.h"
 #include "IThreadManager.h"
-#include "GstNetworkAudioStreamer.h"
+#include "GstAppNetAudioStreamer.h"
+#include "LocalAudioGrabber.h"
 #include "DirectSoundInputStream.h"
 #include "CommunicationMessages.h"
 #include "StreamReader.h"
 #include "XMLTree.h"
 #include "NetworkValueController.h"
 #include "StringUtil.h"
-#include "AppSrcVideoSrc.h"
 #include "ModuleSharedMemory.h"
 #include "INetworkPortAssigner.h"
 #include <conio.h>
@@ -58,6 +58,8 @@ public:
 	std::vector<Position> m_audioSpatialPosition;
 	bool m_isSpatialAudio;
 	std::vector<sound::InputStreamDeviceInfo> m_audioInterfaceList;
+
+	std::vector<video::LocalAudioGrabber*> m_audioGrabbers;
 
 
 public:
@@ -112,7 +114,7 @@ public:
 
 			for (int i = 0; i < m_audioInterfaceIndicies.size(); ++i)
 			{
-				video::GstNetworkAudioStreamer::AudioInterface iface;
+			/*	video::GstNetworkAudioStreamer::AudioInterface iface;
 				video::GstNetworkAudioStreamer* streamer;
 				streamer = new video::GstNetworkAudioStreamer();
 
@@ -123,12 +125,20 @@ public:
 				iface.channelsCount = m_audioInterfaceIndicies[i].channels;
 				iface.samplingRate = m_audioInterfaceIndicies[i].samplingRate;
 
-				streamer->SetAudioInterface(iface);
+				streamer->SetAudioInterface(iface);*/
+
+				video::GstAppNetAudioStreamer* streamer;
+				video::LocalAudioGrabber* g;
+				g = new video::LocalAudioGrabber();
+				streamer = new video::GstAppNetAudioStreamer();
+				g->Init(m_audioInterfaceList[m_audioInterfaceIndicies[i].ID].deviceGUID, m_audioInterfaceIndicies[i].channels, m_audioInterfaceIndicies[i].samplingRate);
+				streamer->SetAudioGrabber(g);
 
 				std::string interfaceID = "Audio";
 				if (m_audioInterfaceIndicies.size() > 1)
 					interfaceID = interfaceID + "#" + core::StringConverter::toString(i);
 				m_streamers->AddStream(streamer, interfaceID);
+				m_audioGrabbers.push_back(g);
 			}
 		}
 
@@ -174,6 +184,12 @@ public:
 		m_context->RemoveListener(this);
 		m_streamers->ClearStreams(true);
 
+		for (int i = 0; i < m_audioGrabbers.size();++i)
+		{
+			delete m_audioGrabbers[i];
+		}
+		m_audioGrabbers.clear();
+
 		m_status = EServiceStatus::Idle;
 	}
 
@@ -204,6 +220,10 @@ public:
 		gLogManager.log("Start Streaming.", ELL_INFO);
 		m_streamers->Stream();
 
+		for (int i = 0; i < m_audioGrabbers.size(); ++i)
+		{
+			m_audioGrabbers[i]->Start();
+		}
 		gLogManager.log("Stream started.", ELL_INFO);
 
 		m_isAudioStarted = true;
@@ -225,8 +245,12 @@ public:
 			return false;
 		gLogManager.log("Stopping AVStreamService.", ELL_INFO);
 
+		for (int i = 0; i < m_audioGrabbers.size(); ++i)
+		{
+			m_audioGrabbers[i]->Pause();
+		}
 		m_streamers->Stop();
-		Sleep(1000);
+	//	Sleep(1000);
 		//m_streamers->CloseAll();
 		gLogManager.log("Streams stopped.", ELL_INFO);
 
