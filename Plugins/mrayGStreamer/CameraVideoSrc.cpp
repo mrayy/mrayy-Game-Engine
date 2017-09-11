@@ -22,6 +22,8 @@ public:
 	math::vector2di m_frameSize;
 	bool m_separateStreams;
 
+	bool m_convertToGray8;
+
 	std::vector<AveragePer> m_currentFps;
 
 	//ImageProcessorListener listener;
@@ -35,6 +37,7 @@ public:
 	{
 		m_frameSize.set(1280, 720);
 		m_captureType = "RAW";
+		m_convertToGray8 = false;
 		m_separateStreams = false;
 	}
 	virtual ~CameraVideoSrcImpl()
@@ -129,6 +132,10 @@ CameraVideoSrc::~CameraVideoSrc()
 	delete m_impl;
 }
 
+void CameraVideoSrc::ConvertToGray8(bool convert)
+{
+	m_impl->m_convertToGray8 = convert;
+}
 void CameraVideoSrc::SetCameraIndex(std::vector<int> cams)
 {
 	m_impl->SetCameraIndex(cams);
@@ -190,8 +197,9 @@ std::string CameraVideoSrc::_generateString(int i)
 		//" do-timestamp=true is-live=true "//"block=true"
 		videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 			",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
-		videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
-			" height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " ";
+		if (m_impl->m_convertToGray8)
+			videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " ";
 		if (m_fps > 0)
 			videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
 		videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i) + " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";

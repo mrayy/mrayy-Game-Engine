@@ -475,6 +475,8 @@ public:
 	ImageProcessorListener _ovrListener;
 	core::string _ovrSettings;
 
+	bool optimizeOVR;
+
 	bool ksSupport;
 	EncodedCameraStreamController(TBee::TelubeeCameraConfiguration::ECameraCaptureType t, ECameraType cam)
 	{
@@ -484,6 +486,7 @@ public:
 		_capDev = new capDeviceInput();
 		_eyegaze = false;
 		_ovrCam = 0;
+		optimizeOVR = false;
 
 	}
 	virtual ~EncodedCameraStreamController()
@@ -561,6 +564,7 @@ public:
 			{
 				gLogManager.log("Linking Overvision",ELL_INFO);
 				src->AddPostCaptureListener(&_ovrListener,0);
+				src->ConvertToGray8(!optimizeOVR);
 				if (!_ovrCam)
 				{
 					_ovrCam = new video::OVRvisionCamGrabber();

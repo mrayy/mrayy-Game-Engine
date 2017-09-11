@@ -174,7 +174,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\serial;$(MRAY_ENGINE)\Projects\TelubeeLib;$(MRAY_ENGINE)\Engine\mrayCore\include;$(MRAY_ENGINE)\Engine\mrayMath;$(MRAY_ENGINE)\Engine\mrayEngine\include;$(MRAY_ENGINE)\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -182,7 +182,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(MRAY_ENGINE)\lib\$(Configuration)64;$(MRAY_ENGINE)\Dependencies\lib\$(Configuration)64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mrayMath.lib;mrayEngine.lib;TelubeeLib.lib;setupapi.lib;serial.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayCore.lib;mrayMath.lib;mrayEngine.lib;TelubeeLib.lib;setupapi.lib;serial.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetFileName) $(MRAY_ENGINE)\bin\$(Configuration)64\$(TargetFileName) </Command>

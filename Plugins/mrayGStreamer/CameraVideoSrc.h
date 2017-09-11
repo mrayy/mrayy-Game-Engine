@@ -38,6 +38,8 @@ public:
 	virtual std::string GetCameraStr(int i);
 	virtual std::string GetPipelineStr(int i);
 
+	void ConvertToGray8(bool convert);
+
 	virtual math::vector2di GetFrameSize(int i);
 
 	void AddPostCaptureListener(IMyListenerCallback* listener,int i);

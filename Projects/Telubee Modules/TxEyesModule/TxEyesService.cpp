@@ -59,6 +59,7 @@ public:
 
 	GCPtr<video::GstStreamBin> m_streamers;
 	ECameraType m_cameraType;
+	bool m_optimizedOVRVision;
 	bool m_enableEyegaze;
 	math::vector2di m_eyegazeSize;
 	int m_eyegazeFoV;
@@ -136,6 +137,8 @@ public:
 
 		m_portsReceived = false;
 		m_isVideoStarted = false;
+
+		m_optimizedOVRVision = false;
 
 		m_currentGain = 0;
 		m_lastGainUpdate = 0;
@@ -232,6 +235,7 @@ public:
 		if (camType == "PointGrey")
 			m_cameraType=ECameraType::PointGrey ;
 
+		m_optimizedOVRVision = core::StringConverter::toBool(context->appOptions.GetOptionValue("OptimizedOVR"));
 		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze"));
 //		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
 		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels"));
@@ -273,7 +277,9 @@ public:
  					m_cameraController = new CameraGrabberController();
  				else
 				{
+				
 					m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType, m_cameraType);
+					((EncodedCameraStreamController*)m_cameraController)->optimizeOVR = m_optimizedOVRVision;
 					((EncodedCameraStreamController*)m_cameraController)->EnableEyegaze(m_enableEyegaze);
 				}
 			}else 
@@ -840,7 +846,7 @@ public:
 
 		xml::XMLElement* ret = m_camConfig->ExportToXML(&e);
 		ret->addAttribute("StreamsCount", core::StringConverter::toString(m_streamsCount));
-// 		if (m_audioPlayer)
+		// 		if (m_audioPlayer)
 // 		{
 // 			ret->addAttribute("AudioPlayerPort", core::StringConverter::toString(m_AudioPort));
 // 			gLogManager.log("AudioPlayerPort: " + core::StringConverter::toString(m_AudioPort), ELL_INFO);
@@ -854,6 +860,7 @@ public:
 			{
 				EncodedCameraStreamController* c = (EncodedCameraStreamController*)m_cameraController;
 
+				ret->addAttribute("OptimizeOVR", c->optimizeOVR?"true":"false");
 				{
 					core::string settings = c->GetCameraParameterValue("settings", 0);
 					xml::XMLTextNode* node = new xml::XMLTextNode(settings);
