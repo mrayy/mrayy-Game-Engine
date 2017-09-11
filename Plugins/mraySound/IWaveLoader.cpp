@@ -5,7 +5,7 @@
 #include <IFileSystem.h>
 #include <LogManager.h>
 #include <ISoundStreamFrame.h>
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 namespace mray{
 namespace loaders{
@@ -65,7 +65,7 @@ public:
 	virtual ISoundStreamFrame* duplicate(){
 		WAVSoundStream* data=new WAVSoundStream(getResourceName());
 		data->sampleData=new byte[dataSize];
-		mraySystem::memCopy(data->sampleData,sampleData,dataSize*sizeof(byte));
+		IOSSystem::memCopy(data->sampleData,sampleData,dataSize*sizeof(byte));
 		data->dataSize=dataSize;
 
 		data->sampleFormat=sampleFormat;

@@ -14,6 +14,7 @@
 #ifndef ___ChunkSerializer___
 #define ___ChunkSerializer___
 
+#include "compileconfig.h"
 #include "IStream.h"
 
 namespace mray{

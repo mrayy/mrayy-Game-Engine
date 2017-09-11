@@ -4,6 +4,7 @@
 #define ___SCENE_NODE___
 
 
+#include "compileconfig.h"
 #include "ICullable.h"
 #include "mString.h"
 

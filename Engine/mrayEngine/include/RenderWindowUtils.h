@@ -18,6 +18,7 @@
 #define __RenderWindowUtils__
 
 
+#include "compileconfig.h"
 #include "mstring.h"
 //#include "OptionContainer.h"
 

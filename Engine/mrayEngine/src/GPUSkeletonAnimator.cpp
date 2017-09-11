@@ -56,14 +56,14 @@ void GPUSkeletonAnimator::setMeshBuffer(IMeshBuffer*buff)
 	int count=data->count*sizeof(math::vector4d);
 
 	math::vector4d*weightsPtr=(math::vector4d*) wStream->lock(0,0,video::IHardwareBuffer::ELO_Discard);
-	mraySystem::memSet(weightsPtr,0,count);
+	IOSSystem::memSet(weightsPtr,0,count);
 
 	math::Point4d<float>*bonesPtr=(math::Point4d<float>*) bStream->lock(0,0,video::IHardwareBuffer::ELO_Discard);
-	mraySystem::memSet(bonesPtr,0,data->count*sizeof(math::Point4d<float>));
+	IOSSystem::memSet(bonesPtr,0,data->count*sizeof(math::Point4d<float>));
 
 	std::vector<uchar> bonesCnt;
 	bonesCnt.resize(data->count);
-	mraySystem::memSet(&bonesCnt[0],0,data->count*sizeof(uchar));
+	IOSSystem::memSet(&bonesCnt[0],0,data->count*sizeof(uchar));
 
 	const BonesList& bones= m_skeleton->getBones();
 	BonesList::const_iterator it= bones.begin();

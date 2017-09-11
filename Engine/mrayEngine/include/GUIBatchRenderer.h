@@ -16,6 +16,7 @@
 #ifndef GUIBatchRenderer_h__
 #define GUIBatchRenderer_h__
 
+#include "compileconfig.h"
 #include "IGUIRenderer.h"
 #include "Point4d.h"
 #include "GCPtr.h"

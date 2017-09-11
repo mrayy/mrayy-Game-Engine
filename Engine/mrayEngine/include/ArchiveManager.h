@@ -2,6 +2,7 @@
 #ifndef ___ArchiveManager___
 #define ___ArchiveManager___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "GCPtr.h"
 #include "IStream.h"

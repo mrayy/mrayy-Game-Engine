@@ -15,6 +15,7 @@
 #define ___FileResourceManager___
 
 
+#include "compileconfig.h"
 #include "IResourceManager.h"
 #include "ISingleton.h"
 #include "IStream.h"

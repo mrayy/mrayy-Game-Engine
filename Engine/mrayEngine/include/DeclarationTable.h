@@ -2,6 +2,7 @@
 #ifndef ___DeclarationTable___
 #define ___DeclarationTable___
 
+#include "compileconfig.h"
 #include "mString.h"
 
 

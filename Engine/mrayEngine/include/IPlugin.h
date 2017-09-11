@@ -3,6 +3,7 @@
 #ifndef ___IPlugin___
 #define ___IPlugin___
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "mString.h"
 

@@ -1,8 +1,8 @@
 
 
 
-#ifndef ___CompileConfig___
-#define ___CompileConfig___
+#ifndef ___NETCompileConfig___
+#define ___NETCompileConfig___
 
 //#define ENABLE__DLL
 

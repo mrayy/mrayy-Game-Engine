@@ -4,6 +4,7 @@
 
 
 
+#include "compileconfig.h"
 #include "IResourceManager.h"
 #include "ISingleton.h"
 #include "MeshLoader.h"

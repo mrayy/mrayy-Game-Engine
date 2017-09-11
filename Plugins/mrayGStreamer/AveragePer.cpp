@@ -2,10 +2,8 @@
 
 #include "stdafx.h"
 #include "AveragePer.h"
+#include "GStreamerCore.h"
 
-
-#include "FPSCalc.h"
-#include "Engine.h"
 #include "ITimer.h"
 
 namespace mray
@@ -19,7 +17,7 @@ void AveragePer::Add(uint count)
 	m_count += count;
 	m_totalCount += count;
 
-	ulong ts = gEngine.getTimer()->getMilliseconds();
+	ulong ts = gGStreamerCore->GetTimer()->getMilliseconds();
 	if (ts - m_timestamp > m_per){
 		m_timestamp = ts;
 		m_average = m_count;
@@ -33,7 +31,7 @@ void AveragePer::Reset()
 	m_count = 0;
 	m_totalCount = 0;
 	m_average = 0;
-	m_timestamp = gEngine.getTimer()->getMilliseconds();
+	m_timestamp = gGStreamerCore->GetTimer()->getMilliseconds();
 }
 
 uint AveragePer::GetAverage(){

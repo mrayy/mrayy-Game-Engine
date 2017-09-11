@@ -8,7 +8,7 @@
 #include "TextureResourceManager.h"
 #include "common.h"
 #include "TraceManager.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include "ColorConverter.h"
 #include "StringUtil.h"
 
@@ -161,7 +161,7 @@ bool CTargaLoader::canLoad(const core::string&name)
 bool CTargaLoader::canLoad(OS::IStream* file)
 {
 	tgaFooter footer;
-	mraySystem::memSet(&footer, 0, sizeof(tgaFooter));
+	IOSSystem::memSet(&footer, 0, sizeof(tgaFooter));
 	file->seek(sizeof(tgaFooter),OS::ESeek_End);
 	file->read(&footer, sizeof(tgaFooter));
 	// Cann't handle old targa versions

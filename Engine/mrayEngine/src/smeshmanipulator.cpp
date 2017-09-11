@@ -8,7 +8,7 @@
 #include "ILogManager.h"
 #include "SMesh.h"
 #include "NvTriStrip.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 namespace mray{
 
@@ -594,7 +594,7 @@ bool SMeshManipulator::ConvertTrisToTriStrips(const ushort *ind,int iCnt,ushort*
 
 	retCount=groups[0].numIndices;
 	*retIndicies=new ushort[retCount];
-	mraySystem::memCopy(*retIndicies,groups[0].indices,sizeof(ushort)*retCount);
+	IOSSystem::memCopy(*retIndicies,groups[0].indices,sizeof(ushort)*retCount);
 	delete [] groups;
 #endif
 	return true;

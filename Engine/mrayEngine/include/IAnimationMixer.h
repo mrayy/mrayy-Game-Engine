@@ -14,6 +14,7 @@
 #ifndef ___IAnimationMixer___
 #define ___IAnimationMixer___
 
+#include "compileconfig.h"
 #include "IResource.h"
 #include "AnimationTrackGroup.h"
 

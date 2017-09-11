@@ -14,6 +14,7 @@
 #ifndef ___GUIElementFactory___
 #define ___GUIElementFactory___
 
+#include "compileconfig.h"
 #include "GUIElementFactoryDef.h"
 #include "ISingleton.h"
 

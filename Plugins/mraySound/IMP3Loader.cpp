@@ -6,7 +6,7 @@
 #include <mArray.h>
 #include <ISoundStreamFrame.h>
 #include <decoder\mpaudec.h>
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 
 namespace mray{
@@ -68,7 +68,7 @@ public:
 			Buffer = (byte*)realloc(Buffer, Capacity);
 		}
 
-		mraySystem::memCopy(Buffer + Size, buffer, size);
+		IOSSystem::memCopy(Buffer + Size, buffer, size);
 		Size += size;
 	}
 
@@ -77,8 +77,8 @@ public:
 	{
 		int toRead = math::Min<int>(size, Size);
 
-		mraySystem::memCopy(buffer, Buffer, toRead);
-		mraySystem::memMove(Buffer, Buffer + toRead, Size - toRead);
+		IOSSystem::memCopy(buffer, Buffer, toRead);
+		IOSSystem::memMove(Buffer, Buffer + toRead, Size - toRead);
 
 		Size -= toRead;
 		return toRead;

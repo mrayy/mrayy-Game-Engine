@@ -5,6 +5,7 @@
 #define ___CPAKArchive___
 
 
+#include "compileconfig.h"
 #include "CLimitedStream.h"
 #include "IArchive.h"
 

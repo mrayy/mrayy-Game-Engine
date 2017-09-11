@@ -4,7 +4,7 @@
 #include "VideoAppSinkHandler.h"
 #include "PixelUtil.h"
 #include "ILogManager.h"
-#include "Engine.h"
+#include "GStreamerCore.h"
 #include "ITimer.h"
 #include "IThreadManager.h"
 
@@ -24,8 +24,6 @@ namespace video
 		m_IsAllocated = false;
 		m_frameID = 0;
 		m_surfaceCount = 1;
-		m_captureFPS = 0;
-		m_frameCount = 0;
 
 		m_mutex = OS::IThreadManager::getInstance().createMutex();
 	}
@@ -183,10 +181,7 @@ namespace video
 		m_BackPixelsChanged = true;
 		m_IsAllocated = true;
 
-		m_frameCount = 0;
-		m_timeAcc = 0;
-		m_lastT = 0;
-		m_captureFPS = 0;
+		m_fps.resetTime(gGStreamerCore->GetTimer()->getSeconds());
 
 		return m_IsAllocated;
 	}
@@ -206,19 +201,8 @@ namespace video
 			prevBuffer = buffer;
 
 
-			float t = gEngine.getTimer()->getSeconds();
-			m_timeAcc += (t - m_lastT)*0.001f;
-
-			++m_frameCount;
-			if (m_timeAcc > 1)
-			{
-				m_captureFPS = m_frameCount;
-				m_timeAcc = m_timeAcc - (int)m_timeAcc;
-				m_frameCount = 0;
-				//	printf("Capture FPS: %d\n", m_captureFPS);
-			}
-
-			m_lastT = t;
+			float t = gGStreamerCore->GetTimer()->getSeconds();
+			m_fps.regFrame(t);
 		}
 
 		m_mutex->unlock();
@@ -231,7 +215,7 @@ namespace video
 
 	float VideoAppSinkHandler::GetCaptureFrameRate()
 	{
-		return m_captureFPS;
+		return m_fps.getFPS();
 	}
 
 

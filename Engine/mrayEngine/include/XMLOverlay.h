@@ -14,6 +14,7 @@
 #ifndef ___XMLOverlay___
 #define ___XMLOverlay___
 
+#include "compileconfig.h"
 #include "IStream.h"
 
 namespace mray{

@@ -5,6 +5,7 @@
 
 
 
+#include "compileconfig.h"
 #include "mstring.h"
 #include "IMovable.h"
 

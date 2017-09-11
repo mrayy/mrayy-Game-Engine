@@ -15,11 +15,11 @@
 #include "LogManager.h"
 #include "LocalNetworkPortAssigner.h"
 
-#include "picojson.h"
+//#include "picojson.h"
 #include <tinyxml2.h>
-#include <windows.h>
 #include <conio.h>
 #include <iostream>
+#include <windows.h>
 
 #undef StartService
 
@@ -113,7 +113,7 @@ void ServiceHostManager::_destroy()
 bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 {
 	new OS::WinOSystem();
-	m_timer = OS::WinOSystem::getInstance().createTimer();
+	m_timer = gOSystem.createTimer();
 	new OS::WinFileSystem();
 	new Engine(new OS::WinOSystem());
 	//gEngine.loadPlugins("plugins.stg");

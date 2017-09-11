@@ -343,6 +343,7 @@
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="MinMaxPair.h" />
     <ClInclude Include="mMath.h" />
+    <ClInclude Include="mrayMath.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="point2d.h" />
     <ClInclude Include="point3d.h" />

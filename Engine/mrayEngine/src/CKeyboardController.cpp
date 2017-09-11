@@ -2,7 +2,7 @@
 
 
 #include "CKeyboardController.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 namespace mray{
 
@@ -11,8 +11,8 @@ namespace controllers{
 
 
 CKeyboardController::CKeyboardController(){
-	mraySystem::memSet(m_keys,0,sizeof(m_keys));
-	mraySystem::memSet(m_keysChar,0,sizeof(m_keysChar));
+	IOSSystem::memSet(m_keys,0,sizeof(m_keys));
+	IOSSystem::memSet(m_keysChar,0,sizeof(m_keysChar));
 	
 	m_shift=0;
 	m_lshift=0;

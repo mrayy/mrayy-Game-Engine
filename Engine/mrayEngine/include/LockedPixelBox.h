@@ -15,6 +15,7 @@
 #define ___LockedPixelBox___
 
 
+#include "compileconfig.h"
 #include "videoCommon.h"
 
 

@@ -15,6 +15,7 @@
 #ifndef MeshFileCreatorManager_h__
 #define MeshFileCreatorManager_h__
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 
 

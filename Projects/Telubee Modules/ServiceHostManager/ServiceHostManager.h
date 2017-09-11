@@ -13,7 +13,6 @@
 #include "GstCustomDataStreamer.h"
 #include "CategoryDictionary.h"
 
-#include <windows.h>
 
 namespace mray
 {
@@ -68,8 +67,8 @@ protected:
 		int netValuePort;
 		TBee::EServiceStatus status;
 
-		HANDLE processHandle;
-		HANDLE threadHandle;
+		void* processHandle;
+		void* threadHandle;
 
 		int pingSent;
 		ulong lastTime;//last time this service was alive

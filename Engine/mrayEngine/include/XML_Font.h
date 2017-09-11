@@ -4,6 +4,7 @@
 #ifndef ___XML_Font___
 #define ___XML_Font___
 
+#include "compileconfig.h"
 #include "IFont.h"
 #include "IStream.h"
 

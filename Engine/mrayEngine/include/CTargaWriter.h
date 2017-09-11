@@ -2,6 +2,7 @@
 #ifndef ___CTARGAWRITER___
 #define ___CTARGAWRITER___
 
+#include "compileconfig.h"
 #include "ITexWriter.h"
 
 

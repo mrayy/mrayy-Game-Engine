@@ -5,6 +5,7 @@
 #define ___IArchiveLoader___
 
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "mTypes.h"
 #include "mstring.h"

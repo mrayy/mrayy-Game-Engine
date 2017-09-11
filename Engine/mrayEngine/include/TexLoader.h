@@ -4,6 +4,7 @@
 #define ___TEXLOADER___
 
 
+#include "compileconfig.h"
 #include "IStream.h"
 
 #include "GCPtr.h"

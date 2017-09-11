@@ -15,6 +15,7 @@
 #define ___MathValues___
 
 
+#include "compileconfig.h"
 #include "IValue.h"
 
 

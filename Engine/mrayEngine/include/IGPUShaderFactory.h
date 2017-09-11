@@ -4,6 +4,7 @@
 #ifndef ___IGPUShaderFactory___
 #define ___IGPUShaderFactory___
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "mTypes.h"
 #include "IGPUShaderProgram.h"

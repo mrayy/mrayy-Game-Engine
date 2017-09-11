@@ -14,6 +14,7 @@
 #ifndef ___IMonitorDeviceManager___
 #define ___IMonitorDeviceManager___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 
 

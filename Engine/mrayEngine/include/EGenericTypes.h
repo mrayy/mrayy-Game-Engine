@@ -16,6 +16,7 @@
 #ifndef EGenericTypes_h__
 #define EGenericTypes_h__
 
+#include "compileconfig.h"
 #include "mString.h"
 
 namespace mray

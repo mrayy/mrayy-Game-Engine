@@ -16,6 +16,7 @@
 #ifndef SceneNodeCreator_h__
 #define SceneNodeCreator_h__
 
+#include "compileconfig.h"
 #include "Gcptr.h"
 
 namespace mray

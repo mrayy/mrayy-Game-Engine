@@ -16,6 +16,7 @@
 #define ActionsHistory_h__
 
 
+#include "compileconfig.h"
 #include "mstring.h"
 #include <stack>
 

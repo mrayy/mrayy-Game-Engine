@@ -4,6 +4,7 @@
 #define ___CJoysticController___
 
 
+#include "compileconfig.h"
 #include "IJoysticController.h"
 
 

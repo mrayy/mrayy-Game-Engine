@@ -3,14 +3,14 @@
 
 
 #include "CMouseController.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 namespace mray{
 	
 namespace controllers{
 
 CMouseController::CMouseController(){
-	mraySystem::memSet(m_pressed,0,sizeof(m_pressed));
+	IOSSystem::memSet(m_pressed,0,sizeof(m_pressed));
 }
 
 CMouseController::~CMouseController(){

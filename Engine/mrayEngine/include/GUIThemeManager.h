@@ -4,6 +4,7 @@
 
 
 
+#include "compileconfig.h"
 #include "mString.h"
 #include "ISingleton.h"
 

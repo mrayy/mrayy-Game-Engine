@@ -3,6 +3,7 @@
 #define ___CBMPLOADER___
 
 
+#include "compileconfig.h"
 #include "mTypes.h"
 #include "ITexLoader.h"
 

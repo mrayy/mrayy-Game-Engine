@@ -5,6 +5,7 @@
 #define ___TEXWRITER___
 
 
+#include "compileconfig.h"
 #include "ITexWriter.h"
 
 namespace mray{

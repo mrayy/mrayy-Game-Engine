@@ -3,6 +3,7 @@
 #ifndef ___PluginManager___
 #define ___PluginManager___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "IPlugin.h"
 #include "IDynamicLibrary.h"

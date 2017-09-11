@@ -3,6 +3,7 @@
 #ifndef ___ISerializable___
 #define ___ISerializable___
 
+#include "compileconfig.h"
 #include "IXMLParser.h"
 #include "XMLElement.h"
 #include "GCPtr.h"

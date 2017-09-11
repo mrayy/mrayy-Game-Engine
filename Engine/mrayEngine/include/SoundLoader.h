@@ -6,6 +6,7 @@
 
 
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 
 #include "ISoundLoader.h"

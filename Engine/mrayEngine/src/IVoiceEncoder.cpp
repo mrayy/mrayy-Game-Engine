@@ -2,7 +2,7 @@
 
 #include "IVoiceEncoder.h"
 
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 namespace mray
 {
@@ -40,7 +40,7 @@ std::vector<uchar>& IVoiceEncoder::EncodeBuffer(std::vector<uchar>& sampleBuffer
 		m_workingBuffer.resize(len);
 
 		uint newSize = (sampleCount - samplesUsed) * sizeof(ushort);
-		mraySystem::memCopy(samplePtr, samplePtr + samplesUsed, newSize);
+		IOSSystem::memCopy(samplePtr, samplePtr + samplesUsed, newSize);
 
 		sampleBuffer.resize(newSize);
 	}

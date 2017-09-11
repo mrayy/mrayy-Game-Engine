@@ -15,6 +15,7 @@
 #define ___KeyAnimationTrack___
 
 
+#include "compileconfig.h"
 #include "IAnimationTrack.h"
 #include "AnimationTypes.h"
 

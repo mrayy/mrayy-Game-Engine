@@ -18,6 +18,7 @@
 #define __AImpSceneLoader__
 
 
+#include "compileconfig.h"
 #include "SMesh.h"
 #include "IMeshLoader.h"
 #include "IStream.h"

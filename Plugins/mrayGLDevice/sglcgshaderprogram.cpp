@@ -462,7 +462,7 @@ void SGLCGShaderProgram::setMatrixArray(GPUUniform*u,const math::matrix4x4* arr,
 	//int idx{}
 	for (int i=0;i<count;i++)
 	{
-		mraySystem::memCopy(&m_matrixArray[i*12],arr[i].getMatPointer(),12*sizeof(float));
+		IOSSystem::memCopy(&m_matrixArray[i*12],arr[i].getMatPointer(),12*sizeof(float));
 		/*const math::matrix4x4& m=arr[i];
 		for(int j{}j<4;++j)
 		{

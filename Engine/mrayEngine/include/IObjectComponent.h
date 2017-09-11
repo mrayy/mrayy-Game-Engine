@@ -16,6 +16,7 @@
 #ifndef __IObjectComponent__
 #define __IObjectComponent__
 
+#include "compileconfig.h"
 #include "IObject.h"
 
 namespace mray

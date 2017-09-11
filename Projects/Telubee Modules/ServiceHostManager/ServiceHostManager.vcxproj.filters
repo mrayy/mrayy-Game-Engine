@@ -41,7 +41,7 @@
     <ClCompile Include="ServiceHostManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Dependencies\include\tinyxml2.cpp">
+    <ClCompile Include="..\..\..\Dependencies\include\tinyxml2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -15,11 +15,12 @@
 #ifndef ___IHardwareBuffer___
 #define ___IHardwareBuffer___
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "mTypes.h"
 #include "macros.h"
 //#include "EDeviceType.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 namespace mray{
 namespace video{
@@ -90,7 +91,7 @@ protected:
 			else
 				op=ELO_Normal;
 			void*dest=inner_lock(m_startLock,m_sizeInBytes,op);
-			mraySystem::memCopy(dest,src,m_sizeInBytes);
+			IOSSystem::memCopy(dest,src,m_sizeInBytes);
 			inner_unlock();
 
 			m_virtualBuffer->inner_unlock();

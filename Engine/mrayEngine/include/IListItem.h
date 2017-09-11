@@ -16,6 +16,7 @@
 #ifndef __IListItem__
 #define __IListItem__
 
+#include "compileconfig.h"
 #include "UTFString.h"
 
 namespace mray

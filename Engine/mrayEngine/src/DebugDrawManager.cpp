@@ -5,7 +5,7 @@
 #include "SMesh.h"
 #include "ThreadBarrier.h"
 #include "JobPool.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include "IMutex.h"
 #include "IThreadManager.h"
 #include "DefaultColors.h"
@@ -271,8 +271,8 @@ void DebugDrawManager::AddMesh(const math::vector3d* verts,const ushort* indicie
 	p->vertices.resize(vCnt);
 	p->indices.resize(iCnt);
 
-	mraySystem::memCopy(&p->vertices[0],verts,vCnt*sizeof(math::vector3d));
-	mraySystem::memCopy(&p->indices[0],indicies,iCnt*sizeof(ushort));
+	IOSSystem::memCopy(&p->vertices[0],verts,vCnt*sizeof(math::vector3d));
+	IOSSystem::memCopy(&p->indices[0],indicies,iCnt*sizeof(ushort));
 
 	AddPrimitiveToDraw(p,wireframe? EBT_WireFrame:EBT_Solid);
 }

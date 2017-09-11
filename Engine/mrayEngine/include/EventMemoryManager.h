@@ -14,6 +14,7 @@
 #ifndef ___EventMemoryManager___
 #define ___EventMemoryManager___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "Event.h"
 #include "GCPtr.h"

@@ -4,6 +4,7 @@
 #define ___SParticleSystemFactory___
 
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "ISingleton.h"
 

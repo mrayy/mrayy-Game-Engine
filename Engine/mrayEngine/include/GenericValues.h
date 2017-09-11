@@ -14,6 +14,7 @@
 #ifndef ___GenericValues___
 #define ___GenericValues___
 
+#include "compileconfig.h"
 #include "IValue.h"
 
 namespace mray{

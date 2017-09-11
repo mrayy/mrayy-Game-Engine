@@ -3,6 +3,7 @@
 #define ___CustomTTranslater___
 
 
+#include "compileconfig.h"
 #include "ITokenTranslator.h"
 
 

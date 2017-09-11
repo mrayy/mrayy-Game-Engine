@@ -3,6 +3,7 @@
 #ifndef __LOCALNETWORKPORTASSIGNER__
 #define __LOCALNETWORKPORTASSIGNER__
 
+#include "compileconfig.h"
 #include "INetworkPortAssigner.h"
 
 namespace mray

@@ -7,7 +7,7 @@
 #include "IStream.h"
 #include "XMLTextNode.h"
 #include "XMLComment.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include "StringUtil.h"
 
 #include "XMLTree.h"
@@ -59,7 +59,7 @@ void charDataHandler(void *data, const XML_Char *text, int len)
 	if(len==1)return;
 	core::string str;
 	str.resize(len);
-	mraySystem::memCopy(&str[0],text,len);
+	IOSSystem::memCopy(&str[0],text,len);
 	str=core::StringUtil::Trim(str);
 	if(str=="")
 		return;
@@ -69,7 +69,7 @@ void charDataHandler(void *data, const XML_Char *text, int len)
 	IXMLListner*listner=static_cast<IXMLListner*>(data);
 	core::string str;
 	str.resize(len);
-	mraySystem::memCopy(&str[0],data,len);
+	IOSSystem::memCopy(&str[0],data,len);
 	str[len-1]=0;
 	listner->texDataHandler(str);*/
 }

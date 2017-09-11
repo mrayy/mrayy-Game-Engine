@@ -3,6 +3,7 @@
 #ifndef ___CToketTranslator___
 #define ___CToketTranslator___
 
+#include "compileconfig.h"
 #include "ITokenTranslator.h"
 
 namespace mray{

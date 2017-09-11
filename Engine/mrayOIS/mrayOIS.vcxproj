@@ -205,7 +205,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\mrayEngine\include;..\mrayMath;..\..\Dependencies\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\mrayEngine\include;..\mrayCore\include;..\mrayMath;..\..\Dependencies\include\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>

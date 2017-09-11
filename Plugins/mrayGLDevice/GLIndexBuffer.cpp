@@ -83,7 +83,7 @@ uint GLIndexBuffer::writeData(uint offset,uint length,const void*src,bool discar
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_bufferID);
 	if(m_useVirtualBuffer){
 		void* dest = m_virtualBuffer->lock(offset, length, ELO_Discard);
-		mraySystem::memCopy(dest, src, length);
+		IOSSystem::memCopy(dest, src, length);
 		m_virtualBuffer->unlock();
 	}
 

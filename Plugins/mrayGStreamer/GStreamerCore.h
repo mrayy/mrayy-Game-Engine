@@ -16,6 +16,7 @@
 #define __GStreamerCore__
 
 #include "IThread.h"
+#include "ITimer.h"
 
 
 namespace mray
@@ -32,6 +33,8 @@ protected:
 	OS::IThread* m_mainLoopThread;
 	OS::IThreadFunction* m_threadFunc;
 
+	OS::ITimer *m_timer;
+
 	GStreamerCore();
 
 
@@ -43,12 +46,16 @@ public:
 
 	virtual~GStreamerCore();
 
+	OS::ITimer* GetTimer(){ return m_timer; }
+
 	static void Ref();
 	static void Unref();
 	static uint RefCount(){ return m_refCount; }
 
 	static GStreamerCore* Instance();
 };
+
+#define gGStreamerCore mray::video::GStreamerCore::Instance()
 
 }
 }

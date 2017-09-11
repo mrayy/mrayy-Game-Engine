@@ -16,6 +16,7 @@
 #ifndef IGUIElement_h__
 #define IGUIElement_h__
 
+#include "compileconfig.h"
 #include "IObject.h"
 #include "GUID.h"
 #include "TypedProperty.h"

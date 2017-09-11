@@ -17,6 +17,7 @@
 #define __CustomTexWriter__
 
 
+#include "compileconfig.h"
 #include "ITexWriter.h"
 
 namespace mray{

@@ -15,6 +15,7 @@
 #ifndef ___EventTimer___
 #define ___EventTimer___
 
+#include "compileconfig.h"
 #include "IDelegate.h"
 
 namespace mray{

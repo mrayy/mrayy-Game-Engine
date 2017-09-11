@@ -15,6 +15,7 @@
 #define ___FreeImageWriter___
 
 
+#include "compileconfig.h"
 #include "ITexWriter.h"
 #include <FreeImage.h>
 

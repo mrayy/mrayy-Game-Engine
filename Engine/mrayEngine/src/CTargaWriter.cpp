@@ -10,7 +10,7 @@
 #include "ITexture.h"
 
 #include "ILogManager.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include "PixelUtil.h"
 #include "StringUtil.h"
 
@@ -141,7 +141,7 @@ bool CTargaWriter::write(video::ImageInfo*tex,OS::IStream* file,video::ETextureT
 		return 0;
 	}
 	tgaHeader header;
-	mraySystem::memSet(&header,0,sizeof(header));
+	IOSSystem::memSet(&header,0,sizeof(header));
 	header.imageTypeCode=TGA_RGB_RLE;
 	header.width=tex->Size.x;
 	header.height=tex->Size.y;

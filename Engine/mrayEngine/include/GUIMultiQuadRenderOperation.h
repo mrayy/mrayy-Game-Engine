@@ -17,6 +17,7 @@
 
 
 
+#include "compileconfig.h"
 #include "SColor.h"
 
 #include "IGUIRenderOperation.h"

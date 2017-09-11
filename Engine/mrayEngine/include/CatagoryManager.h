@@ -14,6 +14,7 @@
 #ifndef ___CatagoryManager___
 #define ___CatagoryManager___
 
+#include "compileconfig.h"
 #include "mString.h"
 
 

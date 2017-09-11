@@ -16,6 +16,7 @@
 #define __InternetCacheManager__
 
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "IStream.h"
 

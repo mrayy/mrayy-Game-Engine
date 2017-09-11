@@ -2,6 +2,7 @@
 #ifndef ___IAttribute___
 #define ___IAttribute___
 
+#include "compileconfig.h"
 #include "mString.h"
 #include "EGenericTypes.h"
 

@@ -2,7 +2,7 @@
 
 #include "NoiseTexture.h"
 #include "ILogManager.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 
 namespace mray{
@@ -37,7 +37,7 @@ void NoiseTexture::createImage3D(uchar*data,int w,int h,int d,EPixelFormat forma
 	if(format==EPixel_LUMINANCE8)c=1;
 	else if(format==EPixel_R8G8B8)c=3;
 	else if(format==EPixel_R8G8B8A8)c=4;
-	mraySystem::memSet(data,0,w*h*d*c);
+	IOSSystem::memSet(data,0,w*h*d*c);
 	for(int o=0;o<m_octaves;o++,freq*=2,ampl*=m_persistance)
 	{
 		uchar*ptr=data;

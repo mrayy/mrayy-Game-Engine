@@ -15,6 +15,7 @@
 #define ___ICursorControl___
 
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 
 

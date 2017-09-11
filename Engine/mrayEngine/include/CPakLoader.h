@@ -4,6 +4,7 @@
 #define ___CPakLoader___
 
 
+#include "compileconfig.h"
 #include "IArchiveLoader.h"
 
 namespace mray{

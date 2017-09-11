@@ -16,6 +16,7 @@
 #ifndef __mdlWriter__
 #define __mdlWriter__
 
+#include "compileconfig.h"
 #include "IModelWriter.h"
 
 namespace mray

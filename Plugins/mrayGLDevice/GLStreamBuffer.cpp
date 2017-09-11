@@ -79,7 +79,7 @@ uint GLStreamBuffer::writeData(uint offset,uint length,const void*src,bool disca
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_bufferID);
 	if(m_useVirtualBuffer){
 		void* dest = m_virtualBuffer->lock(offset, length, ELO_Normal);
-		mraySystem::memCopy(dest, src, length);
+		IOSSystem::memCopy(dest, src, length);
 		m_virtualBuffer->unlock();
 	}
 

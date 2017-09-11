@@ -6,6 +6,7 @@
 
 
 
+#include "compileconfig.h"
 #include "IMouseController.h"
 
 

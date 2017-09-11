@@ -16,6 +16,7 @@ purpose:
 #ifndef __GPUUniform__
 #define __GPUUniform__
 
+#include "compileconfig.h"
 #include "videoCommon.h"
 
 

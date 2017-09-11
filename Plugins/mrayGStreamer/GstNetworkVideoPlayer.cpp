@@ -13,7 +13,7 @@
 
 #include "VideoAppSinkHandler.h"
 #include "GstPipelineHandler.h"
-#include "Engine.h"
+#include "GStreamerCore.h"
 #include "ITimer.h"
 #include "FPSCalc.h"
 
@@ -39,7 +39,7 @@ namespace video
 		}
 		void Start()
 		{
-			m_lastTime = gEngine.getTimer()->getSeconds();
+			m_lastTime = gGStreamerCore->GetTimer()->getSeconds();
 
 			m_frameCount = 0;
 			m_timeAcc = 0;
@@ -50,7 +50,7 @@ namespace video
 		{
 
 
-			float t = gEngine.getTimer()->getSeconds();
+			float t = gGStreamerCore->GetTimer()->getSeconds();
 			m_timeAcc += (t - m_lastTime)*0.001f;
 			++m_frameCount;
 			if (m_timeAcc > 1)
@@ -212,7 +212,7 @@ public:
 		g_signal_emit_by_name(sink, "pull-sample", &sample, NULL);
 		if (sample) {
 
-			m_fpsCounter.regFrame(gEngine.getTimer()->getSeconds());
+			m_fpsCounter.regFrame(gGStreamerCore->GetTimer()->getSeconds());
 			buffer = gst_sample_get_buffer(sample);
 
 			gst_buffer_map(buffer, &map, GST_MAP_READ);

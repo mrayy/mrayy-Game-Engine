@@ -2,6 +2,7 @@
 #ifndef ___CBMPWRITER___
 #define ___CBMPWRITER___
 
+#include "compileconfig.h"
 #include "ITexWriter.h"
 
 namespace mray{

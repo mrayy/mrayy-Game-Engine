@@ -2,6 +2,7 @@
 #ifndef ___EVENT___
 #define ___EVENT___
 
+#include "compileconfig.h"
 #include "mstring.h"
 #include "GCPtr.h"
 #include "GUID.h"

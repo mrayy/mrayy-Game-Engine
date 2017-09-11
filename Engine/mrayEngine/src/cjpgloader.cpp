@@ -8,7 +8,7 @@
 #include "common.h"
 #include "TraceManager.h"
 
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include <stdio.h>
 
 
@@ -37,7 +37,7 @@ bool CJPGLoader::load(OS::IStream* file,video::ImageInfo* image,video::ETextureT
 	file->seek(0,OS::ESeek_Set);
 
 	JPEG_CORE_PROPERTIES img;
-	mraySystem::memSet(&img,0,sizeof(img));
+	IOSSystem::memSet(&img,0,sizeof(img));
 	if(ijlInit(&img)!=IJL_OK){
 		gLogManager.log(mT("Unable to initialize Intel JPEG Library "),file->getStreamName(),ELL_WARNING);
 		return 0;

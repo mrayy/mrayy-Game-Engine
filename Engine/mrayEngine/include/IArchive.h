@@ -4,6 +4,7 @@
 #define ___IArchive___
 
 
+#include "compileconfig.h"
 
 #include "IStream.h"
 

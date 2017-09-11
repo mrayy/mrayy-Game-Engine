@@ -15,6 +15,7 @@
 #ifndef FunctionProfileManager_h__
 #define FunctionProfileManager_h__
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "mstring.h"
 #include "ListenerContainer.h"

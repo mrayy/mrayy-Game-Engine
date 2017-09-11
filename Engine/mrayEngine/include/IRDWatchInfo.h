@@ -14,6 +14,7 @@
 #ifndef ___IRDWatchInfo___
 #define ___IRDWatchInfo___
 
+#include "compileconfig.h"
 #include "mstring.h"
 
 namespace mray{

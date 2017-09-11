@@ -17,6 +17,7 @@
 #ifndef __CustomTexLoader__
 #define __CustomTexLoader__
 
+#include "compileconfig.h"
 #include "mTypes.h"
 #include "ITexLoader.h"
 

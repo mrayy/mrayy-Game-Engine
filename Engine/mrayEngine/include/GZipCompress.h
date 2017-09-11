@@ -17,6 +17,7 @@
 #ifndef __GZipCompress__
 #define __GZipCompress__
 
+#include "compileconfig.h"
 #include "ICompressor.h"
 
 namespace mray

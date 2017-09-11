@@ -14,6 +14,7 @@
 #ifndef ___SoundThemeManager___
 #define ___SoundThemeManager___
 
+#include "compileconfig.h"
 #include "mstring.h"
 
 

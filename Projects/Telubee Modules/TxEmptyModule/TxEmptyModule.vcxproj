@@ -159,7 +159,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TxEmptyModule_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>
       </SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;..\..\..\Engine\mrayOIS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Engine\mrayCore\include;..\..\..\Engine\mrayEngine\include;..\..\..\Engine\mrayMath;..\..\..\Engine\regex;..\..\..\Engine\mrayNet;..\..\..\Dependencies\include;..\..\..\Plugins\mrayGStreamer;..\..\TelubeeLib\;..\..\..\Engine\mrayWin32;..\..\..\Engine\mrayOIS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -167,7 +167,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(GSTREAMER_1_0_ROOT_X86_64)\lib;..\..\..\lib\$(Configuration)64;..\..\..\Dependencies\lib\$(Configuration)64;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mrayWin32.lib;TelubeeLib.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;mrayOIS.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mrayCore.lib;mrayWin32.lib;TelubeeLib.lib;mrayGStreamer.lib;mrayMath.lib;mrayEngine.lib;mrayOIS.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>

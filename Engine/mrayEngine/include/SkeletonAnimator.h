@@ -14,9 +14,9 @@
 #ifndef ___SkeletonAnimator___
 #define ___SkeletonAnimator___
 
+#include "compileconfig.h"
+
 #include "ISkeletonAnimator.h"
-
-
 
 namespace mray{
 namespace scene{

@@ -15,6 +15,7 @@
 #ifndef ___BoneNode___
 #define ___BoneNode___
 
+#include "compileconfig.h"
 #include "IMovable.h"
 #include "GCPtr.h"
 #include "mString.h"

@@ -15,7 +15,7 @@
 #ifndef ___TreeDictionary___
 #define ___TreeDictionary___
 
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include "CMemory.h"
 
 namespace mray{
@@ -57,7 +57,7 @@ protected:
 		void alloc(){
 			if(!children){
 				children=new SNode*[m_tableSize];
-				mraySystem::memSet(children,0,sizeof(SNode*)*m_tableSize);
+				IOSSystem::memSet(children,0,sizeof(SNode*)*m_tableSize);
 			}
 		}
 
@@ -96,7 +96,7 @@ protected:
 public:
 	TreeDictionary(){
 		m_nodes=new SNode*[m_tableSize];
-		mraySystem::memSet(m_nodes,0,sizeof(SNode*)*m_tableSize);
+		IOSSystem::memSet(m_nodes,0,sizeof(SNode*)*m_tableSize);
 	}
 	virtual~TreeDictionary(){
 		for (int i=0;i<m_tableSize;i++)

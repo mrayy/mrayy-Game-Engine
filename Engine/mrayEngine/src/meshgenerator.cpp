@@ -9,7 +9,7 @@
 #include "MeshBufferData.h"
 
 #include "IMeshBuffer.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 #include "ILogManager.h"
 #include "RenderTechnique.h"
@@ -37,7 +37,7 @@ const mchar *GenTypesName[]={
 };
 
 MeshGenerator::MeshGenerator(){
-	mraySystem::memSet(m_genId,0,sizeof(m_genId));
+	IOSSystem::memSet(m_genId,0,sizeof(m_genId));
 }
 MeshGenerator::~MeshGenerator(){
 

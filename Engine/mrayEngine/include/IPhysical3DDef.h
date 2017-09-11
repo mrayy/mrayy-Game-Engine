@@ -14,6 +14,7 @@ purpose:
 #ifndef ___IPhysical3DDef___
 #define ___IPhysical3DDef___
 
+#include "compileconfig.h"
 #include <Point3d.h>
 #include <quaternion.h>
 #include "common.h"

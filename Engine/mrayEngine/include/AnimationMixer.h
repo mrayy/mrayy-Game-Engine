@@ -16,6 +16,7 @@ purpose:
 #ifndef AnimationMixer_h__
 #define AnimationMixer_h__
 
+#include "compileconfig.h"
 #include "IAnimationMixer.h"
 #include "AnimationTrackGroup.h"
 

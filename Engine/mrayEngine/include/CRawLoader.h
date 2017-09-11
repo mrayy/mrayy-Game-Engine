@@ -3,6 +3,7 @@
 #ifndef ___CRAW___
 #define ___CRAW___
 
+#include "compileconfig.h"
 #include "mTypes.h"
 #include "ITexLoader.h"
 

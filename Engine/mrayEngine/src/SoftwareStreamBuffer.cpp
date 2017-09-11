@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "SoftwareStreamBuffer.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 
 namespace mray{
@@ -14,7 +14,7 @@ SoftwareStreamBuffer::SoftwareStreamBuffer(EStreamDataType dataType,uint length,
 {
 	m_data.resize(m_sizeInBytes);
 	if(m_sizeInBytes)
-		mraySystem::memSet(&m_data[0],0,m_sizeInBytes*sizeof(uchar));
+		IOSSystem::memSet(&m_data[0],0,m_sizeInBytes*sizeof(uchar));
 }
 SoftwareStreamBuffer::~SoftwareStreamBuffer(){
 	m_data.clear();
@@ -52,7 +52,7 @@ uint SoftwareStreamBuffer::readData(uint offset,uint length,void*dest){
 		if(offset+length>m_data.size())
 			length=m_data.size()-offset;
 	if(m_data.size())
-		mraySystem::memCopy(dest,&m_data[0]+offset,length);
+		IOSSystem::memCopy(dest,&m_data[0]+offset,length);
 	return length;
 }
 uint SoftwareStreamBuffer::writeData(uint offset,uint length,const void*src,bool disacardWholeBuffer){
@@ -62,7 +62,7 @@ uint SoftwareStreamBuffer::writeData(uint offset,uint length,const void*src,bool
 		if(offset+length>m_data.size())
 			length=(uint)((long)m_data.size()-(long)offset);
 	if(m_data.size())
-		mraySystem::memCopy(&m_data[0]+offset,src,length);
+		IOSSystem::memCopy(&m_data[0]+offset,src,length);
 	return length;
 
 }

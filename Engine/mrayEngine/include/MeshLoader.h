@@ -3,6 +3,7 @@
 #define ___MESH_LOADER___
 
 
+#include "compileconfig.h"
 #include "MString.h"
 
 namespace mray

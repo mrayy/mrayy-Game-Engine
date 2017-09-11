@@ -5,6 +5,7 @@
 
 
 
+#include "compileconfig.h"
 #include "SColor.h"
 #include "IResource.h"
 #include "UTFString.h"

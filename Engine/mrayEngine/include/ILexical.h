@@ -3,6 +3,7 @@
 #ifndef ___ILexical___
 #define ___ILexical___
 
+#include "compileconfig.h"
 #include "mTypes.h"
 #include "mString.h"
 #include "GCPtr.h"

@@ -14,6 +14,7 @@
 #ifndef ___AnimationTrackGroup___
 #define ___AnimationTrackGroup___
 
+#include "compileconfig.h"
 #include "IAnimationTrack.h"
 
 #include "IObject.h"

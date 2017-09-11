@@ -24,7 +24,7 @@ namespace mray
 {
 	class LogSubsystem;
 
-class MRAY_DLL LogSubSystemManager:public ISingleton<LogSubSystemManager>
+class LogSubSystemManager:public ISingleton<LogSubSystemManager>
 {
 private:
 protected:

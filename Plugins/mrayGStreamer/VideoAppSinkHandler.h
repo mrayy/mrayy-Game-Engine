@@ -5,6 +5,7 @@
 #include "IAppSinkHandler.h"
 #include "ImageInfo.h"
 #include "IMutex.h"
+#include "FPSCalc.h"
 
 namespace mray
 {
@@ -30,10 +31,7 @@ protected:
 	math::vector2di m_frameSize;
 	int m_surfaceCount;
 
-	int m_captureFPS;
-	int m_frameCount;
-	float m_timeAcc;
-	float m_lastT;
+	core::FPSCalc m_fps;
 
 	uint m_frameID;
 	bool _Allocate(int width, int height, video::EPixelFormat fmt);

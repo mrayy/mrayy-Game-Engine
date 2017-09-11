@@ -168,6 +168,9 @@
     <ClInclude Include="PoissonLerp.h">
       <Filter>Source Files\math\Lerp</Filter>
     </ClInclude>
+    <ClInclude Include="mrayMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="box3d.cpp">

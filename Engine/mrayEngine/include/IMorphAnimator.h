@@ -15,6 +15,7 @@
 #define ___IMorphAnimator___
 
 
+#include "compileconfig.h"
 #include "IMeshAnimator.h"
 #include "MorphTarget.h"
 

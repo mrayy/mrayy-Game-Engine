@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "DeviceCapabilites.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include "ILogManager.h"
 #include "StringConverter.h"
 
@@ -13,7 +13,7 @@ std::vector<core::string> DeviceCapabilites::m_vendors;
 bool DeviceCapabilites::m_inited=0;
 
 DeviceCapabilites::	DeviceCapabilites(){
-	mraySystem::memSet(m_features,0,sizeof(m_features));
+	IOSSystem::memSet(m_features,0,sizeof(m_features));
 
 	m_vendor=EGPU_Unkown;
 

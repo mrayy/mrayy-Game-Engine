@@ -206,7 +206,7 @@ bool SGLSLShaderProgram::linkProgram(){
 
 	for(int i=0;i<num;++i){
 		GLSLUniform* u;
-		mraySystem::memSet(buff,0,maxLen);
+		IOSSystem::memSet(buff,0,maxLen);
 
 		GLenum type;
 

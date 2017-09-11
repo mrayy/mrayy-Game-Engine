@@ -16,6 +16,7 @@
 #define GUIQuadRenderOperation_h__
 
 
+#include "compileconfig.h"
 #include "SColor.h"
 
 #include "IGUIRenderOperation.h"

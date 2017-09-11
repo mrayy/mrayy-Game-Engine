@@ -256,11 +256,11 @@ IMeshBuffer* SMeshBuffer::getDuplicate(){
 	buffer->m_indexData=m_indexData->duplicate();
 
 	//buffer->orginalUVCoords.resize(orginalUVCoords.size());
-	//mraySystem::memCopy(buffer->orginalUVCoords.pointer(),orginalUVCoords.pointer(),orginalUVCoords.size()*sizeof(math::Point2df));
+	//IOSSystem::memCopy(buffer->orginalUVCoords.pointer(),orginalUVCoords.pointer(),orginalUVCoords.size()*sizeof(math::Point2df));
 
 
 	//buffer->UVTriangles.resize(UVTriangles.size());
-	//mraySystem::memCopy(buffer->UVTriangles.pointer(),UVTriangles.pointer(),UVTriangles.size()*sizeof(math::Point3di));
+	//IOSSystem::memCopy(buffer->UVTriangles.pointer(),UVTriangles.pointer(),UVTriangles.size()*sizeof(math::Point3di));
 
 
 	buffer->setSkinCluster(getSkinCluster());

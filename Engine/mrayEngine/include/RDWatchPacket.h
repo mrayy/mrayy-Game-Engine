@@ -17,6 +17,7 @@
 #include "NetPacket.h"
 #include "NetDataTypes.h"
 #include "RDPacketsID.h"
+#include "compileconfig.h"
 
 namespace mray{
 namespace debug{

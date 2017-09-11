@@ -15,6 +15,7 @@
 #ifndef ___CommandManager___
 #define ___CommandManager___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "GCPtr.h"
 

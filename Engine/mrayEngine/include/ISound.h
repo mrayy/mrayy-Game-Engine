@@ -5,6 +5,7 @@
 #define ___ISound___
 
 
+#include "compileconfig.h"
 #include "mString.h"
 #include "GCPtr.h"
 #include "SoundEnums.h"

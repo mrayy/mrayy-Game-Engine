@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "SkeletonAnimator.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 #include "IHardwareStreamBuffer.h"
 #include "IMeshBuffer.h"
 #include "Skeleton.h"
@@ -45,7 +45,7 @@ void SkeletonAnimator::setMeshBuffer(IMeshBuffer*buff)
 		{
 			m_baseVectors[POSITION_INDEX].resize(data->count);
 			math::vector3d*v=(math::vector3d*) s->lock(0,0,video::IHardwareBuffer::ELO_ReadOnly);
-			mraySystem::memCopy(&m_baseVectors[POSITION_INDEX][0],v,count);
+			IOSSystem::memCopy(&m_baseVectors[POSITION_INDEX][0],v,count);
 			s->unlock();
 		}else
 			m_affectedAttrs=m_affectedAttrs & (~EAA_Position);
@@ -56,7 +56,7 @@ void SkeletonAnimator::setMeshBuffer(IMeshBuffer*buff)
 		{
 			m_baseVectors[NORMAL_INDEX].resize(data->count);
 			math::vector3d*v=(math::vector3d*) s->lock(0,0,video::IHardwareBuffer::ELO_ReadOnly);
-			mraySystem::memCopy(&m_baseVectors[NORMAL_INDEX][0],v,count);
+			IOSSystem::memCopy(&m_baseVectors[NORMAL_INDEX][0],v,count);
 			s->unlock();
 		}else
 			m_affectedAttrs=m_affectedAttrs & (~EAA_Normal);
@@ -67,7 +67,7 @@ void SkeletonAnimator::setMeshBuffer(IMeshBuffer*buff)
 		{
 			m_baseVectors[TANGENT_INDEX].resize(data->count);
 			math::vector3d*v=(math::vector3d*) s->lock(0,0,video::IHardwareBuffer::ELO_ReadOnly);
-			mraySystem::memCopy(&m_baseVectors[TANGENT_INDEX][0],v,count);
+			IOSSystem::memCopy(&m_baseVectors[TANGENT_INDEX][0],v,count);
 			s->unlock();
 		}else
 			m_affectedAttrs=m_affectedAttrs & (~EAA_Tangent);
@@ -78,7 +78,7 @@ void SkeletonAnimator::setMeshBuffer(IMeshBuffer*buff)
 		{
 			m_baseVectors[BINORMAL_INDEX].resize(data->count);
 			math::vector3d*v=(math::vector3d*) s->lock(0,0,video::IHardwareBuffer::ELO_ReadOnly);
-			mraySystem::memCopy(&m_baseVectors[BINORMAL_INDEX][0],v,count);
+			IOSSystem::memCopy(&m_baseVectors[BINORMAL_INDEX][0],v,count);
 			s->unlock();
 		}else
 		{
@@ -112,19 +112,19 @@ void SkeletonAnimator::update(float dt){
 
 	if(m_affectedAttrs & EAA_Position && mainStream){
 		mainVert=(math::vector3d*) mainStream->lock(start,count,video::IHardwareBuffer::ELO_Discard);
-		mraySystem::memSet(mainVert,0,count);
+		IOSSystem::memSet(mainVert,0,count);
 	}
 	if(m_affectedAttrs & EAA_Normal && mainNormal){
 		mainNorm=(math::vector3d*) mainNormal->lock(start,count,video::IHardwareBuffer::ELO_Discard);
-		mraySystem::memSet(mainNorm,0,count);
+		IOSSystem::memSet(mainNorm,0,count);
 	}
 	if(m_affectedAttrs & EAA_Tangent && mainTangent){
 		mainTang=(math::vector3d*) mainTangent->lock(start,count,video::IHardwareBuffer::ELO_Discard);
-		mraySystem::memSet(mainTang,0,count);
+		IOSSystem::memSet(mainTang,0,count);
 	}
 	if(m_affectedAttrs & EAA_Binormal && mainBinormal){
 		mainBinorm=(math::vector3d*) mainBinormal->lock(start,count,video::IHardwareBuffer::ELO_Discard);
-		mraySystem::memSet(mainBinorm,0,count);
+		IOSSystem::memSet(mainBinorm,0,count);
 	}
 
 

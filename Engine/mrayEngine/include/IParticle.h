@@ -3,7 +3,7 @@
 #ifndef ___SPARTICAL___
 #define ___SPARTICAL___
 
-
+#include "compileconfig.h"
 
 
 #include "SColor.h"

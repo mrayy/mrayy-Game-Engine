@@ -59,7 +59,7 @@ bool CBmpWriter::write(video::ImageInfo*tex,OS::IStream* file,video::ETextureTyp
 	if(!buffer)return 0;
 /*	uchar* imageOut=new uchar[tex->imageDataSize];
 	//if(tex->colorDepth==8)
-		mraySystem::memCopy(imageOut,buffer,tex->imageDataSize);
+		IOSSystem::memCopy(imageOut,buffer,tex->imageDataSize);
 	if(tex->colorDepth==24)
 		ColorConverter::convert24BitTo24Bit(buffer,imageOut,tex->imageSize,0,0,1);
 	if(tex->colorDepth==32)

@@ -17,6 +17,7 @@
 #ifndef __BasicTypesGUID__
 #define __BasicTypesGUID__
 
+#include "compileconfig.h"
 #include "GUID.h"
 
 

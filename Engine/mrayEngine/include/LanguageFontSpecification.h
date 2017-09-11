@@ -15,6 +15,7 @@
 #ifndef LanguageFontSpecification_h__
 #define LanguageFontSpecification_h__
 
+#include "compileconfig.h"
 #include "UTFString.h"
 #include "mString.h"
 

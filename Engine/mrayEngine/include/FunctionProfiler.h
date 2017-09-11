@@ -15,6 +15,7 @@
 #ifndef FunctionProfiler_h__
 #define FunctionProfiler_h__
 
+#include "compileconfig.h"
 #include "mstring.h"
 
 namespace mray

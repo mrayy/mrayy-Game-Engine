@@ -14,9 +14,8 @@ purpose:
 #ifndef ___GUIOverlayManager___
 #define ___GUIOverlayManager___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
-
-
 
 namespace mray{
 namespace GUI{

@@ -14,6 +14,7 @@
 #ifndef ___LZWCompress___
 #define ___LZWCompress___
 
+#include "compileconfig.h"
 #include "ICompressor.h"
 #include "TreeDictionary.h"
 

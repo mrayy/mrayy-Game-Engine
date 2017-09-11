@@ -209,7 +209,7 @@ bool FreeImageLoader::load(OS::IStream* file,video::ImageInfo* t2d,video::ETextu
 	for (size_t y = 0; y < imgData->height; ++y)
 	{
 		pSrc = srcData + (imgData->height - y - 1) * srcPitch;
-		mraySystem::memCopy(pDst, pSrc, dstPitch);
+		IOSSystem::memCopy(pDst, pSrc, dstPitch);
 		pDst += dstPitch;
 		
 	}*/
@@ -222,7 +222,7 @@ bool FreeImageLoader::load(OS::IStream* file,video::ImageInfo* t2d,video::ETextu
 	for (size_t y = 0; y < height; ++y)
 	{
 		pSrc = srcData + (height - y - 1) * srcPitch;
-		mraySystem::memCopy(pDst, pSrc, dstPitch);
+		IOSSystem::memCopy(pDst, pSrc, dstPitch);
 		pDst += dstPitch;
 	}
 

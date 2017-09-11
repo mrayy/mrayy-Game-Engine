@@ -41,11 +41,6 @@ using namespace physics;
 using namespace sound;
 using namespace video;
 
-IMPLEMENT_ROOT_RTTI(CPropertieSet);
-
-IMPLEMENT_RTTI(IObject,CPropertieSet);
-
-IMPLEMENT_RTTI(IResource,IObject)
 
 IMPLEMENT_RTTI(ISound,IObject);
 IMPLEMENT_RTTI(ISoundListener,IObject);

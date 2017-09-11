@@ -16,6 +16,7 @@
 #define ___EventQueue___
 
 
+#include "compileconfig.h"
 #include "mTypes.h"
 #include "ISingleton.h"
 #include "IEventReciver.h"

@@ -16,6 +16,7 @@
 #ifndef ___Skeleton___
 #define ___Skeleton___
 
+#include "compileconfig.h"
 #include "IResource.h"
 #include "BoneNode.h"
 

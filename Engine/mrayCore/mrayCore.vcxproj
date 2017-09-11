@@ -180,23 +180,15 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\Dependencies\include;..\mrayEngine\include;..\mrayMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MRAY_NET_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <ExceptionHandling>Async</ExceptionHandling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>.\include\;..\..\Dependencies\include;..\mrayMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MRAY_CORE_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>CompileAsCpp</CompileAs>
+      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
       <AdditionalDependencies>mrayEngine.lib;mrayMath.lib;ws2_32.lib;Wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -206,6 +198,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetFileName) ..\..\bin\$(Configuration)64</Command>
@@ -396,30 +389,212 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CompileConfig.h" />
-    <ClInclude Include="mrayCore.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="include\ASCIIEncoding.h" />
+    <ClInclude Include="include\BitConverter.h" />
+    <ClInclude Include="include\BitVector.h" />
+    <ClInclude Include="include\CException.h" />
+    <ClInclude Include="include\CLimitedStream.h" />
+    <ClInclude Include="include\CMemory.h" />
+    <ClInclude Include="include\CMemoryStream.h" />
+    <ClInclude Include="include\CMsgbuffer.h" />
+    <ClInclude Include="include\CMutexVar.h" />
+    <ClInclude Include="include\ColorConverter.h" />
+    <ClInclude Include="include\common.h" />
+    <ClInclude Include="include\CompileConfig.h" />
+    <ClInclude Include="include\ConnectedPeer.h" />
+    <ClInclude Include="include\CPropertieSet.h" />
+    <ClInclude Include="include\CRC.h" />
+    <ClInclude Include="include\DateTime.h" />
+    <ClInclude Include="include\DefaultColors.h" />
+    <ClInclude Include="include\DelegateManager.h" />
+    <ClInclude Include="include\EnumManager.h" />
+    <ClInclude Include="include\FPSCalc.h" />
+    <ClInclude Include="include\GCCollector.h" />
+    <ClInclude Include="include\GCInfo.h" />
+    <ClInclude Include="include\GCPtr.h" />
+    <ClInclude Include="include\GenericLoggerSystem.h" />
+    <ClInclude Include="include\GUID.h" />
+    <ClInclude Include="include\HashMap.h" />
+    <ClInclude Include="include\HeapAllocator.h" />
+    <ClInclude Include="include\heapSort.h" />
+    <ClInclude Include="include\HMessages.h" />
+    <ClInclude Include="include\HNetCommands.h" />
+    <ClInclude Include="include\IAsyncLoadRequest.h" />
+    <ClInclude Include="include\ICameraVideoGrabber.h" />
+    <ClInclude Include="include\ICondition.h" />
+    <ClInclude Include="include\IDelegate.h" />
+    <ClInclude Include="include\IDelegateContainer.h" />
+    <ClInclude Include="include\IDelegateEvent.h" />
+    <ClInclude Include="include\IDelegateSet.h" />
+    <ClInclude Include="include\idelegate_implement.h" />
+    <ClInclude Include="include\IDirOS.h" />
+    <ClInclude Include="include\IDllManager.h" />
+    <ClInclude Include="include\IDynamicLibrary.h" />
+    <ClInclude Include="include\IErrorDialog.h" />
+    <ClInclude Include="include\IEventReciver.h" />
+    <ClInclude Include="include\IFileMonitor.h" />
+    <ClInclude Include="include\IFileSystem.h" />
+    <ClInclude Include="include\IGCCollector.h" />
+    <ClInclude Include="include\IJoysticController.h" />
+    <ClInclude Include="include\IKeyboardController.h" />
+    <ClInclude Include="include\ILogDevice.h" />
+    <ClInclude Include="include\ILogManager.h" />
+    <ClInclude Include="include\ImageInfo.h" />
+    <ClInclude Include="include\IMonitorFileInformation.h" />
+    <ClInclude Include="include\IMouseController.h" />
+    <ClInclude Include="include\IMutex.h" />
+    <ClInclude Include="include\INetwork.h" />
+    <ClInclude Include="include\INetworkPortAssigner.h" />
+    <ClInclude Include="include\InputManager.h" />
+    <ClInclude Include="include\IObject.h" />
+    <ClInclude Include="include\IOSClipboard.h" />
+    <ClInclude Include="include\IOSRegistry.h" />
+    <ClInclude Include="include\IOSystem.h" />
+    <ClInclude Include="include\IProperty.h" />
+    <ClInclude Include="include\IPropertyVistor.h" />
+    <ClInclude Include="include\IReliableSocket.h" />
+    <ClInclude Include="include\IResource.h" />
+    <ClInclude Include="include\IResourceHolder.h" />
+    <ClInclude Include="include\IResourceManager.h" />
+    <ClInclude Include="include\ISingleton.h" />
+    <ClInclude Include="include\ISocket.h" />
+    <ClInclude Include="include\IStream.h" />
+    <ClInclude Include="include\IStringEncoding.h" />
+    <ClInclude Include="include\ISystemProcess.h" />
+    <ClInclude Include="include\IThread.h" />
+    <ClInclude Include="include\IThreadEvent.h" />
+    <ClInclude Include="include\IThreadFunction.h" />
+    <ClInclude Include="include\IThreadManager.h" />
+    <ClInclude Include="include\ITimer.h" />
+    <ClInclude Include="include\IUDPClient.h" />
+    <ClInclude Include="include\IValue.h" />
+    <ClInclude Include="include\IVideoGrabber.h" />
+    <ClInclude Include="include\IWebRequest.h" />
+    <ClInclude Include="include\IXMLNode.h" />
+    <ClInclude Include="include\IXMLParser.h" />
+    <ClInclude Include="include\KEYCode.h" />
+    <ClInclude Include="include\KEY_MAP.h" />
+    <ClInclude Include="include\ListenerContainer.h" />
+    <ClInclude Include="include\LogManager.h" />
+    <ClInclude Include="include\LogSubsystem.h" />
+    <ClInclude Include="include\macros.h" />
+    <ClInclude Include="include\mArray.h" />
+    <ClInclude Include="include\IOSSystem.h" />
+    <ClInclude Include="include\mrayCore.h" />
+    <ClInclude Include="include\mString.h" />
+    <ClInclude Include="include\mTypes.h" />
+    <ClInclude Include="include\MultiThreadListener.h" />
+    <ClInclude Include="include\MutexLocks.h" />
+    <ClInclude Include="include\NetAddress.h" />
+    <ClInclude Include="include\NetDataTypes.h" />
+    <ClInclude Include="include\NetPacket.h" />
+    <ClInclude Include="include\NullMutex.h" />
+    <ClInclude Include="include\OptionContainer.h" />
+    <ClInclude Include="include\PixelFormat.h" />
+    <ClInclude Include="include\PixelUtil.h" />
+    <ClInclude Include="include\PoolMemoryAllocator.h" />
+    <ClInclude Include="include\ResourceGroup.h" />
+    <ClInclude Include="include\RTTI.h" />
+    <ClInclude Include="include\SColor.h" />
+    <ClInclude Include="include\SendPacketQueue.h" />
+    <ClInclude Include="include\SocketListener.h" />
+    <ClInclude Include="include\SOptionElement.h" />
+    <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\StreamLogger.h" />
+    <ClInclude Include="include\StreamReader.h" />
+    <ClInclude Include="include\StreamReaderEx.h" />
+    <ClInclude Include="include\StreamWriter.h" />
+    <ClInclude Include="include\StreamWriterEx.h" />
+    <ClInclude Include="include\StringConverter.h" />
+    <ClInclude Include="include\StringEncoding.h" />
+    <ClInclude Include="include\StringUtil.h" />
+    <ClInclude Include="include\StringUtil.hpp" />
+    <ClInclude Include="include\ThreadBarrier.h" />
+    <ClInclude Include="include\TraceManager.h" />
+    <ClInclude Include="include\UnicodeEncoding.h" />
+    <ClInclude Include="include\UTFString.h" />
+    <ClInclude Include="include\ValueGroup.h" />
+    <ClInclude Include="include\videoCommon.h" />
+    <ClInclude Include="include\WebURL.h" />
+    <ClInclude Include="include\XMLComment.h" />
+    <ClInclude Include="include\XMLElement.h" />
+    <ClInclude Include="include\XMLTextNode.h" />
+    <ClInclude Include="include\XMLTree.h" />
+    <ClInclude Include="include\XMLWriter.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ASCIIEncoding.cpp" />
+    <ClCompile Include="src\BitConverter.cpp" />
+    <ClCompile Include="src\CException.cpp" />
+    <ClCompile Include="src\CLimitedStream.cpp" />
+    <ClCompile Include="src\CMemory.cpp" />
+    <ClCompile Include="src\CMemoryStream.cpp" />
+    <ClCompile Include="src\ColorConverter.cpp" />
+    <ClCompile Include="src\ConnectedPeer.cpp" />
+    <ClCompile Include="src\CPropertieSet.cpp" />
+    <ClCompile Include="src\CRC.cpp" />
+    <ClCompile Include="src\DateTime.cpp" />
+    <ClCompile Include="src\DefaultColors.cpp" />
+    <ClCompile Include="src\DelegateManager.cpp" />
+    <ClCompile Include="src\EnumManager.cpp" />
+    <ClCompile Include="src\FPSCalc.cpp" />
+    <ClCompile Include="src\gccollector.cpp" />
+    <ClCompile Include="src\GCInfo.cpp" />
+    <ClCompile Include="src\GUID.cpp" />
+    <ClCompile Include="src\HMessage.cpp" />
+    <ClCompile Include="src\HNetCommands.cpp" />
+    <ClCompile Include="src\ICameraVideoGrabber.cpp" />
+    <ClCompile Include="src\IFileSystem.cpp" />
+    <ClCompile Include="src\IGCCollector.cpp" />
+    <ClCompile Include="src\ILogManager.cpp" />
+    <ClCompile Include="src\ImageInfo.cpp" />
+    <ClCompile Include="src\SingletonImpl.cpp" />
+    <ClCompile Include="src\IObject.cpp" />
+    <ClCompile Include="src\IOSSystem.cpp" />
+    <ClCompile Include="src\IProperty.cpp" />
+    <ClCompile Include="src\IResource.cpp" />
+    <ClCompile Include="src\IResourceHolder.cpp" />
+    <ClCompile Include="src\iresourcemanager.cpp" />
+    <ClCompile Include="src\IStream.cpp" />
+    <ClCompile Include="src\IThreadManager.cpp" />
+    <ClCompile Include="src\IXMLParser.cpp" />
+    <ClCompile Include="src\keyCode.cpp" />
+    <ClCompile Include="src\LogManager.cpp" />
+    <ClCompile Include="src\LogSubsystem.cpp" />
+    <ClCompile Include="src\mString.cpp" />
+    <ClCompile Include="src\NetAddress.cpp" />
+    <ClCompile Include="src\NetDataTypes.cpp" />
+    <ClCompile Include="src\NetPacket.cpp" />
+    <ClCompile Include="src\OptionContainer.cpp" />
+    <ClCompile Include="src\PixelFormat.cpp" />
+    <ClCompile Include="src\PixelUtil.cpp" />
+    <ClCompile Include="src\PoolMemoryAllocator.cpp" />
+    <ClCompile Include="src\ResourceGroup.cpp" />
+    <ClCompile Include="src\SColor.cpp" />
+    <ClCompile Include="src\SendPacketQueue.cpp" />
+    <ClCompile Include="src\StreamLogger.cpp" />
+    <ClCompile Include="src\StreamReader.cpp" />
+    <ClCompile Include="src\StreamReaderEx.cpp" />
+    <ClCompile Include="src\StreamWriter.cpp" />
+    <ClCompile Include="src\StreamWriterEx.cpp" />
+    <ClCompile Include="src\StringConverter.cpp" />
+    <ClCompile Include="src\StringEncoding.cpp" />
+    <ClCompile Include="src\ThreadBarrier.cpp" />
+    <ClCompile Include="src\TraceManager.cpp" />
+    <ClCompile Include="src\UnicodeEncoding.cpp" />
+    <ClCompile Include="src\UTFString.cpp" />
+    <ClCompile Include="src\ValueGroup.cpp" />
+    <ClCompile Include="src\WebURL.cpp" />
+    <ClCompile Include="src\XMLElement.cpp" />
+    <ClCompile Include="src\XMLTree.cpp" />
+    <ClCompile Include="src\XMLWriter.cpp" />
     <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\Hashmap.inl" />
     <None Include="Notes.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\mrayEngine\mrayEngine.vcxproj">
-      <Project>{c5f7308a-755f-4872-91e6-77779103e0e3}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

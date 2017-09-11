@@ -4,6 +4,7 @@
 
 
 
+#include "compileconfig.h"
 #include "Keycode.h"
 #include "IKeyboardController.h"
 

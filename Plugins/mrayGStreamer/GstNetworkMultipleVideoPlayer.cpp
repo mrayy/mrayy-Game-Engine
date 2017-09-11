@@ -13,7 +13,7 @@
 
 #include "VideoAppSinkHandler.h"
 #include "GstPipelineHandler.h"
-#include "Engine.h"
+#include "GStreamerCore.h"
 #include "ITimer.h"
 #include "FPSCalc.h"
 
@@ -244,7 +244,7 @@ public:
 		g_signal_emit_by_name(sink, "pull-sample", &sample, NULL);
 		if (sample) {
 
-			m_fpsCounter.regFrame(gEngine.getTimer()->getSeconds());
+			m_fpsCounter.regFrame(gGStreamerCore->GetTimer()->getSeconds());
 			buffer = gst_sample_get_buffer(sample);
 
 			gst_buffer_map(buffer, &map, GST_MAP_READ);

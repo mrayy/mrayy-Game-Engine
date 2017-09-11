@@ -8,6 +8,10 @@
 #include "RobotCommunicator.h"
 #include "OptionContainer.h"
 
+ #include "IFont.h"
+#include "FontAttributes.h"
+#include "ViewPort.h"
+
 namespace mray
 {
 	class CMRayApplication;
@@ -97,13 +101,13 @@ class TbeeServiceRenderContext:public ServiceRenderContext
 protected:
 	int m_xOffset, m_yOffset;
 public:
+	
 	GUI::IFont* font;
 	GUI::FontAttributes fontAttrs;
 	GUI::IGUIRenderer* guiRenderer;
 
 	scene::ViewPort* viewPort;
-
-
+	
 	TbeeServiceRenderContext()
 	{
 		font = 0;

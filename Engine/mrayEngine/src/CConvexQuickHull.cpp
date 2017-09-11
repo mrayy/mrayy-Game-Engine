@@ -131,7 +131,7 @@ void CConvexQuickHull::createConvexHull(GCPtr<scene::SMesh>mesh){
 		if(getExtreme(*it,vextreme)){
 			faceToDelete.push_back(it);
 			tmpArray.resize((*it).vtx.size());
-			mraySystem::memCopy(&tmpArray[0],&(*it).vtx[0],(*it).vtx.size()*sizeof(int));
+			IOSSystem::memCopy(&tmpArray[0],&(*it).vtx[0],(*it).vtx.size()*sizeof(int));
 			it2=convexFaces.begin();
 			for(;it2!=convexFaces.end();it2++){
 				if(it==it2)
@@ -139,7 +139,7 @@ void CConvexQuickHull::createConvexHull(GCPtr<scene::SMesh>mesh){
 				if((*it2).plane.getVertLocation(vtx[vextreme])>0){
 					int lastSz=tmpArray.size();
 					tmpArray.resize(tmpArray.size()+(*it2).vtx.size());
-					mraySystem::memCopy(&tmpArray[0]+lastSz,&(*it2).vtx[0],(*it2).vtx.size()*sizeof(int));
+					IOSSystem::memCopy(&tmpArray[0]+lastSz,&(*it2).vtx[0],(*it2).vtx.size()*sizeof(int));
 					faceToDelete.push_back(it2);
 				}
 			}

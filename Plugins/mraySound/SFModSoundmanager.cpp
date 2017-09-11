@@ -11,7 +11,7 @@
 #include <macros.h>
 #include <SoundResourceManager.h>
 #include <TraceManager.h>
-#include <mraySystem.h>
+#include <IOSSystem>
 #include "SFModSound.h"
 
 namespace mray{
@@ -326,7 +326,7 @@ SFModSoundStream* SFModSoundManager::createDataFile(const core::string&filename,
 	dataFile->manager=this;
  
 	FMOD_CREATESOUNDEXINFO exinfo;
-	mraySystem::memSet(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
+	IOSSystem::memSet(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
 	exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
 	exinfo.length = sz;
 	mode|=FMOD_OPENMEMORY_POINT;

@@ -17,6 +17,7 @@
 #ifndef __RenderWindow__
 #define __RenderWindow__
 
+#include "compileconfig.h"
 #include "mString.h"
 //#include "OptionContainer.h"
 #include "ListenerContainer.h"

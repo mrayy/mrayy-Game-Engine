@@ -5,6 +5,7 @@
 #define ___IAnimationTrack___
 
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "mString.h"
 #include "IObject.h"

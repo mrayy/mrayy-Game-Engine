@@ -15,6 +15,7 @@
 #ifndef __ISerialPort__
 #define __ISerialPort__
 
+#include "compileconfig.h"
 #include "IStream.h"
 
 

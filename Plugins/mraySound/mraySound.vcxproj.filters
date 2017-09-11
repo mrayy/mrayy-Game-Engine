@@ -5,30 +5,11 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\FMod">
-      <UniqueIdentifier>{28f90365-8dc7-41fb-9cef-c0e05cc5d9fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\OpenAL">
-      <UniqueIdentifier>{f17048ba-ec48-40a8-831c-58039e12ee5c}</UniqueIdentifier>
-      <ParseFiles>false</ParseFiles>
-    </Filter>
-    <Filter Include="Source Files\loaders">
-      <UniqueIdentifier>{dbe93f8f-a68c-4740-9883-63d6822944ca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\loaders\mp3">
-      <UniqueIdentifier>{492b285b-fe6b-4010-a7ad-b72a0fe272b3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\FreeSL">
       <UniqueIdentifier>{e2d3c718-89c2-4e57-be9c-2404866f02e4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\DirectSound">
       <UniqueIdentifier>{385bdafb-b258-4aa1-a51f-23c4a35f20ea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Encoder">
-      <UniqueIdentifier>{fb0fb6f4-db8e-41b7-a70c-92521db24b49}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Encoder\lib">
-      <UniqueIdentifier>{e4fd1e92-dc85-488e-bc19-d2461f8482f5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
@@ -38,9 +19,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="Source Files\portAudio">
-      <UniqueIdentifier>{32c240c0-26aa-4817-87c9-bf68bfe8b4af}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="compileConfig.h">
@@ -48,27 +26,6 @@
     </ClInclude>
     <ClInclude Include="mraySoundPlugin.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SFModListener.h">
-      <Filter>Source Files\FMod</Filter>
-    </ClInclude>
-    <ClInclude Include="SFModSound.h">
-      <Filter>Source Files\FMod</Filter>
-    </ClInclude>
-    <ClInclude Include="SFModSoundmanager.h">
-      <Filter>Source Files\FMod</Filter>
-    </ClInclude>
-    <ClInclude Include="SFModSoundStream.h">
-      <Filter>Source Files\FMod</Filter>
-    </ClInclude>
-    <ClInclude Include="IMP3Loader.h">
-      <Filter>Source Files\loaders</Filter>
-    </ClInclude>
-    <ClInclude Include="IOGGLoader.h">
-      <Filter>Source Files\loaders</Filter>
-    </ClInclude>
-    <ClInclude Include="IWaveLoader.h">
-      <Filter>Source Files\loaders</Filter>
     </ClInclude>
     <ClInclude Include="FSLListener.h">
       <Filter>Source Files\FreeSL</Filter>
@@ -82,35 +39,11 @@
     <ClInclude Include="FSLSoundBuffer.h">
       <Filter>Source Files\FreeSL</Filter>
     </ClInclude>
-    <ClInclude Include="GSMVoiceEncoder.h">
-      <Filter>Source Files\Encoder</Filter>
-    </ClInclude>
-    <ClInclude Include="LPCVoiceEncoder.h">
-      <Filter>Source Files\Encoder</Filter>
-    </ClInclude>
-    <ClInclude Include="ftol.h">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClInclude>
-    <ClInclude Include="gsm.h">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClInclude>
-    <ClInclude Include="lpc10.h">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClInclude>
-    <ClInclude Include="private.h">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DirectSoundInputStream.h">
       <Filter>Source Files\DirectSound</Filter>
-    </ClInclude>
-    <ClInclude Include="PortAudioInputStream.h">
-      <Filter>Source Files\portAudio</Filter>
-    </ClInclude>
-    <ClInclude Include="PortAudioCommon.h">
-      <Filter>Source Files\portAudio</Filter>
     </ClInclude>
     <ClInclude Include="DirectSoundCommon.h">
       <Filter>Source Files\DirectSound</Filter>
@@ -122,39 +55,6 @@
   <ItemGroup>
     <ClCompile Include="mraySoundPlugin.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SFModListener.cpp">
-      <Filter>Source Files\FMod</Filter>
-    </ClCompile>
-    <ClCompile Include="SFModSound.cpp">
-      <Filter>Source Files\FMod</Filter>
-    </ClCompile>
-    <ClCompile Include="SFModSoundmanager.cpp">
-      <Filter>Source Files\FMod</Filter>
-    </ClCompile>
-    <ClCompile Include="SFModSoundStream.cpp">
-      <Filter>Source Files\FMod</Filter>
-    </ClCompile>
-    <ClCompile Include="SALSound.cpp">
-      <Filter>Source Files\OpenAL</Filter>
-    </ClCompile>
-    <ClCompile Include="SALSoundmanager.cpp">
-      <Filter>Source Files\OpenAL</Filter>
-    </ClCompile>
-    <ClCompile Include="IMP3Loader.cpp">
-      <Filter>Source Files\loaders</Filter>
-    </ClCompile>
-    <ClCompile Include="IOGGLoader.cpp">
-      <Filter>Source Files\loaders</Filter>
-    </ClCompile>
-    <ClCompile Include="IWaveLoader.cpp">
-      <Filter>Source Files\loaders</Filter>
-    </ClCompile>
-    <ClCompile Include="bits.c">
-      <Filter>Source Files\loaders\mp3</Filter>
-    </ClCompile>
-    <ClCompile Include="mpaudec.c">
-      <Filter>Source Files\loaders\mp3</Filter>
     </ClCompile>
     <ClCompile Include="FSLListener.cpp">
       <Filter>Source Files\FreeSL</Filter>
@@ -168,35 +68,11 @@
     <ClCompile Include="FSLSoundBuffer.cpp">
       <Filter>Source Files\FreeSL</Filter>
     </ClCompile>
-    <ClCompile Include="GSMVoiceEncoder.cpp">
-      <Filter>Source Files\Encoder</Filter>
-    </ClCompile>
-    <ClCompile Include="LPCVoiceEncoder.cpp">
-      <Filter>Source Files\Encoder</Filter>
-    </ClCompile>
-    <ClCompile Include="gsm_decode.c">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClCompile>
-    <ClCompile Include="gsm_encode.c">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClCompile>
-    <ClCompile Include="gsm_state.c">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClCompile>
-    <ClCompile Include="lpc10dec.c">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClCompile>
-    <ClCompile Include="lpc10enc.c">
-      <Filter>Source Files\Encoder\lib</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="DirectSoundInputStream.cpp">
       <Filter>Source Files\DirectSound</Filter>
-    </ClCompile>
-    <ClCompile Include="PortAudioCommon.cpp">
-      <Filter>Source Files\portAudio</Filter>
     </ClCompile>
     <ClCompile Include="DirectSoundCommon.cpp">
       <Filter>Source Files\DirectSound</Filter>
@@ -204,13 +80,5 @@
     <ClCompile Include="DirectSoundOutputStream.cpp">
       <Filter>Source Files\DirectSound</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuildStep Include="SALSound.h">
-      <Filter>Source Files\OpenAL</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="SALSoundmanager.h">
-      <Filter>Source Files\OpenAL</Filter>
-    </CustomBuildStep>
   </ItemGroup>
 </Project>

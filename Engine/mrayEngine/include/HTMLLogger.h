@@ -14,6 +14,7 @@
 #ifndef ___HTMLLogger___
 #define ___HTMLLogger___
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "ILogDevice.h"
 #include "IStream.h"

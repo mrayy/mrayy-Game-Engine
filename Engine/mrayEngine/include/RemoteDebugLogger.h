@@ -15,6 +15,7 @@
 #define ___RemoteDebugLogger___
 
 
+#include "compileconfig.h"
 #include "GCPtr.h"
 #include "ILogDevice.h"
 #include "StreamWriter.h"

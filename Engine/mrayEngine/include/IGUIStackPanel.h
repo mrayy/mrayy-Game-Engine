@@ -17,6 +17,7 @@
 #ifndef __IGUIStackPanel__
 #define __IGUIStackPanel__
 
+#include "compileconfig.h"
 #include "IGUIPanelElement.h"
 
 namespace mray

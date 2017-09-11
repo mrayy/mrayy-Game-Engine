@@ -11,7 +11,7 @@
 
 #include <Vorbis\codec.h>
 #include <Vorbis\vorbisfile.h>
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 namespace mray{
 namespace loaders{
@@ -119,12 +119,12 @@ public:
 		data->samplesPerSec=samplesPerSec;
 		data->channelsCount=channelsCount;
 		data->FDecodingBuffer.resize(FDecodingBuffer.size());
-		mraySystem::memCopy(&data->FDecodingBuffer[0],&FDecodingBuffer[0],FDecodingBuffer.size()*sizeof(char));
+		IOSSystem::memCopy(&data->FDecodingBuffer[0],&FDecodingBuffer[0],FDecodingBuffer.size()*sizeof(char));
 
 		data->FDecodingBufferUsed=FDecodingBufferUsed;
 		data->FOGGCurrentSection=FOGGCurrentSection;
 		data->FOGGRawData=new byte[FWaveDataSize];
-		mraySystem::memCopy(data->FOGGRawData,FOGGRawData,FWaveDataSize*sizeof(byte));
+		IOSSystem::memCopy(data->FOGGRawData,FOGGRawData,FWaveDataSize*sizeof(byte));
 
 		data->FWaveDataSize=FWaveDataSize;
 		return data;
@@ -144,7 +144,7 @@ size_t OGG_ReadFunc(void* Ptr, size_t Size, size_t NMemB, void* DataSource)
 		BytesSize = BytesRead;
 
 	if(BytesSize>0){
-		mraySystem::memCopy( Ptr, OGG->FOGGRawData + OGG->FOGGRawPosition, BytesRead );
+		IOSSystem::memCopy( Ptr, OGG->FOGGRawData + OGG->FOGGRawPosition, BytesRead );
 
 		OGG->FOGGRawPosition += BytesRead;
 	}

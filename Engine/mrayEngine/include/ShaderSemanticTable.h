@@ -14,6 +14,7 @@
 #ifndef ___ShaderSemanticTable___
 #define ___ShaderSemanticTable___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "GCPtr.h"
 

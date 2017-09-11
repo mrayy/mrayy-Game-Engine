@@ -14,6 +14,7 @@
 #ifndef ___GPUSkeletonAnimator___
 #define ___GPUSkeletonAnimator___
 
+#include "compileconfig.h"
 
 #include "ISkeletonAnimator.h"
 

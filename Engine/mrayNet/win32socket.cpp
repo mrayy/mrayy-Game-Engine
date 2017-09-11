@@ -14,7 +14,7 @@
 #include <MutexLocks.h>
 
 #include <IThread.h>
-#include <Engine.h>
+//#include <Engine.h>
 #include <IThreadFunction.h>
 #include <IOSystem.h>
 
@@ -283,7 +283,7 @@ bool Win32Socket::connectToHost(const NetAddress&addr,const char*password){
 bool Win32Socket::addRequest(SRequestPeer*request){
 	if(hasRequest(request->address,request->request))return false;
 
-	request->requestTime = (int)gEngine.getTimer()->getMilliseconds();
+	request->requestTime = 0;// (int)gEngine.getTimer()->getMilliseconds();
 	request->requestCount=0;
 	m_requestPeers.push_back(*request);
 	return true;
@@ -307,7 +307,7 @@ void Win32Socket::sendConnectRequest(const NetAddress&addr,const char*password){
 	request.address=addr;
 	request.request=SRequestPeer::ERT_CONNECT;
 	request.requestCount=0;
-	request.requestTime = (int)gEngine.getTimer()->getMilliseconds();
+	request.requestTime = 0;//(int)gEngine.getTimer()->getMilliseconds();
 	
 	m_requestPeers.push_back(request);
 
@@ -341,7 +341,7 @@ void Win32Socket::sendInfo(const NetAddress&addr,const char*password,byte passle
 	m_tempBuffer.write(&passlen,sizeof(passlen));
 	m_tempBuffer.write((void*)password,passlen*sizeof(char));
 
-	ulong ptime = gEngine.getTimer()->getMilliseconds();
+	ulong ptime = 0;//gEngine.getTimer()->getMilliseconds();
 	m_tempBuffer.write(&ptime,sizeof(ptime));
 	
 	m_tempBuffer.write(&m_udpAddr.port,sizeof(m_udpAddr.port));
@@ -379,7 +379,7 @@ void Win32Socket::setPassword(const char*pass,int len){
 		m_passwordLen=0;
 		return;
 	}
-	mraySystem::memCopy(m_password,pass,len);
+	IOSSystem::memCopy(m_password,pass,len);
 	m_passwordLen=len;
 
 }
@@ -590,7 +590,7 @@ ConnectedPeer* Win32Socket::addNewPeer(const NetAddress&addr,EPeerConnectState s
 	}
 	peer->address=addr;
 	peer->state=state;
-	peer->lastPingTime=peer->lastMsgTime=peer->lastPongTime=peer->connectionTime=(int)gEngine.getTimer()->getMilliseconds();
+	peer->lastPingTime = peer->lastMsgTime = peer->lastPongTime = peer->connectionTime = 0;//(int)gEngine.getTimer()->getMilliseconds();
 	peer->nextPingTime=peer->lastPingTime+m_pingInterval;
 	m_connectedPeers.push_back(peer);
 	//PeersList::iterator it=m_connectedPeers.end();--it;
@@ -723,7 +723,7 @@ bool Win32Socket::parsePacket(const NetAddress&addr,CMsgBuffer*msg){
 
 	m_tempBuffer.resize(0);
 
-	ulong currTime = gEngine.getTimer()->getMilliseconds();
+	ulong currTime = 0;// gEngine.getTimer()->getMilliseconds();
 
 
 	//first strip out control data from message 
@@ -1029,7 +1029,7 @@ bool Win32Socket::parsePacket(const NetAddress&addr,CMsgBuffer*msg){
 		rmsg->addr=addr;
 		rmsg->command=cmd;
 		rmsg->msg.resize(msg->getSize()-sizeof(cmd));
-		mraySystem::memCopy(rmsg->msg.pointer(),m_arrivedPacket.data.pointer()+sizeof(cmd),m_arrivedPacket.data.getSize()-sizeof(cmd));
+		IOSSystem::memCopy(rmsg->msg.pointer(),m_arrivedPacket.data.pointer()+sizeof(cmd),m_arrivedPacket.data.getSize()-sizeof(cmd));
 		rmsg->timeToRemove=currTime+m_timeToRemovePacket;
 
 //		rmsg->m_inUse=true;
@@ -1049,7 +1049,7 @@ void Win32Socket::processRecivedMessages(){
 	if(!m_thread->isActive())return;
 	{
 		OS::ScopedLock locker(m_recMsgMutex);
-		int currTime = (int)gEngine.getTimer()->getMilliseconds();
+		int currTime = 0;//(int)gEngine.getTimer()->getMilliseconds();
 		MessageList::iterator it=m_recivedMessages.begin();
 		MessageList::iterator it2;
 		bool remove=0;
@@ -1111,7 +1111,7 @@ void Win32Socket::processRequestList(){
 	for (;it!=m_requestPeers.end();)
 	{
 		remove=0;
-		int currTime = (int)gEngine.getTimer()->getMilliseconds();
+		int currTime = 0;// (int)gEngine.getTimer()->getMilliseconds();
 		if((*it).requestCount<m_maxRequest){
 			if((*it).requestTime<currTime ){
 				if(processReques(&(*it))){
@@ -1172,7 +1172,7 @@ void Win32Socket::processClients(){
 
 	PeersList::iterator it=m_connectedPeers.begin();
 	PeersList::iterator it2;
-	long currTime = gEngine.getTimer()->getMilliseconds();
+	long currTime = 0;//gEngine.getTimer()->getMilliseconds();
 	bool remove=0;
 	for (;it!=m_connectedPeers.end();)
 	{
@@ -1242,7 +1242,7 @@ void Win32Socket::sendPing(const NetAddress&addr){
 	static CMsgBuffer buffer;
 	buffer.reset();
 	buffer.write((void*)&commands::NET_CMD_PING,sizeof(commands::NET_CMD_PING));
-	uint timeStamp = gEngine.getTimer()->getMilliseconds();
+	uint timeStamp = 0;// gEngine.getTimer()->getMilliseconds();
 	buffer.write(&timeStamp,sizeof(timeStamp));
 
 	writeBytes(&buffer,addr,1,ESM_NOT_RELIABLE);

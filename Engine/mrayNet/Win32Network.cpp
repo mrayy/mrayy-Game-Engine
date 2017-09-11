@@ -13,8 +13,9 @@
 #include <winsock2.h>
 
 
-namespace mray{
+//IMPLEMENT_SINGELTON(mray::network::Win32Network)
 
+namespace mray{
 
 namespace network{
 

@@ -91,9 +91,6 @@
     <Filter Include="Source Files\OS\Archive\loader">
       <UniqueIdentifier>{8073a4b4-81aa-4a67-bc1d-7376a83c3446}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\OS\NullOS">
-      <UniqueIdentifier>{0520915b-4c89-438e-abe6-3841795283d8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{20e0eb8b-a624-4dac-b8b2-0d6a94dac35f}</UniqueIdentifier>
     </Filter>
@@ -124,14 +121,8 @@
     <Filter Include="Source Files\Base\Properties">
       <UniqueIdentifier>{fad40432-cda8-46c8-82d0-9235da4ba247}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Base\GC">
-      <UniqueIdentifier>{f724a49c-675c-4f14-9c24-2cb950c93fbc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Base\ResourceManagers">
       <UniqueIdentifier>{d6e2ec81-d9c2-4a8c-8c5c-e12672f5a083}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Base\Delegates">
-      <UniqueIdentifier>{5784a08f-6b5b-4f19-b6bd-1a9433bec282}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Base\Dialogs">
       <UniqueIdentifier>{99036656-b94c-419d-a737-62e43dfbad40}</UniqueIdentifier>
@@ -141,9 +132,6 @@
     </Filter>
     <Filter Include="Source Files\Base\Events">
       <UniqueIdentifier>{b92ab836-ecf3-4160-9180-cd19ebafdc47}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Base\Option">
-      <UniqueIdentifier>{c98656f5-4c22-4e92-972e-e78f650ada39}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Base\Values">
       <UniqueIdentifier>{0ebf30c6-a1f6-4bc4-a0d4-399348d84cc9}</UniqueIdentifier>
@@ -451,12 +439,6 @@
       <Filter>Source Files\scene\Nodes</Filter>
     </ClInclude>
     <ClInclude Include="include\GrassRenderNode.h">
-      <Filter>Source Files\scene\Nodes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ISkyShape.h">
-      <Filter>Source Files\scene\Nodes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ITerrain.h">
       <Filter>Source Files\scene\Nodes</Filter>
     </ClInclude>
     <ClInclude Include="include\MeshRenderableNode.h">
@@ -837,88 +819,7 @@
     <ClInclude Include="include\IGUIStaticText.h">
       <Filter>Source Files\GUI\Items</Filter>
     </ClInclude>
-    <ClInclude Include="include\CLimitedStream.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\CMemoryStream.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\CMutexVar.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\CRC.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ICondition.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IConsole.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDirOS.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDllManager.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDynamicLibrary.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IFileSystem.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IMutex.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IOSClipboard.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IOSRegistry.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IOSystem.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IStream.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ISystemProcess.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IThread.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IThreadEvent.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IThreadFunction.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IThreadManager.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ITimer.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mraySystem.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\MultiThreadListener.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\MutexLocks.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
     <ClInclude Include="include\OSLoggerSystem.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StreamReader.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StreamWriter.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ThreadBarrier.h">
       <Filter>Source Files\OS</Filter>
     </ClInclude>
     <ClInclude Include="include\ArchiveManager.h">
@@ -941,9 +842,6 @@
     </ClInclude>
     <ClInclude Include="include\IArchiveLoader.h">
       <Filter>Source Files\OS\Archive\loader</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NullMutex.h">
-      <Filter>Source Files\OS\NullOS</Filter>
     </ClInclude>
     <ClInclude Include="include\ChunkSerializer.h">
       <Filter>Source Files\loaders</Filter>
@@ -1290,12 +1188,6 @@
     <ClInclude Include="include\CatagoryManager.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
-    <ClInclude Include="include\CException.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\CMemory.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\CommandManager.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
@@ -1314,25 +1206,16 @@
     <ClInclude Include="include\DefaultObjects.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
-    <ClInclude Include="include\DelegateManager.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\DisableWarn.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="include\Engine.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
-    <ClInclude Include="include\EnumManager.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\FunctionProfileManager.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="include\FunctionProfiler.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GUID.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="include\ICommand.h">
@@ -1347,12 +1230,6 @@
     <ClInclude Include="include\IMessageDispatcher.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
-    <ClInclude Include="include\InputManager.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IObject.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\IObjectComponent.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
@@ -1362,22 +1239,7 @@
     <ClInclude Include="include\ISerializable.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
-    <ClInclude Include="include\ISingleton.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\KEY_MAP.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\KEYCode.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ListenerContainer.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\Localization.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\macros.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="include\memAlign.h">
@@ -1398,13 +1260,7 @@
     <ClInclude Include="include\PluginManager.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
-    <ClInclude Include="include\RTTI.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\TimeTicket.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="include\TraceManager.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="include\CAttribute.h">
@@ -1413,19 +1269,10 @@
     <ClInclude Include="CommonProperties.h">
       <Filter>Source Files\Base\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="include\CPropertieSet.h">
-      <Filter>Source Files\Base\Properties</Filter>
-    </ClInclude>
     <ClInclude Include="include\EGenericTypes.h">
       <Filter>Source Files\Base\Properties</Filter>
     </ClInclude>
     <ClInclude Include="include\IAttribute.h">
-      <Filter>Source Files\Base\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IProperty.h">
-      <Filter>Source Files\Base\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IPropertyVistor.h">
       <Filter>Source Files\Base\Properties</Filter>
     </ClInclude>
     <ClInclude Include="include\ObjectSerializer.h">
@@ -1433,18 +1280,6 @@
     </ClInclude>
     <ClInclude Include="include\TypedProperty.h">
       <Filter>Source Files\Base\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GCCollector.h">
-      <Filter>Source Files\Base\GC</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GCInfo.h">
-      <Filter>Source Files\Base\GC</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GCPtr.h">
-      <Filter>Source Files\Base\GC</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IGCCollector.h">
-      <Filter>Source Files\Base\GC</Filter>
     </ClInclude>
     <ClInclude Include="include\AnimationResourceManager.h">
       <Filter>Source Files\Base\ResourceManagers</Filter>
@@ -1461,22 +1296,10 @@
     <ClInclude Include="include\IResLoadListener.h">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClInclude>
-    <ClInclude Include="include\IResource.h">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IResourceHolder.h">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IResourceManager.h">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClInclude>
     <ClInclude Include="include\MaterialResourceManager.h">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClInclude>
     <ClInclude Include="include\MeshResourceManager.h">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ResourceGroup.h">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClInclude>
     <ClInclude Include="include\ScriptResourceManager.h">
@@ -1494,49 +1317,16 @@
     <ClInclude Include="include\TextureResourceManager.h">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClInclude>
-    <ClInclude Include="include\IDelegate.h">
-      <Filter>Source Files\Base\Delegates</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDelegate_implement.h">
-      <Filter>Source Files\Base\Delegates</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDelegateContainer.h">
-      <Filter>Source Files\Base\Delegates</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDelegateEvent.h">
-      <Filter>Source Files\Base\Delegates</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDelegateSet.h">
-      <Filter>Source Files\Base\Delegates</Filter>
-    </ClInclude>
     <ClInclude Include="include\IConfigDialog.h">
       <Filter>Source Files\Base\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="include\IErrorDialog.h">
       <Filter>Source Files\Base\Dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="include\GenericLoggerSystem.h">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClInclude>
     <ClInclude Include="include\HTMLLogger.h">
       <Filter>Source Files\Base\Logger</Filter>
     </ClInclude>
-    <ClInclude Include="include\ILogDevice.h">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ILogManager.h">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="include\LogManager.h">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="include\LogSubsystem.h">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClInclude>
     <ClInclude Include="include\LogSubSystemManager.h">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StreamLogger.h">
       <Filter>Source Files\Base\Logger</Filter>
     </ClInclude>
     <ClInclude Include="include\ChangeModeEvent.h">
@@ -1574,12 +1364,6 @@
     </ClInclude>
     <ClInclude Include="include\SystemEvent.h">
       <Filter>Source Files\Base\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="include\OptionContainer.h">
-      <Filter>Source Files\Base\Option</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SOptionElement.h">
-      <Filter>Source Files\Base\Option</Filter>
     </ClInclude>
     <ClInclude Include="include\GenericValues.h">
       <Filter>Source Files\Base\Values</Filter>
@@ -1674,27 +1458,6 @@
     <ClInclude Include="..\..\Dependencies\include\extLibs\zzip\zzip.h">
       <Filter>Source Files\librarys\zzlip</Filter>
     </ClInclude>
-    <ClInclude Include="include\IXMLNode.h">
-      <Filter>Source Files\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IXMLParser.h">
-      <Filter>Source Files\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="include\XMLComment.h">
-      <Filter>Source Files\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="include\XMLElement.h">
-      <Filter>Source Files\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="include\XMLTextNode.h">
-      <Filter>Source Files\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="include\XMLTree.h">
-      <Filter>Source Files\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="include\XMLWriter.h">
-      <Filter>Source Files\xml</Filter>
-    </ClInclude>
     <ClInclude Include="include\XMLExpatParser.h">
       <Filter>Source Files\xml\expatParser</Filter>
     </ClInclude>
@@ -1705,15 +1468,6 @@
       <Filter>Source Files\controllers</Filter>
     </ClInclude>
     <ClInclude Include="include\CMouseController.h">
-      <Filter>Source Files\controllers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IJoysticController.h">
-      <Filter>Source Files\controllers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IKeyboardController.h">
-      <Filter>Source Files\controllers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IMouseController.h">
       <Filter>Source Files\controllers</Filter>
     </ClInclude>
     <ClInclude Include="include\DeclarationTable.h">
@@ -1836,19 +1590,7 @@
     <ClInclude Include="include\CCubeTexture.h">
       <Filter>Source Files\video</Filter>
     </ClInclude>
-    <ClInclude Include="include\ColorConverter.h">
-      <Filter>Source Files\video</Filter>
-    </ClInclude>
     <ClInclude Include="include\ColorCurve.h">
-      <Filter>Source Files\video</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DefaultColors.h">
-      <Filter>Source Files\video</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ICameraVideoGrabber.h">
-      <Filter>Source Files\video</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ImageInfo.h">
       <Filter>Source Files\video</Filter>
     </ClInclude>
     <ClInclude Include="include\ImageSet.h">
@@ -1878,12 +1620,6 @@
     <ClInclude Include="include\LUTGenerator.h">
       <Filter>Source Files\video</Filter>
     </ClInclude>
-    <ClInclude Include="include\PixelFormat.h">
-      <Filter>Source Files\video</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PixelUtil.h">
-      <Filter>Source Files\video</Filter>
-    </ClInclude>
     <ClInclude Include="include\RenderMaterial.h">
       <Filter>Source Files\video</Filter>
     </ClInclude>
@@ -1894,9 +1630,6 @@
       <Filter>Source Files\video</Filter>
     </ClInclude>
     <ClInclude Include="include\RTPickBuffer.h">
-      <Filter>Source Files\video</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SColor.h">
       <Filter>Source Files\video</Filter>
     </ClInclude>
     <ClInclude Include="include\SVideoMode.h">
@@ -2028,31 +1761,7 @@
     <ClInclude Include="include\SoftwareStreamBuffer.h">
       <Filter>Source Files\video\HardwareBuffer</Filter>
     </ClInclude>
-    <ClInclude Include="include\ASCIIEncoding.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BitConverter.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BitVector.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="include\CKeyableAttr.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HashMap.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HeapAllocator.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\heapSort.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IStringEncoding.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mArray.h">
       <Filter>Source Files\core</Filter>
     </ClInclude>
     <ClInclude Include="include\MinMaxValue.h">
@@ -2061,34 +1770,10 @@
     <ClInclude Include="include\mIterator.h">
       <Filter>Source Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="include\mString.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mTypes.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PoolMemoryAllocator.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StringConverter.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StringEncoding.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StringUtil.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="include\TPair.h">
       <Filter>Source Files\core</Filter>
     </ClInclude>
     <ClInclude Include="include\TreeDictionary.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\UnicodeEncoding.h">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\UTFString.h">
       <Filter>Source Files\core</Filter>
     </ClInclude>
     <ClInclude Include="include\GZipCompress.h">
@@ -2133,59 +1818,14 @@
     <ClInclude Include="include\RDWUpdatePacket.h">
       <Filter>Source Files\Debug\Packets</Filter>
     </ClInclude>
-    <ClInclude Include="include\CMsgbuffer.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ConnectedPeer.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HMessages.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HNetCommands.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\INetwork.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IReliableSocket.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ISocket.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IUDPClient.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NetAddress.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NetDataTypes.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NetPacket.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
     <ClInclude Include="include\NetworkLoggerSystem.h">
       <Filter>Source Files\network</Filter>
     </ClInclude>
     <ClInclude Include="include\NetworkStream.h">
       <Filter>Source Files\network</Filter>
     </ClInclude>
-    <ClInclude Include="include\SendPacketQueue.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SocketListener.h">
-      <Filter>Source Files\network</Filter>
-    </ClInclude>
     <ClInclude Include="include\UDPClientThreaded.h">
       <Filter>Source Files\network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IWebRequest.h">
-      <Filter>Source Files\network\Internet</Filter>
-    </ClInclude>
-    <ClInclude Include="include\WebURL.h">
-      <Filter>Source Files\network\Internet</Filter>
     </ClInclude>
     <ClInclude Include="include\stdafx.h">
       <Filter>Header Files</Filter>
@@ -2198,12 +1838,6 @@
     </ClInclude>
     <ClInclude Include="include\ISoundStreamFrame.h">
       <Filter>Source Files\sound</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StreamWriterEx.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StreamReaderEx.h">
-      <Filter>Source Files\OS</Filter>
     </ClInclude>
     <ClInclude Include="include\ISQLConnection.h">
       <Filter>Source Files\DB</Filter>
@@ -2265,12 +1899,6 @@
     <ClInclude Include="include\TextureSourceFactory.h">
       <Filter>Source Files\video\Textures</Filter>
     </ClInclude>
-    <ClInclude Include="include\IFileMonitor.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IMonitorFileInformation.h">
-      <Filter>Source Files\OS</Filter>
-    </ClInclude>
     <ClInclude Include="include\CommonValueProviders.h">
       <Filter>Source Files\Base\Values</Filter>
     </ClInclude>
@@ -2295,14 +1923,8 @@
     <ClInclude Include="include\InternetCacheManager.h">
       <Filter>Source Files\network\Internet</Filter>
     </ClInclude>
-    <ClInclude Include="include\StringUtil.hpp">
-      <Filter>Source Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="include\AtlasPacker.h">
       <Filter>Source Files\video</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DateTime.h">
-      <Filter>Source Files\core</Filter>
     </ClInclude>
     <ClInclude Include="include\AImpSceneLoader.h">
       <Filter>Source Files\loaders\models</Filter>
@@ -2334,14 +1956,17 @@
     <ClInclude Include="include\InputKeyMap.h">
       <Filter>Source Files\controllers</Filter>
     </ClInclude>
-    <ClInclude Include="include\ValueGroup.h">
-      <Filter>Source Files\Base\Values</Filter>
-    </ClInclude>
     <ClInclude Include="include\INetworkPortAssigner.h">
       <Filter>Source Files\network</Filter>
     </ClInclude>
     <ClInclude Include="include\LocalNetworkPortAssigner.h">
       <Filter>Source Files\network</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ISkyShape.h">
+      <Filter>Source Files\scene\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ITerrain.h">
+      <Filter>Source Files\scene\Nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2463,9 +2088,6 @@
       <Filter>Source Files\scene\Nodes</Filter>
     </ClCompile>
     <ClCompile Include="src\GrassRenderNode.cpp">
-      <Filter>Source Files\scene\Nodes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ISkyShape.cpp">
       <Filter>Source Files\scene\Nodes</Filter>
     </ClCompile>
     <ClCompile Include="src\MeshRenderableNode.cpp">
@@ -2783,36 +2405,6 @@
     <ClCompile Include="src\IGUIStaticText.cpp">
       <Filter>Source Files\GUI\Items</Filter>
     </ClCompile>
-    <ClCompile Include="src\CLimitedStream.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CMemoryStream.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CRC.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IFileSystem.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IStream.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IThreadManager.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mraySystem.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StreamReader.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StreamWriter.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ThreadBarrier.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
     <ClCompile Include="src\ArchiveManager.cpp">
       <Filter>Source Files\OS\Archive</Filter>
     </ClCompile>
@@ -3017,12 +2609,6 @@
     <ClCompile Include="src\CatagoryManager.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="src\CException.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CMemory.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
     <ClCompile Include="src\CommandManager.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
@@ -3038,13 +2624,7 @@
     <ClCompile Include="src\DefaultObjects.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="src\DelegateManager.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EnumManager.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
     <ClCompile Include="src\FunctionProfileManager.cpp">
@@ -3053,19 +2633,10 @@
     <ClCompile Include="src\FunctionProfiler.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="src\GUID.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
     <ClCompile Include="src\ICursorControl.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="src\IObject.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
     <ClCompile Include="src\IObjectComponent.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\keyCode.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
     <ClCompile Include="include\Localization.cpp">
@@ -3080,13 +2651,7 @@
     <ClCompile Include="src\TimeTicket.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="src\TraceManager.cpp">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
     <ClCompile Include="CommonProperties.cpp">
-      <Filter>Source Files\Base\Properties</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CPropertieSet.cpp">
       <Filter>Source Files\Base\Properties</Filter>
     </ClCompile>
     <ClCompile Include="src\EGenericTypes.cpp">
@@ -3095,20 +2660,8 @@
     <ClCompile Include="src\IAttribute.cpp">
       <Filter>Source Files\Base\Properties</Filter>
     </ClCompile>
-    <ClCompile Include="src\IProperty.cpp">
-      <Filter>Source Files\Base\Properties</Filter>
-    </ClCompile>
     <ClCompile Include="src\ObjectSerializer.cpp">
       <Filter>Source Files\Base\Properties</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GCCollector.cpp">
-      <Filter>Source Files\Base\GC</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GCInfo.cpp">
-      <Filter>Source Files\Base\GC</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IGCCollector.cpp">
-      <Filter>Source Files\Base\GC</Filter>
     </ClCompile>
     <ClCompile Include="src\AnimationResourceManager.cpp">
       <Filter>Source Files\Base\ResourceManagers</Filter>
@@ -3122,22 +2675,10 @@
     <ClCompile Include="src\ImageSetResourceManager.cpp">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClCompile>
-    <ClCompile Include="src\IResource.cpp">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IResourceHolder.cpp">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IResourceManager.cpp">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClCompile>
     <ClCompile Include="src\MaterialResourceManager.cpp">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClCompile>
     <ClCompile Include="src\MeshResourceManager.cpp">
-      <Filter>Source Files\Base\ResourceManagers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ResourceGroup.cpp">
       <Filter>Source Files\Base\ResourceManagers</Filter>
     </ClCompile>
     <ClCompile Include="src\ScriptResourceManager.cpp">
@@ -3158,22 +2699,10 @@
     <ClCompile Include="src\HTMLLogger.cpp">
       <Filter>Source Files\Base\Logger</Filter>
     </ClCompile>
-    <ClCompile Include="src\ILogManager.cpp">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClCompile>
-    <ClCompile Include="src\LogManager.cpp">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClCompile>
-    <ClCompile Include="src\LogSubsystem.cpp">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClCompile>
     <ClCompile Include="src\LogSubSystemManager.cpp">
       <Filter>Source Files\Base\Logger</Filter>
     </ClCompile>
     <ClCompile Include="src\RemoteDebugLogger.cpp">
-      <Filter>Source Files\Base\Logger</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StreamLogger.cpp">
       <Filter>Source Files\Base\Logger</Filter>
     </ClCompile>
     <ClCompile Include="src\Event.cpp">
@@ -3184,9 +2713,6 @@
     </ClCompile>
     <ClCompile Include="src\EventQueue.cpp">
       <Filter>Source Files\Base\Events</Filter>
-    </ClCompile>
-    <ClCompile Include="src\OptionContainer.cpp">
-      <Filter>Source Files\Base\Option</Filter>
     </ClCompile>
     <ClCompile Include="src\GenericValues.cpp">
       <Filter>Source Files\Base\Values</Filter>
@@ -3268,18 +2794,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Dependencies\include\extLibs\zlib\zutil.c">
       <Filter>Source Files\librarys\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IXMLParser.cpp">
-      <Filter>Source Files\xml</Filter>
-    </ClCompile>
-    <ClCompile Include="src\XMLElement.cpp">
-      <Filter>Source Files\xml</Filter>
-    </ClCompile>
-    <ClCompile Include="src\XMLTree.cpp">
-      <Filter>Source Files\xml</Filter>
-    </ClCompile>
-    <ClCompile Include="src\XMLWriter.cpp">
-      <Filter>Source Files\xml</Filter>
     </ClCompile>
     <ClCompile Include="src\XMLExpatParser.cpp">
       <Filter>Source Files\xml\expatParser</Filter>
@@ -3374,16 +2888,7 @@
     <ClCompile Include="src\IterativeIK.cpp">
       <Filter>Source Files\Animation\IK</Filter>
     </ClCompile>
-    <ClCompile Include="src\ColorConverter.cpp">
-      <Filter>Source Files\video</Filter>
-    </ClCompile>
     <ClCompile Include="src\ColorCurve.cpp">
-      <Filter>Source Files\video</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DefaultColors.cpp">
-      <Filter>Source Files\video</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ImageInfo.cpp">
       <Filter>Source Files\video</Filter>
     </ClCompile>
     <ClCompile Include="src\ImageSet.cpp">
@@ -3401,12 +2906,6 @@
     <ClCompile Include="src\LUTGenerator.cpp">
       <Filter>Source Files\video</Filter>
     </ClCompile>
-    <ClCompile Include="src\PixelFormat.cpp">
-      <Filter>Source Files\video</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PixelUtil.cpp">
-      <Filter>Source Files\video</Filter>
-    </ClCompile>
     <ClCompile Include="src\RenderMaterial.cpp">
       <Filter>Source Files\video</Filter>
     </ClCompile>
@@ -3417,9 +2916,6 @@
       <Filter>Source Files\video</Filter>
     </ClCompile>
     <ClCompile Include="src\RTPickBuffer.cpp">
-      <Filter>Source Files\video</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SColor.cpp">
       <Filter>Source Files\video</Filter>
     </ClCompile>
     <ClCompile Include="src\TextureBank.cpp">
@@ -3500,27 +2996,6 @@
     <ClCompile Include="src\SoftwareStreamBuffer.cpp">
       <Filter>Source Files\video\HardwareBuffer</Filter>
     </ClCompile>
-    <ClCompile Include="src\ASCIIEncoding.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BitConverter.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PoolMemoryAllocator.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StringConverter.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StringEncoding.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UnicodeEncoding.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UTFString.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="src\GZipCompress.cpp">
       <Filter>Source Files\Compress</Filter>
     </ClCompile>
@@ -3536,44 +3011,14 @@
     <ClCompile Include="src\RDWatchPacket.cpp">
       <Filter>Source Files\Debug\Packets</Filter>
     </ClCompile>
-    <ClCompile Include="src\ConnectedPeer.cpp">
-      <Filter>Source Files\network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\HMessage.cpp">
-      <Filter>Source Files\network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\HNetCommands.cpp">
-      <Filter>Source Files\network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NetAddress.cpp">
-      <Filter>Source Files\network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NetDataTypes.cpp">
-      <Filter>Source Files\network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NetPacket.cpp">
-      <Filter>Source Files\network</Filter>
-    </ClCompile>
     <ClCompile Include="src\NetworkStream.cpp">
       <Filter>Source Files\network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SendPacketQueue.cpp">
-      <Filter>Source Files\network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\WebURL.cpp">
-      <Filter>Source Files\network\Internet</Filter>
     </ClCompile>
     <ClCompile Include="src\stdafx.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="src\TransformManipulator.cpp.old">
       <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StreamWriterEx.cpp">
-      <Filter>Source Files\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StreamReaderEx.cpp">
-      <Filter>Source Files\OS</Filter>
     </ClCompile>
     <ClCompile Include="src\MouseEvent.cpp">
       <Filter>Source Files\Base\Events</Filter>
@@ -3614,9 +3059,6 @@
     <ClCompile Include="src\FileTextureSource.cpp">
       <Filter>Source Files\video\Textures</Filter>
     </ClCompile>
-    <ClCompile Include="ICameraVideoGrabber.cpp">
-      <Filter>Source Files\video</Filter>
-    </ClCompile>
     <ClCompile Include="src\CommonValueProviders.cpp">
       <Filter>Source Files\Base\Values</Filter>
     </ClCompile>
@@ -3635,20 +3077,11 @@
     <ClCompile Include="src\InternetCacheManager.cpp">
       <Filter>Source Files\network\Internet</Filter>
     </ClCompile>
-    <ClCompile Include="src\mString.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="src\AtlasPacker.cpp">
       <Filter>Source Files\video</Filter>
     </ClCompile>
-    <ClCompile Include="src\DateTime.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="src\AImpSceneLoader.cpp">
       <Filter>Source Files\loaders\models</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FPSCalc.cpp">
-      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="HuffmanCompression.cpp">
       <Filter>Source Files\Compress</Filter>
@@ -3668,20 +3101,17 @@
     <ClCompile Include="src\InputKeyMap.cpp">
       <Filter>Source Files\controllers</Filter>
     </ClCompile>
-    <ClCompile Include="include\ValueGroup.cpp">
-      <Filter>Source Files\Base\Values</Filter>
-    </ClCompile>
     <ClCompile Include="src\LocalNetworkPortAssigner.cpp">
       <Filter>Source Files\network</Filter>
     </ClCompile>
     <ClCompile Include="src\GUIElementFactory.cpp" />
+    <ClCompile Include="src\ISkyShape.cpp">
+      <Filter>Source Files\scene\Nodes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\TransformManipulator.h.old">
       <Filter>Source Files\scene</Filter>
-    </None>
-    <None Include="include\Hashmap.inl">
-      <Filter>Source Files\core</Filter>
     </None>
     <None Include="OverlaySchema.xsx" />
   </ItemGroup>

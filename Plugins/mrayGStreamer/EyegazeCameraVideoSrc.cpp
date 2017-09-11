@@ -11,7 +11,7 @@
 //#include "AveragePer.h"
 #include "FPSCalc.h"
 #include "ITimer.h"
-#include "Engine.h"
+#include "GStreamerCore.h"
 
 #include <gst/gst.h>
 
@@ -193,7 +193,7 @@ namespace video
 			m_eyePosDirty = false;
 			//m_sent = false;
 
-			updateFPS.regFrame(gEngine.getTimer()->getSeconds());
+			updateFPS.regFrame(gGStreamerCore->GetTimer()->getSeconds());
 
 			float fps = updateFPS.getFPS();
 			printf("Eyegaze Update Rate: %f\n", fps);

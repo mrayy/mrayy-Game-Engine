@@ -53,7 +53,7 @@ uint SoftwareIndexBuffer::readData(uint offset,uint length,void*dest){
 	if(offset+length>m_data.size())
 		length=m_data.size()-offset;
 	if(m_data.size())
-		mraySystem::memCopy(dest,&m_data[0]+offset,length);
+		IOSSystem::memCopy(dest,&m_data[0]+offset,length);
 	return length;
 }
 
@@ -64,7 +64,7 @@ uint SoftwareIndexBuffer::writeData(uint offset,uint length,const void*src,bool 
 		if(offset+length>m_data.size())
 			length=m_data.size()-offset;
 	if(m_data.size())
-		mraySystem::memCopy(&m_data[0]+offset,src,length);
+		IOSSystem::memCopy(&m_data[0]+offset,src,length);
 	return length;
 }
 void* SoftwareIndexBuffer::getData(uint offset){

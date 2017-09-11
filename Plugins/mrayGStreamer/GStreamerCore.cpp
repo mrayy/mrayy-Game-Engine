@@ -18,6 +18,7 @@
 #include "CMyUDPSrc.h"
 #include "CMyListener.h"
 #include "CMyUDPSink.h"
+#include "IOSystem.h"
 
 //#define USE_LIBNICE
 
@@ -77,6 +78,7 @@ public:
 GStreamerCore::GStreamerCore()
 {
 	m_mainLoopThread = 0;
+	m_timer = OS::IOSystem::getInstance().createTimer();
 	_Init();
 }
 
@@ -84,6 +86,8 @@ GStreamerCore::~GStreamerCore()
 {
 	_StopLoop();
 	gst_deinit();
+
+	delete m_timer;
 }
 
 

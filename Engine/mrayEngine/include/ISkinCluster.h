@@ -4,6 +4,7 @@
 
 
 //#include "SBoneNode.h"
+#include "compileconfig.h"
 
 #include "mString.h"
 #include "GCPtr.h"

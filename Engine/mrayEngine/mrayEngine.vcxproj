@@ -206,46 +206,34 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalOptions>/MP8 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\..\Dependencies\include;.\include;..\mrayMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;MRAY_DLL_EXPORT;_CRT_SECURE_NO_DEPRECATE;_MT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\mrayCore\include;..\..\Dependencies\include;.\include;..\mrayMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MRAY_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AssemblerListingLocation>
-      </AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>..\..\Obj\$(Configuration)</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>CompileAsCpp</CompileAs>
-      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>freetype265.lib;assimp.lib;mrayMath.lib;FreeImage.lib;zziplib.lib;zlib.lib;libexpatMT.lib;libPng.lib;NvTriStrip.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freetype265.lib;assimp.lib;mrayCore.lib;mrayMath.lib;FreeImage.lib;zziplib.lib;zlib.lib;libexpatMT.lib;libPng.lib;NvTriStrip.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <Version>0.99</Version>
       <AdditionalLibraryDirectories>..\..\lib\$(Configuration)64;..\..\Dependencies\lib\$(Configuration)64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>$(TargetDir)/mrayEngine.lib</ImportLibrary>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetFileName) ..\..\bin\$(Configuration)64</Command>
@@ -586,12 +574,11 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\ValueGroup.cpp" />
     <ClCompile Include="src\3DSLoader.cpp" />
     <ClCompile Include="src\InputKeyMap.cpp" />
     <ClCompile Include="src\LocalNetworkPortAssigner.cpp" />
     <ClCompile Include="UI3DRenderNode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClInclude Include="..\..\Dependencies\include\huffman\huffman.h" />
     <ClInclude Include="HuffmanCompression.h" />
@@ -606,13 +593,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\CommonValueProviders.h" />
-    <ClInclude Include="include\DateTime.h" />
     <ClInclude Include="include\DynamicFontGenerator.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\FileTextureSource.h" />
     <ClInclude Include="include\GUIElement3D.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\GUIElementFactory.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -621,26 +607,25 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\GUIElementRT.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\GUIElementRT_Manager.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\GUIManagerRT.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\GUITreeNode.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\ICustomParticleEmitter.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="include\IFileMonitor.h" />
     <ClInclude Include="include\IGUIElementCreator.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\IGUIElementRT.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\IGUITreeBox.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -652,7 +637,6 @@
     <ClInclude Include="include\ISQLConnection.h" />
     <ClInclude Include="include\ISQLManager.h" />
     <ClInclude Include="include\ISQLResult.h" />
-    <ClInclude Include="include\IMonitorFileInformation.h" />
     <ClInclude Include="include\LocalNetworkPortAssigner.h" />
     <ClInclude Include="include\mrayEngine.h" />
     <ClInclude Include="include\ISound.h" />
@@ -757,9 +741,6 @@
     <ClInclude Include="include\StereoRenderer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="include\StreamReaderEx.h" />
-    <ClInclude Include="include\StreamWriterEx.h" />
-    <ClInclude Include="include\StringUtil.hpp" />
     <ClInclude Include="include\TangentCalculater.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -767,11 +748,10 @@
     <ClInclude Include="include\TextureRTWrap.h" />
     <ClInclude Include="include\TextureSourceFactory.h" />
     <ClInclude Include="include\UI3DRenderNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\UniqueIDGenerator.h" />
     <ClInclude Include="include\ValueControllerManager.h" />
-    <ClInclude Include="include\ValueGroup.h" />
     <ClInclude Include="include\VideoResourceManager.h" />
     <ClInclude Include="include\VideoTextureSource.h" />
     <ClInclude Include="include\ViewPort.h">
@@ -781,82 +761,82 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\CRotateConstraint.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\IAnimators.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SAnimatorCircle.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SAnimatorDirection.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SAnimatorRotate.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SAnimatorSpline.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\CUBEMapRenderNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\GrassRenderNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\ISkyShape.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\ITerrain.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\MeshRenderableNode.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\MountPoint.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\RoadNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SAnimatedSprite.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SBillboardBeam.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SBillboardChain.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SBillboardNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SLensEffect.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SLocator.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SLODAnimatedMesh.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\spatchterrain.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SQ3BSPLevel.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SSkyBoxNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SSkyDomeNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SSkyPlaneNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\STerrain.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClCompile Include="..\..\Dependencies\include\huffman\huffman.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -865,7 +845,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="HuffmanCompression.cpp" />
-    <ClCompile Include="ICameraVideoGrabber.cpp" />
     <ClCompile Include="src\AImpSceneLoader.cpp" />
     <ClCompile Include="src\AtlasPacker.cpp" />
     <ClCompile Include="src\BinPacker.cpp" />
@@ -873,22 +852,21 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\CommonValueProviders.cpp" />
-    <ClCompile Include="src\DateTime.cpp" />
     <ClCompile Include="src\DynamicFontGenerator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\FileTextureSource.cpp" />
     <ClCompile Include="src\GUIElement3D.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\GUIElementFactory.cpp" />
     <ClCompile Include="src\GUIElementRT_Manager.cpp">
       <FileType>CppHeader</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClInclude Include="src\ValueControllerManager.cpp" />
     <CustomBuildStep Include="include\STextNode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CustomBuildStep>
     <ClInclude Include="include\CConvexQuickHull.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -978,7 +956,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\SkeletonAnimator.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\CubeMapFaceRenderPass.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -1029,10 +1007,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\CPUParticleBillboardRenderer.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\GPUParticleBillboardRenderer.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\IParticle.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -1223,34 +1201,7 @@
     <ClInclude Include="include\IGUIStaticText.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="include\CLimitedStream.h" />
-    <ClInclude Include="include\CMemoryStream.h" />
-    <ClInclude Include="include\CMutexVar.h" />
-    <ClInclude Include="include\CRC.h" />
-    <ClInclude Include="include\ICondition.h" />
-    <ClInclude Include="include\IConsole.h" />
-    <ClInclude Include="include\IDirOS.h" />
-    <ClInclude Include="include\IDllManager.h" />
-    <ClInclude Include="include\IDynamicLibrary.h" />
-    <ClInclude Include="include\IFileSystem.h" />
-    <ClInclude Include="include\IMutex.h" />
-    <ClInclude Include="include\IOSClipboard.h" />
-    <ClInclude Include="include\IOSRegistry.h" />
-    <ClInclude Include="include\IOSystem.h" />
-    <ClInclude Include="include\IStream.h" />
-    <ClInclude Include="include\ISystemProcess.h" />
-    <ClInclude Include="include\IThread.h" />
-    <ClInclude Include="include\IThreadEvent.h" />
-    <ClInclude Include="include\IThreadFunction.h" />
-    <ClInclude Include="include\IThreadManager.h" />
-    <ClInclude Include="include\ITimer.h" />
-    <ClInclude Include="include\mraySystem.h" />
-    <ClInclude Include="include\MultiThreadListener.h" />
-    <ClInclude Include="include\MutexLocks.h" />
     <ClInclude Include="include\OSLoggerSystem.h" />
-    <ClInclude Include="include\StreamReader.h" />
-    <ClInclude Include="include\StreamWriter.h" />
-    <ClInclude Include="include\ThreadBarrier.h" />
     <ClInclude Include="include\ArchiveManager.h" />
     <ClInclude Include="include\CPAKArchive.h" />
     <ClInclude Include="include\CZipArchive.h" />
@@ -1258,7 +1209,6 @@
     <ClInclude Include="include\CPakLoader.h" />
     <ClInclude Include="include\CZipLoader.h" />
     <ClInclude Include="include\IArchiveLoader.h" />
-    <ClInclude Include="include\NullMutex.h" />
     <ClInclude Include="include\ChunkSerializer.h" />
     <ClInclude Include="include\IFileLoader.h" />
     <ClInclude Include="include\IFileWriter.h" />
@@ -1378,89 +1328,53 @@
     <ClInclude Include="include\BasicTypesGUID.h" />
     <ClInclude Include="include\BenchmarkItem.h" />
     <ClInclude Include="include\CatagoryManager.h" />
-    <ClInclude Include="include\CException.h" />
-    <ClInclude Include="include\CMemory.h" />
     <ClInclude Include="include\CommandManager.h" />
     <ClInclude Include="include\common.h" />
     <ClInclude Include="include\compileconfig.h" />
     <ClInclude Include="include\CPUInfo.h" />
     <ClInclude Include="include\DefaultEnum.h" />
     <ClInclude Include="include\DefaultObjects.h" />
-    <ClInclude Include="include\DelegateManager.h" />
     <ClInclude Include="include\DisableWarn.h" />
     <ClInclude Include="include\Engine.h" />
-    <ClInclude Include="include\EnumManager.h" />
     <ClInclude Include="include\FunctionProfileManager.h" />
     <ClInclude Include="include\FunctionProfiler.h" />
-    <ClInclude Include="include\GUID.h" />
     <ClInclude Include="include\ICommand.h" />
     <ClInclude Include="include\ICursorControl.h" />
     <ClInclude Include="include\IDGenerator.h" />
     <ClInclude Include="include\IMessageDispatcher.h" />
-    <ClInclude Include="include\InputManager.h" />
-    <ClInclude Include="include\IObject.h" />
     <ClInclude Include="include\IObjectComponent.h" />
     <ClInclude Include="include\IPlugin.h" />
     <ClInclude Include="include\ISerializable.h" />
-    <ClInclude Include="include\ISingleton.h" />
-    <ClInclude Include="include\KEY_MAP.h" />
-    <ClInclude Include="include\KEYCode.h" />
-    <ClInclude Include="include\ListenerContainer.h" />
     <ClInclude Include="include\Localization.h" />
-    <ClInclude Include="include\macros.h" />
     <ClInclude Include="include\memAlign.h" />
     <ClInclude Include="include\MessageTelegram.h" />
     <ClInclude Include="include\MessageTelegramReciver.h" />
     <ClInclude Include="include\ObjectFactory.h" />
     <ClInclude Include="include\ObjectFactoryManager.h" />
     <ClInclude Include="include\PluginManager.h" />
-    <ClInclude Include="include\RTTI.h" />
     <ClInclude Include="include\TimeTicket.h" />
-    <ClInclude Include="include\TraceManager.h" />
     <ClInclude Include="include\CAttribute.h" />
     <ClInclude Include="CommonProperties.h" />
-    <ClInclude Include="include\CPropertieSet.h" />
     <ClInclude Include="include\EGenericTypes.h" />
     <ClInclude Include="include\IAttribute.h" />
-    <ClInclude Include="include\IProperty.h" />
-    <ClInclude Include="include\IPropertyVistor.h" />
     <ClInclude Include="include\ObjectSerializer.h" />
     <ClInclude Include="include\TypedProperty.h" />
-    <ClInclude Include="include\GCCollector.h" />
-    <ClInclude Include="include\GCInfo.h" />
-    <ClInclude Include="include\GCPtr.h" />
-    <ClInclude Include="include\IGCCollector.h" />
     <ClInclude Include="include\AnimationResourceManager.h" />
     <ClInclude Include="include\FileResourceManager.h" />
     <ClInclude Include="include\FontResourceManager.h" />
     <ClInclude Include="include\ImageSetResourceManager.h" />
     <ClInclude Include="include\IResLoadListener.h" />
-    <ClInclude Include="include\IResource.h" />
-    <ClInclude Include="include\IResourceHolder.h" />
-    <ClInclude Include="include\IResourceManager.h" />
     <ClInclude Include="include\MaterialResourceManager.h" />
     <ClInclude Include="include\MeshResourceManager.h" />
-    <ClInclude Include="include\ResourceGroup.h" />
     <ClInclude Include="include\ScriptResourceManager.h" />
     <ClInclude Include="include\ShaderResourceManager.h" />
     <ClInclude Include="include\SkeletonResourceManager.h" />
     <ClInclude Include="include\SoundResourceManager.h" />
     <ClInclude Include="include\TextureResourceManager.h" />
-    <ClInclude Include="include\IDelegate.h" />
-    <ClInclude Include="include\IDelegate_implement.h" />
-    <ClInclude Include="include\IDelegateContainer.h" />
-    <ClInclude Include="include\IDelegateEvent.h" />
-    <ClInclude Include="include\IDelegateSet.h" />
     <ClInclude Include="include\IConfigDialog.h" />
     <ClInclude Include="include\IErrorDialog.h" />
-    <ClInclude Include="include\GenericLoggerSystem.h" />
     <ClInclude Include="include\HTMLLogger.h" />
-    <ClInclude Include="include\ILogDevice.h" />
-    <ClInclude Include="include\ILogManager.h" />
-    <ClInclude Include="include\LogManager.h" />
-    <ClInclude Include="include\LogSubsystem.h" />
     <ClInclude Include="include\LogSubSystemManager.h" />
-    <ClInclude Include="include\StreamLogger.h" />
     <ClInclude Include="include\ChangeModeEvent.h" />
     <ClInclude Include="include\Event.h" />
     <ClInclude Include="include\EventMemoryManager.h" />
@@ -1473,8 +1387,6 @@
     <ClInclude Include="include\NetworkEvent.h" />
     <ClInclude Include="include\ResizeEvent.h" />
     <ClInclude Include="include\SystemEvent.h" />
-    <ClInclude Include="include\OptionContainer.h" />
-    <ClInclude Include="include\SOptionElement.h" />
     <ClInclude Include="include\GenericValues.h" />
     <ClInclude Include="include\IValue.h" />
     <ClInclude Include="include\MathValues.h" />
@@ -1515,20 +1427,10 @@
     <ClInclude Include="..\..\Dependencies\include\extLibs\zzip\conf.h" />
     <ClInclude Include="..\..\Dependencies\include\extLibs\zzip\types.h" />
     <ClInclude Include="..\..\Dependencies\include\extLibs\zzip\zzip.h" />
-    <ClInclude Include="include\IXMLNode.h" />
-    <ClInclude Include="include\IXMLParser.h" />
-    <ClInclude Include="include\XMLComment.h" />
-    <ClInclude Include="include\XMLElement.h" />
-    <ClInclude Include="include\XMLTextNode.h" />
-    <ClInclude Include="include\XMLTree.h" />
-    <ClInclude Include="include\XMLWriter.h" />
     <ClInclude Include="include\XMLExpatParser.h" />
     <ClInclude Include="include\CJoysticController.h" />
     <ClInclude Include="include\CKeyboardController.h" />
     <ClInclude Include="include\CMouseController.h" />
-    <ClInclude Include="include\IJoysticController.h" />
-    <ClInclude Include="include\IKeyboardController.h" />
-    <ClInclude Include="include\IMouseController.h" />
     <ClInclude Include="include\DeclarationTable.h" />
     <ClInclude Include="include\IFunctionHandler.h" />
     <ClInclude Include="include\IScript.h" />
@@ -1615,11 +1517,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="include\CCubeTexture.h" />
-    <ClInclude Include="include\ColorConverter.h" />
     <ClInclude Include="include\ColorCurve.h" />
-    <ClInclude Include="include\DefaultColors.h" />
-    <ClInclude Include="include\ICameraVideoGrabber.h" />
-    <ClInclude Include="include\ImageInfo.h" />
     <ClInclude Include="include\ImageSet.h" />
     <ClInclude Include="include\ImageSetTexture.h" />
     <ClInclude Include="include\IPickBuffer.h" />
@@ -1629,13 +1527,10 @@
     <ClInclude Include="include\IVideoGrabber.h" />
     <ClInclude Include="include\IVideoSource.h" />
     <ClInclude Include="include\LUTGenerator.h" />
-    <ClInclude Include="include\PixelFormat.h" />
-    <ClInclude Include="include\PixelUtil.h" />
     <ClInclude Include="include\RenderMaterial.h" />
     <ClInclude Include="include\RenderPass.h" />
     <ClInclude Include="include\RenderTechnique.h" />
     <ClInclude Include="include\RTPickBuffer.h" />
-    <ClInclude Include="include\SColor.h" />
     <ClInclude Include="include\SVideoMode.h" />
     <ClInclude Include="include\TextureBank.h" />
     <ClInclude Include="include\videoCommon.h" />
@@ -1679,28 +1574,12 @@
     <ClInclude Include="include\SoftwareBufferManager.h" />
     <ClInclude Include="include\SoftwareIndexBuffer.h" />
     <ClInclude Include="include\SoftwareStreamBuffer.h" />
-    <ClInclude Include="include\ASCIIEncoding.h" />
-    <ClInclude Include="include\BitConverter.h" />
-    <ClInclude Include="include\BitVector.h" />
     <ClInclude Include="include\FPSCalc.h" />
     <ClInclude Include="include\CKeyableAttr.h" />
-    <ClInclude Include="include\HashMap.h" />
-    <ClInclude Include="include\HeapAllocator.h" />
-    <ClInclude Include="include\heapSort.h" />
-    <ClInclude Include="include\IStringEncoding.h" />
-    <ClInclude Include="include\mArray.h" />
     <ClInclude Include="include\MinMaxValue.h" />
     <ClInclude Include="include\mIterator.h" />
-    <ClInclude Include="include\mString.h" />
-    <ClInclude Include="include\mTypes.h" />
-    <ClInclude Include="include\PoolMemoryAllocator.h" />
-    <ClInclude Include="include\StringConverter.h" />
-    <ClInclude Include="include\StringEncoding.h" />
-    <ClInclude Include="include\StringUtil.h" />
     <ClInclude Include="include\TPair.h" />
     <ClInclude Include="include\TreeDictionary.h" />
-    <ClInclude Include="include\UnicodeEncoding.h" />
-    <ClInclude Include="include\UTFString.h" />
     <ClInclude Include="include\GZipCompress.h" />
     <ClInclude Include="include\ICompressor.h" />
     <ClInclude Include="include\LZWCompress.h" />
@@ -1715,39 +1594,24 @@
     <ClInclude Include="include\RDWatchPacket.h" />
     <ClInclude Include="include\RDWRemovePacket.h" />
     <ClInclude Include="include\RDWUpdatePacket.h" />
-    <ClInclude Include="include\CMsgbuffer.h" />
-    <ClInclude Include="include\ConnectedPeer.h" />
-    <ClInclude Include="include\HMessages.h" />
-    <ClInclude Include="include\HNetCommands.h" />
-    <ClInclude Include="include\INetwork.h" />
-    <ClInclude Include="include\IReliableSocket.h" />
-    <ClInclude Include="include\ISocket.h" />
-    <ClInclude Include="include\IUDPClient.h" />
-    <ClInclude Include="include\NetAddress.h" />
-    <ClInclude Include="include\NetDataTypes.h" />
-    <ClInclude Include="include\NetPacket.h" />
     <ClInclude Include="include\NetworkLoggerSystem.h" />
     <ClInclude Include="include\NetworkStream.h" />
-    <ClInclude Include="include\SendPacketQueue.h" />
-    <ClInclude Include="include\SocketListener.h" />
     <ClInclude Include="include\UDPClientThreaded.h" />
-    <ClInclude Include="include\IWebRequest.h" />
-    <ClInclude Include="include\WebURL.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\IApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GUIElementRT.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\GUIManagerRT.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\GUITreeNode.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\IGUIElementRT.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\IGUITreeBox.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -1794,9 +1658,7 @@
     <ClCompile Include="src\LightNode.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\MeshAnimatorManager.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="src\MeshAnimatorManager.cpp" />
     <ClCompile Include="src\MeshBufferData.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -1833,8 +1695,6 @@
     <ClCompile Include="src\StereoRenderer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\StreamReaderEx.cpp" />
-    <ClCompile Include="src\StreamWriterEx.cpp" />
     <ClCompile Include="src\TangentCalculater.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -1845,25 +1705,25 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\CRotateConstraint.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SAnimatorCircle.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SAnimatorDirection.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SAnimatorRotate.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SAnimatorSpline.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\CUBEMapRenderNode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\GrassRenderNode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\ISkyShape.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -1872,22 +1732,22 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\MountPoint.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\RoadNode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SAnimatedSprite.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SBillboardBeam.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SBillboardChain.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SBillboardNode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SLensEffect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">true</ExcludedFromBuild>
@@ -1900,13 +1760,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SLocator.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\slodanimatedmesh.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SPatchTerrain.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SQ3BSPLevel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">true</ExcludedFromBuild>
@@ -1922,13 +1782,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SSkyDomeNode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\SSkyPlaneNode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\STerrain.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\STextNode.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">true</ExcludedFromBuild>
@@ -1980,22 +1840,22 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\XMLSceneLoader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\XMLTerrainReader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\DynamicGeometryBatch.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\IGeometryBatch.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\StaticGeometryBatch.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\VertConstGeoInstancing.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\GPUMorphAnimator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -2049,10 +1909,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\CPUParticleBillboardRenderer.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\GPUParticleBillboardRenderer.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\IParticle.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -2204,33 +2064,6 @@
     <ClCompile Include="src\IGUIStaticText.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\CLimitedStream.cpp" />
-    <ClCompile Include="src\CMemoryStream.cpp" />
-    <ClCompile Include="src\CRC.cpp" />
-    <ClCompile Include="src\IFileSystem.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-    </ClCompile>
-    <ClCompile Include="src\IStream.cpp" />
-    <ClCompile Include="src\IThreadManager.cpp" />
-    <ClCompile Include="src\mraySystem.cpp" />
-    <ClCompile Include="src\StreamReader.cpp" />
-    <ClCompile Include="src\StreamWriter.cpp" />
-    <ClCompile Include="src\ThreadBarrier.cpp" />
     <ClCompile Include="src\ArchiveManager.cpp" />
     <ClCompile Include="src\CPAKArchive.cpp" />
     <ClCompile Include="src\CZipArchive.cpp" />
@@ -2333,47 +2166,30 @@
     <ClCompile Include="src\BasicTypesGUID.cpp" />
     <ClCompile Include="src\BenchmarkItem.cpp" />
     <ClCompile Include="src\CatagoryManager.cpp" />
-    <ClCompile Include="src\CException.cpp" />
-    <ClCompile Include="src\CMemory.cpp" />
     <ClCompile Include="src\CommandManager.cpp" />
     <ClCompile Include="src\compileConfig.cpp" />
     <ClCompile Include="src\CPUInfo.cpp" />
     <ClCompile Include="src\DefaultEnum.cpp" />
     <ClCompile Include="src\DefaultObjects.cpp" />
-    <ClCompile Include="src\DelegateManager.cpp" />
     <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\EnumManager.cpp" />
     <ClCompile Include="src\FunctionProfileManager.cpp" />
     <ClCompile Include="src\FunctionProfiler.cpp" />
-    <ClCompile Include="src\GUID.cpp" />
     <ClCompile Include="src\ICursorControl.cpp" />
-    <ClCompile Include="src\IObject.cpp" />
     <ClCompile Include="src\IObjectComponent.cpp" />
-    <ClCompile Include="src\keyCode.cpp" />
     <ClCompile Include="include\Localization.cpp" />
     <ClCompile Include="src\MemOp.cpp" />
     <ClCompile Include="src\PluginManager.cpp" />
     <ClCompile Include="src\TimeTicket.cpp" />
-    <ClCompile Include="src\TraceManager.cpp" />
     <ClCompile Include="CommonProperties.cpp" />
-    <ClCompile Include="src\CPropertieSet.cpp" />
     <ClCompile Include="src\EGenericTypes.cpp" />
     <ClCompile Include="src\IAttribute.cpp" />
-    <ClCompile Include="src\IProperty.cpp" />
     <ClCompile Include="src\ObjectSerializer.cpp" />
-    <ClCompile Include="src\GCCollector.cpp" />
-    <ClCompile Include="src\GCInfo.cpp" />
-    <ClCompile Include="src\IGCCollector.cpp" />
     <ClCompile Include="src\AnimationResourceManager.cpp" />
     <ClCompile Include="src\FileResourceManager.cpp" />
     <ClCompile Include="src\FontResourceManager.cpp" />
     <ClCompile Include="src\ImageSetResourceManager.cpp" />
-    <ClCompile Include="src\IResource.cpp" />
-    <ClCompile Include="src\IResourceHolder.cpp" />
-    <ClCompile Include="src\IResourceManager.cpp" />
     <ClCompile Include="src\MaterialResourceManager.cpp" />
     <ClCompile Include="src\MeshResourceManager.cpp" />
-    <ClCompile Include="src\ResourceGroup.cpp" />
     <ClCompile Include="src\ScriptResourceManager.cpp" />
     <ClCompile Include="src\ShaderResourceManager.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
@@ -2397,16 +2213,11 @@
     <ClCompile Include="src\SoundResourceManager.cpp" />
     <ClCompile Include="src\TextureResourceManager.cpp" />
     <ClCompile Include="src\HTMLLogger.cpp" />
-    <ClCompile Include="src\ILogManager.cpp" />
-    <ClCompile Include="src\LogManager.cpp" />
-    <ClCompile Include="src\LogSubsystem.cpp" />
     <ClCompile Include="src\LogSubSystemManager.cpp" />
     <ClCompile Include="src\RemoteDebugLogger.cpp" />
-    <ClCompile Include="src\StreamLogger.cpp" />
     <ClCompile Include="src\Event.cpp" />
     <ClCompile Include="src\EventMemoryManager.cpp" />
     <ClCompile Include="src\EventQueue.cpp" />
-    <ClCompile Include="src\OptionContainer.cpp" />
     <ClCompile Include="src\GenericValues.cpp" />
     <ClCompile Include="src\IValue.cpp" />
     <ClCompile Include="src\MathValues.cpp" />
@@ -2979,10 +2790,6 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="src\IXMLParser.cpp" />
-    <ClCompile Include="src\XMLElement.cpp" />
-    <ClCompile Include="src\XMLTree.cpp" />
-    <ClCompile Include="src\XMLWriter.cpp" />
     <ClCompile Include="src\XMLExpatParser.cpp" />
     <ClCompile Include="src\CJoysticController.cpp" />
     <ClCompile Include="src\CKeyboardController.cpp" />
@@ -3098,22 +2905,16 @@
     <ClCompile Include="src\IterativeIK.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\ColorConverter.cpp" />
     <ClCompile Include="src\ColorCurve.cpp" />
-    <ClCompile Include="src\DefaultColors.cpp" />
-    <ClCompile Include="src\ImageInfo.cpp" />
     <ClCompile Include="src\ImageSet.cpp" />
     <ClCompile Include="src\ImageSetTexture.cpp" />
     <ClCompile Include="src\IRenderTarget.cpp" />
     <ClCompile Include="src\LockedPixelBox.cpp" />
     <ClCompile Include="src\LUTGenerator.cpp" />
-    <ClCompile Include="src\PixelFormat.cpp" />
-    <ClCompile Include="src\PixelUtil.cpp" />
     <ClCompile Include="src\RenderMaterial.cpp" />
     <ClCompile Include="src\RenderPass.cpp" />
     <ClCompile Include="src\RenderTechnique.cpp" />
     <ClCompile Include="src\RTPickBuffer.cpp" />
-    <ClCompile Include="src\SColor.cpp" />
     <ClCompile Include="src\TextureBank.cpp" />
     <ClCompile Include="src\VideoGrabberTexture.cpp" />
     <ClCompile Include="src\CMultiPassPP.cpp" />
@@ -3145,15 +2946,6 @@
     <ClCompile Include="src\SoftwareBufferManager.cpp" />
     <ClCompile Include="src\SoftwareIndexBuffer.cpp" />
     <ClCompile Include="src\SoftwareStreamBuffer.cpp" />
-    <ClCompile Include="src\ASCIIEncoding.cpp" />
-    <ClCompile Include="src\BitConverter.cpp" />
-    <ClCompile Include="src\FPSCalc.cpp" />
-    <ClCompile Include="src\mString.cpp" />
-    <ClCompile Include="src\PoolMemoryAllocator.cpp" />
-    <ClCompile Include="src\StringConverter.cpp" />
-    <ClCompile Include="src\StringEncoding.cpp" />
-    <ClCompile Include="src\UnicodeEncoding.cpp" />
-    <ClCompile Include="src\UTFString.cpp" />
     <ClCompile Include="src\GZipCompress.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'">MaxSpeed</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'">MaxSpeed</Optimization>
@@ -3164,28 +2956,13 @@
     <ClCompile Include="src\RemoteDebugClient.cpp" />
     <ClCompile Include="src\RemoteDebugger.cpp" />
     <ClCompile Include="src\RDWatchPacket.cpp" />
-    <ClCompile Include="src\ConnectedPeer.cpp" />
-    <ClCompile Include="src\HMessage.cpp" />
-    <ClCompile Include="src\HNetCommands.cpp" />
-    <ClCompile Include="src\NetAddress.cpp" />
-    <ClCompile Include="src\NetDataTypes.cpp" />
-    <ClCompile Include="src\NetPacket.cpp" />
     <ClCompile Include="src\NetworkStream.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\SendPacketQueue.cpp" />
-    <ClCompile Include="src\WebURL.cpp" />
     <ClCompile Include="src\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
@@ -3204,7 +2981,6 @@
     <None Include="include\TransformManipulator.h.old">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="include\Hashmap.inl" />
     <None Include="OverlaySchema.xsx">
       <DependentUpon>OverlaySchema.xsd</DependentUpon>
     </None>

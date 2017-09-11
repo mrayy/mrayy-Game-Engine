@@ -4,6 +4,7 @@
 #ifndef ___SoundManagerFactory___
 #define ___SoundManagerFactory___
 
+#include "compileconfig.h"
 #include "ISingleton.h"
 #include "ObjectFactoryManager.h"
 

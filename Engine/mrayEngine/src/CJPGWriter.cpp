@@ -10,7 +10,7 @@
 #include "TextureResourceManager.h"
 #include <stdio.h>
 #include "StringConverter.h"
-#include "mraySystem.h"
+#include "IOSSystem.h"
 
 
 
@@ -44,7 +44,7 @@ bool CJPGWriter::write(video::ImageInfo*tex,OS::IStream* file,video::ETextureTyp
 	core::stringc fnameStr;
 
 	JPEG_CORE_PROPERTIES img;
-	mraySystem::memSet(&img,0,sizeof(img));
+	IOSSystem::memSet(&img,0,sizeof(img));
 	IJLERR err;
 	if((err=ijlInit(&img))!=IJL_OK){
 		gLogManager.log(core::StringConverter::toString(ijlErrorStr(err)),ELL_WARNING);

@@ -1,6 +1,7 @@
 #ifndef ___CPNGLoader___
 #define ___CPNGLoader___
 
+#include "compileconfig.h"
 #include "mTypes.h"
 #include "ITexLoader.h"
 

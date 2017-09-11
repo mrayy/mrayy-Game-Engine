@@ -16,6 +16,7 @@
 #define ___CDDSLoader___
 
 
+#include "compileconfig.h"
 
 #include "mTypes.h"
 #include "ITexLoader.h"

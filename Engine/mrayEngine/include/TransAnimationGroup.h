@@ -14,6 +14,7 @@
 #ifndef ___TransAnimationGroup___
 #define ___TransAnimationGroup___
 
+#include "compileconfig.h"
 #include "AnimationTrackGroup.h"
 #include "TransformKeyFrame.h"
 

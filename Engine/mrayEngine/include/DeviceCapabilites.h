@@ -15,6 +15,7 @@
 #ifndef ___DeviceCapabilites___
 #define ___DeviceCapabilites___
 
+#include "compileconfig.h"
 #include "ILogDevice.h"
 
 #include "mString.h"
