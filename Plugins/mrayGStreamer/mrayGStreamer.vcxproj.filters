@@ -97,6 +97,9 @@
     <ClCompile Include="CustomAudioGrabber.cpp">
       <Filter>StreamType\Streamer\AudioGrabbers</Filter>
     </ClCompile>
+    <ClCompile Include="OVRVisionEyegazeCameraVideoSrc.cpp">
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -203,6 +206,9 @@
     </ClInclude>
     <ClInclude Include="CustomAudioGrabber.h">
       <Filter>StreamType\Streamer\AudioGrabbers</Filter>
+    </ClInclude>
+    <ClInclude Include="OVRVisionEyegazeCameraVideoSrc.h">
+      <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

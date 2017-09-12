@@ -241,6 +241,7 @@
     <ClInclude Include="IGStreamerStreamer.h" />
     <ClInclude Include="IStreamListener.h" />
     <ClInclude Include="LocalAudioGrabber.h" />
+    <ClInclude Include="OVRVisionEyegazeCameraVideoSrc.h" />
     <ClInclude Include="rtp.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -290,6 +291,7 @@
     <ClCompile Include="IGStreamerPlayer.cpp" />
     <ClCompile Include="IGStreamerStreamer.cpp" />
     <ClCompile Include="LocalAudioGrabber.cpp" />
+    <ClCompile Include="OVRVisionEyegazeCameraVideoSrc.cpp" />
     <ClCompile Include="rtp.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
