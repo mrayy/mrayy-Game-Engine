@@ -101,9 +101,11 @@ public:
 		}
 		OS::IThreadManager::getInstance().sleep(500);
 		_inited = true;
+		ovr.SetCameraSyncMode(false);
+		ovr.SetCameraExposure(1000);
 		size.x = ovr.GetCamWidth();
 		size.y = ovr.GetCamHeight();
-		fps = ovr.GetCamFramerate();
+		_fps = ovr.GetCamFramerate();
 
 		/*size.y *= 2;
 		

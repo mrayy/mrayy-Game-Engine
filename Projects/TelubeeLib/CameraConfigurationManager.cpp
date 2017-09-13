@@ -150,6 +150,9 @@ xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
 	case mray::TBee::TelubeeCameraConfiguration::StreamOvrvision:
 		e->addAttribute("StreamCodec", "Ovrvision");
 		break;
+	case mray::TBee::TelubeeCameraConfiguration::StreamFoveatedOvrvision:
+		e->addAttribute("StreamCodec", "FoveatedOVR");
+		break;
 	case mray::TBee::TelubeeCameraConfiguration::StreamEyegazeRaw:
 		e->addAttribute("StreamCodec", "EyegazeRaw");
 		break;

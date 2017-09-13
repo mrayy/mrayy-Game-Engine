@@ -317,7 +317,10 @@ public:
 		if (m_cameraType == ECameraType::OvrvisionCompressed)
 		{
 
-			m_camConfig->streamType = TelubeeCameraConfiguration::StreamOvrvision;
+			if (m_enableEyegaze)
+				m_camConfig->streamType = TelubeeCameraConfiguration::StreamFoveatedOvrvision;
+			else
+				m_camConfig->streamType = TelubeeCameraConfiguration::StreamOvrvision;
 			// -1 for the None index
 			_CameraInfo ifo;
 			ifo.ifo.index = 0;
@@ -621,6 +624,8 @@ public:
 		printf("Start Streaming.\n");
 		m_streamers->Stream();
 		Sleep(500);
+
+		m_cameraController->OnStreamStarted();
 
 		m_lastGainUpdate = gEngine.getTimer()->getSeconds() + 2000;
 		printf("Stream started.\n");

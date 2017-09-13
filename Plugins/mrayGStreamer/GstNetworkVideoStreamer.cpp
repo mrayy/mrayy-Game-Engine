@@ -120,7 +120,8 @@ public:
 		}
 		else
 		{
-			videoStr += " ! mylistener name=preSent" + core::StringConverter::toString(i) + " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port=" + core::StringConverter::toString(m_videoPorts[i]) + " host=" + m_ipAddr + " sync=true ";
+			videoStr += " ! mylistener name=preSent" + core::StringConverter::toString(i);
+			videoStr += " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port=" + core::StringConverter::toString(m_videoPorts[i]) + " host=" + m_ipAddr + " sync=false ";
 			//videoStr += "! fpsdisplaysink sync=false";
 		}
 		return videoStr;
@@ -152,7 +153,7 @@ public:
 			g_object_set(m_srcData[i].videoSink, "host", m_ipAddr.c_str(), 0);
 		//	SET_SINK(m_srcData[i].videoSink, videoSinkName.c_str(), m_videoPorts[i]);
 		//	gst_base_sink_set_async_enabled(GST_BASE_SINK(m_srcData[i].videoSink), false);
-			gst_base_sink_set_sync(GST_BASE_SINK(m_srcData[i].videoSink), false);
+		//	gst_base_sink_set_sync(GST_BASE_SINK(m_srcData[i].videoSink), false);
 #else
 
 			m_srcData[i].videoSrc = GST_MySRC(gst_bin_get_by_name(GST_BIN(m_gstPipeline), name.c_str()));

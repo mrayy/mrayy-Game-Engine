@@ -22,6 +22,10 @@ protected:
 
 	virtual std::string _generateString(int i);
 	virtual std::string _generateFullString();
+
+	virtual std::string _generateFoveatedString(int i, math::vector2di framesize, math::vector2di divScaler = 1);
+
+	virtual void _setFoveatedRectsCount(int count);
 public:
 	EyegazeCameraVideoSrc();
 	virtual ~EyegazeCameraVideoSrc();
@@ -43,6 +47,7 @@ public:
 	void SetEyegazeCrop(int w, int h);
 	void SetEyegazeLevels(int levels);
 	int GetEyegazeLevels();
+	math::vector2di GetEyeCropSize();
 
 	void LinkWithPipeline(void* pipeline);
 	virtual math::vector2di GetFrameSize(int i);

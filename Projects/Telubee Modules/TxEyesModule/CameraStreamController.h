@@ -11,6 +11,7 @@
 #include "capDevice.h"
 
 #include "EyegazeCameraVideoSrc.h"
+#include "OVRVisionEyegazeCameraVideoSrc.h"
 
 namespace mray
 {
@@ -45,6 +46,7 @@ public:
 	virtual void SetCameras(std::vector<_CameraInfo> c, ECameraType type){ this->cams = c; this->type = type; }
 	virtual void Start() {}
 	virtual void Stop() {}
+	virtual void OnStreamStarted(){}
 	virtual void SetCameraParameterValue(const core::string& name, const core::string& value){}
 	virtual core::string GetCameraParameterValue(const core::string& name, int i){ return ""; }
 	virtual video::ICustomVideoSrc* CreateVideoSrc() = 0;
@@ -416,54 +418,46 @@ class ImageProcessorListener :public IMyListenerCallback
 {
 public:
 	 int width,height;
-	char* buffer;
+	 uchar* buffer;
 	ImageProcessorListener()
 	{
 		buffer = 0;
 	}
 	~ImageProcessorListener()
 	{
-		delete[] buffer;
+		delete[]buffer;
 	}
 
 	void Init(int w, int h)
 	{
 		width = w;
 		height = h;
-
-		buffer = new char[width*height * 2];
+		buffer = new uchar[w*h ];
 	}
 	virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * bfr)
 	{
 		if (!buffer)
 			return;
 		GstMapInfo map;
-		gst_buffer_map(bfr, &map, (GstMapFlags)GST_MAP_READ);
+		gst_buffer_map(bfr, &map, (GstMapFlags)(GST_MAP_READ));
 		ushort*data = (ushort*)map.data;
 		if (!data){
 			gst_buffer_unmap(bfr, &map);
 			return;
 		}
-		
-		int offset = width*height;
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int ps = (y * width) + x;
+		int count = width*height;
+		uchar* ptr = (uchar*)data;
+		//too slow!!
+		for (int ps = 0; ps < count; ++ps) {
+// 			tmp = ptr[ps + 1];
+// 			ptr[ps + 1] = ptr[ps + count];
+// 			ptr[ps + count] = tmp;
+//			math::Swap(ptr[ps + 1], ptr[ps + count]);
 
-//				data[ps] = data[ps] & 0x00FF;
- 				buffer[ps] = (data[ps] & 0x00FF);
- 				buffer[ps + offset] = (data[ps] >> 8);
-			}
+			buffer[ps] = ptr[ps*2 + 1];
+			ptr[ps] = ptr[ps*2];
 		}
-		memcpy(map.data, buffer, width*height * 2);
-		/*	uchar*data = (uchar*)map.data;
-		int offset = width*height;
-		int len = width*height / 2;
-		int idx = 0;
-		for (int y = 0; y < len; y++) {
-			math::Swap(data[offset + idx], data[idx + 1]);
-			idx += 2;
-		}*/
+		memcpy(ptr + count, buffer, count);
 		gst_buffer_unmap(bfr, &map);
 
 	}
@@ -515,6 +509,20 @@ public:
 		}
 	}
 
+	virtual void OnStreamStarted()
+	{
+
+		if (camtype == ECameraType::Ovrvision ||
+			camtype == ECameraType::OvrvisionCompressed)
+		{
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, "1700");
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, "12");
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gamma, "1200");
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Brightness, "9000");
+			SetCameraParameterValue(video::ICameraVideoGrabber::Param_WhiteBalance, "2000");
+		}
+	}
+
 	void EnableEyegaze(bool e)
 	{
 		_eyegaze = e;
@@ -524,7 +532,10 @@ public:
 	{
 		if (camtype == ECameraType::Ovrvision ||
 			camtype == ECameraType::OvrvisionCompressed)
-			_ovrListener.Init(w,h);
+		{
+			_ovrCam->InitDevice(0, w,h, 60);
+			_ovrListener.Init(w, h);
+		}
 	}
 
 	video::ICustomVideoSrc* CreateVideoSrc()
@@ -596,9 +607,19 @@ public:
 
 		if (_eyegaze)
 		{
-			video::EyegazeCameraVideoSrc* res = new video::EyegazeCameraVideoSrc();
-			res->SetCameraSource(ret);
-			return res;
+
+			if (camtype == ECameraType::Ovrvision ||
+				camtype == ECameraType::OvrvisionCompressed)
+			{
+				video::OVRVisionEyegazeCameraVideoSrc* res = new video::OVRVisionEyegazeCameraVideoSrc();
+				res->SetCameraSource(ret);
+				return res;
+			}
+			else{
+				video::EyegazeCameraVideoSrc* res = new video::EyegazeCameraVideoSrc();
+				res->SetCameraSource(ret);
+				return res;
+			}
 		}
 
 		return ret;

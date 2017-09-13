@@ -68,6 +68,10 @@ namespace video
 
 		FILE* averageBytesFile;
 
+		int foveatedRectsCount;
+
+		math::vector2di _divScaler;
+
 	public:
 		EyegazeCameraVideoSrcImpl()
 		{
@@ -83,7 +87,8 @@ namespace video
 			m_levels = 3;
 			m_separateStreams = false;
 			source = 0;
-
+			foveatedRectsCount = 1;
+			_divScaler = 1;
 			//m_sentBytes.OnSample += newClassDelegate1("", this, &EyegazeCameraVideoSrcImpl::OnBytesAverage);
 			//averageBytesFile = fopen("BytesSent.txt", "w");
 
@@ -120,10 +125,12 @@ namespace video
 				m_eyepos.resize(poses.size());
 				okay = true;
 			}
+
+			math::vector2di framesize = source->GetFrameSize(0)/_divScaler;
 			for (int i = 0; i < m_sendRect.size() && !okay; ++i)
 			{
 				m_eyepos[i] = poses[i];
-				math::vector4di r = GetCropRect(0, i);
+				math::vector4di r = GetCropRect(0, i, framesize, _divScaler);
 				if (r != m_sendRect[i])
 					okay = true;
 			}
@@ -148,14 +155,15 @@ namespace video
 
 		math::vector2di gazePos;
 		int dir;
-		math::vector4di GetCropRect(int i, int level)
+		math::vector4di GetCropRect(int i, int level,const math::vector2di& framesize, math::vector2di divScaler)
 		{
 			if (i >= m_eyepos.size())
 				return math::vector4di(0, 0, m_cropsize.x, m_cropsize.y);
 
-			math::vector2d targetSize = GetRectSize(level);
+			math::vector2d targetSize = GetRectSize(level)/2;
+			//targetSize /= divScaler;
 
-			math::vector2di framesize = source->GetFrameSize(i);
+			//math::vector2di framesize = source->GetFrameSize(i);
 
 			math::vector2di gazePos(framesize.x*m_eyepos[i].x, framesize.y*m_eyepos[i].y);
 
@@ -178,11 +186,11 @@ namespace video
 			math::vector4di cropRect(gazePos.x - m_cropsize.x / 2, framesize.x - (gazePos.x + m_cropsize.x / 2),
 			gazePos.y - m_cropsize.y / 2, framesize.y - (gazePos.y + m_cropsize.y / 2));//left,right,top,bottom
 			*/
-			gazePos.x = math::Max<int>(math::Min<int>(gazePos.x, framesize.x - targetSize.x / 2), targetSize.x / 2);
-			gazePos.y = math::Max<int>(math::Min<int>(gazePos.y, framesize.y - targetSize.y / 2), targetSize.y / 2);
+			gazePos.x = math::Max<int>(math::Min<int>(gazePos.x, framesize.x - targetSize.x ), targetSize.x );
+			gazePos.y = math::Max<int>(math::Min<int>(gazePos.y, framesize.y - targetSize.y ), targetSize.y );
 
-			math::vector4di cropRect(gazePos.x - targetSize.x / 2, framesize.x - (gazePos.x + targetSize.x / 2),
-				gazePos.y - targetSize.y / 2, framesize.y - (gazePos.y + targetSize.y / 2));//left,right,top,bottom
+			math::vector4di cropRect(gazePos.x - targetSize.x , framesize.x - (gazePos.x + targetSize.x ),
+				gazePos.y - targetSize.y , framesize.y - (gazePos.y + targetSize.y ));//left,right,top,bottom
 			return cropRect;
 
 		}
@@ -193,6 +201,7 @@ namespace video
 			m_eyePosDirty = false;
 			//m_sent = false;
 
+			math::vector2di framesize = source->GetFrameSize(0)/_divScaler;
 			updateFPS.regFrame(gGStreamerCore->GetTimer()->getSeconds());
 
 			float fps = updateFPS.getFPS();
@@ -200,7 +209,7 @@ namespace video
 			//update video boxes
 			for (int level = 0; level < m_levels; ++level)
 			{
-				m_sendRect[level] = GetCropRect(0, level);
+				m_sendRect[level] = GetCropRect(0, level, framesize, _divScaler);
 				math::vector4di &cropRect = m_sendRect[level];
 				for (int i = 0; i < m_videoRects.size(); ++i)
 				{
@@ -223,7 +232,7 @@ namespace video
 			source->LinkWithPipeline(p);
 			m_videoRects.clear();
 			m_sendRect.resize(m_levels);
-			for (int i = 0; i < source->GetStreamsCount(); ++i)
+			for (int i = 0; i < foveatedRectsCount; ++i)
 			{
 				m_videoRects.push_back(std::vector<GstElement*>());
 				for (int level = 0; level < m_levels; ++level)
@@ -331,7 +340,7 @@ namespace video
 						// 					if (count > 1)
 						// 						printf("exceeding!\n");
 						std::vector<math::vector4di> &gaze = ds.gaze;
-						math::vector2di framesize = source->GetFrameSize(0);
+						math::vector2di framesize = source->GetFrameSize(0) / _divScaler;
 
 						{
 							//static unsigned char buffer[2000];
@@ -489,6 +498,101 @@ namespace video
 		return videoStr;
 
 	}
+
+	std::string EyegazeCameraVideoSrc::_generateFoveatedString(int i, math::vector2di framesize,math::vector2di divScaler)
+	{
+		//math::vector2di framesize = m_data->source->GetFrameSize(0);	
+		math::vector2di cropSize = m_data->m_cropsize;
+
+		m_data->_divScaler = divScaler;
+
+		//cropSize /= divScaler;
+
+		if (cropSize.x % 2 == 1)
+			cropSize.x += 1;
+		if (cropSize.y % 2 == 1)
+			cropSize.y += 1;
+
+
+		int sceneWidth = (framesize.x* cropSize.y) / framesize.y;
+		int sceneHeight = (framesize.y* cropSize.x) / framesize.x;
+
+		if (sceneWidth % 2 == 1)
+			sceneWidth += 1;
+
+		if (sceneHeight % 2 == 1)
+			sceneHeight += 1;
+
+		int lostWidth = framesize.x - sceneWidth*framesize.y / cropSize.y;
+		int lostHeight = framesize.y - sceneHeight*framesize.x / cropSize.x;
+
+
+		std::string videoStr = "";
+		if (m_data->m_eyepos.size() <= i)
+			m_data->m_eyepos.push_back(math::vector2df(0.5f, 0.5f));
+		math::vector2di gazePos(framesize.x*m_data->m_eyepos[i].x, framesize.y*m_data->m_eyepos[i].y);
+		math::vector4di cropRect(gazePos.x - cropSize.x / 2, framesize.x - (gazePos.x + cropSize.x / 2),
+			gazePos.y - cropSize.y / 2, framesize.y - (gazePos.y + cropSize.y / 2));//left,right,top,bottom
+
+		std::string mName = "mix_" + core::StringConverter::toString(i);
+		std::string tName = "t_" + core::StringConverter::toString(i);
+		std::string mixerStr = "";
+		if (m_data->m_levels > 0)
+		{
+			mixerStr = "videomixer name=" + mName;
+			//mixerStr += "  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_1::alpha=1  ";
+			char buffer[256];
+			for (int level = 0; level < m_data->m_levels; ++level){
+				int xpos = cropSize.x*level;
+				sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", level, xpos, level, level, level, level);
+				mixerStr += buffer;
+				//mixerStr += "  sink_2::xpos=0 sink_2::ypos=" + core::StringConverter::toString(cropSize.y) + "  sink_2::zorder=0 sink_2::alpha=1  ";
+			}
+			sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", m_data->m_levels, cropSize.x*m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels);
+			//mixerStr += "  sink_2::xpos=" + core::StringConverter::toString(cropSize.x) + " sink_2::ypos=0 sink_2::zorder=0 sink_2::alpha=1  ";
+			mixerStr += buffer;
+
+			videoStr += mixerStr;
+		}
+
+		for (int level = 0; level < m_data->m_levels; ++level){
+			videoStr += tName + ". ! queue "; //! queue
+
+			cropRect = m_data->GetCropRect(i, level, framesize, m_data->_divScaler);
+
+			m_data->streamSize.x += cropSize.x;
+
+
+			//eyegaze string
+			videoStr += " ! videobox name=box_" + core::StringConverter::toString(i) + "_" + core::StringConverter::toString(level) +
+				" left=" + core::StringConverter::toString(cropRect.x) +
+				" right=" + core::StringConverter::toString(cropRect.y) +
+				" top=" + core::StringConverter::toString(cropRect.z) +
+				" bottom=" + core::StringConverter::toString(cropRect.w);
+
+			videoStr += " ! videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(cropSize.x) + ",height=" + core::StringConverter::toString(cropSize.y) +
+				" ! videoconvert !" + mName + ".sink_" + core::StringConverter::toString(level) + " ";
+		}
+
+		
+		if (m_data->m_levels > 0){
+			videoStr += tName + ". ! queue "; //
+			videoStr += " !  videoscale add-borders=false method=6 sharpen=0 envelope=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(cropSize.y) + " ! videoconvert ";
+			m_data->streamSize.x += sceneWidth;
+		}
+		else{
+			m_data->streamSize.x += framesize.x;
+
+		}
+		if (m_data->m_levels > 0){
+			videoStr += " ! " + mName + ".sink_" + core::StringConverter::toString(m_data->m_levels) + " ";//output to the mixer
+
+
+			videoStr += mName + ". ";
+		}
+		return videoStr;
+
+	}
 	std::string EyegazeCameraVideoSrc::_generateFullString()
 	{
 
@@ -500,31 +604,11 @@ namespace video
 		float totalWidth = 0;
 		float totalHeight = 0;
 
-		if (m_data->m_cropsize.x % 2 == 1)
-			m_data->m_cropsize.x += 1;
-		if (m_data->m_cropsize.y % 2 == 1)
-			m_data->m_cropsize.y += 1;
-
-		int sceneWidth = (framesize.x* m_data->m_cropsize.y) / framesize.y;
-		int sceneHeight = (framesize.y* m_data->m_cropsize.x) / framesize.x;
-
-		if (sceneWidth % 2 == 1)
-			sceneWidth += 1;
-
-		if (sceneHeight % 2 == 1)
-			sceneHeight += 1;
-
-		int lostWidth = framesize.x - sceneWidth*framesize.y / m_data->m_cropsize.y;
-		int lostHeight = framesize.y - sceneHeight*framesize.x / m_data->m_cropsize.x;
-
 		for (int i = 0; i < m_data->source->GetStreamsCount(); ++i)
 		{
-			//		if (m_data->source->IsAvailable(i))
-			{
-				camsCount++;
-				totalWidth += framesize.x;
-				totalHeight += framesize.y;
-			}
+			totalWidth += framesize.x;
+			totalHeight += framesize.y;
+			camsCount++;
 		}
 
 		m_data->streamSize.x = 0;
@@ -536,6 +620,7 @@ namespace video
 		}
 		else
 		{
+
 			if (!m_data->m_separateStreams  && camsCount > 1)
 			{
 				mixer = true;
@@ -559,105 +644,26 @@ namespace video
 			}
 
 			int counter = 1;
-			core::string mixerStr;
-			core::string mName;
 			core::string tName;
 
 			bool precodecSet = false;
 			for (int i = 0; i < m_data->source->GetStreamsCount(); ++i)
 			{
+				videoStr = GetCameraStr(i);
+				if (!precodecSet)
+				{
+					videoStr += "! mylistener name=precodec ";
+					precodecSet = true;
+				}
+				tName = "t_" + core::StringConverter::toString(i);
+				if (m_data->m_levels > 0){
+					videoStr += "! tee name=" + tName + " ";
+				}
+
 				//			if (m_data->source->IsAvailable(i))
 				{
-					if (m_data->m_eyepos.size() <= i)
-						m_data->m_eyepos.push_back(math::vector2df(0.5f, 0.5f));
-					math::vector2di gazePos(framesize.x*m_data->m_eyepos[i].x, framesize.y*m_data->m_eyepos[i].y);
-					math::vector4di cropRect(gazePos.x - m_data->m_cropsize.x / 2, framesize.x - (gazePos.x + m_data->m_cropsize.x / 2),
-						gazePos.y - m_data->m_cropsize.y / 2, framesize.y - (gazePos.y + m_data->m_cropsize.y / 2));//left,right,top,bottom
 
-					mName = "mix_" + core::StringConverter::toString(i);
-					tName = "t_" + core::StringConverter::toString(i);
-					if (m_data->m_levels > 0)
-					{
-						mixerStr = "videomixer name=" + mName;
-						//mixerStr += "  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_1::alpha=1  ";
-						char buffer[256];
-						for (int level = 0; level < m_data->m_levels; ++level){
-							int xpos = m_data->m_cropsize.x*level;
-							sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", level, xpos, level, level, level, level);
-							mixerStr += buffer;
-							//mixerStr += "  sink_2::xpos=0 sink_2::ypos=" + core::StringConverter::toString(m_data->m_cropsize.y) + "  sink_2::zorder=0 sink_2::alpha=1  ";
-						}
-						sprintf(buffer, "  sink_%d::xpos=%d sink_%d::ypos=0  sink_%d::zorder=0 sink_%d::alpha=1  ", m_data->m_levels, m_data->m_cropsize.x*m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels, m_data->m_levels);
-						//mixerStr += "  sink_2::xpos=" + core::StringConverter::toString(m_data->m_cropsize.x) + " sink_2::ypos=0 sink_2::zorder=0 sink_2::alpha=1  ";
-						mixerStr += buffer;
-
-						videoStr += mixerStr;
-					}
-
-					//videoStr += "videotestsrc pattern=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) +
-					//	",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + ",framerate=" + core::StringConverter::toString(m_fps)+"/1 ! "+mName+".sink_0 ";
-
-					videoStr += GetCameraStr(i);
-					if (!precodecSet)
-					{
-						videoStr += "! mylistener name=precodec ";
-						precodecSet = true;
-					}
-
-					if (m_data->m_levels > 0){
-						videoStr += "! tee name=" + tName + " ";
-					}
-					/*
-
-					videoStr += "ksvideosrc";
-					videoStr += " name=src" + core::StringConverter::toString(i);
-					videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
-
-					//videoStr += "videotestsrc ";
-					//" do-timestamp=true is-live=true "//"block=true"
-					videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(framesize.x) +
-					",height=" + core::StringConverter::toString(framesize.y) + " ! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ! videoconvert ! tee name=" + tName + " ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
-					*/
-					for (int level = 0; level < m_data->m_levels; ++level){
-						videoStr += tName + ". ! queue "; //! queue
-
-						cropRect = m_data->GetCropRect(i, level);
-
-						m_data->streamSize.x += m_data->m_cropsize.x;
-
-
-						//eyegaze string
-						videoStr += " ! videobox name=box_" + core::StringConverter::toString(i) + "_" + core::StringConverter::toString(level) +
-							" left=" + core::StringConverter::toString(cropRect.x) +
-							" right=" + core::StringConverter::toString(cropRect.y) +
-							" top=" + core::StringConverter::toString(cropRect.z) +
-							" bottom=" + core::StringConverter::toString(cropRect.w);
-
-						videoStr += " ! videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(m_data->m_cropsize.x) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) +
-							" ! videoconvert !" + mName + ".sink_" + core::StringConverter::toString(level) + " ";
-					}
-
-					//scene string
-					//videoStr += tName + ". ! queue ! videoscale ! video/x-raw,width=" + core::StringConverter::toString(m_data->m_cropsize.x) + ",height=" + core::StringConverter::toString(sceneHeight) + " ! videoconvert ! " + mName + ".sink_2 ";
-					if (lostWidth > 0) 
-					{
-						//videoStr += " ! videobox left=0 top=0 bottom=0 right=" + core::StringConverter::toString(lostWidth) ;
-					}
-					if (m_data->m_levels > 0){
-						videoStr += tName + ". ! queue "; //
-						videoStr += " !  videoscale add-borders=false method=6 sharpen=0 envelope=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(m_data->m_cropsize.y) + " ! videoconvert ";
-						m_data->streamSize.x += sceneWidth;
-					}
-					else{
-						m_data->streamSize.x += GetFrameSize(i).x;
-
-					}
-					if (m_data->m_levels > 0){
-						videoStr += " ! " + mName + ".sink_" + core::StringConverter::toString(m_data->m_levels) + " ";//output to the mixer
-
-
-						videoStr += mName + ". ";
-					}
+					videoStr += _generateFoveatedString(i,framesize);
 
 					if (mixer)
 					{
@@ -713,6 +719,10 @@ namespace video
 	{
 		m_data->source->SetResolution(width, height, fps, free);
 	}
+	void EyegazeCameraVideoSrc::_setFoveatedRectsCount(int count)
+	{
+		m_data->foveatedRectsCount = count;
+	}
 
 	std::string EyegazeCameraVideoSrc::GetPipelineStr(int i)
 	{
@@ -725,6 +735,8 @@ namespace video
 	void EyegazeCameraVideoSrc::SetCameraSource(ICustomVideoSrc* source)
 	{
 		m_data->source = source;
+		if (source!=0)
+			_setFoveatedRectsCount(source->GetStreamsCount());
 	}
 	math::vector2di EyegazeCameraVideoSrc::GetFrameSize(int i)
 	{
@@ -750,6 +762,10 @@ namespace video
 	int EyegazeCameraVideoSrc::GetEyegazeLevels()
 	{
 		return m_data->m_levels;
+	}
+	math::vector2di EyegazeCameraVideoSrc::GetEyeCropSize()
+	{
+		return m_data->m_cropsize;
 	}
 
 	int EyegazeCameraVideoSrc::GetCurrentFPS(int i)

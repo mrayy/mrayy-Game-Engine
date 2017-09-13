@@ -24,6 +24,7 @@ public:
 
 	bool m_convertToGray8;
 
+
 	std::vector<AveragePer> m_currentFps;
 
 	//ImageProcessorListener listener;
@@ -197,12 +198,16 @@ std::string CameraVideoSrc::_generateString(int i)
 		//" do-timestamp=true is-live=true "//"block=true"
 		videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 			",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
-		if (m_impl->m_convertToGray8)
-			videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
-				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " ";
 		if (m_fps > 0)
-			videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
-		videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i) + " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+			videoStr += " ! videorate drop-only=true max-rate=" + core::StringConverter::toString(m_fps) ;
+		if (m_impl->m_convertToGray8){
+			videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+			if (m_fps > 0)
+				videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+		}
+		videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i);
+		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
 	}
 	else

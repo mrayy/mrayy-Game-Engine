@@ -38,6 +38,7 @@ public:
 		StreamRaw,
 		StreamCoded,
 		StreamOvrvision,
+		StreamFoveatedOvrvision,
 		StreamEyegazeRaw
 	};
 

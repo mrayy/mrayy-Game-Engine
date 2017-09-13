@@ -40,10 +40,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlyCaptureLibrary", "Plugins\FlyCaptureLibrary\FlyCaptureLibrary.vcxproj", "{7286D75E-0E49-4BA1-B2E0-FD0E28D09B41}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mrayGStreamer", "Plugins\mrayGStreamer\mrayGStreamer.vcxproj", "{A3BB9F46-E552-48A2-8D04-637B8E420568}"
-	ProjectSection(ProjectDependencies) = postProject
-		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B} = {EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B}
-		{C5F7308A-755F-4872-91E6-77779103E0E3} = {C5F7308A-755F-4872-91E6-77779103E0E3}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mrayOpenNI", "Plugins\mrayOpenNI\mrayOpenNI.vcxproj", "{823D9D60-1B01-4CA6-B8D5-FD2C5FAC8948}"
 EndProject

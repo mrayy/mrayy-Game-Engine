@@ -17,6 +17,7 @@ class OVRVisionEyegazeCameraVideoSrc :public EyegazeCameraVideoSrc
 {
 protected:
 	virtual std::string _generateFullString();
+	virtual void _setFoveatedRectsCount(int count);
 public:
 	OVRVisionEyegazeCameraVideoSrc();
 	virtual ~OVRVisionEyegazeCameraVideoSrc();
