@@ -34,8 +34,8 @@ public:
 	virtual std::string GetPipelineStr(int i);
 
 	virtual void  SetResolution(int width, int height, int fps, bool free);
-	virtual void SetSeparateStreams(bool separate){}
-	virtual bool IsSeparateStreams() { return false; }
+	virtual void SetSeparateStreams(bool separate);
+	virtual bool IsSeparateStreams(){ return false; }
 	virtual void SetBitRate(int biterate);
 
 	virtual std::string BuildStringH264();
@@ -59,6 +59,8 @@ public:
 	virtual void Close();
 	virtual void LoadParameters(xml::XMLElement* e);
 
+	virtual int GetVideoSrcCount();
+	virtual int GetStreamsCount(){ return 1; }
 };
 
 }

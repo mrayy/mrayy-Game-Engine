@@ -6,6 +6,7 @@
 #include "CMyListener.h"
 #include "rtp.h"
 #include "IThreadManager.h"
+#include "ILogManager.h"
 #include "IMutex.h"
 
 //#include "AveragePer.h"
@@ -223,6 +224,8 @@ namespace video
 		}
 		void SetEyegazeCrop(int w, int h)
 		{
+			if (h % 2 == 1)
+				h++;
 			m_cropsize.set(w, h);
 		}
 		void LinkWithPipeline(void* p)
@@ -429,6 +432,7 @@ namespace video
 	}
 	void EyegazeCameraVideoSrc::LoadParameters(xml::XMLElement* e)
 	{
+		ICustomVideoSrc::LoadParameters(e);
 		m_data->source->LoadParameters(e);
 
 	}
@@ -477,7 +481,7 @@ namespace video
 	{
 		std::string videoStr;
 		math::vector2di framesize = m_data->source->GetFrameSize(i);
-		if (i < m_data->source->GetStreamsCount())
+		if (i < m_data->source->GetVideoSrcCount())
 		{
 			/*	videoStr = "ksvideosrc";
 				videoStr += " name=src" + core::StringConverter::toString(i);
@@ -571,13 +575,13 @@ namespace video
 				" bottom=" + core::StringConverter::toString(cropRect.w);
 
 			videoStr += " ! videoscale add-borders=false method=6 sharpen=1 envelope=4 ! video/x-raw,width=" + core::StringConverter::toString(cropSize.x) + ",height=" + core::StringConverter::toString(cropSize.y) +
-				" ! videoconvert !" + mName + ".sink_" + core::StringConverter::toString(level) + " ";
+				" ! " + mName + ".sink_" + core::StringConverter::toString(level) + " ";
 		}
 
 		
 		if (m_data->m_levels > 0){
 			videoStr += tName + ". ! queue "; //
-			videoStr += " !  videoscale add-borders=false method=6 sharpen=0 envelope=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(cropSize.y) + " ! videoconvert ";
+			videoStr += " !  videoscale add-borders=false method=6 sharpen=0 envelope=1 ! video/x-raw,width=" + core::StringConverter::toString(sceneWidth) + ",height=" + core::StringConverter::toString(cropSize.y)+" ";// +" ! videoconvert ";
 			m_data->streamSize.x += sceneWidth;
 		}
 		else{
@@ -604,7 +608,7 @@ namespace video
 		float totalWidth = 0;
 		float totalHeight = 0;
 
-		for (int i = 0; i < m_data->source->GetStreamsCount(); ++i)
+		for (int i = 0; i < m_data->source->GetVideoSrcCount(); ++i)
 		{
 			totalWidth += framesize.x;
 			totalHeight += framesize.y;
@@ -621,16 +625,16 @@ namespace video
 		else
 		{
 
-			if (!m_data->m_separateStreams  && camsCount > 1)
+			if ( camsCount > 1)//!m_data->m_separateStreams  &&
 			{
+				gLogManager.log("starting with multiple streams",ELL_INFO);
 				mixer = true;
-				videoStr = " videomixer name=mix "
-					"  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_0::alpha=1  ";
+				videoStr = " videomixer name=mix_eyes ";
 				int xpos = 0;
 				int ypos = 0;
 				for (int i = 0; i < camsCount; ++i)
 				{
-					std::string name = "sink_" + core::StringConverter::toString(i + 1);
+					std::string name = "sink_" + core::StringConverter::toString(i);
 					//videoStr += "  " + name + "::xpos=" + core::StringConverter::toString(xpos) + " " + name + "::ypos=0  " + name + "::zorder=0 " + name + "::zorder=1  ";
 					videoStr += "  " + name + "::xpos=0 " + name + "::ypos=" + core::StringConverter::toString(ypos) + " " + name + "::zorder=0 " + name + "::zorder=1  ";
 					xpos += m_data->m_cropsize.x;
@@ -643,13 +647,13 @@ namespace video
 
 			}
 
-			int counter = 1;
+			int counter = 0;
 			core::string tName;
 
 			bool precodecSet = false;
-			for (int i = 0; i < m_data->source->GetStreamsCount(); ++i)
+			for (int i = 0; i < m_data->source->GetVideoSrcCount(); ++i)
 			{
-				videoStr = GetCameraStr(i);
+				videoStr += GetCameraStr(i);
 				if (!precodecSet)
 				{
 					videoStr += "! mylistener name=precodec ";
@@ -667,7 +671,7 @@ namespace video
 
 					if (mixer)
 					{
-						videoStr += " ! mix.sink_" + core::StringConverter::toString(counter) + " ";
+						videoStr += " ! mix_eyes.sink_" + core::StringConverter::toString(counter) + " ";
 					}
 					++counter;
 				}
@@ -677,12 +681,14 @@ namespace video
 			if (mixer)
 			{
 				//	videoStr += " mix. ! videoflip method=5 ";// "! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
-				videoStr += " mix.  ";// "! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
+				videoStr += " mix_eyes.  ";// "! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
 			}
 			else
 			{
 				//videoStr += " ! mylistener name=precodec ";
 			}
+
+			videoStr += " ! videoconvert ";
 		}
 
 		//fprintf(m_data->averageBytesFile, "%dx%d\n", m_data->streamSize.x, m_data->streamSize.y);
@@ -711,7 +717,7 @@ namespace video
 	}
 	std::string EyegazeCameraVideoSrc::GetCameraStr(int i)
 	{
-		if (m_data->source->GetStreamsCount() <= i)
+		if (m_data->source->GetVideoSrcCount() <= i)
 			return "";
 		return m_data->source->GetCameraStr(i);
 	}
@@ -735,8 +741,10 @@ namespace video
 	void EyegazeCameraVideoSrc::SetCameraSource(ICustomVideoSrc* source)
 	{
 		m_data->source = source;
-		if (source!=0)
-			_setFoveatedRectsCount(source->GetStreamsCount());
+		if (source != 0){
+			m_data->m_separateStreams = source->IsSeparateStreams();
+			_setFoveatedRectsCount(source->GetVideoSrcCount());
+		}
 	}
 	math::vector2di EyegazeCameraVideoSrc::GetFrameSize(int i)
 	{
@@ -767,10 +775,18 @@ namespace video
 	{
 		return m_data->m_cropsize;
 	}
-
+	void EyegazeCameraVideoSrc::SetSeparateStreams(bool separate)
+	{
+		m_data->m_separateStreams = separate;
+	}
 	int EyegazeCameraVideoSrc::GetCurrentFPS(int i)
 	{
 		return m_data->source->GetCurrentFPS(i);
+	}
+	int EyegazeCameraVideoSrc::GetVideoSrcCount()
+	{
+
+		return m_data->source->GetVideoSrcCount();
 	}
 }
 }

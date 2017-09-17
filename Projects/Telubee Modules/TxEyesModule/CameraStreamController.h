@@ -436,6 +436,7 @@ public:
 	}
 	virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * bfr)
 	{
+		return;
 		if (!buffer)
 			return;
 		GstMapInfo map;

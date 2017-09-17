@@ -225,21 +225,21 @@ public:
 
 		printf("Initing..\n");
 //#if USE_POINTGREY && USE_WEBCAMERA
-		core::string camType= context->appOptions.GetOptionByName("CameraConnection")->getValue();
-		if (camType == "DirectShow")
+		core::string camType = core::StringUtil::ToLower(context->appOptions.GetOptionValue("CameraConnection", "directshow"));
+		if (camType == "directshow")
 			m_cameraType=ECameraType::Webcam ;
-		if (camType == "Ovrvision")
+		if (camType == "ovrvision")
 			m_cameraType = ECameraType::Ovrvision;
-		if (camType == "OvrvisionRaw")
+		if (camType == "ovrvisionraw")
 			m_cameraType = ECameraType::OvrvisionCompressed;
-		if (camType == "PointGrey")
+		if (camType == "pointgrey")
 			m_cameraType=ECameraType::PointGrey ;
 
-		m_optimizedOVRVision = core::StringConverter::toBool(context->appOptions.GetOptionValue("OptimizedOVR"));
-		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze"));
+		m_optimizedOVRVision = core::StringConverter::toBool(context->appOptions.GetOptionValue("OptimizedOVR","false"));
+		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze", "false"));
 //		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
-		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels"));
-		m_eyegazeFoV = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeFOV"));
+		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels", "0"));
+		m_eyegazeFoV = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeFOV", "15"));
 		if (m_eyegazeFoV == 0)
 			m_eyegazeFoV = 10;
 /*#else 
@@ -250,12 +250,10 @@ public:
 #endif
 
 #endif*/
-		m_cameraProfile = context->appOptions.GetOptionValue("CameraProfile");
+		m_cameraProfile = context->appOptions.GetOptionValue("CameraProfile","None");
 
-		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionByName("Quality")->getValue());
-		if (context->appOptions.GetOptionByName("AutoGain"))
-			m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionByName("AutoGain")->getValue());
-		else m_autoGain = false;
+		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionValue("Quality", "0"));
+		m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionValue("AutoGain", "false"));
 
 		printf("Parameters loaded..\n");
 		{
@@ -763,7 +761,7 @@ public:
 
 		msg = "Stream Status:";
 		context->RenderText(msg, 0, 0);
-		for (int i = 0; i < m_cameraSource->GetStreamsCount(); ++i)
+		for (int i = 0; i < m_cameraSource->GetVideoSrcCount(); ++i)
 		{
 			msg = "   FPS ["+core::StringConverter::toString(i)+"]:" + core::StringConverter::toString(m_cameraSource->GetCurrentFPS(i));
 			context->RenderText(msg, 0, 0);

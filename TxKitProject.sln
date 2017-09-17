@@ -52,6 +52,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxBodyServiceModule", "Projects\Telubee Modules\TxBodyModule\TxBodyModule.vcxproj", "{011F365F-97D0-4428-A125-DE735A365858}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxEarsServiceModule", "Projects\Telubee Modules\TxEarsModule\TxEarsModule.vcxproj", "{38B4875C-1395-4D12-BC09-10362D6CCA3F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A3BB9F46-E552-48A2-8D04-637B8E420568} = {A3BB9F46-E552-48A2-8D04-637B8E420568}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{CE1A8229-F182-4F46-893A-32B4967DB4DA}"
 EndProject

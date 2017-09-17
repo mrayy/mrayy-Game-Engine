@@ -40,7 +40,8 @@ std::string OVRVisionEyegazeCameraVideoSrc::_generateFullString()
 
 	//master mixer
 	videoStr +=
-		"videomixer name=mix_eyes  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_0::alpha=1  "
+		"videomixer name=mix_eyes  "
+		"sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_0::alpha=1  "
 		"sink_1::xpos=0 sink_1::ypos=" + core::StringConverter::toString(cropSize.y) + "  sink_1::zorder=0 sink_1::alpha=1 "
 		"sink_2::xpos=0 sink_2::ypos=" + core::StringConverter::toString(cropSize.y * 2) + "  sink_2::zorder=0 sink_2::alpha=1 "
 		"sink_3::xpos=0 sink_3::ypos=" + core::StringConverter::toString(cropSize.y * 3) + "  sink_3::zorder=0 sink_3::alpha=1 ";

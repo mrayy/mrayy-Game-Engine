@@ -36,7 +36,7 @@ public:
 	void AddOption(const SOptionElement&elem);
 	SOptionElement* GetOptionByName(const core::string &name);
 	const SOptionElement* GetOptionByName(const core::string &name)const;
-	const core::string& GetOptionValue(const core::string &name)const;
+	core::string GetOptionValue(const core::string &name,core::string def="")const;
 
 	SOptionElement& operator[](const core::string& name);
 	const SOptionElement* operator[](const core::string& name)const;

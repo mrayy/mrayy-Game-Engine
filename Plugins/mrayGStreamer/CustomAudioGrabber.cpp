@@ -51,14 +51,14 @@ public:
 
 		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=" + core::StringConverter::toString(samplingrate) + ",channels=" + core::StringConverter::toString(channels) + " "
 			//" ! audiochebband mode=band-pass lower-frequency=1000 upper-frequency=6000 poles=4 "
-			"! appsink name=sink";
+			" ! audioconvert ! appsink name=sink";
 
 		return audioStr;
 	}
 
 	bool Start()
 	{
-		if (IsPaused())
+		if (GetPipeline()!=0 && IsPaused())
 		{
 			SetPaused(false);
 			return true;
@@ -99,10 +99,10 @@ public:
 
 
 		// 		gst_base_sink_set_async_enabled(GST_BASE_SINK(m_videoSink), TRUE);
-		gst_base_sink_set_sync(GST_BASE_SINK(m_audioSink), false);
-		gst_app_sink_set_drop(GST_APP_SINK(m_audioSink), TRUE);
-		gst_app_sink_set_max_buffers(GST_APP_SINK(m_audioSink), 8);
-		gst_base_sink_set_max_lateness(GST_BASE_SINK(m_audioSink), 0);
+// 		gst_base_sink_set_sync(GST_BASE_SINK(m_audioSink), false);
+// 		gst_app_sink_set_drop(GST_APP_SINK(m_audioSink), TRUE);
+// 		gst_app_sink_set_max_buffers(GST_APP_SINK(m_audioSink), 8);
+// 		gst_base_sink_set_max_lateness(GST_BASE_SINK(m_audioSink), 0);
 
 		SetPaused(false);
 

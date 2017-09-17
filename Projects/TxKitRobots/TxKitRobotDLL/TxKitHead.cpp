@@ -191,7 +191,7 @@ namespace mray
 			//read EEPROM
 			//Note: for some reason the servo IDs are changed when calling write EEPROM function.
 			// This function is disabled for the time being
-			_writeEEPROM();
+			//_writeEEPROM();
 		}
 		//comROBOT->owner = this;
 		return connected;

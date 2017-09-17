@@ -206,8 +206,8 @@ std::string CameraVideoSrc::_generateString(int i)
 			if (m_fps > 0)
 				videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 		}
-		videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i);
-		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+		videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+	//	videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
 	}
 	else
@@ -245,13 +245,12 @@ std::string CameraVideoSrc::_generateFullString()
 		if (!m_impl->m_separateStreams  && camsCount > 1)
 		{
 			mixer = true;
-			videoStr = "videomixer name=mix "
-				"  sink_0::xpos=0 sink_0::ypos=0  sink_0::zorder=0 sink_0::alpha=1  ";
+			videoStr = "videomixer name=mix ";
 			int xpos = 0;
 			int ypos = 0;
 			for (int i = 0; i < camsCount; ++i)
 			{
-				std::string name = "sink_" + core::StringConverter::toString(i + 1);
+				std::string name = "sink_" + core::StringConverter::toString(i );
 				//videoStr += "  " + name + "::xpos=" + core::StringConverter::toString(xpos) + " " + name + "::ypos=0  " + name + "::zorder=0 " + name + "::zorder=1  ";
 				videoStr += "  " + name + "::xpos=0 " + name + "::ypos=" + core::StringConverter::toString(ypos) + " " + name + "::zorder=0 " + name + "::zorder=1  ";
 				xpos += m_impl->m_frameSize.x;
@@ -259,7 +258,7 @@ std::string CameraVideoSrc::_generateFullString()
 			}
 		}
 
-		int counter = 1;
+		int counter = 0;
 		for (int i = 0; i < m_impl->m_cams.size(); ++i)
 		{
 			if (m_impl->m_cams[i] != -1)
@@ -276,8 +275,8 @@ std::string CameraVideoSrc::_generateFullString()
 				if (m_fps > 0)
 					videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
 
-				videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
-				videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+		//		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+				videoStr += " ! queue ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
 // 				videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 // 					" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 
@@ -292,7 +291,8 @@ std::string CameraVideoSrc::_generateFullString()
 
 		}
 		if (mixer)
-			videoStr += " mix. ! videoflip method=5 ";// "! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
+			videoStr += " mix. ";// "! videoflip method=5 ";// "! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
+		videoStr += "! videoconvert ";
 	}
 	return videoStr;
 }

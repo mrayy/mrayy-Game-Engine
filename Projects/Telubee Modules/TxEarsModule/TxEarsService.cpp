@@ -8,6 +8,7 @@
 #include "GstAppNetAudioStreamer.h"
 #include "LocalAudioGrabber.h"
 #include "DirectSoundInputStream.h"
+#include "GstNetworkAudioStreamer.h"
 #include "CommunicationMessages.h"
 #include "StreamReader.h"
 #include "XMLTree.h"
@@ -114,7 +115,7 @@ public:
 
 			for (int i = 0; i < m_audioInterfaceIndicies.size(); ++i)
 			{
-			/*	video::GstNetworkAudioStreamer::AudioInterface iface;
+				video::GstNetworkAudioStreamer::AudioInterface iface;
 				video::GstNetworkAudioStreamer* streamer;
 				streamer = new video::GstNetworkAudioStreamer();
 
@@ -125,8 +126,8 @@ public:
 				iface.channelsCount = m_audioInterfaceIndicies[i].channels;
 				iface.samplingRate = m_audioInterfaceIndicies[i].samplingRate;
 
-				streamer->SetAudioInterface(iface);*/
-
+				streamer->SetAudioInterface(iface);
+				/*
 				video::GstAppNetAudioStreamer* streamer;
 				video::LocalAudioGrabber* g;
 				g = new video::LocalAudioGrabber();
@@ -134,11 +135,13 @@ public:
 				g->Init(m_audioInterfaceList[m_audioInterfaceIndicies[i].ID].deviceGUID, m_audioInterfaceIndicies[i].channels, m_audioInterfaceIndicies[i].samplingRate);
 				streamer->SetAudioGrabber(g);
 
+				m_audioGrabbers.push_back(g);*/
+
+
 				std::string interfaceID = "Audio";
 				if (m_audioInterfaceIndicies.size() > 1)
 					interfaceID = interfaceID + "#" + core::StringConverter::toString(i);
 				m_streamers->AddStream(streamer, interfaceID);
-				m_audioGrabbers.push_back(g);
 			}
 		}
 

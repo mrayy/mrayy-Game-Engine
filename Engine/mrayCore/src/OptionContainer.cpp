@@ -36,13 +36,13 @@ const SOptionElement* OptionContainer::GetOptionByName(const core::string &name)
 		return 0;
 	return &it->second;
 }
-const core::string& OptionContainer::GetOptionValue(const core::string &name)const
+core::string OptionContainer::GetOptionValue(const core::string &name, core::string def)const
 {
 	core::string str=name;
 	str.make_lower();
 	OptionsMap::const_iterator it= m_options.find(str);
 	if(it==m_options.end())
-		return core::string::Empty;
+		return def;
 	
 	return it->second.getValue();
 }
