@@ -51,7 +51,7 @@ std::string ICustomVideoSrc::BuildStringH264()
 	for (; it != m_encoderParams.end(); ++it)
 		videoStr += it->first + "=" + it->second + " ";
 
-	videoStr += " ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize)+" ";
+	videoStr += " ! mylistener name=encoderlistener ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize)+" ";
 
 	//videoStr += "! autovideosink";
 

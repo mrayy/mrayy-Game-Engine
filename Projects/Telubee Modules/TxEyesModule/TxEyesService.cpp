@@ -145,7 +145,7 @@ public:
 		m_maxGain = 0.25;
 		m_autoGain = false;
 		benchmarkFile = fopen("TxEyesServiceImpl.benchmark", "w");
-		fprintf(benchmarkFile, "FPS\tBytes\tCPU\tMem\n");
+		fprintf(benchmarkFile, "FPS\tBytes\tEncoding\tCPU\tMem\n");
 		m_benchLastTime = gEngine.getTimer()->getMilliseconds();
 	}
 	~TxEyesServiceImpl()
@@ -720,7 +720,7 @@ public:
 				c += m_cameraSource->GetCurrentFPS(i);
 			}
 			c /= (float)m_cameraSource->GetStreamsCount();
-			fprintf(benchmarkFile, "%d\t%d\t%d\t%d\n", c, m_streamers->GetStream("Video")->GetAverageBytesSent(),
+			fprintf(benchmarkFile, "%d\t%d\t%f\t%d\t%d\n", c, m_streamers->GetStream("Video")->GetAverageBytesSent(), m_cameraSource->GetEncodingTimePS(),
 				(int)m_benchmarks.CPUProcessUsage->getCurrentValue(), (int)m_benchmarks.PhysicalMemoryUsage->getCurrentValue());
 
 		}
@@ -769,6 +769,8 @@ public:
 		msg = "   Average Sent Bytes:" + core::StringConverter::toString(m_streamers->GetStream("Video")->GetAverageBytesSent()/1024)+"KB";
 		context->RenderText(msg, 0, 0);
 
+		msg = "   Encoding Time:" + core::StringConverter::toString(m_cameraSource->GetEncodingTimePS());
+		context->RenderText(msg, 0, 0);
 
 		if (m_enableEyegaze)
 		{

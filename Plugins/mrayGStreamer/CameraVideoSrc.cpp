@@ -25,6 +25,8 @@ public:
 	bool m_convertToGray8;
 
 
+	bool m_useFakeSrc;
+
 	std::vector<AveragePer> m_currentFps;
 
 	//ImageProcessorListener listener;
@@ -40,6 +42,7 @@ public:
 		m_captureType = "RAW";
 		m_convertToGray8 = false;
 		m_separateStreams = false;
+		m_useFakeSrc = true;
 	}
 	virtual ~CameraVideoSrcImpl()
 	{
@@ -188,9 +191,15 @@ std::string CameraVideoSrc::_generateString(int i)
 	std::string videoStr;
 	if (m_impl->m_cams[i] != -1)
 	{
-		videoStr = "ksvideosrc";
+		if (m_impl->m_useFakeSrc)
+			videoStr = "videotestsrc";
+		else
+		{
+			videoStr = "ksvideosrc";
+			videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
+		}
+
 		videoStr += " name=src" + core::StringConverter::toString(i);
-		videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
 		
 		//videoStr = "videotestsrc ";/**/
 
@@ -263,9 +272,13 @@ std::string CameraVideoSrc::_generateFullString()
 		{
 			if (m_impl->m_cams[i] != -1)
 			{
-				videoStr += "ksvideosrc";
+				if (m_impl->m_useFakeSrc)
+					videoStr += "videotestsrc";
+				else {
+					videoStr += "ksvideosrc";
+					videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
+				}
 				videoStr += " name=src" + core::StringConverter::toString(i);
-				videoStr += " device-index=" + core::StringConverter::toString(m_impl->m_cams[i]);
 				
 				//videoStr += "videotestsrc ";
 				//" do-timestamp=true is-live=true "//"block=true"

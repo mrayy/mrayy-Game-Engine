@@ -62,6 +62,7 @@ public:
 
 	virtual int GetCurrentFPS(int i){ return -1; }
 
+	virtual float GetEncodingTimePS(){ return -1; }
 
 	virtual void Start() {};
 	virtual void Pause() {};

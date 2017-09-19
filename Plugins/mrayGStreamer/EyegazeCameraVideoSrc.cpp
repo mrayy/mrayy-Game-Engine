@@ -13,6 +13,7 @@
 #include "FPSCalc.h"
 #include "ITimer.h"
 #include "GStreamerCore.h"
+#include "ITimer.h"
 
 #include <gst/gst.h>
 
@@ -24,6 +25,46 @@ namespace video
 	class EyegazeCameraVideoSrcImpl :public IMyListenerCallback
 	{
 	public:
+
+		class AverageValPerSecond
+		{
+			float m_val;
+			float m_valAcc;
+			ulong m_lastT;
+			int m_counter;
+		public:
+
+			AverageValPerSecond()
+			{
+				Reset();
+			}
+
+			void Reset()
+			{
+				m_counter = 0;
+				m_valAcc = 0;
+				m_val = 0;
+				m_lastT = GStreamerCore::Instance()->GetTimer()->getMilliseconds();
+			}
+			void Add(float v)
+			{
+				m_valAcc += v;
+				m_counter++;
+				ulong t = GStreamerCore::Instance()->GetTimer()->getMilliseconds();
+
+				if (t - m_lastT > 1000)
+				{
+					m_lastT = t;
+					m_val = m_valAcc / (float)m_counter;
+					m_valAcc = 0;
+					m_counter = 0;
+				}
+			}
+
+			float GetVal(){
+				return m_val;
+			}
+		};
 
 
 		bool m_inited;
@@ -50,16 +91,20 @@ namespace video
 		std::list<GazeData> m_gazeCasheTmp;
 		std::list<GazeData> m_gazeCashe;
 
+		std::list<float> m_timestamps;
+
 		int m_levels; //number of levels to sample the image at a certain position (eye gaze)
 
 
 		GstMyListener *m_precodecListener;
 		GstMyListener *m_prertpListener;
+		GstMyListener *m_encoderListener;
 		GstMyListener *m_rtpListener;
 
 		OS::IMutex* m_gazeMutex;
 
 		core::FPSCalc updateFPS;
+		AverageValPerSecond encodingTimeFPS;
 
 		uint32_t m_lastRtpTS;
 
@@ -81,6 +126,7 @@ namespace video
 			m_rtpListener = 0;
 			m_prertpListener = 0;
 			m_precodecListener = 0;
+			m_encoderListener = 0;
 			m_eyePosDirty = false;
 			m_lastRtpTS = -1;
 			m_gazeMutex = OS::IThreadManager::getInstance().createMutex();
@@ -107,6 +153,8 @@ namespace video
 				m_prertpListener->listeners->RemoveListener(this);
 			if (m_precodecListener)
 				m_precodecListener->listeners->RemoveListener(this);
+			if (m_encoderListener)
+				m_encoderListener->listeners->RemoveListener(this);
 
 			delete m_gazeMutex;
 
@@ -234,6 +282,8 @@ namespace video
 			m_inited = true;
 			source->LinkWithPipeline(p);
 			m_videoRects.clear();
+			m_timestamps.clear();
+			encodingTimeFPS.Reset();
 			m_sendRect.resize(m_levels);
 			for (int i = 0; i < foveatedRectsCount; ++i)
 			{
@@ -251,6 +301,9 @@ namespace video
 			m_prertpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "preRtplistener"));
 			if (m_prertpListener)
 				m_prertpListener->listeners->AddListener(this);
+			m_encoderListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "encoderlistener"));
+			if (m_encoderListener)
+				m_encoderListener->listeners->AddListener(this);
 			m_precodecListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "precodec"));
 			if (m_precodecListener)
 				m_precodecListener->listeners->AddListener(this);
@@ -308,11 +361,26 @@ namespace video
 					m_gazeCasheTmp.pop_front();
 				}
 				else m_gazeCashe.push_back(_ds);
+
+				m_timestamps.push_back(GStreamerCore::Instance()->GetTimer()->getSeconds());
 				m_gazeMutex->unlock();
 				m_sent = true;
 			}
+			else if (src == m_encoderListener)
+			{
+
+				m_gazeMutex->lock();
+				if (m_timestamps.size() > 0)
+				{
+					float lastT = m_timestamps.front();
+					m_timestamps.pop_front();
+					encodingTimeFPS.Add(GStreamerCore::Instance()->GetTimer()->getSeconds() - lastT);
+				}
+				m_gazeMutex->unlock();
+			}
 			else if (src == m_rtpListener)//after rtp payloader
 			{
+
 
 				GstMapInfo map;
 				gst_buffer_map(buffer, &map, GST_MAP_READ);
@@ -632,14 +700,21 @@ namespace video
 				videoStr = " videomixer name=mix_eyes ";
 				int xpos = 0;
 				int ypos = 0;
+				float mixerWidth = m_data->m_cropsize.x;
+				float mixerHeight = m_data->m_cropsize.y;
+				if (m_data->m_levels == 0)
+				{
+					mixerWidth = framesize.x;
+					mixerHeight = framesize.y;
+				}
 				for (int i = 0; i < camsCount; ++i)
 				{
 					std::string name = "sink_" + core::StringConverter::toString(i);
 					//videoStr += "  " + name + "::xpos=" + core::StringConverter::toString(xpos) + " " + name + "::ypos=0  " + name + "::zorder=0 " + name + "::zorder=1  ";
 					videoStr += "  " + name + "::xpos=0 " + name + "::ypos=" + core::StringConverter::toString(ypos) + " " + name + "::zorder=0 " + name + "::zorder=1  ";
-					xpos += m_data->m_cropsize.x;
-					ypos += m_data->m_cropsize.y;
-					m_data->streamSize.y += m_data->m_cropsize.y;
+					xpos += mixerWidth;
+					ypos += mixerHeight;
+					m_data->streamSize.y += mixerHeight;
 				}
 			}
 			else{
@@ -787,6 +862,11 @@ namespace video
 	{
 
 		return m_data->source->GetVideoSrcCount();
+	}
+
+	float EyegazeCameraVideoSrc::GetEncodingTimePS()
+	{
+		return m_data->encodingTimeFPS.GetVal();
 	}
 }
 }
