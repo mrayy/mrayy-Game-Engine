@@ -90,7 +90,9 @@ public:
 	};
 	std::vector<CameraSettings> m_cameraSettings;
 	CameraSettings m_currentSettings;
-	//std::vector<_CameraInfo> m_cameraIfo;
+
+
+	std::vector<_CameraInfo> m_cameraIfo;
 
 	ICameraSrcController* m_cameraController;
 	video::ICustomVideoSrc* m_cameraSource;
@@ -296,20 +298,13 @@ public:
 		else if (res == "2-FullHD")
 			m_resolution.set(1920, 1080);*/
 
-		std::vector<_CameraInfo> m_cameraIfo;
-
 #ifdef USE_WEBCAMERA
+		m_streamsCount = m_cameraIfo.size();
 		if (m_cameraType == ECameraType::Ovrvision)
 		{
 
 			m_camConfig->streamType = TelubeeCameraConfiguration::StreamCoded;
-			// -1 for the None index
-			_CameraInfo ifo;
-			ifo.ifo.index = 0;
-			m_cameraIfo.push_back(ifo);
-			ifo.ifo.index = 1;
-			m_cameraIfo.push_back(ifo);
-			m_streamsCount = 2;
+			
 		}
 		else
 		if (m_cameraType == ECameraType::OvrvisionCompressed)
@@ -320,10 +315,12 @@ public:
 			else
 				m_camConfig->streamType = TelubeeCameraConfiguration::StreamOvrvision;
 			// -1 for the None index
+			m_streamsCount = 1;
+
+			m_cameraIfo.clear();
 			_CameraInfo ifo;
 			ifo.ifo.index = 0;
 			m_cameraIfo.push_back(ifo);
-			m_streamsCount = 1;
 		}
 		else
 		if (m_cameraType == ECameraType::Webcam)
@@ -333,20 +330,6 @@ public:
 			else
 				m_camConfig->streamType = TelubeeCameraConfiguration::StreamRaw;
 
-			// -1 for the None index
-			_CameraInfo ifo;
-			ifo.ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Left")->getValue());
-			if (ifo.ifo.index>= 0)
-			{
-				m_cameraIfo.push_back(ifo);
-				++m_streamsCount;
-			}
-			ifo.ifo.index = core::StringConverter::toInt(context->appOptions.GetOptionByName("DS_Camera_Right")->getValue());
-			if (ifo.ifo.index >= 0)
-			{
-				m_cameraIfo.push_back(ifo);
-				++m_streamsCount;
-			}
 		}
 #endif
 #ifdef USE_POINTGREY 
@@ -990,7 +973,18 @@ public:
 	bool LoadServiceSettings(xml::XMLElement* elem)
 	{
 		
-
+		xml::XMLElement*e=elem->getSubElement("Cameras");
+		if (e != 0)
+		{
+			_CameraInfo ifo;
+			e = e->getSubElement("Camera");
+			while (e)
+			{
+				ifo.ifo.index = e->getValueInt("Index");
+				m_cameraIfo.push_back(ifo);
+				e = e->nextSiblingElement("Camera");
+			}
+		}
 		return true;
 	}
 };

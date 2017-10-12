@@ -38,8 +38,8 @@ public:
 	virtual bool IsSeparateStreams(){ return false; }
 	virtual void SetBitRate(int biterate);
 
-	virtual std::string BuildStringH264();
-	std::string GetEncodingStr();
+	virtual std::string BuildStringH264(int i);
+	std::string GetEncodingStr(int i);
 
 	void SetCameraSource(ICustomVideoSrc* source);
 

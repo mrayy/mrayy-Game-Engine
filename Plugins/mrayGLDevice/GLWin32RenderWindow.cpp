@@ -258,7 +258,7 @@ void GLWin32RenderWindow::Create(const math::vector2di& size,bool fullScreen,con
 		}
 		m_hWnd=CreateWindowEx(dwStyleEx, mT("MRAYGLWindow"), title.c_str(),
 			dwstyle, m_position.x, m_position.y, outerSz.x, outerSz.y, parent, 0, hinst, this);
-		gVideoLoggerSystem.log(mT("GL Window Created :")+m_name,ELL_INFO);
+		//gVideoLoggerSystem.log(mT("GL Window Created :")+m_name,ELL_INFO);
 
 		RenderWindowUtils::AddRenderWindow(this);
 

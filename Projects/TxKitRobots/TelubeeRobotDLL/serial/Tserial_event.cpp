@@ -316,7 +316,7 @@ int Tserial_event::getNbrOfBytes    (void)
 /* -------------------------------------------------------------------- */
 /* --------------------------    sendData     ------------------------- */
 /* -------------------------------------------------------------------- */
-#define DEBUG_EVENTS
+//#define DEBUG_EVENTS
 void Tserial_event::sendData (char *buffer, int size)
 {
 	if ((!tx_in_progress) && (size<SERIAL_MAX_TX) && (buffer!=0))

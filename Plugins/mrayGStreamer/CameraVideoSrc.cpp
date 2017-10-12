@@ -25,7 +25,6 @@ public:
 	bool m_convertToGray8;
 
 
-	bool m_useFakeSrc;
 
 	std::vector<AveragePer> m_currentFps;
 
@@ -42,7 +41,6 @@ public:
 		m_captureType = "RAW";
 		m_convertToGray8 = false;
 		m_separateStreams = false;
-		m_useFakeSrc = true;
 	}
 	virtual ~CameraVideoSrcImpl()
 	{
@@ -153,7 +151,7 @@ void CameraVideoSrc::SetCaptureType(const std::string &type)
 {
 	m_impl->SetCaptureType(type);
 }
-std::string CameraVideoSrc::GetEncodingStr()
+std::string CameraVideoSrc::GetEncodingStr(int i)
 {
 	std::string videoStr;
 	if (m_encoder == "H264")
@@ -169,7 +167,7 @@ std::string CameraVideoSrc::GetEncodingStr()
 			//videoStr += "! x264enc speed-preset=superfast ! avdec_h264 ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 				//	" height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + " !videoconvert ";
 
-			videoStr += BuildStringH264();
+			videoStr += BuildStringH264(i);
 		}
 
 		//interlaced=true sliced-threads=false  "// 
@@ -189,9 +187,9 @@ std::string CameraVideoSrc::GetEncodingStr()
 std::string CameraVideoSrc::_generateString(int i)
 {
 	std::string videoStr;
-	if (m_impl->m_cams[i] != -1)
+	//if (m_impl->m_cams[i] != -1)
 	{
-		if (m_impl->m_useFakeSrc)
+		if (m_impl->m_cams[i]<0)
 			videoStr = "videotestsrc";
 		else
 		{
@@ -208,7 +206,12 @@ std::string CameraVideoSrc::_generateString(int i)
 		videoStr += " ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 			",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 		if (m_fps > 0)
-			videoStr += " ! videorate drop-only=true max-rate=" + core::StringConverter::toString(m_fps) ;
+		{
+			if (m_impl->m_cams[i]<0)
+				videoStr += ",framerate=" + core::StringConverter::toString(m_fps) + "/1";
+			else
+				videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
+		}
 		if (m_impl->m_convertToGray8){
 			videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
@@ -219,10 +222,7 @@ std::string CameraVideoSrc::_generateString(int i)
 	//	videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
 	}
-	else
-		videoStr="videotestsrc ! video/x-raw,width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
-		",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
-
+	
 	return videoStr;
 
 }
@@ -237,7 +237,7 @@ std::string CameraVideoSrc::_generateFullString()
 	float totalHeight = 0;
 	for (int i = 0; i < m_impl->m_cams.size(); ++i)
 	{
-		if (m_impl->m_cams[i] != -1)
+		//if (m_impl->m_cams[i] != -1)
 		{
 			camsCount++;
 			totalWidth += m_impl->m_frameSize.x;
@@ -270,9 +270,8 @@ std::string CameraVideoSrc::_generateFullString()
 		int counter = 0;
 		for (int i = 0; i < m_impl->m_cams.size(); ++i)
 		{
-			if (m_impl->m_cams[i] != -1)
 			{
-				if (m_impl->m_useFakeSrc)
+				if (m_impl->m_cams[i]<0)
 					videoStr += "videotestsrc";
 				else {
 					videoStr += "ksvideosrc";
@@ -286,10 +285,16 @@ std::string CameraVideoSrc::_generateFullString()
 					",height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 
 				if (m_fps > 0)
-					videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
+				{
+					if (m_impl->m_cams[i]<0)
+						videoStr += ",framerate=" + core::StringConverter::toString(m_fps) + "/1";
+					else
+						videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
+				}
 
 		//		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
-				videoStr += " ! queue ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+			//	videoStr += " ! queue ";
+				videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
 // 				videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 // 					" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 
@@ -305,7 +310,6 @@ std::string CameraVideoSrc::_generateFullString()
 		}
 		if (mixer)
 			videoStr += " mix. ";// "! videoflip method=5 ";// "! videorate max-rate=" + core::StringConverter::toString(m_fps) + " ";
-		videoStr += "! videoconvert ";
 	}
 	return videoStr;
 }
@@ -323,7 +327,7 @@ std::string CameraVideoSrc::GetPipelineStr(int index)
 	if (m_impl->m_separateStreams)
 		videoStr = _generateString(index);
 	else videoStr = _generateFullString();
-	videoStr += GetEncodingStr();
+	videoStr += GetEncodingStr(index);
 	return videoStr;
 }
 

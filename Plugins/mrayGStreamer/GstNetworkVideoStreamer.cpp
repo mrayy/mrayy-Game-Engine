@@ -121,7 +121,7 @@ public:
 		else
 		{
 			videoStr += " ! mylistener name=preSent" + core::StringConverter::toString(i);
-			videoStr += " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port=" + core::StringConverter::toString(m_videoPorts[i]) + " host=" + m_ipAddr;// +" sync=false ";
+			videoStr += " ! udpsink name=videoSink" + core::StringConverter::toString(i) + " port=" + core::StringConverter::toString(m_videoPorts[i]) + " host=" + m_ipAddr+"  sync=false ";
 			//videoStr += "! fpsdisplaysink sync=false";
 		}
 		return videoStr;

@@ -73,6 +73,7 @@
 #include "IFileSystem.h"
 #include "GUIElementFactory.h"
 #include "TextureSourceFactory.h"
+#include "VideoLoggerSystem.h"
 
 #include "InternetCacheManager.h"
 
@@ -169,6 +170,8 @@ namespace mray
 			loggerManager = new LogManager();
 
 			new LogSubSystemManager();
+
+		//	new LoggerSystemVideo();
 
 //			cpuInfo = new CPUInfo();
 

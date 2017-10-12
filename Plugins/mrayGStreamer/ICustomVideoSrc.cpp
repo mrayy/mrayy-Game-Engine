@@ -30,7 +30,7 @@ namespace video
 		}
 	}
 
-std::string ICustomVideoSrc::BuildStringH264()
+	std::string ICustomVideoSrc::BuildStringH264(int i)
 {
 	std::string videoStr = "";
 
@@ -38,7 +38,7 @@ std::string ICustomVideoSrc::BuildStringH264()
 	// 			videoStr += " ! videoconvert ! autovideosink sync=false ";
 	// 			return videoStr;
 
-	videoStr += "! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / GetStreamsCount()) + " ";
+	videoStr += " ! videoconvert ! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / GetStreamsCount()) + " ";
 
 	/*
 	" speed-preset=superfast  tune=zerolatency pass=cbr sliced-threads=true"//" key-int-max=5"
@@ -51,14 +51,14 @@ std::string ICustomVideoSrc::BuildStringH264()
 	for (; it != m_encoderParams.end(); ++it)
 		videoStr += it->first + "=" + it->second + " ";
 
-	videoStr += " ! mylistener name=encoderlistener ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize)+" ";
+	videoStr += " ! mylistener name=encoderlistener"+core::StringConverter::toString(i)+" ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize)+" ";
 
 	//videoStr += "! autovideosink";
 
 	return videoStr;
 }
 
-std::string ICustomVideoSrc::BuildStringVP8()
+	std::string ICustomVideoSrc::BuildStringVP8(int i)
 {
 	std::string videoStr="";
 

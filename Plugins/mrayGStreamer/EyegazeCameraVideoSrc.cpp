@@ -85,7 +85,7 @@ namespace video
 		struct GazeData
 		{
 			GstClockTime pts;
-			std::vector<math::vector4di> gaze;
+			std::vector<std::vector<math::vector4di>> gaze;
 		};
 
 		std::list<GazeData> m_gazeCasheTmp;
@@ -109,7 +109,7 @@ namespace video
 		uint32_t m_lastRtpTS;
 
 		bool m_sent;
-		std::vector<math::vector4di> m_sendRect;
+		std::vector<std::vector<math::vector4di>> m_sendRect;
 		int counter;
 
 		FILE* averageBytesFile;
@@ -175,13 +175,16 @@ namespace video
 				okay = true;
 			}
 
-			math::vector2di framesize = source->GetFrameSize(0)/_divScaler;
-			for (int i = 0; i < m_sendRect.size() && !okay; ++i)
+			math::vector2di framesize = source->GetFrameSize(0) / _divScaler;
+			for (int j = 0; j < m_sendRect.size() && !okay; ++j)
 			{
-				m_eyepos[i] = poses[i];
-				math::vector4di r = GetCropRect(0, i, framesize, _divScaler);
-				if (r != m_sendRect[i])
-					okay = true;
+				for (int i = 0; i < m_sendRect[j].size() && !okay; ++i)
+				{
+					m_eyepos[i] = poses[i];
+					math::vector4di r = GetCropRect(j, i, framesize, _divScaler);
+					if (r != m_sendRect[j][i])
+						okay = true;
+				}
 			}
 			if (!okay)
 				return;
@@ -254,14 +257,14 @@ namespace video
 			updateFPS.regFrame(gGStreamerCore->GetTimer()->getSeconds());
 
 			float fps = updateFPS.getFPS();
-			printf("Eyegaze Update Rate: %f\n", fps);
+			//printf("Eyegaze Update Rate: %f\n", fps);
 			//update video boxes
 			for (int level = 0; level < m_levels; ++level)
 			{
-				m_sendRect[level] = GetCropRect(0, level, framesize, _divScaler);
-				math::vector4di &cropRect = m_sendRect[level];
 				for (int i = 0; i < m_videoRects.size(); ++i)
 				{
+					m_sendRect[i][level] = GetCropRect(i, level, framesize, _divScaler);
+					math::vector4di &cropRect = m_sendRect[i][level];
 					if (!m_videoRects[i][level])
 						continue;
 
@@ -283,11 +286,13 @@ namespace video
 			source->LinkWithPipeline(p);
 			m_videoRects.clear();
 			m_timestamps.clear();
+			m_sendRect.clear();
 			encodingTimeFPS.Reset();
-			m_sendRect.resize(m_levels);
 			for (int i = 0; i < foveatedRectsCount; ++i)
 			{
 				m_videoRects.push_back(std::vector<GstElement*>());
+				m_sendRect.push_back(std::vector<math::vector4di>());
+				m_sendRect[i].resize(m_levels);
 				for (int level = 0; level < m_levels; ++level)
 				{
 					core::string name = "box_" + core::StringConverter::toString(i) + "_" + core::StringConverter::toString(level);
@@ -295,13 +300,13 @@ namespace video
 					m_videoRects[i].push_back(e);
 				}
 			}
-			m_rtpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "rtplistener"));
+			m_rtpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "rtplistener0" ));
 			if (m_rtpListener)
 				m_rtpListener->listeners->AddListener(this);
-			m_prertpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "preRtplistener"));
+			m_prertpListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "preRtplistener0"));
 			if (m_prertpListener)
 				m_prertpListener->listeners->AddListener(this);
-			m_encoderListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "encoderlistener"));
+			m_encoderListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "encoderlistener0"));
 			if (m_encoderListener)
 				m_encoderListener->listeners->AddListener(this);
 			m_precodecListener = GST_MyListener(gst_bin_get_by_name(GST_BIN(pipeline), "precodec"));
@@ -316,40 +321,25 @@ namespace video
 			unsigned short length;
 			unsigned char data[255];
 		};
-		GazeData _ds;
+		GazeData _ds,_last;
 		virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * buffer)
 		{
 
 			if (src == m_precodecListener) //before encoder is applied, save the rect
 			{
-				if (m_sendRect.size() > 0)
+				//if (m_sendRect[0].size() > 0)
 				{
 
-					if (m_sent)
-						_UpdateEyegazePos();
-					m_sent = false; 
-					GazeData ds;
-					ds.pts = buffer->pts;
-					ds.gaze = m_sendRect;
-				//	m_gazeMutex->lock();
-					/*
-					for (int i = 0; i < m_levels; ++i)
-					{
-					g_object_get(m_videoRects[0][i], "left", &m_sendRect[i].x, "right", &m_sendRect[i].y,
-					"top", &m_sendRect[i].z, "bottom", &m_sendRect[i].w, 0);
-					}
-					m_gazeCashe.push_back(ds);*/
-					_ds = ds;
 					m_gazeMutex->lock();
+					if (m_sent)
+					{
+						_UpdateEyegazePos();
+						_ds.pts = buffer->pts;
+						_ds.gaze = m_sendRect;
+						m_sent = false;
+					}
 					m_gazeCasheTmp.push_back(_ds);
 					m_gazeMutex->unlock();
-				//	m_gazeMutex->unlock();
-
-
-					// 			GstMapInfo map;
-					// 			gst_buffer_map(buffer, &map, GST_MAP_READ);
-					// 
-					// 			gst_buffer_unmap(buffer, &map);
 				}
 			}
 			else if (src == m_prertpListener)//before rtp
@@ -357,14 +347,18 @@ namespace video
 				m_gazeMutex->lock();
 				if (m_gazeCasheTmp.size() > 0)
 				{
-					m_gazeCashe.push_back(m_gazeCasheTmp.front());
+					_last = m_gazeCasheTmp.front();
+					m_gazeCashe.push_back(_last);
 					m_gazeCasheTmp.pop_front();
 				}
-				else m_gazeCashe.push_back(_ds);
+				else
+				{
+					m_gazeCashe.push_back(_last);
+				}
 
 				m_timestamps.push_back(GStreamerCore::Instance()->GetTimer()->getSeconds());
-				m_gazeMutex->unlock();
 				m_sent = true;
+				m_gazeMutex->unlock();
 			}
 			else if (src == m_encoderListener)
 			{
@@ -394,34 +388,28 @@ namespace video
 						m_lastRtpTS = packet.timestamp;
 						GazeData ds;
 						m_gazeMutex->lock();
-						/*while (m_gazeCashe.size() > 0)
-						{
-							// 					int count = 0;
-							// 					do {
-							//						count++;
-							ds = m_gazeCashe.front();
-							m_gazeCashe.pop_front();
-						}*/
-					//	ds = _ds;
 						ds = m_gazeCashe.front();
 						m_gazeCashe.pop_front();
 
+
 						m_gazeMutex->unlock();
-						// 					} while (ds.pts != buffer->pts);
-						// 					if (count > 1)
-						// 						printf("exceeding!\n");
-						std::vector<math::vector4di> &gaze = ds.gaze;
 						math::vector2di framesize = source->GetFrameSize(0) / _divScaler;
 
-						{
-							//static unsigned char buffer[2000];
-							static unsigned char data[128];
-							unsigned char* ptr = data;
+						static unsigned char data[128];
+						unsigned char* ptr = data;
+						int tmp = ds.gaze.size();
+						const int header = 0x1010;
+						memcpy(ptr, &header, sizeof(header)); ptr += sizeof(header);
+						memcpy(ptr, &tmp, sizeof(tmp)); ptr += sizeof(int);
+						memcpy(ptr, &m_levels, sizeof(m_levels)); ptr += sizeof(m_levels);
+						
+						int dataLen =  sizeof(int)* 3;
 
-							const int header = 0x1010;
-							int levels = gaze.size();
-							memcpy(ptr, &header, sizeof(header)); ptr += sizeof(header);
-							memcpy(ptr, &levels, sizeof(levels)); ptr += sizeof(levels);
+						for (int j = 0; j < ds.gaze.size(); ++j)
+						{
+							std::vector<math::vector4di> &gaze = ds.gaze[j];
+
+							//static unsigned char buffer[2000];
 							for (int i = 0; i < gaze.size(); ++i)
 							{
 								math::Swap(gaze[i].y, gaze[i].z);
@@ -430,8 +418,10 @@ namespace video
 								gaze[i].w = framesize.y - gaze[i].y - gaze[i].w;
 								memcpy(ptr, &gaze[i], sizeof(math::vector4di));
 								ptr += sizeof(math::vector4di);
+								dataLen += sizeof(math::vector4di);
 							}
-							int dataLen = sizeof(math::vector4di)*gaze.size() + sizeof(int)*2;
+						}
+						{
 
 // 							memcpy(ptr, &counter, sizeof(counter));
 // 							counter++;
@@ -509,7 +499,7 @@ namespace video
 		m_data->source->SetBitRate(bitrate);
 		ICustomVideoSrc::SetBitRate(bitrate);
 	}
-	std::string EyegazeCameraVideoSrc::BuildStringH264()
+	std::string EyegazeCameraVideoSrc::BuildStringH264(int i)
 	{
 		if (false)
 		{
@@ -533,7 +523,7 @@ namespace video
 			for (; it != m_encoderParams.end(); ++it)
 				videoStr += it->first + "=" + it->second + " ";
 
-			videoStr += "  ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize) + " ! mylistener name=rtplistener ";
+			videoStr += "  ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize) + " ! mylistener name=rtplistener" + core::StringConverter::toString(i) + " ";
 
 			return videoStr;
 		}
@@ -541,7 +531,7 @@ namespace video
 		{
 			if (m_data->source == 0)
 				return "";
-			return "! mylistener name=preRtplistener "+m_data->source->BuildStringH264() + " ! mylistener name=rtplistener ";
+			return "! mylistener name=preRtplistener" + core::StringConverter::toString(i) + " " + m_data->source->BuildStringH264(i) + " ! mylistener name=rtplistener" + core::StringConverter::toString(i) + " ";
 		}
 	}
 
@@ -763,7 +753,6 @@ namespace video
 				//videoStr += " ! mylistener name=precodec ";
 			}
 
-			videoStr += " ! videoconvert ";
 		}
 
 		//fprintf(m_data->averageBytesFile, "%dx%d\n", m_data->streamSize.x, m_data->streamSize.y);
@@ -771,14 +760,14 @@ namespace video
 	}
 
 
-	std::string EyegazeCameraVideoSrc::GetEncodingStr()
+	std::string EyegazeCameraVideoSrc::GetEncodingStr(int i)
 	{
 		std::string videoStr;
 
 		if (m_encoder == "H264")
 		{
 
-			videoStr += BuildStringH264();
+			videoStr += BuildStringH264(i);
 			//interlaced=true sliced-threads=false  "// 
 			//videoStr += " ! rtph264pay ";
 		}
@@ -809,7 +798,7 @@ namespace video
 	{
 		std::string videoStr;
 		videoStr = _generateFullString();
-		videoStr += GetEncodingStr();
+		videoStr += GetEncodingStr(i);
 		return videoStr;
 	}
 

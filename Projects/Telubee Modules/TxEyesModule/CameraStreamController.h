@@ -312,7 +312,7 @@ class EncodedCameraStreamController :public ICameraSrcController
 	}
 	void _setParam(int device,const core::string& name, const core::string& value)
 	{
-		if (device == -1 )
+		if (device <0 )
 			return;
 		if (_GetParameter(device,name) == value)
 			return;
@@ -499,14 +499,16 @@ public:
 		gLogManager.log("Starting camera grabber", ELL_INFO);
 		for (int i = 0; i < _captureDevices.size(); ++i)
 		{
-			_capDev->setupDevice(_captureDevices[i]);
+			if (_captureDevices[i]>=0)
+				_capDev->setupDevice(_captureDevices[i]);
 		}
 	}
 	virtual void Stop() 
 	{
 		for (int i = 0; i < _captureDevices.size(); ++i)
 		{
-			_capDev->stopDevice(_captureDevices[i]);
+			if (_captureDevices[i] >= 0)
+				_capDev->stopDevice(_captureDevices[i]);
 		}
 	}
 
@@ -544,7 +546,7 @@ public:
 		gLogManager.log("Initing camera grabber", ELL_INFO);
 		for (int i = 0; i < cams.size(); ++i)
 		{
-			if (cams[i].ifo.index>=0)
+			//if (cams[i].ifo.index>=0)
 			{
 				_captureDevices.push_back(cams[i].ifo.index);
 				
@@ -595,9 +597,16 @@ public:
 			std::vector<video::IVideoGrabber*> devices;
 			for (int i = 0; i < _captureDevices.size(); ++i)
 			{
-				video::DirectShowVideoGrabber* dev = new video::DirectShowVideoGrabber();
-				devices.push_back( dev);
-				dev->SetDevice(_captureDevices[i]);
+				if (_captureDevices[i] >= 0)
+				{
+					video::DirectShowVideoGrabber* dev = new video::DirectShowVideoGrabber();
+					devices.push_back(dev);
+					dev->SetDevice(_captureDevices[i]);
+				}
+				else
+				{
+					devices.push_back(0);
+				}
 			}
 
 			src->SetVideoGrabber(devices);

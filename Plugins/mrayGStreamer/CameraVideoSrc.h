@@ -20,7 +20,7 @@ class CameraVideoSrc:public ICustomVideoSrc
 {
 protected:
 	CameraVideoSrcImpl* m_impl;
-	virtual std::string GetEncodingStr();
+	virtual std::string GetEncodingStr(int i);
 
 	virtual std::string _generateString(int i);
 	virtual std::string _generateFullString();
