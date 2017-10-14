@@ -99,7 +99,7 @@ public:
 		{
 			return false;
 		}
-		OS::IThreadManager::getInstance().sleep(500);
+		//OS::IThreadManager::getInstance().sleep(500);
 		_inited = true;
 		ovr.SetCameraSyncMode(false);
 		ovr.SetCameraExposure(1000);
@@ -122,7 +122,7 @@ public:
 		_remapData = new uchar[len];
 
 		ovr.Close();
-		OS::IThreadManager::getInstance().sleep(300);
+		//OS::IThreadManager::getInstance().sleep(300);
 		hasNewFrame = true;
 
 		return true;

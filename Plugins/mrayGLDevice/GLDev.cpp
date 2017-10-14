@@ -291,7 +291,7 @@ void GLDev::_SetGLState(GLenum st,bool s)
 void GLDev::_SetGLClientState(GLenum st,bool s)
 {
 
- 	stdext::hash_map<GLenum,bool>::iterator it=m_states.find(st);
+ 	std::map<GLenum,bool>::iterator it=m_states.find(st);
  	if(it!=m_states.end() && it->second==s)
  		return;
 	m_states[st]=s;
@@ -302,7 +302,7 @@ void GLDev::_SetGLClientState(GLenum st,bool s)
 bool GLDev::_GetGLState(GLenum st)
 {
 
-	stdext::hash_map<GLenum,bool>::iterator it=m_states.find(st);
+	std::map<GLenum,bool>::iterator it=m_states.find(st);
 	if(it==m_states.end())
 	{
 		bool ret=glIsEnabled(st);

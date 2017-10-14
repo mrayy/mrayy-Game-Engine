@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_Unicode|Win32">
       <Configuration>Debug_Unicode</Configuration>
@@ -44,51 +44,52 @@
     <SccProvider>
     </SccProvider>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -574,6 +575,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\VideoValues.cpp" />
     <ClCompile Include="src\3DSLoader.cpp" />
     <ClCompile Include="src\InputKeyMap.cpp" />
     <ClCompile Include="src\LocalNetworkPortAssigner.cpp" />
@@ -754,6 +756,7 @@
     <ClInclude Include="include\ValueControllerManager.h" />
     <ClInclude Include="include\VideoResourceManager.h" />
     <ClInclude Include="include\VideoTextureSource.h" />
+    <ClInclude Include="include\VideoValues.h" />
     <ClInclude Include="include\ViewPort.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -1387,13 +1390,9 @@
     <ClInclude Include="include\NetworkEvent.h" />
     <ClInclude Include="include\ResizeEvent.h" />
     <ClInclude Include="include\SystemEvent.h" />
-    <ClInclude Include="include\GenericValues.h" />
-    <ClInclude Include="include\IValue.h" />
-    <ClInclude Include="include\MathValues.h" />
     <ClInclude Include="include\PropertyValue.h" />
     <ClInclude Include="include\ValueController.h" />
     <ClInclude Include="include\ValueProxy.h" />
-    <ClInclude Include="include\VideoValues.h" />
     <ClInclude Include="include\CmdParams.h" />
     <ClInclude Include="include\Param.h" />
     <ClInclude Include="include\ISIMD_Processor.h" />
@@ -2218,10 +2217,6 @@
     <ClCompile Include="src\Event.cpp" />
     <ClCompile Include="src\EventMemoryManager.cpp" />
     <ClCompile Include="src\EventQueue.cpp" />
-    <ClCompile Include="src\GenericValues.cpp" />
-    <ClCompile Include="src\IValue.cpp" />
-    <ClCompile Include="src\MathValues.cpp" />
-    <ClCompile Include="src\VideoValues.cpp" />
     <ClCompile Include="src\Param.cpp" />
     <ClCompile Include="src\ISIMD_Processor.cpp" />
     <ClCompile Include="src\SIMD_SSE.cpp" />

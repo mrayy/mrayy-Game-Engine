@@ -74,3 +74,8 @@ ipch/*
 Bin/*
 Dependencies/*
 mrayEngine.VC.db
+Engine/mrayEngine/src/Engine.cpp
+*.opendb
+*.db
+*.db-shm
+*.db-wal

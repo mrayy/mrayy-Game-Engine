@@ -157,19 +157,19 @@ ulong WinOSystem::HandleWindowEvent(const OptionContainer& params)
 
 	p=params.GetOptionByName(mT("hWnd"));
 	if(!p)return 0;
-	hWnd=(HWND)core::StringConverter::toULong(p->value);
+	hWnd=(HWND)atoll(p->value.c_str());
 
 	p=params.GetOptionByName(mT("Msg"));
 	if(!p)return 0;
-	msg=core::StringConverter::toUInt(p->value);
+	msg=core::StringConverter::toULong(p->value);
 
 	p=params.GetOptionByName(mT("wParam"));
 	if(!p)return 0;
-	wParam=core::StringConverter::toUInt(p->value);
+	wParam= atoll(p->value.c_str());
 
 	p=params.GetOptionByName(mT("lParam"));
 	if(!p)return 0;
-	lParam=core::StringConverter::toUInt(p->value);
+	lParam=atoll(p->value.c_str());
 
 	return Win32MessageProc::getInstance().WndProc(hWnd,msg,wParam,lParam);
 }

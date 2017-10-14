@@ -110,7 +110,7 @@ bool ServiceLoader::Init(int argc, _TCHAR* argv[])
 			printf("Failed to set DLL Directory\n");
 		}
 	}
-	new OS::WinFileSystem();
+//	new OS::WinFileSystem();
 	new Engine(new OS::WinOSystem());
 	new network::LocalNetworkPortAssigner();
 	gEngine.loadPlugins("plugins.stg");

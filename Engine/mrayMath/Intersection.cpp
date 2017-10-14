@@ -172,7 +172,7 @@ bool Intersection::intersect(const Plane&p,const Sphere&s){
 InterRayResult Intersection::intersect(const Ray3d&r,const Plane&p){
 
 	float n2 = (p.Normal.x * r.Dir.x) + (p.Normal.y * r.Dir.y) + (p.Normal.z * r.Dir.z);
-	if (abs(n2) < math::Epsilon)
+	if (fabsf(n2) < math::Epsilon)
 	{
 		return InterRayResult(0);
 	}

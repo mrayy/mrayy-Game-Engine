@@ -324,7 +324,7 @@ void Win32GLSupport::InitExtensions()
 	const char *wgl_extensions = _wglGetExtensionsStringARB(m_InitialWindow->GetHDC());
 	core::string extStr;
 	core::char_to_string(wgl_extensions ,extStr);
-	gVideoLoggerSystem.log(mT("Supported WGL extensions: ")+extStr,ELL_INFO,EVL_Heavy);
+//	gVideoLoggerSystem.log(mT("Supported WGL extensions: ")+extStr,ELL_INFO,EVL_Heavy);
 
 	std::stringstream ext;
 	std::string instr;

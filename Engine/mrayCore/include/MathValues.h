@@ -31,8 +31,8 @@
 namespace mray{
 
 //////////////////////////////////////////////////////////////////////////
-
-class MRAY_DLL Vector2diValue:public IValue
+	
+class MRAY_CORE_DLL Vector2diValue:public IValue
 {
 public:
 	math::vector2di value;
@@ -50,7 +50,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Vector2dfValue:public IValue
+class MRAY_CORE_DLL Vector2dfValue:public IValue
 {
 public:
 	math::vector2df value;
@@ -68,7 +68,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Vector3diValue:public IValue
+class MRAY_CORE_DLL Vector3diValue:public IValue
 {
 public:
 	math::vector3di value;
@@ -86,7 +86,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Vector3dfValue:public IValue
+class MRAY_CORE_DLL Vector3dfValue:public IValue
 {
 public:
 	math::vector3df value;
@@ -104,7 +104,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Vector4diValue:public IValue
+class MRAY_CORE_DLL Vector4diValue:public IValue
 {
 public:
 	math::vector4di value;
@@ -122,7 +122,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Vector4dfValue:public IValue
+class MRAY_CORE_DLL Vector4dfValue:public IValue
 {
 public:
 	math::vector4df value;
@@ -140,7 +140,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Line2dfValue:public IValue
+class MRAY_CORE_DLL Line2dfValue:public IValue
 {
 public:
 	math::line2d value;
@@ -158,7 +158,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Line3dfValue:public IValue
+class MRAY_CORE_DLL Line3dfValue:public IValue
 {
 public:
 	math::line3d value;
@@ -176,7 +176,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL box3dfValue:public IValue
+class MRAY_CORE_DLL box3dfValue:public IValue
 {
 public:
 	math::box3d value;
@@ -194,7 +194,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Matrix3x3Value:public IValue
+class MRAY_CORE_DLL Matrix3x3Value:public IValue
 {
 public:
 	math::matrix3x3 value;
@@ -212,7 +212,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL Matrix4x4Value:public IValue
+class MRAY_CORE_DLL Matrix4x4Value:public IValue
 {
 public:
 	math::matrix4x4 value;
@@ -230,7 +230,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL PlaneValue:public IValue
+class MRAY_CORE_DLL PlaneValue:public IValue
 {
 public:
 	math::Plane value;
@@ -248,7 +248,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL QuaternionValue:public IValue
+class MRAY_CORE_DLL QuaternionValue:public IValue
 {
 public:
 	math::quaternion value;
@@ -266,7 +266,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL RectiValue:public IValue
+class MRAY_CORE_DLL RectiValue:public IValue
 {
 public:
 	math::recti value;
@@ -284,7 +284,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL RectfValue:public IValue
+class MRAY_CORE_DLL RectfValue:public IValue
 {
 public:
 	math::rectf value;

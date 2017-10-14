@@ -143,7 +143,7 @@ void GStreamerCore::_Init()
 
 		gLogManager.log("GStreamerCore - Adding Appsink", ELL_INFO);
 		//add our custom src/sink elements
-		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+		gst_plugin_register_static(1, 1,
 			"appsink", (char*)"Element application sink",
 			appsink_plugin_init, "0.1", "LGPL", "ofVideoPlayer", "openFrameworks",
 			"http://openframeworks.cc/");
@@ -156,17 +156,18 @@ void GStreamerCore::_Init()
 // 			_GstMySinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 // 			"");
 		gLogManager.log("GStreamerCore - Adding myudpsrc", ELL_INFO);
-		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+		gst_plugin_register_static(1, 1,
 			"myudpsrc", (char*)"Element udp src",
 			_GstMyUDPSrcClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 			"");
 		gLogManager.log("GStreamerCore - Adding myudpsink", ELL_INFO);
-		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+		gst_plugin_register_static(1, 1,
 			"myudpsink", (char*)"Element udp sink",
 			_GstMyUDPSinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 			"");
 
-		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+		gLogManager.log("GStreamerCore - Adding mylistener", ELL_INFO);
+		gst_plugin_register_static(1, 1,
 			"mylistener", (char*)"Custom listener element",
 			_GstMyListenerClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "mray",
 			"");

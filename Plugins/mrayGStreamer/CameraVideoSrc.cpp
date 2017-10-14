@@ -6,7 +6,7 @@
 #include "AveragePer.h"
 #include "ILogManager.h"
 
-#include <hash_map>
+#include <map>
 
 namespace mray
 {
@@ -32,7 +32,7 @@ public:
 
 	std::vector<GstMyListener*> m_imagecapListener;
 
-	std::hash_map<int, std::vector<IMyListenerCallback*>> listeners;
+	std::map<int, std::vector<IMyListenerCallback*>> listeners;
 
 public:
 	CameraVideoSrcImpl()

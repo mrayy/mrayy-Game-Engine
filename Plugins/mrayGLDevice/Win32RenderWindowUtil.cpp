@@ -14,10 +14,10 @@ LRESULT CALLBACK Win32RenderWindowUtil::_WndProc(HWND hWnd, UINT uMsg, WPARAM wP
 {
 
 	OptionContainer params;
-	params[mT("hWnd")].value=core::StringConverter::toString((ulong)hWnd);
-	params[mT("Msg")].value=core::StringConverter::toString((uint)uMsg);
-	params[mT("wParam")].value=core::StringConverter::toString((uint)wParam);
-	params[mT("lParam")].value=core::StringConverter::toString((uint)lParam);
+	params[mT("hWnd")].value=core::StringConverter::toString((unsigned long long)hWnd);
+	params[mT("Msg")].value=core::StringConverter::toString((UINT)uMsg);
+	params[mT("wParam")].value=core::StringConverter::toString((LONG_PTR)wParam);
+	params[mT("lParam")].value=core::StringConverter::toString((LONG_PTR)lParam);
 	
 	ulong ret=RenderWindowUtils::HandleWindowEvent(params);
 	return ret;

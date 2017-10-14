@@ -6,7 +6,6 @@
 #include <mTypes.h>
 #include <NetDataTypes.h>
 #include <IMutex.h>
-#include <hash_set>
 
 #include "CompileConfig.h"
 

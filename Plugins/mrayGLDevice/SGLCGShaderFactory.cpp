@@ -26,7 +26,7 @@ namespace video{
 				errorMsg += "- Context: " + core::StringConverter::toString(msg
 				);
 		}
-		gVideoLoggerSystem.log(errorMsg, ELL_WARNING);
+//			.log(errorMsg, ELL_WARNING);
 	}
 SGLCGShaderFactory::SGLCGShaderFactory(){
 	m_context=cgCreateContext();

@@ -74,7 +74,7 @@ bool Plane::getIntersectionWithPlane(const Plane&other,vector3d&outLinePoint,
 
 	double det=f1*f3-f2*f2;
 
-	if(abs(det)<math::Zero)
+	if(fabsf(det)<math::Zero)
 		return 0;
 	det=1.0/det;
 	

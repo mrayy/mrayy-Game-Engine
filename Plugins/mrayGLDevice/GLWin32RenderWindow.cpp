@@ -260,6 +260,7 @@ void GLWin32RenderWindow::Create(const math::vector2di& size,bool fullScreen,con
 			dwstyle, m_position.x, m_position.y, outerSz.x, outerSz.y, parent, 0, hinst, this);
 		//gVideoLoggerSystem.log(mT("GL Window Created :")+m_name,ELL_INFO);
 
+
 		RenderWindowUtils::AddRenderWindow(this);
 
 		if(m_isFullscreen)

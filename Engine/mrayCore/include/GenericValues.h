@@ -24,7 +24,7 @@ namespace video{
 	class ITexture;
 }
 
-class MRAY_DLL IntValue:public IValue
+class MRAY_CORE_DLL IntValue:public IValue
 {
 public:
 	int value;
@@ -42,7 +42,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL FloatValue:public IValue
+class MRAY_CORE_DLL FloatValue:public IValue
 {
 public:
 	float value;
@@ -60,7 +60,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL BoolValue:public IValue
+class MRAY_CORE_DLL BoolValue:public IValue
 {
 public:
 	bool value;
@@ -78,7 +78,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-class MRAY_DLL StringValue:public IValue
+class MRAY_CORE_DLL StringValue:public IValue
 {
 public:
 	core::string value;

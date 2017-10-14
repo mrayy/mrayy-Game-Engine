@@ -8,7 +8,7 @@
 	
 #define DELEG_PCOUNT 1
 #define DELEG_PARAMS Param1 p1
-#define DELEG_PARAMS_T class MRAY_CORE_DLL Param1
+#define DELEG_PARAMS_T class  Param1
 #define DELEG_ARGS p1
 #define DELEG_ARGS_T Param1
 
@@ -22,7 +22,7 @@
 	
 #define DELEG_PCOUNT 2
 #define DELEG_PARAMS Param1 p1,Param2 p2
-#define DELEG_PARAMS_T class MRAY_CORE_DLL Param1,class MRAY_CORE_DLL Param2
+#define DELEG_PARAMS_T class  Param1,class  Param2
 #define DELEG_ARGS p1,p2
 #define DELEG_ARGS_T Param1,Param2
 
@@ -36,7 +36,7 @@
 	
 #define DELEG_PCOUNT 3
 #define DELEG_PARAMS Param1 p1,Param2 p2,Param3 p3
-#define DELEG_PARAMS_T class MRAY_CORE_DLL Param1,class MRAY_CORE_DLL Param2,class MRAY_CORE_DLL Param3
+#define DELEG_PARAMS_T class  Param1,class  Param2,class  Param3
 #define DELEG_ARGS p1,p2,p3
 #define DELEG_ARGS_T Param1,Param2,Param3
 
@@ -51,7 +51,7 @@
 #undef DELEG_PCOUNT
 
 #define DELEG_PARAMS Param1 p1,Param2 p2,Param3 p3,Param4 p4
-#define DELEG_PARAMS_T class MRAY_CORE_DLL Param1,class MRAY_CORE_DLL Param2,class MRAY_CORE_DLL Param3,class MRAY_CORE_DLL Param4
+#define DELEG_PARAMS_T class  Param1,class  Param2,class  Param3,class  Param4
 #define DELEG_ARGS p1,p2,p3,p4
 #define DELEG_ARGS_T Param1,Param2,Param3,Param4
 

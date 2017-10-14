@@ -80,7 +80,7 @@ EXTERN_C const IID IID_ISampleGrabber;
 EXTERN_C const CLSID CLSID_NullRenderer;
 
 //use capDeviceInput::setVerbose to change 
-static bool verbose = true;
+static bool verbose = false;
 
 //use capDeviceInput::setComMultiThreaded to change 
 static bool VI_COM_MULTI_THREADED = false;

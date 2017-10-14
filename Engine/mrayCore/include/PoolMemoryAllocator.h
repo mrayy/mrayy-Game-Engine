@@ -201,7 +201,7 @@ inline bool operator!=(const PoolMemoryAllocator<T>&, const PoolMemoryAllocator<
 
 }
 namespace std{
-	template <class  _Tp1, class MRAY_CORE_DLL _Tp2>
+	template <class  _Tp1, class  _Tp2>
 	inline mray::PoolMemoryAllocator<_Tp2>& POOL_ALLOC_CDECL
 		__stl_alloc_rebind(mray::PoolMemoryAllocator<_Tp1>& __a, const _Tp2*) 
 	{  
@@ -209,7 +209,7 @@ namespace std{
 	}
 
 
-	template <class  _Tp1, class MRAY_CORE_DLL _Tp2>
+	template <class  _Tp1, class  _Tp2>
 	inline mray::PoolMemoryAllocator<_Tp2> POOL_ALLOC_CDECL
 		__stl_alloc_create(const mray::PoolMemoryAllocator<_Tp1>&, const _Tp2*) 
 	{ 

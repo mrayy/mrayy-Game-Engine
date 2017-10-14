@@ -228,7 +228,7 @@ bool SGLCGShaderProgram::checkForError(const mchar*msg){
 			errorMsg+=core::StringConverter::toString(cgGetLastListing(m_context));
 		}
 		//FATAL_ERROR(1,errorMsg.c_str())
-		gVideoLoggerSystem.log(errorMsg.c_str(),ELL_WARNING);
+		//gVideoLoggerSystem.log(errorMsg.c_str(),ELL_WARNING);
 		return 1;
 	}
 	return 0;

@@ -41,20 +41,20 @@ void GLSupport::InitExtensions()
 
 	core::string tmpStr ;
 	core::char_to_string( (const char*)pcVer,tmpStr);
-	gVideoLoggerSystem.log(mT("GL_VERSION = ") + tmpStr,ELL_INFO);
+//	gVideoLoggerSystem.log(mT("GL_VERSION = ") + tmpStr,ELL_INFO);
 
 	m_version = tmpStr.substr(0, tmpStr.find(mT(" ")));
 
 	// Get vendor
 	const GLubyte* pcVendor = glGetString(GL_VENDOR);
 	core::char_to_string( (const char*)pcVendor,tmpStr);
-	gVideoLoggerSystem.log(mT("GL_VENDOR = ") + tmpStr,ELL_INFO);
+	//gVideoLoggerSystem.log(mT("GL_VENDOR = ") + tmpStr,ELL_INFO);
 	m_vendor = tmpStr.substr(0, tmpStr.find(mT(" ")));
 
 	// Get renderer
 	const GLubyte* pcRenderer = glGetString(GL_RENDERER);
 	core::char_to_string( (const char*)pcRenderer,tmpStr);
-	gVideoLoggerSystem.log(mT("GL_RENDERER = ") + tmpStr,ELL_INFO);
+	//gVideoLoggerSystem.log(mT("GL_RENDERER = ") + tmpStr,ELL_INFO);
 
 	// Set extension list
 	std::stringstream ext;
@@ -65,7 +65,7 @@ void GLSupport::InitExtensions()
 	assert(pcExt && "Problems getting GL extension string using glGetString");
 
 	core::char_to_string( (const char*)pcExt,tmpStr);
-	gVideoLoggerSystem.log(mT("GL_EXTENSIONS = ") + tmpStr,ELL_INFO);
+	//gVideoLoggerSystem.log(mT("GL_EXTENSIONS = ") + tmpStr,ELL_INFO);
 
 	ext << pcExt;
 

@@ -39,7 +39,7 @@ LRESULT Win32MessageProc::WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 
 	if(msg==WM_CREATE)
 	{
-		SetWindowLongPtr(hWnd,GWLP_USERDATA, (LONG)(((LPCREATESTRUCT)lParam)->lpCreateParams));
+		SetWindowLongPtr(hWnd,GWLP_USERDATA, (LONG_PTR)(((LPCREATESTRUCT)lParam)->lpCreateParams));
 		return 0;
 	}
 	video::RenderWindow* wnd= (video::RenderWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);

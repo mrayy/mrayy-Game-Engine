@@ -3,7 +3,7 @@
 #define ___IResourceManager___
 
 
-#include <hash_map>
+//#include <hash_map>
 #include "GCPtr.h"
 #include "IResource.h"
 #include "mString.h"

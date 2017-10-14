@@ -421,7 +421,7 @@ quaternion quaternion::exp () const
 	quaternion kResult;
 	kResult.w = (float)cosr(fAngle);
 
-	if ( abs(fSin) >= Epsilon )
+	if (fabsf(fSin) >= Epsilon )
 	{
 		float fCoeff = fSin/(fAngle);
 		kResult.x = fCoeff*x;
@@ -446,11 +446,11 @@ quaternion quaternion::log () const
 	quaternion kResult;
 	kResult.w = 0.0;
 
-	if ( abs(w) < 1.0 )
+	if (fabsf(w) < 1.0 )
 	{
 		double fAngle ( acos(w) );
 		double fSin = math::sinr(fAngle);
-		if ( abs(fSin) >= math::Epsilon )
+		if (fabsf(fSin) >= math::Epsilon )
 		{
 			float fCoeff = (float)(fAngle/fSin);
 			kResult.x = fCoeff*x;
@@ -571,7 +571,7 @@ void quaternion::Slerp(const quaternion& rkP,const quaternion& rkQ,float t,bool 
 		rkT = rkQ;
 	}
 
-	if (abs(fCos) < 1 - math::Epsilon)
+	if (fabsf(fCos) < 1 - math::Epsilon)
 	{
 		// Standard case (slerp)
 		float fSin = sqrt(1 - math::sqr(fCos));

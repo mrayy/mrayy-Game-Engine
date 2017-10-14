@@ -436,7 +436,7 @@ public:
 	}
 	virtual void ListenerOnDataChained(_GstMyListener* src, GstBuffer * bfr)
 	{
-		return;
+		//return;
 		if (!buffer)
 			return;
 		GstMapInfo map;
@@ -575,6 +575,7 @@ public:
 
 			if (camtype == ECameraType::Ovrvision ||
 				camtype == ECameraType::OvrvisionCompressed)
+				printf("A\n");
 			{
 				gLogManager.log("Linking Overvision",ELL_INFO);
 				src->AddPostCaptureListener(&_ovrListener,0);

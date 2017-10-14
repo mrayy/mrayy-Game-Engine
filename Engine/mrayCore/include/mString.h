@@ -109,7 +109,7 @@ public:
 	//! Makes the tstring lower case.
 	void make_lower()
 	{
-		T* ptr=_Myptr();
+		T* ptr=(T*)c_str();
 		while(*ptr)
 		{
 			if (*ptr>='A' && *ptr<='Z')
@@ -123,7 +123,7 @@ public:
 	//! Makes the tstring upper case.
 	void make_upper()
 	{
-		T* ptr=_Myptr();
+		T* ptr=(T*)c_str();
 		while(*ptr)
 		{
 			if (*ptr>='a' && *ptr<='z')
@@ -175,7 +175,7 @@ public:
 	//! replaces all characters of a special type with another one
 	void replaceChar(T toReplace, T replaceWith)
 	{
-		T* ptr=_Myptr();
+		T* ptr=(T*)c_str();
 		while(*ptr)
 		{
 			if (*ptr == toReplace)

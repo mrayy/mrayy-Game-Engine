@@ -69,8 +69,8 @@ bool matrix4x4::checkIdentity()
 	for(int i=0;i<4;++i)
 	for(int j=0;j<4;j++)
 		if(i!=j)
-			if(abs(mat[i*4+j])>math::Epsilon)return 0;
-		else if(abs(mat[i*4+j])>1+math::Epsilon|| abs(mat[i*4+j])<1-math::Epsilon)
+			if(fabsf(mat[i*4+j])>math::Epsilon)return 0;
+		else if(fabsf(mat[i*4+j])>1+math::Epsilon|| fabsf(mat[i*4+j])<1-math::Epsilon)
 			return 0;
 	//isIdentityMatrix=1;
 	return 1;
@@ -380,7 +380,7 @@ vector3d matrix4x4::getRotation()const
 
 	double rotx, roty, X, Z;
 
-	if (fabs(C)>0.0005f)
+	if (fabsf(C)>0.0005f)
 	{
 		rotx = mat[10] / C;
 		roty = mat[6] / C;

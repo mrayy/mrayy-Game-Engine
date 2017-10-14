@@ -397,6 +397,12 @@
     <ClInclude Include="include\CompileConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\GenericValues.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MathValues.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Notes.txt" />
@@ -607,6 +613,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SingletonImpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\GenericValues.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\MathValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

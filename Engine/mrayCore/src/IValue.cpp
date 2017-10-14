@@ -5,7 +5,7 @@
 #include "EnumManager.h"
 
 #include "GenericValues.h"
-#include "VideoValues.h"
+//#include "VideoValues.h"
 #include "MathValues.h"
 
 
@@ -77,7 +77,7 @@ IValue* IValue::CreateValueByType(const core::string&name,EValueType t)
 		return new RectiValue(name,math::recti(0,0,0,0));
 	case EVT_RECTf:
 		return new RectfValue(name,math::rectf(0,0,0,0));
-
+		/*
 	case EVT_MATERIAL:
 		return new MaterialValue(name,0);
 	case EVT_TEXTURE:
@@ -85,7 +85,7 @@ IValue* IValue::CreateValueByType(const core::string&name,EValueType t)
 	case EVT_COLOR:
 		return new ColorValue(name,0);
 	case EVT_SHADER:
-		return new ShaderValue(name,0);
+		return new ShaderValue(name,0);*/
 	}
 
 	return 0;

@@ -102,10 +102,6 @@ public:
 	bool m_isVideoStarted;
 	network::NetAddress m_remoteAddr;
 
-	float m_currentGain;
-	float m_lastGainUpdate;
-	float m_maxGain;
-	bool m_autoGain;
 
 	int m_quality;
 	CameraProfileManager* m_cameraProfileManager;
@@ -142,10 +138,6 @@ public:
 
 		m_optimizedOVRVision = false;
 
-		m_currentGain = 0;
-		m_lastGainUpdate = 0;
-		m_maxGain = 0.25;
-		m_autoGain = false;
 		benchmarkFile = fopen("TxEyesServiceImpl.benchmark", "w");
 		fprintf(benchmarkFile, "FPS\tBytes\tEncoding\tCPU\tMem\n");
 		m_benchLastTime = gEngine.getTimer()->getMilliseconds();
@@ -255,8 +247,6 @@ public:
 		m_cameraProfile = context->appOptions.GetOptionValue("CameraProfile","None");
 
 		m_quality = core::StringConverter::toInt(context->appOptions.GetOptionValue("Quality", "0"));
-		m_autoGain = core::StringConverter::toBool(context->appOptions.GetOptionValue("AutoGain", "false"));
-
 		printf("Parameters loaded..\n");
 		{
 
@@ -408,10 +398,9 @@ public:
 			//Init Cameras
 			m_cameraController->SetCameras(m_cameraIfo,m_cameraType);
 
-			m_currentGain =  core::StringConverter::toFloat(context->appOptions.GetOptionByName("Gain")->getValue());
 			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
 			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
-			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, core::StringConverter::toString(m_currentGain));// context->appOptions.GetOptionByName("Gain")->getValue());
+			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, "1");// context->appOptions.GetOptionByName("Gain")->getValue());
 
 			// Now close cameras
 			m_cameraController->Stop();
@@ -592,7 +581,7 @@ public:
 			//Pointgrey cameras need to be started manually
 			printf("Starting Cameras.\n");
 			m_cameraController->Start();
-			Sleep(100);
+			//Sleep(100);
 		}
 
 		m_cameraSource->SetResolution(m_resolution.x, m_resolution.y, m_fps, true);
@@ -604,11 +593,10 @@ public:
 
 		printf("Start Streaming.\n");
 		m_streamers->Stream();
-		Sleep(500);
+		//Sleep(500);
 
 		m_cameraController->OnStreamStarted();
 
-		m_lastGainUpdate = gEngine.getTimer()->getSeconds() + 2000;
 		printf("Stream started.\n");
 
 

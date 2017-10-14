@@ -18,7 +18,7 @@
 #include "GLContext.h"
 
 #include "DeviceCapabilites.h"
-#include "hash_map"
+#include <map>
 
 #include <gl\gl.h>
 
@@ -46,7 +46,7 @@ public:
 	static const core::string m_deviceType;
 protected:
 
-	stdext::hash_map<GLenum,bool> m_states;
+	std::map<GLenum,bool> m_states;
 
 	int lastLightAdded;
 
