@@ -188,7 +188,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Engine\mrayCore\include;..\..\Engine\mrayMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Engine\mrayCore\include;..\..\Engine\mrayMath;..\..\Dependencies\include\%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -197,7 +197,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>mrayCore.lib;mrayMath.lib;kernel32.lib;user32.lib;ws2_32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;libnice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zlib.lib;mrayCore.lib;mrayMath.lib;kernel32.lib;user32.lib;ws2_32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;libnice.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\Dependencies\lib\$(Configuration)64;$(GSTREAMER_1_0_ROOT_X86_64)\lib;..\..\lib\$(Configuration)64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -217,6 +217,7 @@
     <ClInclude Include="CustomAudioGrabber.h" />
     <ClInclude Include="EyegazeCameraVideoSrc.h" />
     <ClInclude Include="GstAppNetAudioStreamer.h" />
+    <ClInclude Include="GstCustomDataPlayer.h" />
     <ClInclude Include="GstCustomDataStreamer.h" />
     <ClInclude Include="GstNetworkVideoStreamer.h" />
     <ClInclude Include="GstCustomVideoStreamer.h" />
@@ -232,6 +233,7 @@
     <ClInclude Include="GstNetworkVideoPlayer.h" />
     <ClInclude Include="GStreamerPlayback.h" />
     <ClInclude Include="GstStreamBin.h" />
+    <ClInclude Include="GZipCompress.h" />
     <ClInclude Include="IAppSinkHandler.h" />
     <ClInclude Include="IAudioGrabber.h" />
     <ClInclude Include="ICustomVideoSrc.h" />
@@ -268,6 +270,7 @@
     <ClCompile Include="CustomAudioGrabber.cpp" />
     <ClCompile Include="EyegazeCameraVideoSrc.cpp" />
     <ClCompile Include="GstAppNetAudioStreamer.cpp" />
+    <ClCompile Include="GstCustomDataPlayer.cpp" />
     <ClCompile Include="GstCustomDataStreamer.cpp" />
     <ClCompile Include="GstNetworkVideoStreamer.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
@@ -287,6 +290,7 @@
     <ClCompile Include="GstStreamBin.cpp" />
     <ClCompile Include="GstUtils.cpp" />
     <ClCompile Include="GstVideoPlayer.cpp" />
+    <ClCompile Include="GZipCompress.cpp" />
     <ClCompile Include="IAppSinkHandler.cpp" />
     <ClCompile Include="ICustomVideoSrc.cpp" />
     <ClCompile Include="IGStreamerPlayer.cpp" />

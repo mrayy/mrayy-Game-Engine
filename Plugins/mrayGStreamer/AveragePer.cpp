@@ -16,11 +16,13 @@ void AveragePer::Add(uint count)
 {
 	m_count += count;
 	m_totalCount += count;
+	++m_samples;
 
 	ulong ts = gGStreamerCore->GetTimer()->getMilliseconds();
 	if (ts - m_timestamp > m_per){
 		m_timestamp = ts;
-		m_average = m_count;
+		m_average = (float)m_count/ (float)m_samples;
+		m_samples = 0;
 		m_count = 0;
 		OnSample(m_average);
 	}
@@ -34,7 +36,7 @@ void AveragePer::Reset()
 	m_timestamp = gGStreamerCore->GetTimer()->getMilliseconds();
 }
 
-uint AveragePer::GetAverage(){
+float AveragePer::GetAverage(){
 	return m_average;
 }
 }

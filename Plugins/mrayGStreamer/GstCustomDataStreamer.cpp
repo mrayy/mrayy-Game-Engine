@@ -12,6 +12,9 @@
 #include "IThreadManager.h"
 #include "IMutex.h"
 
+#include "GZipCompress.h"
+#include "AveragePer.h"
+
 namespace mray
 {
 namespace video
@@ -23,6 +26,7 @@ protected:
 	core::string m_ipAddr;
 	uint m_dataPort;
 
+	uint m_appSourceID;
 	core::string m_pipeLineString;
 	GstMyUDPSink* m_dataSink;
 	core::string m_dataType;
@@ -34,6 +38,8 @@ protected:
 	GstClockTime m_prevTimeStamp;
 
 	OS::IMutex* m_dataMutex;
+
+	Compress::GZipCompress m_compress;
 
 	struct DataSegment
 	{
@@ -57,25 +63,35 @@ protected:
 
 		bool avail;
 	};
-	std::vector<DataSegment*> m_data;
+	typedef std::list<DataSegment*> DataList;
+	DataList m_data;
+	DataList m_grave;
+
+	AveragePer m_compressRatio;
+
 public:
 	GstCustomDataStreamerImpl()
 	{
 		m_dataSink = 0;
+		m_appSourceID = 0;
 		m_dataSrc = 0;
 		m_ipAddr = "127.0.0.1";
 		m_dataPort = 5005;
 		m_bufferID = 0;
 		m_prevTimeStamp = 0;
+		m_compressRatio.Init(1000);
 		m_dataMutex = OS::IThreadManager::getInstance().createMutex();
 	}
 	virtual ~GstCustomDataStreamerImpl()
 	{
 		Close();
 		delete m_dataMutex;
-		for (int i = 0; i < m_data.size(); ++i)
-			delete m_data[i];
+		for (DataSegment* d : m_data)
+			delete d;
+		for (DataSegment* d : m_grave)
+			delete d;
 		m_data.clear();
+		m_grave.clear();
 	}
 	void SetApplicationDataType(const std::string& dataType, bool autotimestamp, int payload = 98)
 	{
@@ -91,7 +107,25 @@ public:
 		{
 			d->owner->m_dataMutex->lock();
 			d->avail = true;
+			d->owner->m_grave.push_back(d);
 			d->owner->m_dataMutex->unlock();
+		}
+	}
+	static void _DestroyNotifyRemove(gpointer       data)
+	{
+		uchar* d = static_cast<uchar*>(data);
+		if (d)
+		{
+			delete[] d;
+		}
+	}
+	static void _DestroyNotifyChunk(gpointer       data)
+	{
+		Compress::GZipCompress::Chunk* d = static_cast<Compress::GZipCompress::Chunk*>(data);
+		if (d)
+		{
+			d->autoRemove=true;
+			delete d;
 		}
 	}
 
@@ -99,11 +133,14 @@ public:
 	{
 		m_dataMutex->lock();
 		DataSegment* d = 0;
-		for (int i = 0; i < m_data.size(); ++i)
+		DataList::iterator it = m_grave.begin();
+		for (;it != m_grave.end();++it)
 		{
-			if (m_data[i]->avail && m_data[i]->length>=size)
+			DataSegment* t = *it;
+			if (t->avail && t->length >= size)
 			{
-				d = m_data[i];
+				d = t;
+				m_grave.erase(it);
 				break;
 			}
 		}
@@ -113,8 +150,8 @@ public:
 			d->owner = this;
 			d->data = new uchar[size];
 			d->length = size;
-			m_data.push_back(d);
 		}
+		m_data.push_back(d);
 		d->avail = false;
 		m_dataMutex->unlock();
 		return d;
@@ -136,7 +173,7 @@ public:
 
 		auto d=GetDataSegment(length);
 		memcpy(d->data, data, length);
-
+		/*
 		GstBuffer * buffer = gst_buffer_new_wrapped_full(GST_MEMORY_FLAG_READONLY, (void*)d->data, length, 0, length, d, (GDestroyNotify)&_DestroyNotify);
 
 		GstClockTime now = GST_CLOCK_TIME_NONE;
@@ -157,16 +194,16 @@ public:
 
 		if (flow_return != GST_FLOW_OK) {
 			gLogManager.log("GstCustomDataStreamer::Failed to push data", ELL_WARNING, EVL_Heavy);
-		}
+		}*/
 	}
 	void BuildString()
 	{
 		//actual-buffer-time=0 actual-latency-time=0
 		core::string pipline = "appsrc is-live=1 format=time do-timestamp=" + core::string(m_autotimestamp ? "1" : "0") + " name=dataSrc ! application/x-" + m_dataType + " ";
 		
-		pipline += " ! rtpgstpay pt=" + core::StringConverter::toString(m_payload) + " ";
+		pipline += " ! rtpgstpay pt=" + core::StringConverter::toString(m_payload) + " config-interval=3 ";
 		m_pipeLineString = pipline + " ! "
-			"udpsink name=dataSink ";
+			"udpsink name=dataSink port="+core::StringConverter::toString(m_dataPort)+" host="+m_ipAddr+" sync=false ";
 
 	}
 	void _UpdatePorts()
@@ -179,8 +216,8 @@ public:
 
 
 	//	SET_SINK(dataSink, m_dataPort);
-		g_object_set(m_dataSink, "port", m_dataPort, 0);
-		g_object_set(m_dataSink, "host", m_ipAddr.c_str(), 0);
+// 		g_object_set(m_dataSink, "port", m_dataPort, 0);
+// 		g_object_set(m_dataSink, "host", m_ipAddr.c_str(), 0);
 	}
 
 
@@ -193,6 +230,102 @@ public:
 		_UpdatePorts();
 	}
 
+	GstFlowReturn NeedBuffer(GstBuffer ** buffer)
+	{
+		DataSegment* s = 0;
+		m_dataMutex->lock();
+		if(m_data.size()>0)
+		{
+			s = m_data.front();
+			m_data.pop_front();
+		}
+		m_dataMutex->unlock();
+		if (!s)
+		{
+			//	gLogManager.log("AppSrcVideoSrc::NeedBuffer() - Failed to grab buffer " + core::StringConverter::toString(index), ELL_WARNING);
+			return GST_FLOW_ERROR;
+		}
+
+		Compress::GZipCompress::Chunk input(false), output(true);
+
+		input.data = s->data;
+		input.length = s->length;
+
+		m_compress.compress(&input,&output);
+
+		uchar* bufferData;
+		int len;
+
+ 		if (output.length < s->length)
+ 		{
+			m_compressRatio.Add(100 * ((float)s->length / (float)output.length));
+			len = output.length + 1;
+			bufferData = new uchar[len];
+			bufferData[0] = 1;
+			memcpy(bufferData + 1, output.data, output.length);
+			m_grave.push_back(s);
+ 
+ 		}
+		else
+		{
+
+			len = s->length + 1;
+			bufferData = new uchar[len];
+			bufferData[0] = 0;
+			memcpy(bufferData + 1, s->data, s->length);
+		}
+		m_grave.push_back(s);
+ 		//	*buffer = gst_buffer_new_wrapped_full(GST_MEMORY_FLAG_READONLY, (void*)s->data, s->length, 0, s->length, s, (GDestroyNotify)&_DestroyNotify);
+
+		*buffer = gst_buffer_new_wrapped_full(GST_MEMORY_FLAG_READONLY, (void*)bufferData, len, 0, len, bufferData, (GDestroyNotify)&_DestroyNotifyRemove);
+
+		return GST_FLOW_OK;
+	}
+
+	static gboolean read_data(GstCustomDataStreamerImpl *d)
+	{
+		GstFlowReturn ret;
+
+		GstBuffer *buffer;
+		if (d->NeedBuffer(&buffer) == GST_FLOW_OK)
+		{
+			ret = gst_app_src_push_buffer(d->m_dataSrc, buffer);
+			//	gLogManager.log("pushing data to: ", core::StringConverter::toString(d->index),ELL_INFO);
+			if (ret != GST_FLOW_OK) {
+				gLogManager.log("GstAppNetAudioStreamer::read_data() - Failed to push data to AppSrc ", ELL_WARNING);
+				ret = gst_app_src_end_of_stream(d->m_dataSrc);
+				return FALSE;
+			}
+		}
+		return TRUE;
+
+	}
+	static void start_feed(GstAppSrc *source, guint size, gpointer data)
+	{
+		GstCustomDataStreamerImpl* o = static_cast<GstCustomDataStreamerImpl*>(data);
+		if (o->m_appSourceID != 0)
+		{
+			g_source_remove(o->m_appSourceID);
+			o->m_appSourceID = 0;
+		}
+		GST_DEBUG("start feeding");
+		o->m_appSourceID = g_idle_add((GSourceFunc)read_data, o);
+	}
+
+
+	static void stop_feed(GstAppSrc *source, gpointer data)
+	{
+		GstCustomDataStreamerImpl* o = static_cast<GstCustomDataStreamerImpl*>(data);
+		if (o->m_appSourceID != 0) {
+			GST_DEBUG("stop feeding");
+			g_source_remove(o->m_appSourceID);
+			o->m_appSourceID = 0;
+		}
+	}
+	static gboolean seek_data(GstAppSrc *src, guint64 offset, gpointer user_data)
+	{
+		return TRUE;
+	}
 	bool CreateStream()
 	{
 		GError *err = 0;
@@ -212,9 +345,20 @@ public:
 
 		m_dataSrc=GST_APP_SRC(gst_bin_get_by_name(GST_BIN((GstElement*)p), "dataSrc"));
 		gst_app_src_set_stream_type((GstAppSrc*)m_dataSrc, GST_APP_STREAM_TYPE_STREAM);
+		GstAppSrcCallbacks m_srcCB;
+		m_srcCB.need_data = &start_feed;
+		m_srcCB.enough_data = &stop_feed;
+		m_srcCB.seek_data = &seek_data;
+		gst_app_src_set_callbacks(m_dataSrc, &m_srcCB, this, NULL);
+
+		m_compressRatio.Reset();
 
 		return CreatePipeline();
 
+	}
+	int CompressRatio()
+	{
+		return m_compressRatio.GetAverage();
 	}
 	void Stream()
 	{
@@ -300,6 +444,10 @@ void GstCustomDataStreamer::SetPaused(bool paused)
 bool GstCustomDataStreamer::IsPaused()
 {
 	return !m_impl->IsPlaying();
+}
+int GstCustomDataStreamer::CompressRatio()
+{
+	return m_impl->CompressRatio();
 }
 
 

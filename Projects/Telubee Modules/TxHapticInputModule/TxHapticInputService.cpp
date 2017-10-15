@@ -9,6 +9,8 @@
 #include "GstNetworkAudioStreamer.h"
 #include "DirectSoundInputStream.h"
 
+#include "GstCustomDataStreamer.h"
+#include "GstCustomDataPlayer.h"
 
 namespace mray
 {
@@ -39,6 +41,9 @@ public:
 	GCPtr<video::GstStreamBin> m_streamers;
 	std::vector<HapticInterface> m_hapticInterfaceIndicies;
 	std::vector<sound::InputStreamDeviceInfo> m_audioInterfaceList;
+
+	video::GstCustomDataStreamer* m_dstreamer;
+	video::GstCustomDataPlayer* m_dplayer;
 public:
 
 	TxHapticInputServiceImpl()
@@ -84,6 +89,7 @@ public:
 				m_hapticInterfaceIndicies.push_back(iface);//add the default audio interface
 			}
 			printf("Creating Haptic Streamer\n");
+			m_streamers = new video::GstStreamBin();
 
 			for (int i = 0; i < m_hapticInterfaceIndicies.size(); ++i)
 			{
@@ -105,6 +111,24 @@ public:
 					interfaceID = interfaceID + "#" + core::StringConverter::toString(i);
 				m_streamers->AddStream(streamer, interfaceID);
 			}
+		}
+
+
+		
+		{
+			m_dstreamer = new video::GstCustomDataStreamer();
+			m_dstreamer->SetApplicationDataType("rtp", true);
+			uint ports[] = { 5111 };
+			m_dstreamer->BindPorts("192.168.137.1", ports, 1, false);
+			m_dstreamer->CreateStream();
+			m_dstreamer->Stream();
+
+			m_dplayer = new video::GstCustomDataPlayer();
+			m_dplayer->SetApplicationDataType("rtp", true);
+			m_dplayer->SetPort(0);
+			m_dplayer->CreateStream();
+			m_dplayer->Play();
+
 		}
 
 		printf("Finished streams\n");
@@ -138,11 +162,52 @@ public:
 		m_status = EServiceStatus::Stopped;
 		return true;
 	}
+
+	int _count;
+	float t = 0;
+
+	uint time;
+
 	void Update(float dt)
 	{
 		if (m_status != EServiceStatus::Running)
 			return;
 
+		t += dt;
+
+
+		//if(t>0.01f)
+		{
+			t = 0;
+			std::vector<float> data;
+			int length = (int)math::Randomizer::randRange(10, 30);
+			for (int i = 0;i < length;++i)
+			{
+				data.push_back(math::Randomizer::rand01());
+			}
+			time++;
+
+			m_dstreamer->AddDataFrame((uchar*)&data[0],sizeof(float)*data.size());
+		}
+
+	
+		while (m_dplayer->GrabFrame())
+		{
+			 int length=m_dplayer->GetDataLength();
+
+			 void* d = new uchar[length];
+
+			 if (m_dplayer->GetData(d, length))
+			 {
+				 float* received = (float*)d;
+				 _count = time-(int)received[0];
+
+
+
+			 }
+
+			 delete []d;
+		}
 	}
 	void Render(ServiceRenderContext* context)
 	{
@@ -154,7 +219,8 @@ public:
 	{
 		if (m_status == EServiceStatus::Idle)
 			return;
-
+		core::string msg = "Compress raio= " + core::StringConverter::toString(m_dstreamer->CompressRatio())+"%";
+		context->RenderText(msg, 0, 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

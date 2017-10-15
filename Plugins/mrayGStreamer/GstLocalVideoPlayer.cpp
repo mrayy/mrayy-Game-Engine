@@ -82,7 +82,7 @@ public:
 		}
 
 		{
-			ss << "! F ! appsink name=videosink";
+			ss << "! appsink name=videosink";
 
 		}
 		m_pipeLineString = ss.str();

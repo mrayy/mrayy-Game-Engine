@@ -29,6 +29,7 @@ namespace video
 	}
 	VideoAppSinkHandler::~VideoAppSinkHandler()
 	{
+		delete m_mutex;
 	}
 	void VideoAppSinkHandler::Close()
 	{

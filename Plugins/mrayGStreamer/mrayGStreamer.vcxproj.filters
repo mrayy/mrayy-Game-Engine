@@ -100,6 +100,12 @@
     <ClCompile Include="OVRVisionEyegazeCameraVideoSrc.cpp">
       <Filter>StreamType\Streamer\VideoGrabber</Filter>
     </ClCompile>
+    <ClCompile Include="GstCustomDataPlayer.cpp">
+      <Filter>StreamType\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GZipCompress.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GStreamerManager.h" />
@@ -209,6 +215,12 @@
     </ClInclude>
     <ClInclude Include="OVRVisionEyegazeCameraVideoSrc.h">
       <Filter>StreamType\Streamer\VideoGrabber</Filter>
+    </ClInclude>
+    <ClInclude Include="GstCustomDataPlayer.h">
+      <Filter>StreamType\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GZipCompress.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

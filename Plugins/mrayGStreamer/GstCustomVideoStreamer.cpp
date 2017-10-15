@@ -24,6 +24,7 @@ class GstCustomVideoStreamerImpl :public GstPipelineHandler,public IPipelineList
 {
 protected:
 
+
 	GstCustomVideoStreamer* m_owner;
 
 	core::string m_ipAddr;

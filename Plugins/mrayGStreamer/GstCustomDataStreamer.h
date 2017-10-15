@@ -31,6 +31,8 @@ public:
 	virtual void Stop() ;
 	virtual void Close() ;
 
+	int CompressRatio();
+
 	virtual void SetPaused(bool paused) ;
 	virtual bool IsPaused() ;
 };
