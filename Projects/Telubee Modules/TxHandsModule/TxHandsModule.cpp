@@ -5,6 +5,7 @@
 #include "TxHandsModule.h"
 #include "TxHandsService.h"
 
+extern mray::core::string ModuleName;
 
 namespace mray
 {
@@ -38,7 +39,7 @@ CServiceModule* CServiceModule::instance = 0;
 // see TelubeeRobotDLL.h for the class definition
 CServiceModule::CServiceModule()
 {
-	m_impl = new TxHandsService();
+	m_impl = new TxHandsService(ModuleName);
 
 }
 
@@ -52,7 +53,7 @@ CServiceModule::~CServiceModule(void)
 
 HandsWindowMODULE_API std::string DLL_GetServiceName()
 {
-	return TBee::TxHandsService::ModuleName;
+	return ModuleName;
 }
 HandsWindowMODULE_API void  DLL_ServiceInit()
 {

@@ -12,13 +12,13 @@
 #include "GstCustomDataStreamer.h"
 #include "GstCustomDataPlayer.h"
 
+extern mray::core::string ModuleName;
 namespace mray
 {
 namespace TBee
 {
 
 IMPLEMENT_RTTI(TxHapticInputService, IServiceModule)
-const std::string TxHapticInputService::ModuleName("TxHapticInputServiceModule");
 
 
 
@@ -44,6 +44,7 @@ public:
 
 	video::GstCustomDataStreamer* m_dstreamer;
 	video::GstCustomDataPlayer* m_dplayer;
+	bool _streamStarted;
 public:
 
 	TxHapticInputServiceImpl()
@@ -52,6 +53,7 @@ public:
 		m_context = 0;
 		m_port = 0;
 		m_connected = false;
+		_streamStarted = false;
 	}
 
 	~TxHapticInputServiceImpl()
@@ -63,7 +65,7 @@ public:
 	{
 		m_context = context;
 
-		m_context->serviceLoader->RegisterCapability(TxHapticInputService::ModuleName, "HapticsInputSupported", "Yes");
+		m_context->serviceLoader->RegisterCapability(ModuleName, "HapticsInputSupported", "Yes");
 		{
 			sound::DirectSoundInputStream inputStream;
 			inputStream.ListDevices(m_audioInterfaceList);
@@ -114,21 +116,9 @@ public:
 		}
 
 
-		
 		{
 			m_dstreamer = new video::GstCustomDataStreamer();
 			m_dstreamer->SetApplicationDataType("rtp", true);
-			uint ports[] = { 5111 };
-			m_dstreamer->BindPorts("192.168.137.1", ports, 1, false);
-			m_dstreamer->CreateStream();
-			m_dstreamer->Stream();
-
-			m_dplayer = new video::GstCustomDataPlayer();
-			m_dplayer->SetApplicationDataType("rtp", true);
-			m_dplayer->SetPort(0);
-			m_dplayer->CreateStream();
-			m_dplayer->Play();
-
 		}
 
 		printf("Finished streams\n");
@@ -147,12 +137,41 @@ public:
 
 	}
 
+
+	void _beginStreaming()
+	{
+		if (_streamStarted)
+			return;
+		_streamStarted = true;
+		int port = core::StringConverter::toInt(m_context->appOptions.GetOptionValue("Port", "5111"));
+		uint ports[] = { port };
+		m_dstreamer->BindPorts(m_context->GetTargetClientAddr()->toString(), ports, 1, false);
+		m_dstreamer->CreateStream();
+		m_dstreamer->Stream();
+		/*
+		m_dplayer = new video::GstCustomDataPlayer();
+		m_dplayer->SetApplicationDataType("rtp", true);
+		m_dplayer->SetPort(0);
+		m_dplayer->CreateStream();
+		m_dplayer->Play();
+		*/
+	}
+
+	void _endStreaming()
+	{
+		if (!_streamStarted)
+			return;
+		_streamStarted = false;
+		m_dstreamer->Close();
+	}
+
 	void Start()
 	{
 		if (m_status != EServiceStatus::Inited && m_status != EServiceStatus::Stopped)
 			return;
 
 		m_status = EServiceStatus::Running;
+		_beginStreaming();
 	}
 	bool Stop()
 	{
@@ -160,6 +179,7 @@ public:
 			return false;
 
 		m_status = EServiceStatus::Stopped;
+		_endStreaming();
 		return true;
 	}
 
@@ -180,7 +200,7 @@ public:
 		{
 			t = 0;
 			std::vector<float> data;
-			int length = (int)math::Randomizer::randRange(10, 30);
+			int length = (int)math::Randomizer::randRange(10, 100);
 			for (int i = 0;i < length;++i)
 			{
 				data.push_back(math::Randomizer::rand01());
@@ -191,6 +211,7 @@ public:
 		}
 
 	
+		/*
 		while (m_dplayer->GrabFrame())
 		{
 			 int length=m_dplayer->GetDataLength();
@@ -207,7 +228,7 @@ public:
 			 }
 
 			 delete []d;
-		}
+		}*/
 	}
 	void Render(ServiceRenderContext* context)
 	{
@@ -278,7 +299,7 @@ TxHapticInputService::~TxHapticInputService()
 
 std::string TxHapticInputService::GetServiceName()
 {
-	return TxHapticInputService::ModuleName;
+	return ModuleName;
 }
 
 EServiceStatus TxHapticInputService::GetServiceStatus()

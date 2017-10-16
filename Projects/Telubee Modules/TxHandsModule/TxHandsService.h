@@ -16,14 +16,14 @@ namespace TBee
 class TxHandsService :public IServiceModule
 {
 public:
-	static const std::string ModuleName;
+	std::string ModuleName;
 
 	DECLARE_RTTI
 protected:
 	TxHandsServiceImpl* m_impl;
 
 public:
-	TxHandsService();
+	TxHandsService(const std::string& name);
 	virtual ~TxHandsService();
 
 	virtual std::string GetServiceName();

@@ -6,6 +6,7 @@
 #include "TxHapticInputService.h"
 
 
+extern mray::core::string ModuleName;
 namespace mray
 {
 namespace TBee
@@ -52,7 +53,7 @@ CServiceModule::~CServiceModule(void)
 
 HapticInputMODULE_API std::string DLL_GetServiceName()
 {
-	return TBee::TxHapticInputService::ModuleName;
+	return ModuleName;
 }
 HapticInputMODULE_API void  DLL_ServiceInit()
 {

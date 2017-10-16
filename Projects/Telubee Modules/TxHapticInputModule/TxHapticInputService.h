@@ -16,8 +16,7 @@ namespace TBee
 class TxHapticInputService :public IServiceModule
 {
 public:
-	static const std::string ModuleName;
-
+	
 	DECLARE_RTTI
 protected:
 	TxHapticInputServiceImpl* m_impl;

@@ -10,6 +10,8 @@
 
 #include "Win32WindowUtils.h"
 
+#include <Windows.h>
+
 
 namespace mray
 {
@@ -17,7 +19,7 @@ namespace TBee
 {
 
 IMPLEMENT_RTTI(TxHandsService, IServiceModule)
-const std::string TxHandsService::ModuleName("TxHandsServiceModule");
+//const std::string TxHandsService::ModuleName("TxHandsServiceModule");
 
 
 
@@ -153,14 +155,15 @@ public:
 
 	bool LoadServiceSettings(xml::XMLElement* elem)
 	{
-
+		printf("Loading settings\n");
 		return true;
 	}
 };
 
 
-TxHandsService::TxHandsService()
+TxHandsService::TxHandsService(const std::string& name)
 {
+	ModuleName = name;
 	m_impl = new TxHandsServiceImpl();
 }
 
