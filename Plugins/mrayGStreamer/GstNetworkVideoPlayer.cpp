@@ -87,6 +87,8 @@ class GstNetworkVideoPlayerImpl :public GstPipelineHandler,IPipelineListener
 
 	VideoAppSinkHandler m_videoHandler;
 
+	bool m_rgb;
+
 public:
 	GstNetworkVideoPlayerImpl(GstNetworkVideoPlayer* o)
 	{
@@ -97,18 +99,22 @@ public:
 		m_videoRtcpSrc = 0;
 		m_videoRtcpSink = 0;
 		m_videoSink = 0;
+		m_rgb = false;
 		AddListener(this);
 	}
 	virtual ~GstNetworkVideoPlayerImpl()
 	{
 
 	}
-
+	void ConvertToRGB(bool convert)
+	{
+		m_rgb = convert;
+	}
 	void _BuildPipelineH264()
 	{
 		core::string videoStr =
 			//video rtp
-			"udpsrc name=videoSrc !"
+			"udpsrc name=videoSrc port="+core::StringConverter::toString(m_videoPort)+" !"
 			//"udpsrc port=7000 buffer-size=2097152 do-timestamp=true !"
 			"application/x-rtp ";
 		if (m_rtcp)
@@ -133,7 +139,7 @@ public:
 				"rtph264depay ! h264parse !  avdec_h264 ! "
 				// " videorate  ! "//"video/x-raw,framerate=60/1 ! "
 				//	"videoconvert ! video/x-raw,format=RGB  !" // Very slow!!
-				"videoconvert ! video/x-raw,format=I420  !"
+				"videoconvert ! video/x-raw,format="+(m_rgb?"RGB":"I420")+" !"
 			//	" timeoverlay halignment=right text=\"Local Time =\"! "
 			" appsink name=videoSink sync=false  emit-signals=false";
 				//"fpsdisplaysink sync=false";
@@ -417,6 +423,11 @@ void GstNetworkVideoPlayer::Close()
 	m_impl->Close();
 
 }
+void GstNetworkVideoPlayer::ConvertToRGB(bool convert)
+{
+	m_impl->ConvertToRGB( convert);
+}
+
 
 const math::vector2di& GstNetworkVideoPlayer::GetFrameSize()
 {

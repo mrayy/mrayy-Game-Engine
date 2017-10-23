@@ -48,7 +48,7 @@ bool HandsWindow::OnInit(TBeeServiceContext* context)
 #if USE_PLAYERS
 //		app->GetPlayers()->AddPlayer(player, "Hands");
 #endif
-
+		player->ConvertToRGB(false);
 		m_handsGrabber = new video::VideoGrabberTexture();
 		m_handsGrabber->Set(new video::GstNetworkVideoPlayerGrabber(player), 0);
 	}

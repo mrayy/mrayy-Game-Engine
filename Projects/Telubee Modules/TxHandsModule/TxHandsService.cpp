@@ -42,6 +42,7 @@ public:
 		m_status = EServiceStatus::Idle;
 		m_context = 0;
 		m_connected = false;
+		m_handPort = 0;
 	}
 
 	~TxHandsServiceImpl()
@@ -122,7 +123,7 @@ public:
 	virtual void OnUserConnected(const UserConnectionData& data)
 	{
 		m_connected = true;
-		m_handsWindow->OnConnected(m_context->remoteAddr.toString(), 7010, 0);
+		m_handsWindow->OnConnected(m_context->remoteAddr.toString(), m_handPort, 0);
 	}
 	virtual void OnUserDisconnected()
 	{
@@ -136,7 +137,7 @@ public:
 		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 		OS::StreamWriter wrtr(&stream);
 		std::vector<core::string> values = core::StringUtil::Split(value, ",");
-		if (msg == "HandPorts" && values.size() >= 1)
+		if (msg == "Ports" && values.size() >= 1)
 		{
 			m_handPort = core::StringConverter::toInt(values[0]);
 			m_handsWindow->OnConnected(m_context->remoteAddr.toString(), m_handPort, 0);
