@@ -291,6 +291,12 @@ std::string CameraVideoSrc::_generateFullString()
 					else
 						videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
 				}
+				if (m_impl->m_convertToGray8) {
+					videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+						" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+					if (m_fps > 0)
+						videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+				}
 
 		//		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 			//	videoStr += " ! queue ";

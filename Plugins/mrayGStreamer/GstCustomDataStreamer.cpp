@@ -263,7 +263,6 @@ public:
 			bufferData = new uchar[len];
 			bufferData[0] = 1;
 			memcpy(bufferData + 1, output.data, output.length);
-			m_grave.push_back(s);
  
  		}
 		else
@@ -274,6 +273,7 @@ public:
 			bufferData[0] = 0;
 			memcpy(bufferData + 1, s->data, s->length);
 		}
+		s->avail = true;
 		m_grave.push_back(s);
  		//	*buffer = gst_buffer_new_wrapped_full(GST_MEMORY_FLAG_READONLY, (void*)s->data, s->length, 0, s->length, s, (GDestroyNotify)&_DestroyNotify);
 

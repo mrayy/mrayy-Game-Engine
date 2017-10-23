@@ -11,6 +11,10 @@
 
 #include "GstCustomDataStreamer.h"
 #include "GstCustomDataPlayer.h"
+#include "IThreadManager.h"
+#include "IThread.h"
+
+#include "serial/serial.h"
 
 extern mray::core::string ModuleName;
 namespace mray
@@ -23,7 +27,7 @@ IMPLEMENT_RTTI(TxHapticInputService, IServiceModule)
 
 
 
-class TxHapticInputServiceImpl :public IServiceContextListener
+class TxHapticInputServiceImpl :public IServiceContextListener,public OS::IThreadFunction
 {
 public:
 
@@ -45,6 +49,12 @@ public:
 	video::GstCustomDataStreamer* m_dstreamer;
 	video::GstCustomDataPlayer* m_dplayer;
 	bool _streamStarted;
+
+	core::string _comPort;
+	serial::Serial *_serialPort;
+
+	OS::IThread* _serialThread;
+
 public:
 
 	TxHapticInputServiceImpl()
@@ -54,11 +64,16 @@ public:
 		m_port = 0;
 		m_connected = false;
 		_streamStarted = false;
+		_serialPort = 0;
 	}
 
 	~TxHapticInputServiceImpl()
 	{
 		Destroy();
+		_serialPort->close();
+		_serialThread->terminate();
+		delete _serialThread;
+		delete _serialPort;
 	}
 
 	void Init(TBeeServiceContext* context)
@@ -115,6 +130,13 @@ public:
 			}
 		}
 
+		{
+			_comPort = context->appOptions.GetOptionValue("COM", "COM5");
+			int baudRate = core::StringConverter::toInt(context->appOptions.GetOptionValue("Baudrate", "115200"));
+
+			_serialPort = new serial::Serial(_comPort,baudRate);
+			_serialThread = OS::IThreadManager::getInstance().createThread(this);
+		}
 
 		{
 			m_dstreamer = new video::GstCustomDataStreamer();
@@ -136,6 +158,23 @@ public:
 		m_status = EServiceStatus::Idle;
 
 	}
+	virtual void execute(OS::IThread*caller, void*arg)
+	{
+		while (m_status == EServiceStatus::Running)
+		{
+			if (_serialPort->available()) {
+				std::string data=_serialPort->readline(256,"\r");
+				std::vector<core::string> lst = core::StringUtil::Split(data, " ,");
+				std::vector<float> parsed;
+				for (int i = 0; i < lst.size(); ++i)
+				{
+					parsed.push_back(core::StringConverter::toFloat(lst[i]));
+				}
+				m_dstreamer->AddDataFrame((uchar*)&parsed[0], sizeof(float)*parsed.size());
+			}
+		//	OS::IThreadManager::getInstance().sleep(2);
+		}
+	}
 
 
 	void _beginStreaming()
@@ -148,6 +187,13 @@ public:
 		m_dstreamer->BindPorts(m_context->GetTargetClientAddr()->toString(), ports, 1, false);
 		m_dstreamer->CreateStream();
 		m_dstreamer->Stream();
+
+		if (_serialPort->isOpen())
+			_serialPort->close();
+		_serialPort->open();
+		_serialPort->write("delay 0\n\r");
+		_serialPort->write("alpha 0.8\n\r");
+		_serialThread->start(0);
 		/*
 		m_dplayer = new video::GstCustomDataPlayer();
 		m_dplayer->SetApplicationDataType("rtp", true);
@@ -163,6 +209,8 @@ public:
 			return;
 		_streamStarted = false;
 		m_dstreamer->Close();
+		_serialPort->close();
+		_serialThread->terminate();
 	}
 
 	void Start()
@@ -197,6 +245,7 @@ public:
 
 
 		//if(t>0.01f)
+		if(false)
 		{
 			t = 0;
 			std::vector<float> data;

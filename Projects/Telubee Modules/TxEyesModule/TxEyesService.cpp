@@ -162,6 +162,7 @@ public:
 
 		if (path == "" || m_streamingParameters.load(path) == false)
 		{
+			gLogManager.log("Failed to setting file:" + path, ELL_WARNING);
 			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 3000, 30));
 			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 4000, 45));
 			m_cameraSettings.push_back(CameraSettings(math::vector2di(640, 480), 5000, 50));
