@@ -33,7 +33,7 @@ HandsWindow::~HandsWindow()
 
 void HandsWindow::Parse(const OptionContainer& extraOptions)
 {
-	m_handsMonitor = core::StringConverter::toULong(extraOptions.GetOptionByName("HandsDisplay")->getValue());
+	m_handsMonitor = core::StringConverter::toULong(extraOptions.GetOptionValue("HandsDisplay","0"));
 }
 
 bool HandsWindow::OnInit(TBeeServiceContext* context)
