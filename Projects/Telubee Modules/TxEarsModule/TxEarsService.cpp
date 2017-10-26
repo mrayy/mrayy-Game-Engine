@@ -202,11 +202,11 @@ public:
 		if (!m_portsReceived || m_status != EServiceStatus::Running)
 			return;
 		gLogManager.log("Creating Streaming.", ELL_INFO);
-		for (int i = 0; i < m_AudioPort.size(); ++i)
+	/*	for (int i = 0; i < m_AudioPort.size(); ++i)
 		{
 			core::string pname = "Audio" + core::StringConverter::toString(i);
 			m_AudioPort[i] = gNetworkPortAssigner.AssignPort(pname, network::EPT_UDP, m_context->GetPortValue(pname));
-		}
+		}*/
 		core::string clockIpAddr;
 		if (m_context->sharedMemory->gstClockPortStreamer != 0)
 		{
@@ -381,11 +381,11 @@ public:
 		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 		OS::StreamWriter wrtr(&stream);
 		std::vector<core::string> values = core::StringUtil::Split(value, ",");
-		if (msg == "AudioParameters")
+		if (msg == "Parameters")
 		{
 			_SendAudioSettings();
 		}
-		else if (msg == "AudioPort" && values.size() >= 1)
+		else if (msg == "Port" && values.size() >= 1)
 		{
 			std::vector<uint> ports;
 			ports.resize(values.size());
@@ -404,8 +404,8 @@ public:
 			m_AudioPort = ports;
 			m_remoteAddr = m_context->remoteAddr;
 
-
-			//m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort, 1, 0, 0);
+			if(m_isAudioStarted)
+				m_streamers->GetStream("Audio")->BindPorts(m_context->remoteAddr.toString(), &m_AudioPort[0], 1, false);
 
 			m_portsReceived = true;
 		}

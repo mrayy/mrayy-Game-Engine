@@ -23,13 +23,14 @@ public:
 
 	struct AudioInterface
 	{
-		AudioInterface() :channelsCount(1), samplingRate(44100){}
-		AudioInterface(const std::string& guid, int count) :deviceGUID(guid), channelsCount(count), samplingRate(44100), channel(0)
+		AudioInterface() :channelsCount(1), samplingRate(44100), buffertime(10){}
+		AudioInterface(const std::string& guid, int count) :deviceGUID(guid), channelsCount(count), samplingRate(44100), channel(0), buffertime(10)
 		{}
 		std::string deviceGUID;
 		int channelsCount;
 		int channel;
 		int samplingRate;
+		int buffertime;
 	};
 public:
 	GstNetworkAudioStreamer();
@@ -40,6 +41,8 @@ public:
 	void BindPorts(const std::string& addr, uint* ports, uint count, bool rtcp);
 
 	void SetAudioInterface(const AudioInterface& interfaces);
+
+	void SetEncoderQuality(int qual);
 
 	bool CreateStream();
 	void Stream();

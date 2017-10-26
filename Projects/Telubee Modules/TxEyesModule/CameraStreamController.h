@@ -574,7 +574,6 @@ public:
 
 			if (camtype == ECameraType::Ovrvision ||
 				camtype == ECameraType::OvrvisionCompressed)
-				printf("A\n");
 			{
 				gLogManager.log("Linking Overvision",ELL_INFO);
 				src->AddPostCaptureListener(&_ovrListener,0);
@@ -647,7 +646,7 @@ public:
 		for (int i = 0; i < _captureDevices.size(); ++i)
 		{
 			_setParam(_captureDevices[i], name, value);
-			gLogManager.log("Changing Camera Parameter:" + name + " to:" + _GetParameter(_captureDevices[i], video::ICameraVideoGrabber::Param_Gain), ELL_INFO);
+//			gLogManager.log("Changing Camera Parameter:" + name + " to:" + _GetParameter(_captureDevices[i], video::ICameraVideoGrabber::Param_Gain), ELL_INFO);
 
 		}
 	}

@@ -37,7 +37,7 @@ protected:
 
 	TBee::RobotCommunicator* m_robotCommunicator;
 
-	video::GstCustomDataStreamer* m_dataStreamer;
+	//video::GstCustomDataStreamer* m_dataStreamer;
 
 	CategoryDictionary m_capabilities;
 

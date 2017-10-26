@@ -26,6 +26,8 @@ protected:
 	core::string m_ipAddr;
 	uint m_audioPort;
 
+	int m_qual;
+
 	core::string m_pipeLineString;
 	GstElement* m_audioSink;
 	GstMyUDPSink* m_audioRtcpSink;
@@ -41,9 +43,14 @@ public:
 		m_ipAddr = "127.0.0.1";
 		m_audioPort = 5005;
 		m_rtcp = false;
+		m_qual = 5;
 	}
 	virtual ~GstNetworkAudioStreamerImpl()
 	{
+	}
+	void SetEncoderQuality(int qual)
+	{
+		m_qual = math::clamp(qual, 0, 10);
 	}
 #define OPUS_ENC
 	void BuildString()
@@ -53,7 +60,7 @@ public:
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=8000,channels=1 ! audioconvert ! flacenc quality=2 ! rtpgstpay ";
 #elif defined OPUS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
-		core::string audioStr = "directsoundsrc ";// "buffer-time=100  ";
+		core::string audioStr = "directsoundsrc buffer-time="+core::StringConverter::toString(m_interface.buffertime) +" ";
 
 		if (m_interface.deviceGUID != "")
 		{
@@ -65,7 +72,7 @@ public:
 			"! audioconvert ! volume volume=2 ! audioresample ! ";
 		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
 
-		audioStr += "opusenc complexity=5 bitrate-type=vbr frame-size=5 ! rtpopuspay  ";
+		audioStr += "opusenc complexity="+core::StringConverter::toString(m_qual)+" bitrate-type=vbr frame-size=5 ! rtpopuspay  ";
 #elif defined VORBIS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
 		core::string audioStr = "directsoundsrc buffer-time=200 ";
@@ -202,6 +209,10 @@ GstPipelineHandler* GstNetworkAudioStreamer::GetPipeline()
 	return m_impl;
 }
 
+void GstNetworkAudioStreamer::SetEncoderQuality(int qual)
+{
+	m_impl->SetEncoderQuality(qual);
+}
 void GstNetworkAudioStreamer::SetAudioInterface(const AudioInterface& interfaces)
 {
 	m_impl->SetAudioInterface(interfaces);

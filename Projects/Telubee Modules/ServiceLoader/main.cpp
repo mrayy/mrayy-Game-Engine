@@ -5,6 +5,13 @@
 #include "ServiceLoader.h"
 #include "CrashHandler.h"
 
+#include <signal.h>
+
+#ifdef _WIN32
+int const sigClosed = SIGBREAK;
+#else
+int const sigClosed = SIGHUP;
+#endif
 
 using namespace mray;
 
@@ -26,8 +33,14 @@ void OnExit()
 	}
 }
 
+void OnExitSig(int)
+{
+	OnExit();
+}
 int _tmain(int argc, _TCHAR* argv[])
 {
+	signal(sigClosed, OnExitSig);
+
 	atexit(OnExit);
 	if (argc < 2)
 	{

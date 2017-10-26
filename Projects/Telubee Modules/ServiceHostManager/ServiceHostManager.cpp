@@ -68,7 +68,7 @@ ServiceHostManager::ServiceHostManager()
 	m_dataMutex = 0;
 	_currDataRate = 0;
 	_lastTime = 0;
-	m_dataStreamer = 0;
+	//m_dataStreamer = 0;
 }
 ServiceHostManager::~ServiceHostManager()
 {
@@ -89,13 +89,13 @@ void ServiceHostManager::_destroy()
 		m_commLink->Close();
 		delete m_commLink;
  	}
-
+	/*
 	if (m_dataStreamer)
 	{
 		m_dataStreamer->Close();
 		delete m_dataStreamer;
 		m_dataStreamer = 0;
-	}
+	}*/
 
 	OS::IThreadManager::getInstance().killThread(m_commThread);
 	delete m_commThread;
@@ -158,11 +158,11 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 	printf("Service Host: %s:%d\n\n", m_memory->hostAddress.toString().c_str(), m_memory->hostAddress.port);
 
 	m_dataMutex = OS::IThreadManager::getInstance().createMutex();
-
+	/*
 	m_dataStreamer = new video::GstCustomDataStreamer();
 	m_dataStreamer->SetApplicationDataType("control", true);
 	m_dataStreamer->SetClockAddr("", 0);
-
+	*/
 
 	char computerName[512];
 	DWORD sz=512;
@@ -627,13 +627,13 @@ void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const 
 		core::StringConverter::toString(ip[3]);
 
 	//start dataStreamer
-	uint port = 7030;
+	/*uint port = 7030;
 	m_dataStreamer->BindPorts(data.userData.clientAddress.toString(),&port,1,false);
 	m_dataStreamer->SetClockAddr("", 0);
 	m_dataStreamer->CreateStream();
 	m_dataStreamer->Stream();
 	m_memory->gstClockPortStreamer = m_dataStreamer->GetClockPort();
-	m_memory->gstClockPortPlayer = m_dataStreamer->GetClockPort();
+	m_memory->gstClockPortPlayer = m_dataStreamer->GetClockPort();*/
 	
 	m_memory->UserConnected = true;
 	m_memory->userConnectionData = data;
@@ -645,7 +645,7 @@ void ServiceHostManager::OnUserConnected(TBee::RobotCommunicator* sender, const 
 void ServiceHostManager::OnUserDisconnected(TBee::RobotCommunicator* sender, const network::NetAddress& address)
 {
 	m_memory->UserConnected =  false;
-	m_dataStreamer->Stop();
+	//m_dataStreamer->Stop();
 	m_memory->gstClockPortStreamer = 0;
 	m_memory->gstClockPortPlayer = 0;
 	printf("User Disconnected : %s\n", address.toString().c_str());
