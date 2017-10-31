@@ -477,8 +477,8 @@ void torsoController::UpdateRobotStatus(const RobotStatus& st)
 	QuatToEuler(targetQuat, rotTmp);
 
 	torsoHeadOri[0] = -rotTmp[0];	// Roll
-	torsoHeadOri[1] = -rotTmp[1];	// Pitch
-	torsoHeadOri[2] = rotTmp[2];	// Yaw
+	torsoHeadOri[1] = rotTmp[1];	// Pitch
+	torsoHeadOri[2] = -rotTmp[2];	// Yaw
 
 
 	if (true)

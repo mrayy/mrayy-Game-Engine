@@ -206,7 +206,7 @@ namespace mray
 			return;
 
 		SetRotation(0);
-		_sleep(100);
+		_sleep(200);
 
 		uint8_t sCommand[] = { 0, 0, 0 };
 		uint8_t reply[6];
@@ -215,7 +215,7 @@ namespace mray
 			sCommand[0] = 0x80 | ServoCODE[i];//(PosCtrlCMD << 5)
 			sCommand[1] = 0;
 			sCommand[2] = 0;
-			_sendCommand(sCommand, 3 * sizeof(char), reply, 6);
+			_sendCommand(sCommand, 3 * sizeof(char), reply, 6,10);
 			//	printf("%d,%d,%d,%d\n", value,(int)sCommand[0], (int)sCommand[1], (int)sCommand[2]);
 		}
 		m_lastValues[0] = m_lastValues[1] = m_lastValues[2] = 0;

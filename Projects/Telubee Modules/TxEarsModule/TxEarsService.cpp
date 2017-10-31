@@ -51,9 +51,14 @@ public:
 	};
 	struct AudioInterface
 	{
+		AudioInterface()
+		{
+			buffertime = 50;
+		}
 		int ID;
 		int channels;
 		int samplingRate;
+		int buffertime;
 	};
 	std::vector<AudioInterface> m_audioInterfaceIndicies;
 	std::vector<Position> m_audioSpatialPosition;
@@ -125,6 +130,7 @@ public:
 					iface.deviceGUID = m_audioInterfaceList[m_audioInterfaceIndicies[i].ID].deviceGUID;
 				iface.channelsCount = m_audioInterfaceIndicies[i].channels;
 				iface.samplingRate = m_audioInterfaceIndicies[i].samplingRate;
+				iface.buffertime = m_audioInterfaceIndicies[i].buffertime;
 
 				streamer->SetAudioInterface(iface);
 				/*
@@ -455,6 +461,7 @@ public:
 			iface.ID = 0;
 			iface.samplingRate = 44100;
 			iface.channels = 2;
+			iface.buffertime = 100;
 			a = e->getAttribute("Index");
 			if (a)
 				iface.ID = core::StringConverter::toInt(a->value);
@@ -464,6 +471,9 @@ public:
 			a = e->getAttribute("SamplingRate");
 			if (a)
 				iface.samplingRate = core::StringConverter::toInt(a->value);
+			a = e->getAttribute("BufferTime");
+			if (a)
+				iface.buffertime = core::StringConverter::toInt(a->value);
 			m_audioInterfaceIndicies.push_back(iface);
 			e = e->nextSiblingElement("AudioInterface");
 		}
