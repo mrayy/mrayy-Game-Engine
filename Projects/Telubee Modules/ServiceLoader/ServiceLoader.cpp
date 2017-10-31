@@ -399,9 +399,9 @@ void ServiceLoader::Run()
 		_RenderInfo();
 		Sleep(dt*1000);
 
-		if (GetAsyncKeyState(VK_ESCAPE))
-		{
-			break;
+		if(_kbhit()){
+			if(_getch()==27)
+				break;
 		}
 	}
 	
