@@ -51,7 +51,10 @@ namespace video
 	for (; it != m_encoderParams.end(); ++it)
 		videoStr += it->first + "=" + it->second + " ";
 
-	videoStr += " ! mylistener name=encoderlistener"+core::StringConverter::toString(i)+" ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize)+" ";
+	if(false)
+		videoStr += " ! mylistener name=encoderlistener" + core::StringConverter::toString(i);
+	
+	videoStr += " ! rtph264pay mtu=" + core::StringConverter::toString(m_mtuSize) + " ";
 
 	//videoStr += "! autovideosink";
 

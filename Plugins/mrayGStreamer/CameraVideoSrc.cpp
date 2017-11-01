@@ -24,6 +24,7 @@ public:
 
 	bool m_convertToGray8;
 
+	bool m_addListeners;
 
 
 	std::vector<AveragePer> m_currentFps;
@@ -32,7 +33,8 @@ public:
 
 	std::vector<GstMyListener*> m_imagecapListener;
 
-	std::map<int, std::vector<IMyListenerCallback*>> listeners;
+	typedef std::map<int, std::vector<IMyListenerCallback*>> ListenersMap;
+	ListenersMap listeners;
 
 public:
 	CameraVideoSrcImpl()
@@ -41,6 +43,7 @@ public:
 		m_captureType = "RAW";
 		m_convertToGray8 = false;
 		m_separateStreams = false;
+		m_addListeners = true;
 	}
 	virtual ~CameraVideoSrcImpl()
 	{
@@ -60,12 +63,13 @@ public:
 		}
 		if (index == -1)
 			return;
-		if (listeners.find(index) != listeners.end())
+
+		ListenersMap::iterator it=listeners.find(index);
+		if (it != listeners.end())
 		{
-			for (IMyListenerCallback* i : listeners[index])
+			for (IMyListenerCallback* i : it->second)
 				i->ListenerOnDataChained(src, bfr);
 		}
-
 		m_currentFps[index].Add(1);
 	}
 
@@ -120,6 +124,7 @@ public:
 	{
 		if (i >= m_currentFps.size())
 			return -1;
+		m_currentFps[i].Update();
 		return m_currentFps[i].GetAverage();
 	}
 };
@@ -218,7 +223,8 @@ std::string CameraVideoSrc::_generateString(int i)
 			if (m_fps > 0)
 				videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 		}
-		videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+		if(m_impl->m_addListeners)
+			videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
 	//	videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
 	}
@@ -300,7 +306,8 @@ std::string CameraVideoSrc::_generateFullString()
 
 		//		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 			//	videoStr += " ! queue ";
-				videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+				if(m_impl->m_addListeners)
+					videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
 // 				videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 // 					" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 

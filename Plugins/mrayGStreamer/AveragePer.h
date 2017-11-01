@@ -32,6 +32,8 @@ public:
 	void Reset();
 
 	float GetAverage();
+
+	void Update();
 };
 }
 
