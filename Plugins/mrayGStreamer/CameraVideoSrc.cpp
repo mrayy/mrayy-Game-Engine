@@ -321,9 +321,12 @@ std::string CameraVideoSrc::_generateFullString()
   							",height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + ",framerate=60/1 ";
  					}
 				}
-				if (m_impl->m_convertToGray8) {
+				if (m_impl->m_convertToGray8 ) {
 					videoStr += "  ! rawvideoparse format=y42b width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 						" height=" + core::StringConverter::toString(m_impl->m_frameSize.y );
+				}
+				else {
+					videoStr += " ! videoconvert ";
 				}
 				if (m_impl->m_convertToGray8 && false) {
 					videoStr += "  ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
