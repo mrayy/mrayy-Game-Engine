@@ -9,6 +9,9 @@
 #endif
 
 #include <gst/gst.h>
+#include <gst/base/gstpushsrc.h>
+#include <gst/video/video-info.h>
+#include <gio/gio.h>
 
 GST_DEBUG_CATEGORY_STATIC(gst_my_listener_debug);
 #define GST_CAT_DEFAULT gst_my_listener_debug
@@ -34,14 +37,19 @@ enum
 static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE("sink",
 	GST_PAD_SINK,
 	GST_PAD_ALWAYS,
-	GST_STATIC_CAPS("ANY")
+	GST_STATIC_CAPS_ANY
 	);
 
 static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE("src",
 	GST_PAD_SRC,
 	GST_PAD_ALWAYS,
+	GST_STATIC_CAPS_ANY);
+/*
+static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE("src",
+	GST_PAD_SRC,
+	GST_PAD_ALWAYS,
 	GST_STATIC_CAPS("ANY")
-	);
+	);*/
 
 #define gst_my_listener_parent_class parent_class
 G_DEFINE_TYPE(GstMyListener, gst_my_listener, GST_TYPE_ELEMENT);
@@ -52,10 +60,34 @@ static void gst_my_listener_get_property(GObject * object, guint prop_id,
 	GValue * value, GParamSpec * pspec);
 
 static gboolean gst_my_listener_sink_event(GstPad * pad, GstObject * parent, GstEvent * event);
+static gboolean gst_my_listener_src_event(GstPad * pad, GstObject * parent, GstEvent * event);
 static GstFlowReturn gst_my_listener_chain(GstPad * pad, GstObject * parent, GstBuffer * buf);
 
 static void gst_my_listener_finalize(GObject * object);
 
+static GstCaps *
+gst_mylistener_getcaps(GstBaseSrc * src, GstCaps * caps)
+{
+	GstMyListener *filter = GST_MyListener(src);
+	/*
+	if (!udpsrc->caps)
+	{
+		udpsrc->caps = gst_caps_new_any();
+	}*/
+
+	return gst_caps_ref(filter->caps);
+
+}
+
+static gboolean
+gst_mylistener_setcaps(GstBaseSrc * src, GstCaps * caps)
+{
+	GstMyListener *filter = GST_MyListener(src);
+	gst_pad_set_caps(filter->srcpad, caps);
+
+	return true;
+
+}
 /* GObject vmethod implementations */
 
 /* initialize the MyListener's class */
@@ -64,14 +96,18 @@ gst_my_listener_class_init(GstMyListenerClass * klass)
 {
 	GObjectClass *gobject_class;
 	GstElementClass *gstelement_class;
+	GstBaseSrcClass *gstbasesrc_class;
 
 	gobject_class = (GObjectClass *)klass;
 	gstelement_class = (GstElementClass *)klass;
+	gstbasesrc_class = (GstBaseSrcClass *)klass;
 
 	gobject_class->set_property = gst_my_listener_set_property;
 	gobject_class->get_property = gst_my_listener_get_property;
 	gobject_class->finalize = gst_my_listener_finalize;
 
+	gstbasesrc_class->get_caps = gst_mylistener_getcaps;
+	gstbasesrc_class->set_caps = gst_mylistener_setcaps;
 
 	g_object_class_install_property(gobject_class, PROP_SILENT,
 		g_param_spec_boolean("silent", "Silent", "Produce verbose output ?",
@@ -79,9 +115,9 @@ gst_my_listener_class_init(GstMyListenerClass * klass)
 
 	gst_element_class_set_details_simple(gstelement_class,
 		"MyListener",
-		"FIXME:Generic",
-		"FIXME:Generic Template Element",
-		" <<user@hostname.org>>");
+		"Source",
+		"Simple Listener",
+		"mrayyamen@gmail.com");
 
 	g_object_class_install_property(gobject_class, PROP_CAPS,
 		g_param_spec_boxed("caps", "Caps",
@@ -111,8 +147,25 @@ gst_my_listener_init(GstMyListener * filter)
 	gst_element_add_pad(GST_ELEMENT(filter), filter->sinkpad);
 
 	filter->srcpad = gst_pad_new_from_static_template(&src_factory, "src");
-	GST_PAD_SET_PROXY_CAPS(filter->srcpad);
+	//GST_OBJECT_FLAG_SET(filter->srcpad, GST_PAD_FLAG_FIXED_CAPS);
+	GST_PAD_SET_PROXY_CAPS(filter->sinkpad);
+	//gst_pad_use_fixed_caps(filter->srcpad);
+	gst_pad_set_event_function(filter->srcpad,
+		GST_DEBUG_FUNCPTR(gst_my_listener_src_event));
 	gst_element_add_pad(GST_ELEMENT(filter), filter->srcpad);
+	/*
+	GstCaps* caps = gst_caps_new_simple("video/x-raw",
+		"format", G_TYPE_STRING, "RGB",
+		"width", G_TYPE_INT, 1920,
+		"height", G_TYPE_INT, 950, NULL);
+	if (!gst_pad_set_caps(filter->srcpad, caps)) {
+		gLogManager.log("Failed to set caps", mray::ELogLevel::ELL_WARNING);
+// 		GST_ELEMENT_ERROR(element, CORE, NEGOTIATION, (NULL),
+// 			("Some debug information here"));
+// 		return GST_FLOW_ERROR;
+	}*/
+
+
 
 	filter->silent = FALSE;
 
@@ -163,19 +216,26 @@ const GValue * value, GParamSpec * pspec)
 			new_caps = gst_caps_copy(new_caps_val);
 		}
 
+		GstVideoInfo ifo;
+		gst_video_info_init(&ifo);
+		gst_video_info_from_caps(&ifo, new_caps);
+
 		old_caps = filter->caps;
 		filter->caps = new_caps;
 		if (old_caps)
 			gst_caps_unref(old_caps);
+		//		gst_pad_set_caps(filter->srcpad, new_caps);
 // 		else
 // 			GST_PAD_UNSET_PROXY_CAPS(filter->srcpad);
-// 		gst_pad_use_fixed_caps(filter->srcpad);
-		if (!gst_pad_set_caps(filter->srcpad, new_caps))
+ //		gst_pad_use_fixed_caps(filter->srcpad);
+		
+	//	GstPad* pads=gst_element_get_static_pad(&filter->element, "sink");
+		if (!gst_pad_set_caps(filter->srcpad, filter->caps))
 		{
 			GST_ELEMENT_ERROR(filter, CORE, NEGOTIATION, (NULL),
 				("Failed to set pads for mylistener"));
-		//	gLogManager.log("Failed to set pads for mylistener", mray::ELL_WARNING);
-		}
+			//	gLogManager.log("Failed to set pads for mylistener", mray::ELL_WARNING);
+		}/**/
 		break;
 	}
 	default:
@@ -204,7 +264,43 @@ GValue * value, GParamSpec * pspec)
 }
 
 /* GstElement vmethod implementations */
+static gboolean
+gst_my_filter_setcaps(GstMyListener *filter,
+	GstCaps *caps)
+{
+	if (gst_pad_set_caps(filter->srcpad, caps)) {
+		//filter->passthrough = TRUE;
+	}	else {
+	}
 
+	return true;
+}
+/* this function handles sink events */
+static gboolean
+gst_my_listener_src_event(GstPad * pad, GstObject * parent, GstEvent * event)
+{
+	gboolean ret;
+	GstMyListener *filter;
+
+	filter = GST_MyListener(parent);
+
+	switch (GST_EVENT_TYPE(event)) {
+	case GST_EVENT_CAPS:
+	{
+						   GstCaps * caps;
+						   gst_event_parse_caps(event, &caps);
+						   /* do something with the caps */
+
+						   /* and forward */
+						   ret = gst_my_filter_setcaps(filter , caps);// gst_pad_event_default(pad, parent, event);
+						   break;
+	}
+	default:
+		ret = gst_pad_push_event(filter->sinkpad, event);
+		break;
+	}
+	return ret;
+}
 /* this function handles sink events */
 static gboolean
 gst_my_listener_sink_event(GstPad * pad, GstObject * parent, GstEvent * event)
@@ -222,7 +318,7 @@ gst_my_listener_sink_event(GstPad * pad, GstObject * parent, GstEvent * event)
 						   /* do something with the caps */
 
 						   /* and forward */
-						   ret = gst_pad_event_default(pad, parent, event);
+						   ret =  gst_pad_event_default(pad, parent, event);
 						   break;
 	}
 	default:
@@ -246,6 +342,7 @@ gst_my_listener_chain(GstPad * pad, GstObject * parent, GstBuffer * buf)
 	{
 		filter->listeners->__FIRE_ListenerOnDataChained(filter, buf);
 	}
+
 
 	/* just push out the incoming buffer without touching it */
 	return gst_pad_push(filter->srcpad, buf);

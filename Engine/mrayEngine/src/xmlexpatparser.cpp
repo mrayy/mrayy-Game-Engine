@@ -100,6 +100,7 @@ bool XMLExpatParser::parserXML(OS::IStream*stream, XMLTree*tree)
 		gLogManager.log(core::string(mT("XMLExpatParser::parserXML()-couldn't parse file.")) + stream->getStreamName(), ELL_WARNING);
 
 	}
+	return true;
 }
 
 bool XMLExpatParser::parserXML(const core::string& xml, XMLTree*tree){

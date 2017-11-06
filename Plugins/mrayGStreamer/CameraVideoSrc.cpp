@@ -98,6 +98,15 @@ public:
 			{
 				l->listeners->AddListener(this);
 			}
+			/*
+			if (m_convertToGray8) {
+				GstCaps* caps = gst_caps_new_simple("video/x-raw",
+					"format", G_TYPE_STRING, "GRAY8",
+					"width", G_TYPE_INT, m_frameSize.x*2,
+					"height", G_TYPE_INT, m_frameSize.y, NULL);
+				if(!gst_pad_set_caps())
+
+			}*/
 
 			m_imagecapListener.push_back(l);
 		}
@@ -217,14 +226,18 @@ std::string CameraVideoSrc::_generateString(int i)
 			else
 				videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
 		}
-		if (m_impl->m_convertToGray8){
-			videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
-				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
-			if (m_fps > 0)
-				videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
-		}
+// 		if (m_impl->m_convertToGray8){
+// 			videoStr += " ! rawvideoparse format=gray16-be width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+// 				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
+// 			if (m_fps > 0)
+// 				videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+// 		}
 		if(m_impl->m_addListeners)
-			videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+			videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i) + " ";
+		if (m_impl->m_convertToGray8) {
+			videoStr += " caps=video/x-raw,format=gray8,width="+ core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y)+" ";
+		}
 	//	videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
 	}
@@ -297,17 +310,27 @@ std::string CameraVideoSrc::_generateFullString()
 					else
 						videoStr += " ! videorate max-rate=" + core::StringConverter::toString(m_fps);
 				}
-				if (m_impl->m_convertToGray8) {
-					videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
-						" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
-					if (m_fps > 0)
-						videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
-				}
 
 		//		videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 			//	videoStr += " ! queue ";
-				if(m_impl->m_addListeners)
-					videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i)+" ";
+				if (m_impl->m_addListeners )
+				{
+					videoStr += " ! mylistener name=imagecap" + core::StringConverter::toString(i) + " ";
+ 					if (m_impl->m_convertToGray8 && false) {
+  						videoStr += " caps=video/x-raw,format=GRAY8,width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
+  							",height=" + core::StringConverter::toString(m_impl->m_frameSize.y) + ",framerate=60/1 ";
+ 					}
+				}
+				if (m_impl->m_convertToGray8) {
+					videoStr += "  ! rawvideoparse format=y42b width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
+						" height=" + core::StringConverter::toString(m_impl->m_frameSize.y );
+				}
+				if (m_impl->m_convertToGray8 && false) {
+					videoStr += "  ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
+						" height=" + core::StringConverter::toString(m_impl->m_frameSize.y*2);
+					if (m_fps > 0)
+						videoStr += " framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
+				}
 // 				videoStr += " ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x * 2) +
 // 					" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 

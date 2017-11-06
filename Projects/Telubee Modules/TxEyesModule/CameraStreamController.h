@@ -447,13 +447,15 @@ public:
 		}
 		int count = width*height;
 		uchar* ptr = (uchar*)data;
-		//too slow!!
-		for (int ps = 0; ps < count; ++ps) {
-// 			tmp = ptr[ps + 1];
-// 			ptr[ps + 1] = ptr[ps + count];
-// 			ptr[ps + count] = tmp;
-//			math::Swap(ptr[ps + 1], ptr[ps + count]);
 
+		//First byte lossless compression
+		//second byte, lossy
+		/*for (int ps = 0; ps < count; ++ps) {
+			ptr[ps*2+1] = 0;
+		}*/
+		
+		//rearrange the byte coding for the left and right images of OVRVision Pro camera
+		for (int ps = 0; ps < count; ++ps) {
 			buffer[ps] = ptr[ps*2 + 1];
 			ptr[ps] = ptr[ps*2];
 		}

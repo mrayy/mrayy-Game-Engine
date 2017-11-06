@@ -38,7 +38,8 @@ namespace video
 	// 			videoStr += " ! videoconvert ! autovideosink sync=false ";
 	// 			return videoStr;
 
-	videoStr += " ! videoconvert ! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / GetStreamsCount()) + " ";
+	//videoStr += " ! videoconvert ";
+	videoStr += " ! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / GetStreamsCount()) + " ";
 
 	/*
 	" speed-preset=superfast  tune=zerolatency pass=cbr sliced-threads=true"//" key-int-max=5"
