@@ -583,7 +583,7 @@ public:
 				if (!_ovrCam)
 				{
 					_ovrCam = new video::OVRvisionCamGrabber();
-					_ovrCam->InitDevice(0,960,950,60);
+					_ovrCam->InitDevice(0,640,480,90);
 					_ovrSettings = _ovrCam->GetCameraSettings();
 					_ovrCam->Stop();
 				}

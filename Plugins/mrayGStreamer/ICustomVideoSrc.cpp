@@ -38,6 +38,7 @@ namespace video
 	// 			videoStr += " ! videoconvert ! autovideosink sync=false ";
 	// 			return videoStr;
 
+	videoStr += " ! videoconvert ! video/x-raw,format=I420 ";
 	//videoStr += " ! videoconvert ";
 	videoStr += " ! x264enc bitrate=" + core::StringConverter::toString(m_bitRate / GetStreamsCount()) + " ";
 

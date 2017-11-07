@@ -399,15 +399,17 @@ public:
 			//Init Cameras
 			m_cameraController->SetCameras(m_cameraIfo,m_cameraType);
 
-			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
-			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
-			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, "1");// context->appOptions.GetOptionByName("Gain")->getValue());
+ 			printf("Setting cameras parameters\n");
+ 			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
+ 			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
+ 			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, "1");// context->appOptions.GetOptionByName("Gain")->getValue());
 
 			// Now close cameras
 			m_cameraController->Stop();
 
 			gLogManager.log("Creating Video Streamer",ELL_INFO);
 
+			printf("Creating Video Streamer\n");
 			video::GstNetworkVideoStreamer* hs = new video::GstNetworkVideoStreamer();
 			hs->AddListener(this);
 
@@ -430,6 +432,7 @@ public:
 			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);
 			src->SetBitRate(m_currentSettings.bitrate);
 
+			printf("Loading Parameters\n");
 			src->LoadParameters(m_paramsElement->getSubElement("Encoder"));
 			m_camConfig->encoderType = src->GetEncoderType();
 			m_camConfig->separateStreams = src->IsSeparateStreams();
