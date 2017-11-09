@@ -60,6 +60,7 @@ class RobotSerialPortImpl
 		TXHeadType* m_headController;
 
 		std::string m_headPort;
+		std::string m_headGyroPort;
 		std::string m_basePort;
 
 		bool autoFindPort;
@@ -72,7 +73,7 @@ class RobotSerialPortImpl
 		RobotSerialPortImpl(RobotSerialPort* o)
 		{
 			m_owner = o;
-			autoFindPort=true;
+			autoFindPort=false;
 #ifdef ROOMBA_CONTROLLER
 			m_baseController = new mray::RoombaController;
 #else 
@@ -188,7 +189,9 @@ void RobotSerialPort::_ProcessRobot()
 		{
 			if (m_impl->m_headPort == "")
 				m_impl->m_headPort = _config.headCOM;
-			ret = m_impl->m_headController->Connect(m_impl->m_headPort, m_impl->autoFindPort);
+			if (m_impl->m_headGyroPort == "")
+				m_impl->m_headGyroPort = _config.gyroheadCOM;
+			ret = m_impl->m_headController->Connect(m_impl->m_headPort, m_impl->m_headGyroPort, m_impl->autoFindPort);
 			if (ret){
 				gLogManager.log("Head Connected", ELL_INFO);
 				if (debug_print)
@@ -414,6 +417,7 @@ int RobotSerialPort::head_control(float pan, float tilt, float roll){
 	if (!_config.HeadEnabled)
 		return false;
 	//gLogManager.log("Rotation", ELL_INFO);
+	m_impl->m_headController->UpdateThreaded();
 
 	m_impl->m_headController->SetRotation(math::vector3d(tilt,pan,roll));
 
@@ -727,11 +731,11 @@ bool RobotSerialPort::GetJointValues(std::vector<float>& values)
 	values.resize(3*2);
 	math::vector3d rot=m_impl->m_headController->GetRotation();
 	values[0] = tilt;
-	values[1] = rot.x;
+	values[1] = rot.x/ (_config.xAxis != 0 ? _config.xAxis : 1);
 	values[2] = pan;
-	values[3] = rot.y;
+	values[3] = rot.y / (_config.yAxis != 0 ? _config.yAxis : 1);
 	values[4] = roll;
-	values[5] = rot.z;
+	values[5] = rot.z / (_config.zAxis!=0 ? _config.zAxis:1);
 	return true;
 }
 

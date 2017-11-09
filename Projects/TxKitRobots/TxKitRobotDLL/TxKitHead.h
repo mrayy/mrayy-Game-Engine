@@ -27,10 +27,14 @@ protected:
 	bool connected;
 	float m_rotation[3];
 	serial::Serial* m_serial;
+	serial::Serial* m_gyroserial;
 
 	ServoParameters m_parameters[3];
 	bool m_paramsLoaded;
 	float m_limits[3][2];
+
+	float m_gyroRotation[3];
+	math::quaternion m_gyroQuat;
 
 	unsigned short m_lastValues[3];
 
@@ -45,13 +49,19 @@ public:
 	virtual ~TxKitHead();
 
 
-	virtual bool Connect(const core::string& port,bool autoSearch=true);
+	virtual bool Connect(const core::string& port, const core::string& gyroPort = "", bool autoSearch = true);
+	virtual bool Connect(const core::string& port, bool autoSearchPort = true)
+	{
+		return Connect(port, "", autoSearchPort);
+	}
 	virtual bool IsConnected();
 	virtual void Disconnect();
 
 	virtual void SetRotation(const math::vector3d& rotation);
 	virtual math::vector3d GetRotation() ;
 	void _onSerialData(int size, char *buffer);
+
+	void UpdateThreaded();
 };
 
 }

@@ -11,12 +11,18 @@
 namespace mray
 {
 
-	static const std::string HeadPnPID = "FTDIBUS\VID_165C+PID_0008+KOUSBCNVA\0000";
+	static const std::string HeadPnPID = "FTDIBUS\\VID_165C+PID_0008+KOUSBCNVA\\0000";
 
 	const int ServoCODE[] = {
 		0x3,
 		0x1,
 		0x2
+	};
+	const int ServoRevertCODE[] = {
+		0,
+		1,
+		2,
+		0
 	};
 
 	const TxKitHead::ServoParameters TxKitHead::DEFAULT_PARAMETERS[] = {
@@ -36,6 +42,7 @@ namespace mray
 	{
 		connected = false;
 		m_serial = 0;
+		m_gyroserial = 0;
 		m_EEPROMset = false;
 		{
 			memcpy(m_limits, DEFAULT_LIMITS, sizeof(DEFAULT_LIMITS));
@@ -153,10 +160,11 @@ namespace mray
 		m_EEPROMset = true;
 		return true;
 	}
-	bool TxKitHead::Connect(const core::string& p, bool autoSearch)
+	bool TxKitHead::Connect(const core::string& p, const core::string& gp, bool autoSearch)
 	{
 		Disconnect();
 		m_lastValues[0] = m_lastValues[1] = m_lastValues[2] = 0;
+		m_gyroRotation[0] = m_gyroRotation[1] = m_gyroRotation[2] = 0;
 
 		core::string port = p;
 
@@ -165,7 +173,7 @@ namespace mray
 			std::vector<serial::PortInfo> ports= serial::list_ports();
 			for (int i = 0; i < ports.size(); ++i)
 			{
-				if (ports[i].pnpId.find(HeadPnPID)>=0)
+				if (ports[i].pnpId.find(HeadPnPID)!= std::string::npos)
 				{
 					port = ports[i].port;
 					break;
@@ -192,6 +200,17 @@ namespace mray
 			//Note: for some reason the servo IDs are changed when calling write EEPROM function.
 			// This function is disabled for the time being
 			//_writeEEPROM();
+
+			if (gp != "")
+			{
+				m_gyroserial = new serial::Serial(gp, 115200);
+				connected = m_gyroserial->isOpen();
+				if (!connected)
+				{
+					delete m_gyroserial;
+					m_gyroserial = 0;
+				}
+			}
 		}
 		//comROBOT->owner = this;
 		return connected;
@@ -224,20 +243,28 @@ namespace mray
 		connected = false;
 		delete m_serial;
 		m_serial = 0;
+
+		if (m_gyroserial) {
+			m_gyroserial->close();
+			delete m_gyroserial;
+			m_gyroserial = 0;
+		}
 	}
 
 	int TxKitHead::_sendCommand(const uint8_t* cmd, int len, uint8_t* reply, int rlen, int waitTime)
 	{
-		m_serial->flushInput();
-		m_serial->flushOutput();
+ 		m_serial->flushInput();
+ 		m_serial->flushOutput();
 		//comROBOT->sendData((char*)cmd, len);
 		m_serial->write((const uint8_t*)cmd, len);
 
 		if (waitTime>0)
 			_sleep(waitTime);
 
-		int ret = m_serial->read(reply, rlen);
-
+		int ret = 0;
+	//	do {
+			ret = m_serial->read(reply, rlen);
+	//	} while (reply[0] != cmd[0] && ret>0);
 		return ret;
 		//if (ret != 6)
 		//	gLogManager.log("Failed to read 6 bytes: "+core::StringConverter::toString(ret), ELL_INFO);
@@ -251,7 +278,7 @@ namespace mray
 
 
 		for (int i = 0; i < 3; ++i)
-			orot[i] = 0.5f + math::clamp(rotation[i], m_limits[i][0], m_limits[i][1]) / 270.0f; //pitch
+			orot[i] = 0.5f + math::clamp(rotation[i]-m_gyroRotation[i], m_limits[i][0], m_limits[i][1]) / 270.0f; //pitch
 
 
 		const int MinValue = 3500;
@@ -275,15 +302,19 @@ namespace mray
 			sCommand[0] = (uint8_t)(0x80 | ServoCODE[i]);//(PosCtrlCMD << 5)
 			sCommand[1] = (uint8_t)((value >> 7) & 0x7F);
 			sCommand[2] = (uint8_t)(value & 0x7F);
-			int ret = _sendCommand(sCommand, 3 * sizeof(uint8_t), reply, 6,2);
+			int ret = _sendCommand(sCommand, 3 * sizeof(uint8_t), reply, 6,3);
 
-			if (false && ret == 6)
+			if ( ret == 6)
 			{
-				ret = ((reply[4] & 0x7F) << 7) | (reply[5] & 0x7F);
-			//	printf("%d:%d , %d:%d\n", sCommand[1], sCommand[2], reply[4], reply[5]);
+				int idx = reply[3];
+				if(idx >0 && idx <=3){
+					idx = ServoRevertCODE[idx];
+					ret = ((reply[4] & 0x7F) << 7) | (reply[5] & 0x7F);
+					//	printf("%d:%d , %d:%d\n", sCommand[1], sCommand[2], reply[4], reply[5]);
 
-				m_rotation[i] = ((float)(ret - MinValue) / (MaxValue - MinValue));
-				m_rotation[i] = (m_rotation[i] - 0.5f)*270.0f;
+					m_rotation[idx] = ((float)(ret - MinValue) / (MaxValue - MinValue));
+					m_rotation[idx] = (m_rotation[idx] - 0.5f)*270.0f;
+				}
 
 			}
 			else{
@@ -322,6 +353,32 @@ namespace mray
 			return;
 		if (lst[0] == "angles ")//angles
 		{
+		}
+	}
+
+	void TxKitHead::UpdateThreaded()
+	{
+		if (!m_gyroserial)
+			return;
+		while (m_gyroserial->available())
+		{
+			std::string line = m_gyroserial->readline();
+			std::vector<core::string> lst = core::StringUtil::Split(line, "\t");
+			if (lst.size() < 4)
+				continue;
+			m_gyroQuat.w = core::StringConverter::toFloat(lst[0]);
+			m_gyroQuat.x = core::StringConverter::toFloat(lst[1]);
+			m_gyroQuat.y = core::StringConverter::toFloat(lst[2]);
+			m_gyroQuat.z = core::StringConverter::toFloat(lst[3]);
+
+			math::vector3d e;
+			m_gyroQuat.toEulerAngles(e);
+
+			m_gyroRotation[0] = e.x;
+			m_gyroRotation[2] = e.z;
+// 			m_gyroRotation[0] = core::StringConverter::toFloat(lst[1]);
+// 			m_gyroRotation[1] = 0;// core::StringConverter::toFloat(lst[0]);
+// 			m_gyroRotation[2] = core::StringConverter::toFloat(lst[2]);
 		}
 	}
 
