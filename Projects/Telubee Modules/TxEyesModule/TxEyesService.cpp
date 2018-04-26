@@ -434,6 +434,7 @@ public:
 
 			printf("Loading Parameters\n");
 			src->LoadParameters(m_paramsElement->getSubElement("Encoder"));
+			gLogManager.log("Is separate streams?" + core::StringConverter::toString(src->IsSeparateStreams()), ELL_INFO);
 			m_camConfig->encoderType = src->GetEncoderType();
 			m_camConfig->separateStreams = src->IsSeparateStreams();
 			m_camConfig->CameraStreams = src->GetVideoSrcCount();
@@ -481,7 +482,7 @@ public:
 			m_streamers->AddStream(streamer, "Audio");
 		}*/
 
-		printf("Finished streams\n");
+		gLogManager.log("Finished streams",ELL_INFO);
 
 
 		/*if (m_streamAudio)
@@ -510,7 +511,7 @@ public:
 		m_status = EServiceStatus::Inited;
 		m_context->serviceLoader->RegisterCapability(TxEyesService::ModuleName, "EyesSupported", "Yes");
 
-		printf("Done Initing.\n");
+		gLogManager.log("Done Initing.",ELL_INFO);
 	}
 
 	void _RegisterValues()
@@ -583,25 +584,27 @@ public:
 		//if (m_cameraType == ECameraType::PointGrey)
 		{
 			//Pointgrey cameras need to be started manually
-			printf("Starting Cameras.\n");
+			gLogManager.log("Starting Cameras.",ELL_INFO);
 			m_cameraController->Start();
 			//Sleep(100);
 		}
 
 		m_cameraSource->SetResolution(m_resolution.x, m_resolution.y, m_fps, true);
-		m_streamers->GetStream("Video")->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortStreamer);
-		m_streamers->GetStream("Video")->BindPorts(m_context->GetTargetClientAddr()->toString(),&m_VideoPorts[0],m_VideoPorts.size(),false);
-		m_streamers->GetStream("Video")->CreateStream();
-		if (m_context->sharedMemory->gstClockPortStreamer == 0)//only if first time
-			m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStream("Video")->GetClockPort();
+		video::IGStreamerStreamer*streamer= m_streamers->GetStream("Video");
+		streamer->SetClockAddr(clockIpAddr, m_context->sharedMemory->gstClockPortStreamer);
+		streamer->BindPorts(m_context->GetTargetClientAddr()->toString(),&m_VideoPorts[0],m_VideoPorts.size(),false);
+		gLogManager.log("Creating Stream.", ELL_INFO);
+		streamer->CreateStream();
+		// 		if (m_context->sharedMemory->gstClockPortStreamer == 0)//only if first time
+// 			m_context->sharedMemory->gstClockPortStreamer = m_streamers->GetStream("Video")->GetClockPort();
 
-		printf("Start Streaming.\n");
+		gLogManager.log("Start Streaming.",ELL_INFO);
 		m_streamers->Stream();
 		//Sleep(500);
 
 		m_cameraController->OnStreamStarted();
 
-		printf("Stream started.\n");
+		gLogManager.log("Stream started.", ELL_INFO);
 
 
 		m_isVideoStarted = true;

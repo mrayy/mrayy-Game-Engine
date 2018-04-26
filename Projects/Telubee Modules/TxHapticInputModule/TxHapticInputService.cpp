@@ -50,6 +50,8 @@ public:
 	video::GstCustomDataPlayer* m_dplayer;
 	bool _streamStarted;
 
+	int _baudRate;
+
 	core::string _comPort;
 	serial::Serial *_serialPort;
 
@@ -70,10 +72,6 @@ public:
 	~TxHapticInputServiceImpl()
 	{
 		Destroy();
-		_serialPort->close();
-		_serialThread->terminate();
-		delete _serialThread;
-		delete _serialPort;
 	}
 
 	void Init(TBeeServiceContext* context)
@@ -132,10 +130,8 @@ public:
 
 		{
 			_comPort = context->appOptions.GetOptionValue("COM", "COM5");
-			int baudRate = core::StringConverter::toInt(context->appOptions.GetOptionValue("Baudrate", "115200"));
+			_baudRate = core::StringConverter::toInt(context->appOptions.GetOptionValue("Baudrate", "115200"));
 
-			_serialPort = new serial::Serial(_comPort,baudRate);
-			_serialThread = OS::IThreadManager::getInstance().createThread(this);
 		}
 
 		{
@@ -155,15 +151,27 @@ public:
 		m_context->RemoveListener(this);
 
 
+		if (_serialPort) {
+			_serialPort->close();
+			delete _serialThread;
+			delete _serialPort;
+			_serialThread->terminate();
+			_serialPort = 0;
+			_serialThread = 0;
+		}
 		m_status = EServiceStatus::Idle;
 
 	}
 	virtual void execute(OS::IThread*caller, void*arg)
 	{
+		_serialPort->read(100);//drop the first 100 bytes
 		while (m_status == EServiceStatus::Running)
 		{
 			if (_serialPort->available()) {
-				std::string data=_serialPort->readline(256,"\r");
+				while (_serialPort->read(1) != "@")continue;
+				std::string data=_serialPort->readline(256,"#");
+				if(data.size()>0)
+					data[data.size() - 1] = 0;
 				std::vector<core::string> lst = core::StringUtil::Split(data, " ,");
 				std::vector<float> parsed;
 				for (int i = 0; i < lst.size(); ++i)
@@ -188,11 +196,10 @@ public:
 		m_dstreamer->CreateStream();
 		m_dstreamer->Stream();
 
-		if (_serialPort->isOpen())
-			_serialPort->close();
+		_serialPort = new serial::Serial(_comPort, _baudRate);
+		_serialThread = OS::IThreadManager::getInstance().createThread(this);
 		_serialPort->open();
-		_serialPort->write("delay 0\n\r");
-		_serialPort->write("alpha 0.8\n\r");
+		_serialPort->write("delay 30\n\r");
 		_serialThread->start(0);
 		/*
 		m_dplayer = new video::GstCustomDataPlayer();
@@ -244,6 +251,8 @@ public:
 		t += dt;
 
 
+	
+		/*
 		//if(t>0.01f)
 		if(false)
 		{
@@ -259,8 +268,6 @@ public:
 			m_dstreamer->AddDataFrame((uchar*)&data[0],sizeof(float)*data.size());
 		}
 
-	
-		/*
 		while (m_dplayer->GrabFrame())
 		{
 			 int length=m_dplayer->GetDataLength();

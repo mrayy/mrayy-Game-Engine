@@ -503,6 +503,7 @@ public:
 			if (_captureDevices[i]>=0)
 				_capDev->setupDevice(_captureDevices[i]);
 		}
+		gLogManager.log("Done camera grabber", ELL_INFO);
 	}
 	virtual void Stop() 
 	{

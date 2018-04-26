@@ -16,6 +16,7 @@
 #include "TxKitHead.h"
 #include "StringUtil.h"
 #include "ILogManager.h"
+#include "TxKitBraccio.h"
 
 float testPosx = 100.00;
 float testPosy = 100.00; 
@@ -59,6 +60,8 @@ class RobotSerialPortImpl
 		typedef TxKitHead TXHeadType;
 		TXHeadType* m_headController;
 
+		TxKitBraccio* m_armController;
+
 		std::string m_headPort;
 		std::string m_headGyroPort;
 		std::string m_basePort;
@@ -80,12 +83,15 @@ class RobotSerialPortImpl
 			m_baseController = 0;// new mray::OmniBaseController;
 #endif
 			m_headController = new TXHeadType();
+
+			m_armController = new TxKitBraccio();
 			listener = 0;
 		}
 		~RobotSerialPortImpl()
 		{
 			delete m_baseController;
 			delete m_headController;
+			delete m_armController;
 		}
 		void NotifyCollision(float l, float r)
 		{
@@ -185,6 +191,16 @@ void RobotSerialPort::_ProcessRobot()
 				m_impl->m_baseController->Disconnect();
 			}
 		}
+		if (_config.armEnabled)
+		{
+			ret = m_impl->m_armController->Connect(_config.armCOM);
+			if (ret) {
+				ok |= true;
+			}
+			else {
+				m_impl->m_armController->Disconnect();
+			}
+		}
 		if (_config.HeadEnabled)
 		{
 			if (m_impl->m_headPort == "")
@@ -225,6 +241,15 @@ void RobotSerialPort::_ProcessRobot()
 		{
 			//base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
 			m_baseCounter = 0;
+		}
+
+		if (m_impl->m_armController->IsConnected())
+		{
+			math::vector3d e;
+			_roboStatus.leftHand.ori.toEulerAngles(e);
+			m_impl->m_armController->SetPosition(_roboStatus.leftHand.pos);
+			m_impl->m_armController->SetRotation(e);
+			m_impl->m_armController->UpdateThreaded();
 		}
 		m_baseCounter++;
 
@@ -676,8 +701,9 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 
 	if (GetRobotStatus() != EConnected)
 		return;
+	_roboStatus = st;
 	//mray::math::Point3d<double> angles;
-	mray::math::quaternion q2(st.headRotation[0], st.headRotation[1], st.headRotation[2], st.headRotation[3]);
+	mray::math::quaternion q2(st.head.ori);
 	mray::math::quaternion q(q2.w,q2.z,q2.x,q2.y);
 	//Matrix rotMat;
 	//qtomatrix(rotMat, q);

@@ -28,6 +28,8 @@ protected:
 
 	mray::TBee::RobotCapabilities m_caps;
 
+	RobotStatus _roboStatus;
+
 	RobotSerialPortImpl* m_impl;
 	float pan, tilt, roll;
 	bool baseConnected;

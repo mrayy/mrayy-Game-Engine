@@ -35,11 +35,11 @@
 class RobotConfig
 {
 public:
-	char headCOM[10], gyroheadCOM[10], robotCOM[10];
+	char headCOM[10], gyroheadCOM[10], robotCOM[10], armCOM[10];
 	int robot_baudRate = 115200, head_baudRate = 115200;
 	float xAxis = 1, yAxis = 1, zAxis = 1;
 	float xSpeed = 1, ySpeed = 1, Rotation = 1;
-	bool BaseEnabled = true, HeadEnabled = true;
+	bool BaseEnabled = true, HeadEnabled = true,armEnabled=false;
 };
 
 RobotConfig _config;
@@ -147,6 +147,9 @@ void load_parameters(){
 				else if(strcmp (token[0], "GYRO_COM_PORT") == 0)
 					strcpy(_config.gyroheadCOM, token[1]);
 
+				 if (strcmp(token[0], "ARM_COM_PORT") == 0)
+					 strcpy(_config.armCOM, token[1]);
+
 				else if(strcmp (token[0], "HEAD_BAUD") == 0)
 					_config.head_baudRate = atoi(token[1]);/**/
 				
@@ -166,6 +169,8 @@ void load_parameters(){
 					_config.HeadEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "BaseEnabled") == 0)
 					_config.BaseEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "ArmEnabled") == 0)
+					_config.armEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 
 			}
 

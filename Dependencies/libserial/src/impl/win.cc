@@ -31,8 +31,8 @@ Serial::SerialImpl::SerialImpl (const string &port, unsigned long baudrate,
 {
   read_mutex = CreateMutex(NULL, false, NULL);
   write_mutex = CreateMutex(NULL, false, NULL);
-  if (port_.empty () == false)
-    open ();
+//   if (port_.empty () == false)
+//     open ();
 }
 
 Serial::SerialImpl::~SerialImpl ()

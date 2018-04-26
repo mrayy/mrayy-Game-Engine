@@ -231,7 +231,7 @@ public:
 		 // int trials = 0;
 		 // while (trials < 3 && pipeline==0)
 		 {
-			 pipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
+				 pipeline = gst_parse_launch(m_pipeLineString.c_str(), &err);
 			 gLogManager.log("Starting with pipeline: " + m_pipeLineString, ELL_INFO);
 			 if (err)
 			 {

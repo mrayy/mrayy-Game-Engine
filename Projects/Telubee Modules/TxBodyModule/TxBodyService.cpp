@@ -335,15 +335,14 @@ public:
 			context->RenderText(msg, 10, 0);
 
 			math::vector3d angles;
-			math::quaternion q(m_robotData.headRotation[0], m_robotData.headRotation[3],
-				m_robotData.headRotation[1], m_robotData.headRotation[2]);
+			math::quaternion q(m_robotData.head.ori);
 			q.toEulerAngles(angles);
 			angles.set(angles.y, angles.z, angles.x);
 			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", angles.x, angles.y, angles.z);
 			msg = core::string("Head Rotation: ") + buffer;
 			context->RenderText(msg, 10, 0);
 
-			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", m_robotData.headPos[0], m_robotData.headPos[1], m_robotData.headPos[2]);
+			sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", m_robotData.head.pos.x, m_robotData.head.pos.y, m_robotData.head.pos.z);
 			msg = core::string("Head Position: ") + buffer;
 			context->RenderText(msg, 10, 0);
 
@@ -398,6 +397,33 @@ public:
 		}
 	}
 
+	static math::quaternion parseQuaternion(std::vector<core::string> &vals)
+	{
+		return math::quaternion(core::StringConverter::toFloat(vals[0]),
+			core::StringConverter::toFloat(vals[1]),
+			core::StringConverter::toFloat(vals[2]),
+			core::StringConverter::toFloat(vals[3]));
+	}
+
+	static math::vector3d parseVector3(std::vector<core::string> &vals)
+	{
+		return math::vector3d(core::StringConverter::toFloat(vals[0]),
+			core::StringConverter::toFloat(vals[1]),
+			core::StringConverter::toFloat(vals[2]));
+	}
+
+	void ParseJoint(JointData& j, const std::string& msg, std::vector<core::string> &vals)
+	{
+		if (msg == "Pos")
+		{
+			j.pos = parseVector3(vals);
+		}
+		else if(msg=="Rot")
+		{
+			j.ori = parseQuaternion(vals);
+
+		}
+	}
 
 	//////////////////////////////////////////////////////////////////////////
 	/// Listeners
@@ -425,12 +451,13 @@ public:
 		OS::CMemoryStream stream("", buffer, BufferLen, false, OS::BIN_WRITE);
 		OS::StreamWriter wrtr(&stream);
 
-		std::vector<core::string> vals;
+		std::vector<core::string> vals,msgV;
 		vals = core::StringUtil::Split(value, ",");
+		msgV = core::StringUtil::Split(msg, ".");
 
 		int arrived = false;
 
-		if (msg.equals_ignore_case("query"))
+		if (msgV[0].equals_ignore_case("query"))
 		{
 			if (m_RobotHandler->GetRobotController() != 0)
 			{
@@ -441,40 +468,42 @@ public:
 				m_context->commChannel->SendTo(m_context->GetTargetClientAddr(), (char*)buffer, len);
 			}
 		}
-		else if (msg.equals_ignore_case("Speed") && vals.size() == 2)
+		else if (msgV[0].equals_ignore_case("Body") && vals.size() == 2)
 		{
-			m_robotData.speed[0] = atof(vals[0].c_str());
-			m_robotData.speed[1] = atof(vals[1].c_str());
-			//limit the speed
-			m_robotData.speed[0] = math::clamp<float>(m_robotData.speed[0], -1, 1);
-			m_robotData.speed[1] = math::clamp<float>(m_robotData.speed[1], -1, 1);
-			m_robotData.speed[0] = (m_robotData.speed[0]);
-			m_robotData.speed[1] = (m_robotData.speed[1]);
+			if(msgV[1]=="Speed")
+			{
+				m_robotData.speed[0] = atof(vals[0].c_str());
+				m_robotData.speed[1] = atof(vals[1].c_str());
+				//limit the speed
+				m_robotData.speed[0] = math::clamp<float>(m_robotData.speed[0], -1, 1);
+				m_robotData.speed[1] = math::clamp<float>(m_robotData.speed[1], -1, 1);
+				m_robotData.speed[0] = (m_robotData.speed[0]);
+				m_robotData.speed[1] = (m_robotData.speed[1]);
 
+			}
+			else if (msgV[1].equals_ignore_case("Rot") && vals.size() == 1)
+			{
+				m_robotData.rotation = atof(vals[0].c_str());
+				m_robotData.rotation = math::clamp<float>(m_robotData.rotation, -1, 1);
+			}
 		}
-		else if (msg.equals_ignore_case("Rotation") && vals.size() == 1)
-		{
-			m_robotData.rotation = atof(vals[0].c_str());
-			m_robotData.rotation = math::clamp<float>(m_robotData.rotation, -1, 1);
-		}
-		else if (msg.equals_ignore_case("RobotConnect"))
+		else if (msgV[0].equals_ignore_case("Connect"))
 		{
 			m_robotData.connected = core::StringConverter::toBool(vals[0].c_str());
 		}
-		else if (msg.equals_ignore_case("HeadRotation"))
+		else if (msgV[0].equals_ignore_case("Head"))
 		{
-			m_robotData.headRotation[0] = atof(vals[0].c_str());
-			m_robotData.headRotation[1] = atof(vals[1].c_str());
-			m_robotData.headRotation[2] = atof(vals[2].c_str());
-			m_robotData.headRotation[3] = atof(vals[3].c_str());
+			ParseJoint(m_robotData.head, msgV[1], vals);
 		}
-		else if (msg.equals_ignore_case("HeadPosition"))
+		else if (msgV[0].equals_ignore_case("LeftH"))
 		{
-			m_robotData.headPos[0] = atof(vals[0].c_str());
-			m_robotData.headPos[1] = atof(vals[1].c_str());
-			m_robotData.headPos[2] = atof(vals[2].c_str());
+			ParseJoint(m_robotData.leftHand, msgV[1], vals);
 		}
-		else  if (msg.equals_ignore_case("jointVals"))
+		else if (msgV[0].equals_ignore_case("RightH"))
+		{
+			ParseJoint(m_robotData.rightHand, msgV[1], vals);
+		}
+		else  if (msgV[0].equals_ignore_case("jointVals"))
 		{
 			if (m_RobotHandler->GetRobotController() != 0)
 			{
@@ -489,7 +518,7 @@ public:
 				m_context->commChannel->SendTo(m_context->GetTargetClientAddr(), (char*)buffer, len);
 			}
 		}
-		else if (msg.equals_ignore_case("reinit"))
+		else if (msgV[0].equals_ignore_case("reinit"))
 		{
 			if (m_RobotHandler->GetRobotController() != 0)
 			{

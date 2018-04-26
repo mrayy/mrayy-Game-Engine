@@ -29,6 +29,7 @@ protected:
 	serial::Serial* m_serial;
 	serial::Serial* m_gyroserial;
 
+
 	ServoParameters m_parameters[3];
 	bool m_paramsLoaded;
 	float m_limits[3][2];

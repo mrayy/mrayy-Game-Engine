@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{9F1F1199-BFBE-4EE3-A5CA-AB0A1760F45E}"
 EndProject
@@ -50,6 +50,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TxKit", "TxKit", "{EBFC3C06-C22F-4659-9ED7-04A60AB37E4E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxBodyServiceModule", "Projects\Telubee Modules\TxBodyModule\TxBodyModule.vcxproj", "{011F365F-97D0-4428-A125-DE735A365858}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC75C431-3C9B-439F-8D24-FE2F104C0972} = {EC75C431-3C9B-439F-8D24-FE2F104C0972}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxEarsServiceModule", "Projects\Telubee Modules\TxEarsModule\TxEarsModule.vcxproj", "{38B4875C-1395-4D12-BC09-10362D6CCA3F}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -64,6 +67,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxEyesServiceModule", "Proj
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxMouthServiceModule", "Projects\Telubee Modules\TxMouthModule\TxMouthModule.vcxproj", "{9616AB0C-CCD1-4BE8-AF90-C2C9EA49C9EA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A3BB9F46-E552-48A2-8D04-637B8E420568} = {A3BB9F46-E552-48A2-8D04-637B8E420568}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{F9507B77-823C-4D92-96BB-0474C4B86E6E}"
 EndProject

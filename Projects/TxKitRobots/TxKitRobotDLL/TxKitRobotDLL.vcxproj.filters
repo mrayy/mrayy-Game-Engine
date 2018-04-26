@@ -54,6 +54,9 @@
     <ClInclude Include="TxKitHead.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
+    <ClInclude Include="TxKitBraccio.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -72,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TxKitHead.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="TxKitBraccio.cpp">
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>

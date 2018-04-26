@@ -119,14 +119,14 @@ void GStreamerCore::_Init()
 		_gst_debug_min = GST_LEVEL_NONE;
 
 		*/
-		_gst_debug_enabled = false;
-		g_setenv("GST_DEBUG", "*:0", 1);
+		//_gst_debug_enabled = false;
+		//g_setenv("GST_DEBUG", "*:0", 1);
 		/*
 		g_log_set_handler_full("", G_LOG_LEVEL_INFO, g_logFunction, 0, 0);
 		g_log_set_handler_full("", G_LOG_LEVEL_DEBUG, g_logFunction, 0, 0);
 		g_log_set_handler_full("", G_LOG_LEVEL_MESSAGE, g_logFunction, 0, 0);*/
 
-		fclose(stderr);
+		//fclose(stderr);
 		//fclose(stdout);
 
 		//register plugin path
@@ -141,7 +141,7 @@ void GStreamerCore::_Init()
 		}
 		*/
 
-		gLogManager.log("GStreamerCore - Adding Appsink", ELL_INFO);
+		gLogManager.log("GStreamerCore - Adding Appsink", ELL_INFO);/*
 		//add our custom src/sink elements
 		gst_plugin_register_static(1, 1,
 			"appsink", (char*)"Element application sink",
@@ -164,13 +164,16 @@ void GStreamerCore::_Init()
 		gst_plugin_register_static(1, 1,
 			"myudpsink", (char*)"Element udp sink",
 			_GstMyUDPSinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
-			"");
-
+			"");*/
+		/*
 		gLogManager.log("GStreamerCore - Adding mylistener", ELL_INFO);
-		gst_plugin_register_static(1, 1,
-			"mylistener", (char*)"Custom listener element",
-			_GstMyListenerClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "mray",
-			"");
+ 		if (!gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
+ 			"mylistener", (char*)"Custom listener element",
+ 			_GstMyListenerClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "mray",
+ 			""))
+ 		{
+ 			gLogManager.log("Failed to register mylistener!", ELL_WARNING);
+ 		}*/
 #ifdef USE_LIBNICE
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "nicesrc", strdup("nicesrc"), nicesrc_plugin_init, "1.0.4", "BSD", "libnice", "nice", "http://libnice.org");
 

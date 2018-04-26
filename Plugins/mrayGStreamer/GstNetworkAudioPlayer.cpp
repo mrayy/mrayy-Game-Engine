@@ -66,7 +66,7 @@ public:
 		char buffer[128];
 		sprintf(buffer, "%d", m_sampleRate);
 
-		std::string audioStr = "  rtpopusdepay ! opusdec ! audioconvert ! volume volume=2 ! audioresample  ! audio/x-raw,rate=";
+		std::string audioStr = "  rtpopusdepay ! opusdec ! audioconvert ! volume volume=1 ! audioresample  ! audio/x-raw,rate=";
 		audioStr+=buffer;
 		audioStr += " ";
 #elif defined VORBIS_ENC
@@ -106,7 +106,7 @@ public:
 			if (m_customAudioInterface)
 				m_pipeLineString += " ! appsink name=audioSink sync=false  emit-signals=false";
 			else
-				m_pipeLineString += " ! queue ! directsoundsink buffer-time=80000  sync=false";// "buffer-time=200000 latency-time=100 sync=false";
+				m_pipeLineString += " ! queue ! directsoundsink   ";// "buffer-time=200000 latency-time=100 sync=false" //buffer-time=80000//sync=false;
 
 		}
 

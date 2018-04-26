@@ -18,6 +18,7 @@ namespace TBee
 	{
 		m_listener = 0;
 		m_localControl = 0;
+		m_robotController = 0;
 		m_robotLib = OS::IDllManager::getInstance().getLibrary(robotDll);
 		if (!m_robotLib)
 		{

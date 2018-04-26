@@ -141,15 +141,6 @@ void CRobotConnector::EndUpdate()
 	{
 		RobotStatus st;
 		st.connected = m_connected;
-		st.headPos[0] = 0;
-		st.headPos[1] = 0;
-		st.headPos[2] = 0;
-
-		st.headRotation[0] = 0;
-		st.headRotation[1] = 0;
-		st.headRotation[2] = 0;
-		st.headRotation[3] = 0;
-
 		st.rotation = 0;
 
 		st.speed[0] = 0;
@@ -226,14 +217,8 @@ void CRobotConnector::UpdateStatus()
 	{
 		RobotStatus st;
 		st.connected = m_connected;
-		st.headPos[0] = m_headPosition.x;
-		st.headPos[1] = m_headPosition.y;
-		st.headPos[2] = m_headPosition.z;
-
-		st.headRotation[0] = m_headRotation.w;
-		st.headRotation[1] = m_headRotation.x;
-		st.headRotation[2] = m_headRotation.y;
-		st.headRotation[3] = m_headRotation.z;
+		st.head.pos=m_headPosition;
+		st.head.ori = m_headRotation;
 
 		st.rotation = m_rotation / 3.0f;
 

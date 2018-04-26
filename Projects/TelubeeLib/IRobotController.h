@@ -18,20 +18,29 @@ namespace mray
 class ITelubeeRobotListener;
 struct RobotStatus;
 
+class JointData
+{
+public:
+	 JointData()
+	 {
+	}
+
+	mray::math::vector3d pos;
+	mray::math::quaternion ori;
+};
+
 struct RobotStatus
 {
 	bool connected;
 	float speed[2];	//speed x,y axis
 	float rotation;
-	float headRotation[4];  	//head rotation  [w,x,y,z] quaternion
-	float headPos[3];			//head position [x,y,z]
+	JointData head;
+	JointData leftHand;
+	JointData rightHand;
 
 	RobotStatus()
 	{
 		speed[0] = speed[1] = 0;
-		headPos[0] = headPos[1] = headPos [2]= 0;
-		headRotation[0] = 1;
-		headRotation[1] = headRotation[2] = headRotation[3] = 0;
 		connected = false;
 		rotation = 0;
 	}

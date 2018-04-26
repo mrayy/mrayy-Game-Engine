@@ -202,6 +202,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TelubeeRobotDLL.h" />
+    <ClInclude Include="TxKitBraccio.h" />
     <ClInclude Include="TxKitHead.h" />
   </ItemGroup>
   <ItemGroup>
@@ -231,6 +232,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TelubeeRobotDLL.cpp" />
+    <ClCompile Include="TxKitBraccio.cpp" />
     <ClCompile Include="TxKitHead.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

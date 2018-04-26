@@ -136,6 +136,7 @@ namespace video
 			}
 		}
 #endif
+		gLogManager.log("Pipeline Created", ELL_INFO);
 	//	Stop();
 		return true;
 	}
