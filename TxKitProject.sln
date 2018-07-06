@@ -134,6 +134,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OIS", "Dependencies\ois-v1-
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RemoteRobotReceiverServiceModule", "Projects\Telubee Modules\RemoteRobotReceiverServiceModule\RemoteRobotReceiverServiceModule.vcxproj", "{3924E84D-E246-4CDD-AC83-7BB0B3861A1A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FusionRobotDLL", "Projects\TxKitRobots\FusionRobotDLL\FusionRobotDLL.vcxproj", "{C715F799-CA2A-4C84-AEBD-4CBBF345C305}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Unicode|Mixed Platforms = Debug_Unicode|Mixed Platforms
@@ -1556,6 +1558,42 @@ Global
 		{3924E84D-E246-4CDD-AC83-7BB0B3861A1A}.Release|Win32.Build.0 = Release|Win32
 		{3924E84D-E246-4CDD-AC83-7BB0B3861A1A}.Release|x64.ActiveCfg = Release|x64
 		{3924E84D-E246-4CDD-AC83-7BB0B3861A1A}.Release|x64.Build.0 = Release|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug_Unicode|Mixed Platforms.ActiveCfg = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug_Unicode|Mixed Platforms.Build.0 = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug_Unicode|Win32.ActiveCfg = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug_Unicode|Win32.Build.0 = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug_Unicode|x64.ActiveCfg = Debug|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug_Unicode|x64.Build.0 = Debug|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug|Win32.Build.0 = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug|x64.ActiveCfg = Debug|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Debug|x64.Build.0 = Debug|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_DebugDll|Mixed Platforms.ActiveCfg = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_DebugDll|Mixed Platforms.Build.0 = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_DebugDll|Win32.ActiveCfg = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_DebugDll|Win32.Build.0 = Debug|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_DebugDll|x64.ActiveCfg = Debug|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_DebugDll|x64.Build.0 = Debug|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_ReleaseDll|Mixed Platforms.ActiveCfg = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_ReleaseDll|Mixed Platforms.Build.0 = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_ReleaseDll|Win32.ActiveCfg = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_ReleaseDll|Win32.Build.0 = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_ReleaseDll|x64.ActiveCfg = Release|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.OIS_ReleaseDll|x64.Build.0 = Release|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release_Unicode|Mixed Platforms.ActiveCfg = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release_Unicode|Mixed Platforms.Build.0 = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release_Unicode|Win32.ActiveCfg = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release_Unicode|Win32.Build.0 = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release_Unicode|x64.ActiveCfg = Release|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release_Unicode|x64.Build.0 = Release|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release|Win32.ActiveCfg = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release|Win32.Build.0 = Release|Win32
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release|x64.ActiveCfg = Release|x64
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1605,6 +1643,7 @@ Global
 		{EF92D540-0CCA-45DA-A8C3-3B76A6DBB64B} = {9F1F1199-BFBE-4EE3-A5CA-AB0A1760F45E}
 		{9CC704CB-4956-4479-BDEC-57CBC03F700E} = {E98F397D-8062-4B06-9A74-D3B62F6F85C8}
 		{3924E84D-E246-4CDD-AC83-7BB0B3861A1A} = {CE1A8229-F182-4F46-893A-32B4967DB4DA}
+		{C715F799-CA2A-4C84-AEBD-4CBBF345C305} = {695D0AF1-FC9D-41DF-A2F9-8922072E49C0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D271C0D6-131F-4826-B58F-6607AB32E88E}

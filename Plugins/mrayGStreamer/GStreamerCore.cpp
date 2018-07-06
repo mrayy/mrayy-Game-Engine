@@ -165,7 +165,7 @@ void GStreamerCore::_Init()
 			"myudpsink", (char*)"Element udp sink",
 			_GstMyUDPSinkClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "TELUBee",
 			"");*/
-		/*
+		/**/
 		gLogManager.log("GStreamerCore - Adding mylistener", ELL_INFO);
  		if (!gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
  			"mylistener", (char*)"Custom listener element",
@@ -173,7 +173,7 @@ void GStreamerCore::_Init()
  			""))
  		{
  			gLogManager.log("Failed to register mylistener!", ELL_WARNING);
- 		}*/
+ 		}
 #ifdef USE_LIBNICE
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "nicesrc", strdup("nicesrc"), nicesrc_plugin_init, "1.0.4", "BSD", "libnice", "nice", "http://libnice.org");
 
