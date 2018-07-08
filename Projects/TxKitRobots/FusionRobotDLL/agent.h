@@ -35,11 +35,11 @@
 class RobotConfig
 {
 public:
-	char headCOM[10], robotCOM[10];
+	char headCOM[10], gyroheadCOM[10], robotCOM[10], armCOM[10];
 	int robot_baudRate = 115200, head_baudRate = 115200;
 	float xAxis = 1, yAxis = 1, zAxis = 1;
 	float xSpeed = 1, ySpeed = 1, Rotation = 1;
-	bool BaseEnabled = true, HeadEnabled = true;
+	bool BaseEnabled = true, HeadEnabled = true, armEnabled = false;
 };
 
 RobotConfig _config;
@@ -49,18 +49,18 @@ clock_t startT, endT;
 using namespace std;
 
 
-void wait(long milliseconds){
+void wait(long milliseconds) {
 	register long endwait;
 	endwait = clock() + milliseconds * CLOCKS_PER_SEC * 0.001;
-	while (clock() < endwait){} 
+	while (clock() < endwait) {}
 }
 
 
 
-DWORD_PTR GetNumCPUs(){
-	SYSTEM_INFO m_si = {0, }; 
+DWORD_PTR GetNumCPUs() {
+	SYSTEM_INFO m_si = { 0, };
 	GetSystemInfo(&m_si);
-	return (DWORD_PTR)m_si.dwNumberOfProcessors; 
+	return (DWORD_PTR)m_si.dwNumberOfProcessors;
 }
 
 
@@ -68,7 +68,7 @@ DWORD_PTR GetNumCPUs(){
 #endif 
 
 
-void load_parameters(){
+void load_parameters() {
 
 	const int MAX_CHARS_PER_LINE = 512;
 	const int MAX_TOKENS_PER_LINE = 20;
@@ -78,7 +78,7 @@ void load_parameters(){
 	char buffer[MAX_PATH];
 	GetModuleFileName(NULL, buffer, MAX_PATH);
 
-	
+
 	int index = -1;
 	int len = strlen(buffer);
 	for (int i = len - 1; i >= 0; --i)
@@ -89,7 +89,7 @@ void load_parameters(){
 			break;
 		}
 	}
-	std::string path="";
+	std::string path = "";
 	if (index != -1)
 	{
 		buffer[index + 1] = 0;
@@ -110,44 +110,49 @@ void load_parameters(){
 	_config.BaseEnabled = true;
 	_config.HeadEnabled = true;
 
-	if ( !confFile.is_open() ){
+	if (!confFile.is_open()) {
 		cout << " FileOpenError(robotconf.ini)" << endl;
 	}
-	else{
-		while (!confFile.eof()){
+	else {
+		while (!confFile.eof()) {
 			char buf[MAX_CHARS_PER_LINE];
 			confFile.getline(buf, MAX_CHARS_PER_LINE);
 
 			// parse the line into blank-delimited tokens
 			int n = 0; // a for-loop index
 
-			if(buf[0] == ESCAPE)
-				continue; 
+			if (buf[0] == ESCAPE)
+				continue;
 
 			// array to store memory addresses of the tokens in buf
 			const char* token[MAX_TOKENS_PER_LINE] = {}; // initialize to 0
 
-			// parse the line
+														 // parse the line
 			token[0] = strtok(buf, DELIMITER); // first token
 
-			if (token[0]){
-				for (n = 1; n < MAX_TOKENS_PER_LINE; n++){
+			if (token[0]) {
+				for (n = 1; n < MAX_TOKENS_PER_LINE; n++) {
 					token[n] = strtok(0, DELIMITER); // subsequent tokens
 					if (!token[n]) break; // no more tokens
 				}
-				
- 				if(strcmp (token[0], "ROBOT_COM_PORT") == 0)
+
+				if (strcmp(token[0], "ROBOT_COM_PORT") == 0)
 					strcpy(_config.robotCOM, token[1]);
-				
-				 if(strcmp (token[0], "ROBOT_BAUD") == 0)
-					 _config.robot_baudRate = atoi(token[1]);
 
-				else if(strcmp (token[0], "HEAD_COM_PORT") == 0)
+				if (strcmp(token[0], "ROBOT_BAUD") == 0)
+					_config.robot_baudRate = atoi(token[1]);
+
+				else if (strcmp(token[0], "HEAD_COM_PORT") == 0)
 					strcpy(_config.headCOM, token[1]);
+				else if (strcmp(token[0], "GYRO_COM_PORT") == 0)
+					strcpy(_config.gyroheadCOM, token[1]);
 
-				else if(strcmp (token[0], "HEAD_BAUD") == 0)
+				if (strcmp(token[0], "ARM_COM_PORT") == 0)
+					strcpy(_config.armCOM, token[1]);
+
+				else if (strcmp(token[0], "HEAD_BAUD") == 0)
 					_config.head_baudRate = atoi(token[1]);/**/
-				
+
 				else if (strcmp(token[0], "X") == 0)
 					_config.xAxis = atof(token[1]);
 				else if (strcmp(token[0], "Y") == 0)
@@ -164,6 +169,8 @@ void load_parameters(){
 					_config.HeadEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "BaseEnabled") == 0)
 					_config.BaseEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "ArmEnabled") == 0)
+					_config.armEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 
 			}
 

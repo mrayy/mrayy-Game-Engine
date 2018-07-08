@@ -3,7 +3,7 @@
 #define __THREEAXISHEAD__
 
 #include "IHeadController.h"
-#include "Tserial_event.h"
+#include "serial/serial.h"
 
 namespace mray
 {
@@ -12,7 +12,7 @@ class ThreeAxisHead:public IHeadController
 {
 protected:
 
-	Tserial_event *comROBOT;	// Serial Port
+	serial::Serial* m_serial;
 	bool connected;
 	math::vector3d m_rotation;
 
@@ -23,7 +23,7 @@ public:
 	ThreeAxisHead();
 	virtual ~ThreeAxisHead();
 
-	Tserial_event *GetComEvent(){ return comROBOT; }
+	serial::Serial *GetComEvent(){ return m_serial; }
 
 	virtual bool Connect(const core::string& port);
 	virtual bool IsConnected();

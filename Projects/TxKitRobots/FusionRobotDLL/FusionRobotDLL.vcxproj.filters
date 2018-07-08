@@ -66,6 +66,9 @@
     <ClInclude Include="FusionRobotDLL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RobotArms.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -97,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="FusionRobotDLL.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotArms.cpp">
+      <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

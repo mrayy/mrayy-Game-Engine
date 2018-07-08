@@ -320,7 +320,7 @@ bool KondoClass::synchronize(byte *txBuf, byte txLen, byte *rxBuf, byte rxLen)
 	enHigh(); //送信切替
 	_serial->write(txBuf, txLen);
 	_serial->flush();   //待つ
-  delay(1);
+  delayMicroseconds(600);
 /*
 	while (_serial->available() > 0) //受信バッファを消す
 	{

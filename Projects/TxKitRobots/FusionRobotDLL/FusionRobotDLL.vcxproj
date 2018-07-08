@@ -198,6 +198,7 @@
     <ClInclude Include="IHeadController.h" />
     <ClInclude Include="IRobotComponent.h" />
     <ClInclude Include="movingAverage.h" />
+    <ClInclude Include="RobotArms.h" />
     <ClInclude Include="RobotSerialPort.h" />
     <ClInclude Include="serial\serial.h" />
     <ClInclude Include="serial\v8stdint.h" />
@@ -224,6 +225,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="movingAverage.cpp" />
+    <ClCompile Include="RobotArms.cpp" />
     <ClCompile Include="RobotSerialPort.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>

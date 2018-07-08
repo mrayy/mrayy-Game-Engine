@@ -38,6 +38,8 @@ struct RobotStatus
 	JointData leftHand;
 	JointData rightHand;
 
+	float customAngles[256];
+
 	RobotStatus()
 	{
 		speed[0] = speed[1] = 0;

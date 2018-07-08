@@ -33,6 +33,13 @@ protected:
 	bool baseConnected;
 	int m_baseCounter;
 	int m_headCounter;
+
+	float m_leftArm[7];
+	float m_rightArm[7];
+
+	float m_leftHand[3];
+	float m_rightHand[3];
+
 	ERobotControllerStatus _status;
 	IRobotStatusProvider* m_robotStatusProvider;
 	HANDLE m_robotThread;

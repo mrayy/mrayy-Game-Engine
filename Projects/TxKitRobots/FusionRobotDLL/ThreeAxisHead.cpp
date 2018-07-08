@@ -10,7 +10,7 @@
 namespace mray
 {
 
-
+	/*
 	void head_SerialEventManager(Tserial_event * object, uint32 event){
 		char *buffer;
 		int   size;
@@ -32,17 +32,17 @@ namespace mray
 		}
 
 
-	}
+	}*/
 
 ThreeAxisHead::ThreeAxisHead()
 {
 	connected = false;
-	comROBOT = 0;
+	m_serial = 0;
 }
 ThreeAxisHead::~ThreeAxisHead()
 {
 	Disconnect();
-	delete comROBOT;
+	delete m_serial;
 }
 
 
@@ -50,49 +50,54 @@ bool ThreeAxisHead::Connect(const core::string& port)
 {
 	Disconnect();
 
-	comROBOT = new Tserial_event();
-	comROBOT->setManager(head_SerialEventManager);
-	connected = comROBOT->connect((char*)port.c_str(), 115200, SERIAL_PARITY_NONE, 8, FALSE, FALSE) == 0;
-	if (!comROBOT->isconnected())
+	m_serial = new serial::Serial(port, 115200, serial::Timeout(), serial::eightbits, serial::parity_none);
+	if (!m_serial->isOpen())
 	{
+		connected = false;
 	//	printf("Failed to connect robot\n");
-		delete comROBOT;
-		comROBOT = 0;
+		delete m_serial;
+		m_serial = 0;
 	}
 	else
 	{
-		comROBOT->owner = this;
-		comROBOT->setRxSize(10);
+		connected = true;
 		_sendCommand("sa");//disable angle logging
 		_sendCommand("es");//enable stabilization
 	}
-	return comROBOT && comROBOT->isconnected();
+	return m_serial && m_serial->isOpen();
 }
 bool ThreeAxisHead::IsConnected()
 {
-	return comROBOT != 0;
+	return m_serial != 0 && m_serial->isOpen();
 }
 void ThreeAxisHead::Disconnect()
 {
-	if (!comROBOT)
+	if (!m_serial)
 		return;
 	_sendCommand("q");
 
 	SetRotation(0);
-	comROBOT->disconnect();
-	connected = FALSE;
-	delete comROBOT;
-	comROBOT = 0;
+	if (m_serial != 0)
+	{
+		m_serial->close();
+		delete m_serial;
+		m_serial = 0;
+	}
+	connected = false;
 }
 
 void ThreeAxisHead::_sendCommand(const std::string& cmd)
 {
 	std::string str = "@"+cmd + "#";
-	comROBOT->sendData((char*)str.c_str(), str.length());
+	m_serial->write(str);
+	if (m_serial->available())
+	{
+		m_serial->read(m_serial->available());
+	}
 }
 void ThreeAxisHead::SetRotation(const math::vector3d& rotation)
 {
-	if (!comROBOT)
+	if (!m_serial)
 		return;
 	int packet_size;
 	char sCommand[128];

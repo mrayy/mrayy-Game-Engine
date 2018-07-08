@@ -14,6 +14,7 @@
 //#include "RoombaController.h"
 //#include "OmniBaseController.h"
 #include "ThreeAxisHead.h"
+#include "RobotArms.h"
 #include "StringUtil.h"
 #include "ILogManager.h"
 #include "Tserial_event.h"
@@ -61,8 +62,11 @@ class RobotSerialPortImpl
 		typedef ThreeAxisHead TXHeadType;
 		TXHeadType* m_headController;
 
+		RobotArms* m_armsController;
+
 		std::string m_headPort;
 		std::string m_basePort;
+		std::string m_armsPort;
 
 		//Tserial_event *comHEAD;		// Serial Port
 		MovAvg *mvRobot[2][3];		// 1 - base, 2 - head moving avarage 
@@ -78,11 +82,12 @@ class RobotSerialPortImpl
 			m_baseController = 0;// new mray::OmniBaseController;
 #endif
 			m_headController = new TXHeadType();
+			m_armsController = new RobotArms();
 			listener = 0;
 		}
 		~RobotSerialPortImpl()
 		{
-			delete m_baseController;
+			delete m_armsController;
 			delete m_headController;
 		}
 		void NotifyCollision(float l, float r)
@@ -140,6 +145,7 @@ DWORD RobotSerialPort::timerThreadRobot(RobotSerialPort *robot, LPVOID pdata){
 	int count = 0;
 	while (!isDone){
 		robot->_ProcessRobot();
+
 		Sleep(1);
 		if (!threadStart)
 			Sleep(100);
@@ -154,33 +160,40 @@ void RobotSerialPort::_ProcessRobot()
 	if (_status!=EDisconnecting || _status!=EDisconnected)
 		_processData();
 
+	if (m_impl->m_armsController)
+	{
+		m_impl->m_armsController->Update(0.001f);
+	}
+
 	bool ok = false;
 	switch (_status)
 	{
 	case ERobotControllerStatus::EIniting:
 		break;
 	case ERobotControllerStatus::EConnecting:
-		if (_config.BaseEnabled && m_impl->m_baseController)
+		if (_config.armEnabled && m_impl->m_armsController)
 		{
-			if (m_impl->m_basePort == "")
-				m_impl->m_basePort = _config.robotCOM;
-			ret = m_impl->m_baseController->Connect(m_impl->m_basePort);
+			if (m_impl->m_armsPort == "")
+				m_impl->m_armsPort = _config.armCOM;
+			ret = m_impl->m_armsController->Connect(m_impl->m_armsPort);
 			if (ret){
 
-				gLogManager.log("Robot Connected", ELL_INFO);
+				m_impl->m_armsController->Start(true, true);
+				gLogManager.log("Arms Connected", ELL_INFO);
 				if (debug_print)
-					printf("Robot Connected!\n", ret);
+					printf("Arms Connected!\n", ret);
+
 				ok |= true;
 			}
 			else{
 
-				gLogManager.log("Robot Failed to connected", ELL_WARNING);
+				gLogManager.log("Arms Failed to connected", ELL_WARNING);
 				if (debug_print)
 				{
-					printf("Robot not connected (%ld)\n", ret);
-					printf("Robot baud (%ld)\n", ret);
+					printf("Arms not connected (%ld)\n", ret);
+					printf("Arms baud (%ld)\n", ret);
 				}
-				m_impl->m_baseController->Disconnect();
+				m_impl->m_armsController->Disconnect();
 			}
 		}
 		if (_config.HeadEnabled)
@@ -216,6 +229,12 @@ void RobotSerialPort::_ProcessRobot()
 			head_control(pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
 			m_headCounter = 0;
 		}
+
+		if (m_impl->m_armsController)
+		{
+			m_impl->m_armsController->SetArmAngles(RobotArms::Left, m_leftArm, 7);
+			m_impl->m_armsController->SetArmAngles(RobotArms::Right,m_rightArm, 7);
+		}
 		m_headCounter++;
 		if (m_baseCounter > 120)
 		{
@@ -229,10 +248,9 @@ void RobotSerialPort::_ProcessRobot()
 		gLogManager.log("Disconnecting Robot", ELL_INFO);
 		if (debug_print)
 			printf("Disconnecting Robot\n", ret);
-		if (_config.BaseEnabled && m_impl->m_baseController)
+		if (_config.armEnabled && m_impl->m_armsController)
 		{
-			m_impl->m_baseController->DriveStop();
-			m_impl->m_baseController->Disconnect();
+			m_impl->m_armsController->Disconnect();
 		}
 		if (_config.HeadEnabled)
 			m_impl->m_headController->Disconnect();
@@ -241,8 +259,8 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EDisconnected:
 		break;
 	case ERobotControllerStatus::EStopping:
-		if (m_impl->m_baseController)
-			m_impl->m_baseController->Disconnect();
+		if (m_impl->m_armsController)
+			m_impl->m_armsController->Disconnect();
 		m_impl->m_headController->Disconnect();
 		_status = ERobotControllerStatus::EStopped;
 		break;
@@ -697,6 +715,12 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 		tilt = m_impl->mvRobot[HEAD][1]->getNext(res[1]);//2
 		pan = m_impl->mvRobot[HEAD][0]->getNext(res[2]); //0
 		roll = m_impl->mvRobot[HEAD][2]->getNext(res[0]);//1
+	}
+
+	for (int i = 0; i < 7; ++i)
+	{
+		m_leftArm[i] = st.customAngles[i];
+		m_rightArm[i] = st.customAngles[7+i];
 	}
 
 	baseConnected = st.connected;

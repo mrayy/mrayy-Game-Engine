@@ -503,6 +503,13 @@ public:
 		{
 			ParseJoint(m_robotData.rightHand, msgV[1], vals);
 		}
+		else if (msgV[0].equals_ignore_case("CAng"))//custom angles
+		{
+			for (int i = 0; i < vals.size(); ++i)
+			{
+				m_robotData.customAngles[i] = core::StringConverter::toFloat(vals[i]);
+			}
+		}
 		else  if (msgV[0].equals_ignore_case("jointVals"))
 		{
 			if (m_RobotHandler->GetRobotController() != 0)

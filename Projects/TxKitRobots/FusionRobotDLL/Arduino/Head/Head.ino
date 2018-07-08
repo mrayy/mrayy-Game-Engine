@@ -1,5 +1,5 @@
 #include "Kondo.h"
-#include <MPU6050_tockn.h>
+#include "MPU6050_tockn.h"
 #include <Wire.h>
 #include "imumaths.h"
 
@@ -64,6 +64,7 @@ void setup()
   Kondo.setFree(3);
   
   Wire.begin();
+  //Wire.setSpeed(1);
   mpu6050.begin();
   mpu6050.calcGyroOffsets(true);
 }
