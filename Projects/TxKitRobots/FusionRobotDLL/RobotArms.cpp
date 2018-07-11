@@ -276,6 +276,7 @@ void RobotArms::ProcessState()
 		}
 		break;
 	case EState::Initialize:
+		_state = EState::Initializing;
 		if (LArmEnabled)
 			_UpdateJoints(TargetArm::Left, timeMS, true);
 		if (RArmEnabled)
@@ -286,7 +287,6 @@ void RobotArms::ProcessState()
 			_UpdateJoints(TargetArm::Left, timeMS);
 		if (RArmEnabled)
 			_UpdateJoints(TargetArm::Right, timeMS);
-		_state = EState::Initializing;
 		break;
 	case EState::Initializing:
 		if (_timer > timeMS)
@@ -444,6 +444,7 @@ void RobotArms::_Close()
 	if (RArmEnabled)
 		_UpdateJoints(TargetArm::Right, timeMS);
 	_sleep(timeMS);
+	_state = EState::Wait;
 
 	_Off();
 	if (m_serial != 0 )

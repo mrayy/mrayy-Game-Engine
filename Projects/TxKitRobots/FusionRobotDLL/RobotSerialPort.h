@@ -28,6 +28,8 @@ protected:
 
 	mray::TBee::RobotCapabilities m_caps;
 
+	std::vector<float> m_jointsValues;
+
 	RobotSerialPortImpl* m_impl;
 	float pan, tilt, roll;
 	bool baseConnected;
@@ -78,6 +80,7 @@ public:
 	virtual void ParseParameters(const std::map<std::string, std::string>& valueMap);
 
 	virtual void tuningMode() {};
+	virtual void DebugRender(mray::TBee::ServiceRenderContext* context);
 
 };
 

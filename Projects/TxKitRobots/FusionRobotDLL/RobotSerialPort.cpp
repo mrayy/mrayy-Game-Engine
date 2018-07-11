@@ -20,6 +20,10 @@
 #include "Tserial_event.h"
 #include "serial.h"
 
+#include "ITimer.h"
+#include "IOSystem.h"
+#include "ServiceContext.h"
+
 float testPosx = 100.00;
 float testPosy = 100.00; 
 
@@ -68,6 +72,10 @@ class RobotSerialPortImpl
 		std::string m_basePort;
 		std::string m_armsPort;
 
+		ulong lastTime;
+
+		OS::ITimer* m_timer;
+
 		//Tserial_event *comHEAD;		// Serial Port
 		MovAvg *mvRobot[2][3];		// 1 - base, 2 - head moving avarage 
 
@@ -84,6 +92,7 @@ class RobotSerialPortImpl
 			m_headController = new TXHeadType();
 			m_armsController = new RobotArms();
 			listener = 0;
+			lastTime = 0;
 		}
 		~RobotSerialPortImpl()
 		{
@@ -109,6 +118,9 @@ RobotSerialPort::RobotSerialPort()
 	baseConnected = 0;
 	load_parameters();
 
+	m_impl->m_timer = OS::IOSystem::getInstance().createTimer();
+	m_impl->lastTime = m_impl->m_timer->getMilliseconds();
+
 	for (int i = 0; i < 3; i++){
 		m_impl->mvRobot[BASE][i] = new MovAvg(1);
 		m_impl->mvRobot[HEAD][i] = new MovAvg(1);
@@ -121,6 +133,7 @@ RobotSerialPort::RobotSerialPort()
 	//ConnectRobot();
 	_setupCaps();
 
+	m_jointsValues.resize(2 * 3 + 2 * 7 * 3);
 }
 
 RobotSerialPort::~RobotSerialPort()
@@ -129,6 +142,7 @@ RobotSerialPort::~RobotSerialPort()
 	Sleep(100);
 	TerminateThread(m_robotThread, 0);
 	DisconnectRobot();
+	delete m_impl->m_timer;
 	delete m_impl;
 }
 
@@ -160,9 +174,12 @@ void RobotSerialPort::_ProcessRobot()
 	if (_status!=EDisconnecting || _status!=EDisconnected)
 		_processData();
 
+	ulong t = m_impl->m_timer->getMilliseconds();
+	float dt = (t - m_impl->lastTime)*0.001f;
+	m_impl->lastTime = t;
 	if (m_impl->m_armsController)
 	{
-		m_impl->m_armsController->Update(0.001f);
+		m_impl->m_armsController->Update(dt);
 	}
 
 	bool ok = false;
@@ -722,12 +739,88 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 		m_leftArm[i] = st.customAngles[i];
 		m_rightArm[i] = st.customAngles[7+i];
 	}
+	for (int i = 0; i < 3; ++i)
+	{
+		m_leftHand[i] = st.customAngles[14+i];
+		m_rightHand[i] = st.customAngles[14+3 + i];
+	}
+
+	{
+
+		m_jointsValues.resize(3 * 2 + 2 * 7 * 3);
+		math::vector3d rot = m_impl->m_headController->GetRotation();
+		m_jointsValues[0] = tilt;
+		m_jointsValues[1] = -rot.x;
+		m_jointsValues[2] = pan;
+		m_jointsValues[3] = -rot.y;
+		m_jointsValues[4] = roll;
+		m_jointsValues[5] = -rot.z;
+
+		int offset = 6;
+		for (int i = 0; i < 7; ++i)
+		{
+			RobotArms::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
+			RobotArms::JoinInfo&j2 = m_impl->m_armsController->GetRightArm()[i];
+			m_jointsValues[offset + i * 3 + 0] = j1.targetAngle;
+			m_jointsValues[offset + i * 3 + 1] = j1.currAngle;
+			m_jointsValues[offset + i * 3 + 2] = j1.temp;
+
+			m_jointsValues[offset + 21 + i * 3 + 0] = j2.targetAngle;
+			m_jointsValues[offset + 21 + i * 3 + 1] = j2.currAngle;
+			m_jointsValues[offset + 21 + i * 3 + 2] = j2.temp;
+		}
+	}
 
 	baseConnected = st.connected;
 	return;
 
 }
+void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
+{
 
+	core::string msg;
+	char buffer[512];
+	RobotArms::EState st = m_impl->m_armsController->GetStatus();
+
+	sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", tilt, pan, roll);
+	msg = core::string("Head Rotation: ") + buffer;
+	context->RenderText(msg, 10, 0);
+
+	msg = core::string("Arms Status: ");
+	if (st == RobotArms::Wait)msg += "Wait";
+	if (st == RobotArms::Initialize)msg += "Initialize";
+	if (st == RobotArms::Initializing)msg += "Initializing";
+	if (st == RobotArms::Operate)msg += "Operate";
+	if (st == RobotArms::Shutdown)msg += "Shutdown";
+	if (st == RobotArms::Shutingdown)msg += "Shutingdown";
+	context->RenderText(msg, 5, 0);
+
+
+
+	context->RenderText(core::string("Robot Joint Values:"), 5, 0);
+
+	msg = "";
+	context->RenderText("   \tIK\t/ Real", 10, 0);
+	for (int i = 0; i < 14; i++)
+	{
+		int index = 6 + i * 3;
+		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", m_jointsValues[index], m_jointsValues[index + 1], m_jointsValues[index + 2]);
+		msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
+		context->RenderText(msg, 10, 0);
+	}
+
+	context->RenderText("   \tHands: L/R", 10, 0);
+	for (int i = 0; i < 3; i ++)
+	{
+
+		sprintf_s(buffer, " %-2.2f\t/ %-2.2f", m_leftHand[i], m_rightHand[i]);
+		msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
+		context->RenderText(msg, 10, 0);
+	}
+
+	msg = "Battery:" + core::StringConverter::toString(m_impl->m_armsController->GetBatteryLevel(), 3) + "V";
+	context->RenderText(msg, 5, 0);
+}
 
 void RobotSerialPort::SetListener(ITelubeeRobotListener* l)
 {
@@ -747,14 +840,8 @@ void RobotSerialPort::ShutdownRobot()
 
 bool RobotSerialPort::GetJointValues(std::vector<float>& values)
 {
-	values.resize(3*2);
-	math::vector3d rot=m_impl->m_headController->GetRotation();
-	values[0] = tilt;
-	values[1] = -rot.x;
-	values[2] = pan;
-	values[3] =-rot.y;
-	values[4] = roll;
-	values[5] = -rot.z;
+	values = m_jointsValues;
+
 	return true;
 }
 

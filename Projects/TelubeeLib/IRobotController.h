@@ -12,6 +12,7 @@ namespace mray
 	namespace TBee
 	{
 		class RobotCapabilities;
+		class ServiceRenderContext;
 	}
 }
 
@@ -112,6 +113,7 @@ public:
 	virtual void ParseParameters(const std::map<std::string, std::string>& valueMap){}
 
 	virtual void tuningMode() = 0;
+	virtual void DebugRender(mray::TBee::ServiceRenderContext* context) {};
 };
 
 

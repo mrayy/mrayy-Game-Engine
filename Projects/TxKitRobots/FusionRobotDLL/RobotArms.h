@@ -16,9 +16,6 @@ public:
 		Left,
 		Right
 	};
-protected:
-
-
 	enum EState
 	{
 		Wait,
@@ -28,7 +25,6 @@ protected:
 		Shutdown,
 		Shutingdown
 	};
-
 	struct JoinInfo
 	{
 		JoinInfo()
@@ -41,6 +37,10 @@ protected:
 		float currAngle;
 		float temp;
 	};
+protected:
+
+
+
 
 	JoinInfo _leftArm[7];
 	JoinInfo _rightArm[7];
@@ -139,6 +139,15 @@ public:
 	void Stop(bool force=false);
 
 	void Update(float dt);
+
+	float GetBatteryLevel() { return BatteryLevel*0.001f; }
+
+	JoinInfo* GetLeftArm() { return _leftArm; }
+	JoinInfo* GetRightArm() { return _rightArm; }
+	JoinInfo* GetLeftHand() { return _leftHand; }
+	JoinInfo* GetRightHand() { return _rightHand; }
+
+	EState GetStatus() { return _state; }
 };
 
 }

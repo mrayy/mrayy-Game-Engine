@@ -323,8 +323,12 @@ public:
 		context->RenderText(msg, 5, 0);
 		msg = core::string("Controlling: ") + (m_RobotHandler->IsLocalControl() ? "Local" : "Remote");
 		context->RenderText(msg, 5, 0);
+		msg = "Robot Started: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
+		context->RenderText(msg, 10, 0);
+		/*
 		msg = core::string("Sensors : ") + core::StringConverter::toString(math::vector2d(m_collision));
 		context->RenderText(msg, 5, 0);
+		
 		if (m_robotData.connected || m_RobotHandler->IsLocalControl())
 		{
 			sprintf_s(buffer, "%-2.2f, %-2.2f", m_robotData.speed[0], m_robotData.speed[1]);
@@ -350,8 +354,6 @@ public:
 
 
 		{
-			msg = "Robot Started: " + m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_IsStarted, "");
-			context->RenderText(msg, 10, 0);
 
 			int sensorsCount = core::StringConverter::toInt(m_RobotHandler->GetRobotController()->ExecCommand(IRobotController::CMD_GetSensorCount, ""));
 			for (int i = 0; i < sensorsCount;++i)
@@ -375,7 +377,9 @@ public:
 				context->RenderText(msg, 10, 0);
 			}
 			
-		}
+		}*/
+
+		m_RobotHandler->GetRobotController()->DebugRender(context);
 
 	}
 	void Render(ServiceRenderContext* context)
