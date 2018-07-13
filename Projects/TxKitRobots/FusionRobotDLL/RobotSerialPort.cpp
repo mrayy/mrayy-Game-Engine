@@ -251,6 +251,9 @@ void RobotSerialPort::_ProcessRobot()
 		{
 			m_impl->m_armsController->SetArmAngles(RobotArms::Left, m_leftArm, 7);
 			m_impl->m_armsController->SetArmAngles(RobotArms::Right,m_rightArm, 7);
+
+			m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 3);
+			m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 3);
 		}
 		m_headCounter++;
 		if (m_baseCounter > 120)

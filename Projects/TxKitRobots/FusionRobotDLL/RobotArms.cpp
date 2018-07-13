@@ -152,6 +152,25 @@ float RobotArms::ServoToAngle(short val, bool reverse)
 	return angle;
 }
 
+void RobotArms::_updateHand(TargetArm arm)
+{
+	cmd[0] = CMD_ALL_HAND_SET;
+	cmd[1] = (arm == TargetArm::Right) ? (byte)0x01 : (byte)0x02;
+
+	if (arm == TargetArm::Left)
+	{
+		for (int i = 0; i < 3; ++i)
+			cmd[2 + i] = (byte)(math::clamp<float>(_leftHand[i].targetAngle,0, 180.0f));
+	}
+	else
+	{
+		for (int i = 0; i < 3; ++i)
+			cmd[2 + i] = (byte)(math::clamp<float>(_rightHand[i].targetAngle, 0, 180.0f));
+
+	}
+
+	_sendCommand(cmd, 2 + 3);
+}
 void RobotArms::_UpdateJoints(TargetArm arm, ushort time, bool midPos )
 {
 	if (time > 0)
@@ -243,25 +262,6 @@ void RobotArms::_readTemperature(TargetArm arm)
 }
 
 
-void RobotArms::_updateHand(TargetArm arm)
-{
-	return;
-	cmd[0] = CMD_ALL_HAND_SET;
-	cmd[1] = (arm == TargetArm::Right) ? (byte)0x01 : (byte)0x02;
-
-	if (arm == TargetArm::Left)
-	{
-		for (int i = 0; i < 3; ++i)
-			cmd[2 + i] = (byte)(math::clamp<float>(_leftHand[i].targetAngle,0,180));
-	}
-	else
-	{
-		for (int i = 0; i < 3; ++i)
-			cmd[2 + i] = (byte)(math::clamp<float>(_rightHand[i].targetAngle, 0, 180));
-	}
-
-	_sendCommand(cmd, 2 + 3);
-}
 void RobotArms::ProcessState()
 {
 	_readBattery();
@@ -297,31 +297,19 @@ void RobotArms::ProcessState()
 		break;
 	case EState::Operate:
 		if (LArmEnabled)
+		{
 			_UpdateJoints(TargetArm::Left, 0);
-		if (RArmEnabled)
-			_UpdateJoints(TargetArm::Right, 0);
-
-		if (_enableReading)
-		{
-			if (LArmEnabled)
-				_readJoints(TargetArm::Left);
-			if (RArmEnabled)
-				_readJoints(TargetArm::Right);
+			_updateHand(TargetArm::Left);
 		}
-		if (_enableTemperature && _temperatureTime >= TemperatureTime)
-		{
-			_temperatureTime = 0;
-			if (LArmEnabled)
-				_readTemperature(TargetArm::Left);
-			if (RArmEnabled)
-				_readTemperature(TargetArm::Right);
+		if (RArmEnabled) {
+			_UpdateJoints(TargetArm::Right, 0);
+			_updateHand(TargetArm::Right);
 		}
 		if (!_enableSending)
 			_state = EState::Shutdown;
 		break;
 	case EState::Shutdown:
 		_timer = 0;
-
 		if (LArmEnabled)
 			_UpdateJoints(TargetArm::Left, timeMS, true);
 		if (RArmEnabled)
@@ -336,6 +324,22 @@ void RobotArms::ProcessState()
 			_state = EState::Wait;
 		}
 		break;
+	}
+
+	if (_enableReading)
+	{
+		if (LArmEnabled)
+			_readJoints(TargetArm::Left);
+		if (RArmEnabled)
+			_readJoints(TargetArm::Right);
+	}
+	if (_enableTemperature && _temperatureTime >= TemperatureTime)
+	{
+		_temperatureTime = 0;
+		if (LArmEnabled)
+			_readTemperature(TargetArm::Left);
+		if (RArmEnabled)
+			_readTemperature(TargetArm::Right);
 	}
 }
 void RobotArms::ProcessThread()
@@ -496,9 +500,9 @@ void RobotArms::SetArmAngles(TargetArm arm, float *angles, int n)
 	for (int i = 0; i < n; ++i)
 	{
 		if (arm == Left)
-			_leftArm[i].targetAngle = angles[i];
+			_leftArm[i].SetValue(angles[i]);
 		else
-			_rightArm[i].targetAngle = angles[i];
+			_rightArm[i].SetValue(angles[i]);
 	}
 }
 
@@ -507,9 +511,9 @@ void RobotArms::SetHand(TargetArm arm, float* angles, int n)
 	for (int i = 0; i < n; ++i)
 	{
 		if (arm == Left)
-			_leftHand[i].targetAngle = angles[i];
+			_leftHand[i].SetValue(angles[i]);
 		else
-			_rightHand[i].targetAngle = angles[i];
+			_rightHand[i].SetValue(angles[i]);
 	}
 }
 void RobotArms::Start(bool leftArm, bool rightArm)

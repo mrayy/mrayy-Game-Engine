@@ -4,6 +4,7 @@
 
 #include "serial/serial.h"
 #include <windows.h>
+#include "movingAverage.h"
 
 namespace mray
 {
@@ -27,15 +28,22 @@ public:
 	};
 	struct JoinInfo
 	{
-		JoinInfo()
+		JoinInfo():_samples(10)
 		{
 			targetAngle = 0;
 			currAngle = 0;
 			temp = 0;
 		}
+
+		MovAvg _samples;
 		float targetAngle;
 		float currAngle;
 		float temp;
+
+		void SetValue(float v)
+		{
+			targetAngle=_samples.getNext(v);
+		}
 	};
 protected:
 
@@ -112,12 +120,11 @@ protected:
 
 	short AngleToServo(float angle, bool reverse);
 	float ServoToAngle(short val, bool reverse);
+	void _updateHand(TargetArm arm);
 	void _UpdateJoints(TargetArm arm, ushort time, bool midPos = false);
 	void _readJoints(TargetArm arm);
 	void _readTemperature(TargetArm arm);
 	void _readBattery();
-
-	void _updateHand(TargetArm arm);
 
 	void ProcessState();
 	void ProcessThread();
