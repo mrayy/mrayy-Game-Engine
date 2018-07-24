@@ -820,6 +820,13 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 		msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
 	}
+	context->RenderText("   \tSensors: L/R", 10, 0);
+	float* vals = m_impl->m_armsController->GetHandSensor(RobotArms::Right);
+	msg = core::string("   \tRight:") + core::StringConverter::toString(vals[0]) + ", " + core::StringConverter::toString(vals[1]) ;
+	context->RenderText(msg, 10, 0);
+	vals = m_impl->m_armsController->GetHandSensor(RobotArms::Left);
+	msg = core::string("   \tLeft:") + core::StringConverter::toString(vals[0]) + ", " + core::StringConverter::toString(vals[1]) ;
+	context->RenderText(msg, 10, 0);
 
 	msg = "Battery:" + core::StringConverter::toString(m_impl->m_armsController->GetBatteryLevel(), 3) + "V";
 	context->RenderText(msg, 5, 0);

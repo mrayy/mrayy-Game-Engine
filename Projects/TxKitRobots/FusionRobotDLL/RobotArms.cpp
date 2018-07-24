@@ -59,7 +59,7 @@ RobotArms::RobotArms()
 
 	_enableSending = false;
 	_enableReading = false;
-	_enableTemperature = false;
+	_enableTemperature = true;
 
 	TemperatureTime = 1000;
 	_temperatureTime = 0;
@@ -260,6 +260,25 @@ void RobotArms::_readTemperature(TargetArm arm)
 		}
 	}
 }
+void RobotArms::_readHand(TargetArm arm)
+{
+	return;
+	cmd[0] = CMD_ALL_HAND_GET;
+	cmd[1] = (arm == TargetArm::Right) ? (byte)0x01 : (byte)0x02;
+	_sendCommand(cmd, 2);
+	byte d[2];
+	short val;
+	if (ReadData(data) > 0)
+	{
+		for (int i = 0; i < 2; ++i)
+		{
+			d[0] = data[2 * i + 1];
+			d[1] = data[2 * i + 0];
+			memcpy(&val, d, sizeof(val));
+			_adcValues[(arm == TargetArm::Right) ? 0 : 1][i] = val;
+		}
+	}
+}
 
 
 void RobotArms::ProcessState()
@@ -300,10 +319,12 @@ void RobotArms::ProcessState()
 		{
 			_UpdateJoints(TargetArm::Left, 0);
 			_updateHand(TargetArm::Left);
+			_readHand(TargetArm::Left);
 		}
 		if (RArmEnabled) {
 			_UpdateJoints(TargetArm::Right, 0);
 			_updateHand(TargetArm::Right);
+			_readHand(TargetArm::Right);
 		}
 		if (!_enableSending)
 			_state = EState::Shutdown;

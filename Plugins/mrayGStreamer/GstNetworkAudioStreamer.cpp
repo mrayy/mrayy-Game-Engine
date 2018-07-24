@@ -60,8 +60,9 @@ public:
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=8000,channels=1 ! audioconvert ! flacenc quality=2 ! rtpgstpay ";
 #elif defined OPUS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
-		core::string audioStr = "directsoundsrc buffer-time="+core::StringConverter::toString(m_interface.buffertime) +" ";
-
+		core::string audioStr = "directsoundsrc ";
+		if (m_interface.buffertime > 0)
+			audioStr += "buffer-time=" + core::StringConverter::toString(m_interface.buffertime) + " ";
 		if (m_interface.deviceGUID != "")
 		{
 			audioStr += "device=\"" + m_interface.deviceGUID + "\"";
@@ -107,7 +108,7 @@ public:
 		else
 		{
 			m_pipeLineString = audioStr + " ! "
-				"udpsink name=audioSink port=" + core::StringConverter::toString(m_audioPort) + " host=" + m_ipAddr + " sync=true ";
+				"udpsink name=audioSink port=" + core::StringConverter::toString(m_audioPort) + " host=" + m_ipAddr + " sync=false ";
 
 		}
 

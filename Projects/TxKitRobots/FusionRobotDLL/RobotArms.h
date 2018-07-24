@@ -55,6 +55,8 @@ protected:
 	JoinInfo _leftHand[5];
 	JoinInfo _rightHand[5];
 
+	float _adcValues[2][2];
+
 	EState _state ;
 
 	int JointsCount;
@@ -124,6 +126,7 @@ protected:
 	void _UpdateJoints(TargetArm arm, ushort time, bool midPos = false);
 	void _readJoints(TargetArm arm);
 	void _readTemperature(TargetArm arm);
+	void _readHand(TargetArm arm);
 	void _readBattery();
 
 	void ProcessState();
@@ -153,6 +156,7 @@ public:
 	JoinInfo* GetRightArm() { return _rightArm; }
 	JoinInfo* GetLeftHand() { return _leftHand; }
 	JoinInfo* GetRightHand() { return _rightHand; }
+	float* GetHandSensor(TargetArm hand) { return _adcValues[(hand == TargetArm::Right) ? 0 : 1]; }
 
 	EState GetStatus() { return _state; }
 };
