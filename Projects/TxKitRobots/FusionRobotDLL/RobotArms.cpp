@@ -283,7 +283,14 @@ void RobotArms::_readHand(TargetArm arm)
 
 void RobotArms::ProcessState()
 {
+	_timeToWait = 0;
 	_readBattery();
+	if (_enableTemperature && _temperatureTime >= TemperatureTime)
+	{
+		_temperatureTime = 0;
+		_readTemperature(TargetArm::Left);
+		_readTemperature(TargetArm::Right);
+	}
 	switch (_state)
 	{
 	case EState::Wait:
@@ -317,15 +324,18 @@ void RobotArms::ProcessState()
 	case EState::Operate:
 		if (LArmEnabled)
 		{
-			_UpdateJoints(TargetArm::Left, 0);
+			_UpdateJoints(TargetArm::Left, 3);
 			_updateHand(TargetArm::Left);
 			_readHand(TargetArm::Left);
 		}
 		if (RArmEnabled) {
-			_UpdateJoints(TargetArm::Right, 0);
+			_UpdateJoints(TargetArm::Right, 3);
 			_updateHand(TargetArm::Right);
 			_readHand(TargetArm::Right);
 		}
+		if (LArmEnabled || RArmEnabled)
+			_timeToWait += 10;
+
 		if (!_enableSending)
 			_state = EState::Shutdown;
 		break;
@@ -354,14 +364,6 @@ void RobotArms::ProcessState()
 		if (RArmEnabled)
 			_readJoints(TargetArm::Right);
 	}
-	if (_enableTemperature && _temperatureTime >= TemperatureTime)
-	{
-		_temperatureTime = 0;
-		if (LArmEnabled)
-			_readTemperature(TargetArm::Left);
-		if (RArmEnabled)
-			_readTemperature(TargetArm::Right);
-	}
 }
 void RobotArms::ProcessThread()
 {
@@ -370,7 +372,9 @@ void RobotArms::ProcessThread()
 		try
 		{
 			ProcessState();
-			_sleep(10);
+			if (_state == EState::Wait)
+				_timeToWait = 100;
+			_sleep( _timeToWait);
 			//   System.Threading._sleep(30);
 		}
 		catch (std::exception& e)

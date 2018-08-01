@@ -60,7 +60,8 @@ public:
 		core::string audioStr = "directsoundsrc! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=8000,channels=1 ! audioconvert ! flacenc quality=2 ! rtpgstpay ";
 #elif defined OPUS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
-		core::string audioStr = "directsoundsrc ";
+		//core::string audioStr = "directsoundsrc ";
+		core::string audioStr = "autoaudiosrc ";
 		if (m_interface.buffertime > 0)
 			audioStr += "buffer-time=" + core::StringConverter::toString(m_interface.buffertime) + " ";
 		if (m_interface.deviceGUID != "")
@@ -70,10 +71,10 @@ public:
 
 		audioStr += " ! audio/x-raw,endianness=1234,signed=true,width=16,depth=16,rate=" + core::StringConverter::toString(m_interface.samplingRate) + ",channels=" + core::StringConverter::toString(m_interface.channelsCount)+" "
 			//" ! audiochebband mode=band-pass lower-frequency=1000 upper-frequency=6000 poles=4 "
-			"! audioconvert ! volume volume=2 ! audioresample ! ";
+			"! audioresample ! audiorate ! audioconvert  ! ";
 		//	"audiochebband mode=band-pass lower-frequency=1000 upper-frequency=4000 type=2 ! "
 
-		audioStr += "opusenc complexity="+core::StringConverter::toString(m_qual)+" bitrate-type=vbr frame-size=5 ! rtpopuspay  ";
+		audioStr += "opusenc  bitrate=96000 frame-size=5 ! rtpopuspay  ";//complexity="+core::StringConverter::toString(m_qual)+"
 #elif defined VORBIS_ENC
 		//actual-buffer-time=0 actual-latency-time=0
 		core::string audioStr = "directsoundsrc buffer-time=200 ";

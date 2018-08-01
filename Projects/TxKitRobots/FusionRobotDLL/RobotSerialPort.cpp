@@ -117,6 +117,7 @@ RobotSerialPort::RobotSerialPort()
 	m_impl->listener = 0;
 	baseConnected = 0;
 	load_parameters();
+	_connectionOpen = false;
 
 	m_impl->m_timer = OS::IOSystem::getInstance().createTimer();
 	m_impl->lastTime = m_impl->m_timer->getMilliseconds();
@@ -186,56 +187,83 @@ void RobotSerialPort::_ProcessRobot()
 	switch (_status)
 	{
 	case ERobotControllerStatus::EIniting:
+		_connectionOpen = false;
+		_status = EConnecting;
 		break;
 	case ERobotControllerStatus::EConnecting:
-		if (_config.armEnabled && m_impl->m_armsController)
+		if (!_connectionOpen)
 		{
-			if (m_impl->m_armsPort == "")
-				m_impl->m_armsPort = _config.armCOM;
-			ret = m_impl->m_armsController->Connect(m_impl->m_armsPort);
-			if (ret){
-
-				m_impl->m_armsController->Start(true, true);
-				gLogManager.log("Arms Connected", ELL_INFO);
-				if (debug_print)
-					printf("Arms Connected!\n", ret);
-
-				ok |= true;
-			}
-			else{
-
-				gLogManager.log("Arms Failed to connected", ELL_WARNING);
-				if (debug_print)
-				{
-					printf("Arms not connected (%ld)\n", ret);
-					printf("Arms baud (%ld)\n", ret);
+			if (_config.armEnabled && m_impl->m_armsController && !m_impl->m_armsController->IsConnected())
+			{
+				if (m_impl->m_armsPort == "")
+					m_impl->m_armsPort = _config.armCOM;
+				ret = m_impl->m_armsController->Connect(m_impl->m_armsPort);
+				if (ret) {
+					ok |= true;
 				}
-				m_impl->m_armsController->Disconnect();
-			}
-		}
-		if (_config.HeadEnabled)
-		{
-			if (m_impl->m_headPort == "")
-				m_impl->m_headPort = _config.headCOM;
-			ret = m_impl->m_headController->Connect(m_impl->m_headPort);
-			if (ret){
-				gLogManager.log("Head Connected", ELL_INFO);
-				if (debug_print)
-					printf("Head Connected!\n", ret);
-				ok |= true;
-			}
-			else{
+				else {
 
-				gLogManager.log("Head Failed to connected", ELL_WARNING);
-				if (debug_print)
-					printf("Head not connected (%ld)\n", ret);
-				m_impl->m_headController->Disconnect();
+					gLogManager.log("Arms Failed to connected", ELL_WARNING);
+					if (debug_print)
+					{
+						printf("Arms not connected (%ld)\n", ret);
+						printf("Arms baud (%ld)\n", ret);
+					}
+					m_impl->m_armsController->Disconnect();
+				}
+			}
+			 if (m_impl->m_armsController && m_impl->m_armsController->IsConnected())
+			 {
+				 m_impl->m_armsController->Start(true, true);
+				 gLogManager.log("Arms Connected", ELL_INFO);
+				 if (debug_print)
+					 printf("Arms Connected!\n", ret);
+			}
+			if (_config.HeadEnabled)
+			{
+				if (m_impl->m_headPort == "")
+					m_impl->m_headPort = _config.headCOM;
+				ret = m_impl->m_headController->Connect(m_impl->m_headPort);
+				if (ret) {
+					gLogManager.log("Head Connected", ELL_INFO);
+					if (debug_print)
+						printf("Head Connected!\n", ret);
+					ok |= true;
+				}
+				else {
+
+					gLogManager.log("Head Failed to connected", ELL_WARNING);
+					if (debug_print)
+						printf("Head not connected (%ld)\n", ret);
+					m_impl->m_headController->Disconnect();
+				}
+			}
+			m_baseCounter = 0;
+			if (ok)
+			{
+				_connectionOpen = true;
 			}
 		}
-		m_baseCounter = 0;
-		if (ok)
+		else
 		{
-			_status = ERobotControllerStatus::EConnected;
+			ok = true;
+			//initial position
+			if (m_impl->m_armsController)
+			{
+				m_impl->m_armsController->SetArmAngles(RobotArms::Left, m_leftArm, 7);
+				m_impl->m_armsController->SetArmAngles(RobotArms::Right, m_rightArm, 7);
+
+				m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 3);
+				m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 3);
+			}
+			if (_config.armEnabled && m_impl->m_armsController && m_impl->m_armsController->IsConnected())
+			{
+				if (m_impl->m_armsController->GetStatus() != RobotArms::EState::Operate)
+					ok = false;
+			}
+			if(ok)
+				_status = ERobotControllerStatus::EConnected;
+
 		}
 		break;
 	case ERobotControllerStatus::EConnected:
@@ -270,7 +298,7 @@ void RobotSerialPort::_ProcessRobot()
 			printf("Disconnecting Robot\n", ret);
 		if (_config.armEnabled && m_impl->m_armsController)
 		{
-			m_impl->m_armsController->Disconnect();
+			m_impl->m_armsController->Stop();
 		}
 		if (_config.HeadEnabled)
 			m_impl->m_headController->Disconnect();
@@ -279,9 +307,10 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EDisconnected:
 		break;
 	case ERobotControllerStatus::EStopping:
-		if (m_impl->m_armsController)
-			m_impl->m_armsController->Disconnect();
+ 		if (m_impl->m_armsController)
+ 			m_impl->m_armsController->Disconnect();
 		m_impl->m_headController->Disconnect();
+		_connectionOpen = false;
 		_status = ERobotControllerStatus::EStopped;
 		break;
 	case ERobotControllerStatus::EStopped:
@@ -404,7 +433,7 @@ void RobotSerialPort::ConnectRobot()
 {
 	if (GetRobotStatus() !=EDisconnected)
 		return;
-	_status = EConnecting;
+	_status = EIniting;
 	gLogManager.log("Connecting Robot\n", ELL_INFO);
 }
 
@@ -418,32 +447,6 @@ void RobotSerialPort::DisconnectRobot()
 
 }
 
-int RobotSerialPort::base_control(int velocity_x, int velocity_y, int rotation, int control){
-
-	static int counter = 0;
-
-	if (!_config.BaseEnabled || !m_impl->m_baseController)
-		return false;
-
-	if (!m_impl->m_baseController->IsConnected())
-		return FALSE;
-	if (abs(rotation) < 5)
-		rotation = 0;
-	if (control == RUN)
-		m_impl->m_baseController->Drive(mray::math::vector2di(velocity_x, velocity_y) , rotation );
-	else if (control == STOP)
-		m_impl->m_baseController->DriveStop();
-
-	if (counter == 2)
-	{
-		counter = 0;
-		m_impl->m_baseController->UpdateSensors();
-	}
-	counter++;
-
-	return true;
-
-}
 
 
 
@@ -707,7 +710,7 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	else
 		threadStart = false;
 
-	if (GetRobotStatus() != EConnected)
+	if (!(GetRobotStatus() == EConnected || GetRobotStatus() == EConnecting))
 		return;
 	//mray::math::Point3d<double> angles;
 	mray::math::quaternion q2=st.head.ori;
@@ -804,11 +807,18 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 
 	msg = "";
 	context->RenderText("   \tIK\t/ Real", 10, 0);
-	for (int i = 0; i < 14; i++)
+	for (int i = 0; i < 7; ++i)
 	{
-		int index = 6 + i * 3;
-		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", m_jointsValues[index], m_jointsValues[index + 1], m_jointsValues[index + 2]);
-		msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
+		RobotArms::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
+		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", j1.targetAngle,j1.currAngle,j1.temp);
+		msg = core::string("Left  J[") + core::StringConverter::toString(i) + "]:" + buffer;
+		context->RenderText(msg, 10, 0);
+	}
+	for (int i = 0; i < 7; ++i)
+	{
+		RobotArms::JoinInfo&j1 = m_impl->m_armsController->GetRightArm()[i];
+		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", j1.targetAngle, j1.currAngle, j1.temp);
+		msg = core::string("Right J[") + core::StringConverter::toString(i) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
 	}
 

@@ -74,9 +74,9 @@ void ThreeAxisHead::Disconnect()
 {
 	if (!m_serial)
 		return;
+	SetRotation(0);
 	_sendCommand("q");
 
-	SetRotation(0);
 	if (m_serial != 0)
 	{
 		m_serial->close();

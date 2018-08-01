@@ -61,6 +61,7 @@ ServiceHostManager::ServiceHostManager()
 {
 	m_inited = false;
 	m_robotCommunicator = 0;
+	m_autoKill = false;
 	m_autoRestartService = false;
 	m_commLink = 0;
 	m_commThread = 0;
@@ -184,6 +185,12 @@ bool ServiceHostManager::Init(int argc, _TCHAR* argv[])
 			m_autoRestartService = true;
 			printf("Auto Restart Services: Enabled\n");
 		}
+		else
+			if (strcmp(argv[i], "-k") == 0)
+			{
+				m_autoKill = true;
+				printf("Auto Kill Unresponding Services: Enabled\n");
+			}
 		else if (strcmp(argv[i], "-p") == 0)
 		{
 			PingTime = atoi(argv[i + 1]);
@@ -566,6 +573,8 @@ void ServiceHostManager::_ProcessServiceMessage(const core::string data, network
 
 bool ServiceHostManager::_ProcessServices()
 {
+	if (!m_autoKill)
+		return false;
 	std::vector<ServiceList::iterator> toRemove;
 	std::vector<core::string> servicesToRun;
 	ulong t=m_timer->getMilliseconds();
@@ -601,7 +610,7 @@ bool ServiceHostManager::_ProcessServices()
 		TerminateProcess(toRemove[i]->processHandle, 0);
 		CloseHandle(toRemove[i]->processHandle);
 		CloseHandle(toRemove[i]->threadHandle);
-		m_serviceList.erase( toRemove[i]);
+		m_serviceList.erase(toRemove[i]);
 	}
 	m_dataMutex->unlock();
 	for (int i = 0; i < servicesToRun.size(); ++i)

@@ -24,6 +24,7 @@ protected:
 	shmem m_sharedMemory;
 
 	bool m_autoRestartService;// restart when the service die
+	bool m_autoKill;// restart when the service die
 	bool m_inited;
 
 	network::IUDPClient* m_commLink;

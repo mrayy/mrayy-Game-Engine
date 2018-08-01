@@ -62,11 +62,11 @@ public:
 		core::string audiocaps = " caps=application/x-rtp,media=application,clock-rate=90000,encoding-name=X-GST,payload=96 ";
 		core::string audioStr = " rtpgstdepay ! audio/x-flac,rate=8000,channels=1! flacdec !  audioconvert ! audioresample  ";
 #elif defined OPUS_ENC
-		std::string audiocaps = "caps=application/x-rtp,media=(string)audio,clock-rate=48000,encoding-name=OPUS,payload=96,encoding-params=2 ";
+		std::string audiocaps = "caps=application/x-rtp ";// ",media=(string)audio,clock-rate=48000,encoding-name=OPUS,payload=96,encoding-params=2 ";
 		char buffer[128];
 		sprintf(buffer, "%d", m_sampleRate);
 
-		std::string audioStr = "  rtpopusdepay ! opusdec ! audioconvert ! volume volume=1 ! audioresample  ! audio/x-raw,rate=";
+		std::string audioStr = " queue ! rtpopusdepay ! opusdec plc=true ! audioconvert ! volume volume=1 ! audioresample  ! audio/x-raw,rate=";
 		audioStr+=buffer;
 		audioStr += " ";
 #elif defined VORBIS_ENC

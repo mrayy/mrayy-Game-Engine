@@ -585,6 +585,7 @@ public:
 				{
 					_ovrCam = new video::OVRvisionCamGrabber();
 					_ovrCam->InitDevice(0,640,480,90);
+					gLogManager.log("Getting Camera Settings", ELL_INFO);
 					_ovrSettings = _ovrCam->GetCameraSettings();
 					_ovrCam->Stop();
 				}

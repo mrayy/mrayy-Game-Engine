@@ -84,6 +84,8 @@ protected:
 	ushort timeMS;
 	float _timer;
 
+	float _timeToWait;
+
 	bool _off;
 
 	bool *RSigns;

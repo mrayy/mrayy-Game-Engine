@@ -42,11 +42,10 @@ protected:
 	float m_leftHand[3];
 	float m_rightHand[3];
 
+	bool _connectionOpen;
 	ERobotControllerStatus _status;
 	IRobotStatusProvider* m_robotStatusProvider;
 	HANDLE m_robotThread;
-
-	int base_control(int velocity_x, int velocity_y, int rotation, int control);
 // 	int yamahaInitialize();
 // 	int yamahaXY_control(float pos_x, float pos_y, int control);
 	int head_control(float pan, float tilt, float roll);
