@@ -13,6 +13,7 @@ const byte CMD_ALL_JOINTANGLE_SET = 0x07; //7parameters
 const byte CMD_ALL_JOINTANGLE_GET = 0x08;
 const byte CMD_ALL_HAND_SET = 0x11;
 const byte CMD_ALL_HAND_GET = 0x10;
+const byte CMD_ALL_ARMHAND_SET = 0x13;
 const byte CMD_ALL_TEMP = 0x0A;
 const byte CMD_ALL_JOINTTarget_SET = 0x0D;
 const byte CMD_ALL_JOINTTarget_GET = 0x0C;
@@ -160,40 +161,46 @@ void RobotArms::_updateHand(TargetArm arm)
 	if (arm == TargetArm::Left)
 	{
 		for (int i = 0; i < 3; ++i)
-			cmd[2 + i] = (byte)(math::clamp<float>(_leftHand[i].targetAngle,0, 180.0f));
+			cmd[2 + i] = (byte)(math::clamp<float>(_leftHand[i].targetAngle,25, 150.0f));
 	}
 	else
 	{
 		for (int i = 0; i < 3; ++i)
-			cmd[2 + i] = (byte)(math::clamp<float>(_rightHand[i].targetAngle, 0, 180.0f));
+			cmd[2 + i] = (byte)(math::clamp<float>(_rightHand[i].targetAngle, 25, 150.0f));
 
 	}
 
 	_sendCommand(cmd, 2 + 3);
 }
-void RobotArms::_UpdateJoints(TargetArm arm, ushort time, bool midPos )
+void RobotArms::_UpdateJoints(TargetArm arm, ushort time, bool midPos, bool immediate,bool hand)
 {
-	if (time > 0)
+	if (time >= 0)
 		cmd[0] = CMD_ALL_JOINTTarget_SET;
 	else
 		cmd[0] = CMD_ALL_JOINTANGLE_SET;
+	if (hand)
+		cmd[0] = CMD_ALL_ARMHAND_SET;
+
 	cmd[1] = (arm == TargetArm::Right) ? (byte)0x01 : (byte)0x02;
 
-	byte bytes[16];
+	byte bytes[24];
+	int offset = 0;
 	for (int i = 0; i < JointsCount; ++i)
 	{
 		float angle = 0;
-		if (midPos)
+		if (Masks[i])
 		{
-			if (Masks[i])
+			if (midPos)
+			{
 				angle = (arm == TargetArm::Right) ? RMidPos[i] : LMidPos[i];
 
-		}
-		else if (Masks[i] && _state != EState::Shutdown)
-			angle = _GetValue(arm,i);
-		else if (_state == EState::Shutdown)
-		{
-			angle = (arm == TargetArm::Right) ? RShutdownPos[i] : LShutdownPos[i];
+			}
+			else if ( _state != EState::Shutdown)
+				angle = _GetValue(arm, i);
+			else if ( _state == EState::Shutdown)
+			{
+				angle = (arm == TargetArm::Right) ? RShutdownPos[i] : LShutdownPos[i];
+			}
 		}
 
 		short servo=AngleToServo(angle, (arm == TargetArm::Right) ? RSigns[i] : LSigns[i]);
@@ -201,18 +208,43 @@ void RobotArms::_UpdateJoints(TargetArm arm, ushort time, bool midPos )
 		//bytes = BitConverter.GetBytes();
 		cmd[2 + i * 2 + 0] = bytes[1];
 		cmd[2 + i * 2 + 1] = bytes[0];
+		offset += 2;
 	}
 
-	if (time > 0)
+	if (hand || time>=0)
 	{
 		//bytes = BitConverter.GetBytes(time);
 		memcpy(bytes, &time, sizeof(time));
-		cmd[2 + 2 * JointsCount + 0] = bytes[1];
-		cmd[2 + 2 * JointsCount + 1] = bytes[0];
-		_sendCommand(cmd, 2 + JointsCount * 2 + 2);
+		cmd[2 + offset + 0] = bytes[1];
+		cmd[2 + offset + 1] = bytes[0];
+		offset += 2;
+	}
+	if (hand)
+	{
+
+		if (arm == TargetArm::Left)
+		{
+			for (int i = 0; i < 3; ++i)
+				cmd[2+offset + i] = (byte)(math::clamp<float>(_leftHand[i].targetAngle, 25, 150.0f));
+		}
+		else
+		{
+			for (int i = 0; i < 3; ++i)
+				cmd[2 + offset + i] = (byte)(math::clamp<float>(_rightHand[i].targetAngle, 25, 150.0f));
+
+		}
+	}
+	if (hand)
+	{
+
+		_sendCommand(cmd, 2 + JointsCount * 2 + 3 + 2, immediate);
+	}
+	else if (time >= 0)
+	{
+		_sendCommand(cmd, 2 + JointsCount * 2 + 2, immediate);
 	}
 	else
-		_sendCommand(cmd, 2 + JointsCount * 2);
+		_sendCommand(cmd, 2 + JointsCount * 2, immediate);
 
 }
 
@@ -245,7 +277,7 @@ void RobotArms::_readTemperature(TargetArm arm)
 
 	cmd[0] = CMD_ALL_TEMP;
 	cmd[1] = (arm == TargetArm::Right) ? (byte)0x01 : (byte)0x02;
-	_sendCommand(cmd, 2);
+	_sendCommand(cmd, 2,true);
 	byte d [2];
 	short val;
 	if (ReadData(data) > 0)
@@ -262,7 +294,6 @@ void RobotArms::_readTemperature(TargetArm arm)
 }
 void RobotArms::_readHand(TargetArm arm)
 {
-	return;
 	cmd[0] = CMD_ALL_HAND_GET;
 	cmd[1] = (arm == TargetArm::Right) ? (byte)0x01 : (byte)0x02;
 	_sendCommand(cmd, 2);
@@ -284,8 +315,9 @@ void RobotArms::_readHand(TargetArm arm)
 void RobotArms::ProcessState()
 {
 	_timeToWait = 0;
+	int updateTime = 8;
 	_readBattery();
-	if (_enableTemperature && _temperatureTime >= TemperatureTime)
+	if (_enableTemperature )//&& _temperatureTime >= TemperatureTime
 	{
 		_temperatureTime = 0;
 		_readTemperature(TargetArm::Left);
@@ -304,9 +336,9 @@ void RobotArms::ProcessState()
 	case EState::Initialize:
 		_state = EState::Initializing;
 		if (LArmEnabled)
-			_UpdateJoints(TargetArm::Left, timeMS, true);
+			_UpdateJoints(TargetArm::Left, timeMS, true,true);
 		if (RArmEnabled)
-			_UpdateJoints(TargetArm::Right, timeMS, true);
+			_UpdateJoints(TargetArm::Right, timeMS, true, true);
 		_sleep(timeMS);
 		_timer = 0;
 		if (LArmEnabled)
@@ -324,17 +356,17 @@ void RobotArms::ProcessState()
 	case EState::Operate:
 		if (LArmEnabled)
 		{
-			_UpdateJoints(TargetArm::Left, 3);
-			_updateHand(TargetArm::Left);
-			_readHand(TargetArm::Left);
+			_UpdateJoints(TargetArm::Left, 18,false,true,true);
+			//_updateHand(TargetArm::Left);
+			//_readHand(TargetArm::Left);
 		}
 		if (RArmEnabled) {
-			_UpdateJoints(TargetArm::Right, 3);
-			_updateHand(TargetArm::Right);
-			_readHand(TargetArm::Right);
+			_UpdateJoints(TargetArm::Right, 18, false, true, true);
+			//_updateHand(TargetArm::Right);
+			//_readHand(TargetArm::Right);
 		}
 		if (LArmEnabled || RArmEnabled)
-			_timeToWait += 10;
+			_timeToWait += updateTime;
 
 		if (!_enableSending)
 			_state = EState::Shutdown;
@@ -342,9 +374,9 @@ void RobotArms::ProcessState()
 	case EState::Shutdown:
 		_timer = 0;
 		if (LArmEnabled)
-			_UpdateJoints(TargetArm::Left, timeMS, true);
+			_UpdateJoints(TargetArm::Left, timeMS, true, true);
 		if (RArmEnabled)
-			_UpdateJoints(TargetArm::Right, timeMS, true);
+			_UpdateJoints(TargetArm::Right, timeMS, true, true);
 		_state = EState::Shutingdown;
 		break;
 	case EState::Shutingdown:
@@ -372,6 +404,13 @@ void RobotArms::ProcessThread()
 		try
 		{
 			ProcessState();
+
+			if (_buffer.size() > 0) {
+
+				m_serial->write(&_buffer[0], _buffer.size());
+				_buffer.clear();
+				_timeToWait = 10;
+			}
 			if (_state == EState::Wait)
 				_timeToWait = 100;
 			_sleep( _timeToWait);
@@ -434,8 +473,15 @@ bool RobotArms::_sendCommand(byte* cmd, int length, bool immediate )
 		sum += data[i + 1];
 	}
 	data[dlen - 1] = (byte)(sum & 0xff);
-	m_serial->write(data,  dlen);
-	_sleep(10);
+	if (immediate)
+	{
+		m_serial->write(data, dlen);
+		_sleep(4);
+	}
+	else {
+		for (int i = 0; i < dlen; ++i)
+			_buffer.push_back(data[i]);
+	}
 	return true;
 
 }
@@ -469,9 +515,9 @@ void RobotArms::_Close()
 
 	_state = EState::Shutdown;
 	if (LArmEnabled)
-		_UpdateJoints(TargetArm::Left, timeMS);
+		_UpdateJoints(TargetArm::Left, timeMS, false, true);
 	if (RArmEnabled)
-		_UpdateJoints(TargetArm::Right, timeMS);
+		_UpdateJoints(TargetArm::Right, timeMS, false, true);
 	_sleep(timeMS);
 	_state = EState::Wait;
 

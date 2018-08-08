@@ -65,7 +65,7 @@ protected:
 	bool connected;
 	HANDLE m_robotThread;
 
-	std::list<byte> _buffer;
+	std::vector<byte> _buffer;
 
 	byte _readByte();
 
@@ -125,7 +125,7 @@ protected:
 	short AngleToServo(float angle, bool reverse);
 	float ServoToAngle(short val, bool reverse);
 	void _updateHand(TargetArm arm);
-	void _UpdateJoints(TargetArm arm, ushort time, bool midPos = false);
+	void _UpdateJoints(TargetArm arm, ushort time, bool midPos = false,bool immediate=false, bool hand=false);
 	void _readJoints(TargetArm arm);
 	void _readTemperature(TargetArm arm);
 	void _readHand(TargetArm arm);
