@@ -317,7 +317,7 @@ void RobotArms::ProcessState()
 	_timeToWait = 0;
 	int updateTime = 8;
 	_readBattery();
-	if (_enableTemperature )//&& _temperatureTime >= TemperatureTime
+	if (_enableTemperature && _temperatureTime >= TemperatureTime)
 	{
 		_temperatureTime = 0;
 		_readTemperature(TargetArm::Left);
