@@ -56,7 +56,7 @@ namespace video
 
 	GstPipelineHandler::GstPipelineHandler()
 	{
-		GStreamerCore::Instance()->Ref();
+		GStreamerCore::Ref();
 
 		m_data = new GstPipelineHandlerImpl();
 
@@ -64,7 +64,7 @@ namespace video
 	GstPipelineHandler::~GstPipelineHandler()
 	{
 		Close();
-		GStreamerCore::Instance()->Unref();
+		GStreamerCore::Unref();
 		delete m_data;
 	}
 

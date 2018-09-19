@@ -36,7 +36,7 @@ void AveragePer::Reset()
 	m_count = 0;
 	m_totalCount = 0;
 	m_average = 0;
-	m_timestamp = gGStreamerCore->GetTimer()->getMilliseconds();
+	m_timestamp = 0;// gGStreamerCore->GetTimer()->getMilliseconds();
 }
 
 float AveragePer::GetAverage(){

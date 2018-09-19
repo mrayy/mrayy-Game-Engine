@@ -67,29 +67,6 @@ RobotArms::RobotArms()
 	_timer = 0;
 	timeMS = 3000;
 
-	if (JointsCount == 6)
-	{
-		// V1 parameters
-		LMidPos = new float[7]{ -15, -42, 0, -50, 42, 0, 0 };
-		RMidPos = new float[7]{ 15, 42, 0, -50, -42, 0, 0 };
-
-		LShutdownPos = new float[7]{ 0, -80, 0, -75, 52, 0, 0 };
-		RShutdownPos = new float[7]{ 0, 80, 0, -75, -52, 0, 0 };
-
-		RSigns = new bool[7] { false, true, true, false, true, false, true }; //XX-X-X
-		LSigns = new bool[7] { false, false, false, false, false, true, true };
-	}
-	if (JointsCount == 7)
-	{
-		LMidPos = new float[7] { 15, 42, 0, 90, 0, 0, 0 };
-		RMidPos = new float[7] { 15, -42, 0, 90, 0, 0, 0 };
-
-		LShutdownPos = new float[7] { 0, 10, 0, 0, 0, 0, 0 };
-		RShutdownPos = new float[7] { 0, -10, 0, 0, 0, 0, 0 };
-
-		LSigns = new bool[7] { true, false, true, false, true, false, true };
-		RSigns = new bool[7] { false, false, true, true, true, false, false }; //XX-X-X
-	}
 }
 RobotArms::~RobotArms()
 {
@@ -98,8 +75,34 @@ RobotArms::~RobotArms()
 }
 
 
-bool RobotArms::Connect(const core::string& port)
+bool RobotArms::Connect(const core::string& port,int version)
 {
+	if (version == 0)
+		JointsCount = 6;
+	else JointsCount = 7;
+	if (JointsCount == 6)
+	{
+		// V1 parameters
+		LMidPos = new float[7]{ -15, -42, 0, -50, 42, 0, 0 };
+		RMidPos = new float[7]{ -15, 42, 0, -50, -42, 0, 0 };
+
+		LShutdownPos = new float[7]{ 0, -80, 0, -75, 52, 0, 0 };
+		RShutdownPos = new float[7]{ 0, 80, 0, -75, -52, 0, 0 };
+
+		LSigns = new bool[7]{ false, true, true, true, true, false, true };
+		RSigns = new bool[7]{ false, true, true, false, true, false, true }; //XX-X-X
+	}
+	if (JointsCount == 7)
+	{
+		LMidPos = new float[7]{ 15, 42, 0, 90, 0, 0, 0 };
+		RMidPos = new float[7]{ 15, -42, 0, 90, 0, 0, 0 };
+
+		LShutdownPos = new float[7]{ 0, 10, 0, 0, 0, 0, 0 };
+		RShutdownPos = new float[7]{ 0, -10, 0, 0, 0, 0, 0 };
+
+		LSigns = new bool[7]{ true, false, true, false, true, false, true };
+		RSigns = new bool[7]{ false, false, true, true, true, false, false }; //XX-X-X
+	}
 	Disconnect();
 
 	m_serial = new serial::Serial(port, 1500000, serial::Timeout::simpleTimeout(30), serial::eightbits, serial::parity_none);
@@ -185,7 +188,9 @@ void RobotArms::_UpdateJoints(TargetArm arm, ushort time, bool midPos, bool imme
 
 	byte bytes[24];
 	int offset = 0;
-	for (int i = 0; i < JointsCount; ++i)
+
+	int _jointsCount = 7;
+	for (int i = 0; i < _jointsCount; ++i)
 	{
 		float angle = 0;
 		if (Masks[i])
@@ -237,14 +242,14 @@ void RobotArms::_UpdateJoints(TargetArm arm, ushort time, bool midPos, bool imme
 	if (hand)
 	{
 
-		_sendCommand(cmd, 2 + JointsCount * 2 + 3 + 2, immediate);
+		_sendCommand(cmd, 2 + _jointsCount * 2 + 3 + 2, immediate);
 	}
 	else if (time >= 0)
 	{
-		_sendCommand(cmd, 2 + JointsCount * 2 + 2, immediate);
+		_sendCommand(cmd, 2 + _jointsCount * 2 + 2, immediate);
 	}
 	else
-		_sendCommand(cmd, 2 + JointsCount * 2, immediate);
+		_sendCommand(cmd, 2 + _jointsCount * 2, immediate);
 
 }
 
@@ -258,9 +263,10 @@ void RobotArms::_readJoints(TargetArm arm)
 	_sendCommand(cmd, 2);
 	byte d[2];
 	short val;
+	int _jointsCount = 7;
 	if (ReadData(data) > 0)
 	{
-		for (int i = 0; i < JointsCount; ++i)
+		for (int i = 0; i < _jointsCount; ++i)
 		{
 			d[0] = data[2 * i + 1];
 			d[1] = data[2 * i + 0];
@@ -280,9 +286,10 @@ void RobotArms::_readTemperature(TargetArm arm)
 	_sendCommand(cmd, 2,true);
 	byte d [2];
 	short val;
+	int _jointsCount = 7;
 	if (ReadData(data) > 0)
 	{
-		for (int i = 0; i < JointsCount; ++i)
+		for (int i = 0; i < _jointsCount; ++i)
 		{
 			d[0] = data[2 * i + 1];
 			d[1] = data[2 * i + 0];
@@ -314,8 +321,8 @@ void RobotArms::_readHand(TargetArm arm)
 
 void RobotArms::ProcessState()
 {
+	int servoUpdate = 0;
 	_timeToWait = 0;
-	int updateTime = 8;
 	_readBattery();
 	if (_enableTemperature && _temperatureTime >= TemperatureTime)
 	{
@@ -356,17 +363,17 @@ void RobotArms::ProcessState()
 	case EState::Operate:
 		if (LArmEnabled)
 		{
-			_UpdateJoints(TargetArm::Left, 18,false,true,true);
+			_UpdateJoints(TargetArm::Left, servoUpdate,false,true,true);
 			//_updateHand(TargetArm::Left);
 			//_readHand(TargetArm::Left);
 		}
 		if (RArmEnabled) {
-			_UpdateJoints(TargetArm::Right, 18, false, true, true);
+			_UpdateJoints(TargetArm::Right, servoUpdate, false, true, true);
 			//_updateHand(TargetArm::Right);
 			//_readHand(TargetArm::Right);
 		}
 		if (LArmEnabled || RArmEnabled)
-			_timeToWait += updateTime;
+			_timeToWait += servoUpdate;
 
 		if (!_enableSending)
 			_state = EState::Shutdown;
@@ -404,6 +411,7 @@ void RobotArms::ProcessThread()
 		try
 		{
 			ProcessState();
+			_timeToWait += 5;
 
 			if (_buffer.size() > 0) {
 
@@ -476,7 +484,7 @@ bool RobotArms::_sendCommand(byte* cmd, int length, bool immediate )
 	if (immediate)
 	{
 		m_serial->write(data, dlen);
-		_sleep(4);
+		//_sleep(4);
 	}
 	else {
 		for (int i = 0; i < dlen; ++i)

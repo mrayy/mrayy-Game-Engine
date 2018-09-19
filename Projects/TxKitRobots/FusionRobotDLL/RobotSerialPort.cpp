@@ -197,7 +197,7 @@ void RobotSerialPort::_ProcessRobot()
 			{
 				if (m_impl->m_armsPort == "")
 					m_impl->m_armsPort = _config.armCOM;
-				ret = m_impl->m_armsController->Connect(m_impl->m_armsPort);
+				ret = m_impl->m_armsController->Connect(m_impl->m_armsPort, _config.ArmVersion);
 				if (ret) {
 					ok |= true;
 				}
@@ -800,13 +800,20 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 	if (st == RobotArms::Shutdown)msg += "Shutdown";
 	if (st == RobotArms::Shutingdown)msg += "Shutingdown";
 	context->RenderText(msg, 5, 0);
-
+	 
 
 
 	context->RenderText(core::string("Robot Joint Values:"), 5, 0);
 
 	msg = "";
 	context->RenderText("   \tIK\t/ Real", 10, 0);
+	for (int i = 0; i < 3; ++i)
+	{
+		
+		sprintf_s(buffer, " %-2.2f\t/ %-2.2f", m_jointsValues[i * 2], m_jointsValues[i * 2 + 1]);
+		msg = core::string("Head  J[") + core::StringConverter::toString(i) + "]:" + buffer;
+		context->RenderText(msg, 10, 0);
+	}
 	for (int i = 0; i < 7; ++i)
 	{
 		RobotArms::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];

@@ -168,9 +168,9 @@ void GStreamerCore::_Init()
 		/**/
 		gLogManager.log("GStreamerCore - Adding mylistener", ELL_INFO);
  		if (!gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR,
- 			"mylistener", (char*)"Custom listener element",
- 			_GstMyListenerClass::plugin_init, "0.1", "LGPL", "GstVideoProvider", "mray",
- 			""))
+ 			"mylistener", "Custom listener element",
+ 			_GstMyListenerClass::plugin_init, "1.0", "LGPL", "NM", "mray",
+ 			"http://gstreamer.net/"))
  		{
  			gLogManager.log("Failed to register mylistener!", ELL_WARNING);
  		}
@@ -192,8 +192,8 @@ void GStreamerCore::_Init()
 void GStreamerCore::_StartLoop()
 {
 	m_threadFunc = new GstMainLoopThread();
-	m_mainLoopThread = OS::IThreadManager::getInstance().createThread(m_threadFunc);
-	m_mainLoopThread->start(0);
+ 	m_mainLoopThread = OS::IThreadManager::getInstance().createThread(m_threadFunc);
+ 	m_mainLoopThread->start(0);
 }
 
 void GStreamerCore::_StopLoop()

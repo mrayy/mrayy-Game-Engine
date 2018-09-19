@@ -40,6 +40,7 @@ public:
 	float xAxis = 1, yAxis = 1, zAxis = 1;
 	float xSpeed = 1, ySpeed = 1, Rotation = 1;
 	bool BaseEnabled = true, HeadEnabled = true, armEnabled = false;
+	int ArmVersion = 0;
 };
 
 RobotConfig _config;
@@ -171,6 +172,8 @@ void load_parameters() {
 					_config.BaseEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "ArmEnabled") == 0)
 					_config.armEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "ArmVersion") == 0)
+					_config.ArmVersion = strToInt(token[1]);
 
 			}
 

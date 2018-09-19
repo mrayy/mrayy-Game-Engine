@@ -34,7 +34,7 @@ void SetHeadAngles(float tilt,float yaw,float roll)
     Serial.print("@ang ");
     Serial.print(realAngles[0]);Serial.print(",");
     Serial.print(realAngles[1]);Serial.print(",");
-    Serial.println(realAngles[2]);
+    Serial.print(realAngles[2]);Serial.println("#")
   }
 }
 //@0,90,0#
@@ -55,14 +55,14 @@ void applyRotation()
   SetHeadAngles(eulerAngles.z(),eulerAngles.x(),eulerAngles.y());
 }
 
-void setup() 
+void setup()
 {
   Serial.begin(115200);
   Kondo.begin(115200,&Serial1);
   Kondo.setFree(1);
   Kondo.setFree(2);
   Kondo.setFree(3);
-  
+
   Wire.begin();
   //Wire.setSpeed(1);
   mpu6050.begin();
@@ -135,7 +135,7 @@ void ProcessSerial()
         values[i++]=str;
 
       ProcessInput();
-      
+
     }else
     {
       inputBuffer[inputBufferIndex++]=c;
@@ -143,7 +143,7 @@ void ProcessSerial()
   }
 }
 
-void loop() 
+void loop()
 {
   if(stabilizer){
     mpu6050.update();
@@ -155,7 +155,7 @@ void loop()
   IMUQuat.fromEuler(mpu6050.getAngleX(),0,mpu6050.getAngleY());
 
   //SetHeadAngles(mpu6050.getAngleX(),0,mpu6050.getAngleY());
-  
+
   /*Serial.print(mpu6050.getAngleX()); Serial.print(" ");
   Serial.print(mpu6050.getAngleZ());Serial.print(" ");
   Serial.print(mpu6050.getAngleY());Serial.println();*/

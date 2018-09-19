@@ -75,8 +75,12 @@ public:
 
 	void SetCameraIndex(std::vector<int> cams)
 	{
-		m_cams = cams;
-		m_currentFps.resize(cams.size());
+
+		m_cams = std::vector<int>( cams);
+		m_currentFps.clear();
+		
+		for (int i = 0; i < cams.size(); ++i)
+			m_currentFps.push_back(AveragePer());
 	}
 	void  SetResolution(int width, int height, int fps, bool free)
 	{

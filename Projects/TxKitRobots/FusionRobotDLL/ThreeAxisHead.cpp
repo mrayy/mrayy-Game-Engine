@@ -45,12 +45,20 @@ ThreeAxisHead::~ThreeAxisHead()
 	delete m_serial;
 }
 
+DWORD timerThreadRobot(ThreeAxisHead *robot, LPVOID pdata) {
+	int count = 0;
+	while (robot->IsConnected()) {
+		robot->CheckSerial();
+		Sleep(10);
+	}
+	return 0;
+}
 
 bool ThreeAxisHead::Connect(const core::string& port)
 {
 	Disconnect();
 
-	m_serial = new serial::Serial(port, 115200, serial::Timeout(), serial::eightbits, serial::parity_none);
+	m_serial = new serial::Serial(port, 115200, serial::Timeout(0,10), serial::eightbits, serial::parity_none, serial::stopbits_one);
 	if (!m_serial->isOpen())
 	{
 		connected = false;
@@ -63,17 +71,28 @@ bool ThreeAxisHead::Connect(const core::string& port)
 		connected = true;
 		_sendCommand("sa");//disable angle logging
 		_sendCommand("es");//enable stabilization
+		if(false)
+			m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
+		else m_robotThread = 0;
+
 	}
 	return m_serial && m_serial->isOpen();
 }
 bool ThreeAxisHead::IsConnected()
 {
-	return m_serial != 0 && m_serial->isOpen();
+	return connected && m_serial != 0 && m_serial->isOpen();
 }
 void ThreeAxisHead::Disconnect()
 {
 	if (!m_serial)
 		return;
+	connected = false;
+	if (m_robotThread != 0)
+	{
+		Sleep(100);
+		TerminateThread(m_robotThread, 0);
+		m_robotThread = 0;
+	}
 	SetRotation(0);
 	_sendCommand("q");
 
@@ -83,17 +102,27 @@ void ThreeAxisHead::Disconnect()
 		delete m_serial;
 		m_serial = 0;
 	}
-	connected = false;
 }
 
+void ThreeAxisHead::CheckSerial()
+{
+	std::string str;
+	if (m_serial->available() == 0)
+		return;
+	_rcvbuffer+=m_serial->read(m_serial->available());
+
+	std::size_t index = _rcvbuffer.find_first_of('\n');
+	if (index!= std::string::npos)
+	{
+		str = _rcvbuffer.substr(0, index + 1);
+		_rcvbuffer = _rcvbuffer.substr(index + 1);
+		_onSerialData(str.length(), &str[0]);
+	}
+}
 void ThreeAxisHead::_sendCommand(const std::string& cmd)
 {
 	std::string str = "@"+cmd + "#";
 	m_serial->write(str);
-	if (m_serial->available())
-	{
-		m_serial->read(m_serial->available());
-	}
 }
 void ThreeAxisHead::SetRotation(const math::vector3d& rotation)
 {
@@ -137,7 +166,7 @@ void ThreeAxisHead::_onSerialData(int size, char *buffer)
 		}
 		if (cnt == 0)
 			continue;
-		if (_buffer[i] == '\r')
+		if (_buffer[i] == '\n')
 		{
 			if(cnt==1){
 				cnt = 2;

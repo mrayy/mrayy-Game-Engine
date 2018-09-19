@@ -159,6 +159,7 @@ public:
 	}
 	video::ICustomVideoSrc* CreateVideoSrc()
 	{
+		gLogManager.log("Creating src",ELL_INFO);
 		std::vector<video::IVideoGrabber*> grabbers;
 		for (int i = 0; i < cameras.size(); ++i)
 		{
@@ -167,9 +168,11 @@ public:
 				grabbers.push_back(cameras[i]);
 			}
 		}
+		gLogManager.log("setting video grabber", ELL_INFO);
 
 		video::AppSrcVideoSrc* src = new video::AppSrcVideoSrc();
 		src->SetVideoGrabber(grabbers);//
+		gLogManager.log("done", ELL_INFO);
 
 		return src;
 	}
@@ -557,8 +560,10 @@ public:
 		video::ICustomVideoSrc* ret = 0;
 		if (ksSupport)
 		{
+			gLogManager.log("Using Kernal Streaming", ELL_INFO);
 			video::CameraVideoSrc* src;
 			src = new video::CameraVideoSrc();
+			gLogManager.log("SetCameraIndex: "+core::StringConverter::toString(_captureDevices[0]), ELL_INFO);
 			src->SetCameraIndex(_captureDevices);
 			if (CaptureType == TBee::TelubeeCameraConfiguration::CaptureJpeg)
 			{
@@ -571,6 +576,7 @@ public:
 				src->SetEncoderType("H264");
 			}
 			else {
+				gLogManager.log("RAW/H264", ELL_INFO);
 				src->SetCaptureType("RAW");
 				src->SetEncoderType("H264");
 			}
@@ -594,6 +600,7 @@ public:
 		}
 		else
 		{
+			gLogManager.log("Using DirectShow grabber", ELL_INFO);
 			video::AppSrcVideoSrc* src;
 			src = new video::AppSrcVideoSrc();
 
@@ -612,6 +619,7 @@ public:
 				}
 			}
 
+			gLogManager.log("SetVideoGrabber()", ELL_INFO);
 			src->SetVideoGrabber(devices);
 
 			ret = src;

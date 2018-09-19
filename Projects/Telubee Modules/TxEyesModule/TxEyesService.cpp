@@ -217,7 +217,6 @@ public:
 
 		m_context = context;
 		m_resolution.set(1280, 720);
-
 		printf("Initing..\n");
 //#if USE_POINTGREY && USE_WEBCAMERA
 		core::string camType = core::StringUtil::ToLower(context->appOptions.GetOptionValue("CameraConnection", "directshow"));
@@ -263,12 +262,15 @@ public:
 			//Create Camera Controller
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
-				gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
- 				if ( false && (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed))
- 					m_cameraController = new CameraGrabberController();
+				if (false && (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed))
+				{
+					gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
+
+					m_cameraController = new CameraGrabberController();
+				}
  				else
 				{
-				
+					gLogManager.log("Creating Encoded Capture Camera", ELL_INFO);
 					m_cameraController = new EncodedCameraStreamController(m_camConfig->captureType, m_cameraType);
 					((EncodedCameraStreamController*)m_cameraController)->optimizeOVR = m_optimizedOVRVision;
 					((EncodedCameraStreamController*)m_cameraController)->EnableEyegaze(m_enableEyegaze);
@@ -367,7 +369,7 @@ public:
 			}
 		}
 */
-
+		if(false)
 		{
 			//load camera cropping offsets
 
@@ -380,6 +382,7 @@ public:
 				s->close();
 			}
 		}
+		gLogManager.log("Initializing Cameras", ELL_INFO);
 		printf("Initializing Cameras\n");
 		m_quality = math::Min<int>((int)m_quality, m_cameraSettings.size());
 		m_currentSettings = m_cameraSettings[m_quality];
@@ -399,6 +402,8 @@ public:
 			//Init Cameras
 			m_cameraController->SetCameras(m_cameraIfo,m_cameraType);
 
+
+			gLogManager.log("Setting cameras parameters", ELL_INFO);
  			printf("Setting cameras parameters\n");
  			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Focus, "0");
  			m_cameraController->SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, context->appOptions.GetOptionByName("Exposure")->getValue());
@@ -407,15 +412,14 @@ public:
 			// Now close cameras
 			m_cameraController->Stop();
 
-			gLogManager.log("Creating Video Streamer",ELL_INFO);
-
-			printf("Creating Video Streamer\n");
-			video::GstNetworkVideoStreamer* hs = new video::GstNetworkVideoStreamer();
-			hs->AddListener(this);
 
 
-			
+
+			gLogManager.log("Creating Video Src", ELL_INFO);
+			printf("Creating Video Src\n");
 			video::ICustomVideoSrc* src = m_cameraController->CreateVideoSrc();
+			gLogManager.log("Done with Video Streamer", ELL_INFO);
+			printf("Done with Video Streamer\n");
 			m_cameraSource = src;
 			if (m_enableEyegaze)
 			{
@@ -426,6 +430,7 @@ public:
 				cs->SetEyegazeCrop(m_eyegazeSize.x, m_eyegazeSize.y);
 				cs->SetEyegazeLevels(m_eyegazeLevels);
 			}
+			printf("Settings...\n");
 
 			m_cameraController->SetResolution(m_resolution.x, m_resolution.y);
 
@@ -438,6 +443,11 @@ public:
 			m_camConfig->encoderType = src->GetEncoderType();
 			m_camConfig->separateStreams = src->IsSeparateStreams();
 			m_camConfig->CameraStreams = src->GetVideoSrcCount();
+			gLogManager.log("Creating Video Streamer", ELL_INFO);
+
+			printf("Creating Video Streamer\n");
+			video::GstNetworkVideoStreamer* hs = new video::GstNetworkVideoStreamer();
+			hs->AddListener(this);
 			hs->SetVideoSrc(src);
 
 			m_streamers->AddStream(hs, "Video");

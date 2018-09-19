@@ -97,6 +97,8 @@ protected:
 	float *LShutdownPos;
 	float *RShutdownPos;
 
+	int _version;
+
 	ushort BatteryLevel;
 
 	static float NormalizeAngle(float v)
@@ -140,7 +142,7 @@ public:
 	RobotArms();
 	virtual ~RobotArms();
 
-	virtual bool Connect(const core::string& port);
+	virtual bool Connect(const core::string& port,int version);
 	virtual bool IsConnected();
 	virtual void Disconnect();
 

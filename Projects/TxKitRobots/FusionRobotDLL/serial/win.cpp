@@ -219,6 +219,7 @@ Serial::SerialImpl::reconfigurePort ()
   } else {
     throw invalid_argument ("invalid parity");
   }
+  dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
 
   // setup flowcontrol
   if (flowcontrol_ == flowcontrol_none) {
