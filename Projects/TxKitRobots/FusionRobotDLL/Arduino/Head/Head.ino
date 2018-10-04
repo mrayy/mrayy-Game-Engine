@@ -34,7 +34,7 @@ void SetHeadAngles(float tilt,float yaw,float roll)
     Serial.print("@ang ");
     Serial.print(realAngles[0]);Serial.print(",");
     Serial.print(realAngles[1]);Serial.print(",");
-    Serial.print(realAngles[2]);Serial.println("#")
+    Serial.print(realAngles[2]);Serial.println("#");
   }
 }
 //@0,90,0#

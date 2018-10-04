@@ -519,15 +519,16 @@ public:
 
 	virtual void OnStreamStarted()
 	{
-
 		if (camtype == ECameraType::Ovrvision ||
 			camtype == ECameraType::OvrvisionCompressed)
 		{
+			gLogManager.log("begin OVRvision Settings", ELL_INFO);
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Exposure, "1700");
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gain, "12");
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Gamma, "1200");
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_Brightness, "9000");
 			SetCameraParameterValue(video::ICameraVideoGrabber::Param_WhiteBalance, "2000");
+			gLogManager.log("done OVRvision Settings", ELL_INFO);
 		}
 	}
 
@@ -541,8 +542,10 @@ public:
 		if (camtype == ECameraType::Ovrvision ||
 			camtype == ECameraType::OvrvisionCompressed)
 		{
-			_ovrCam->InitDevice(0, w,h, 60);
+			gLogManager.log("Begin OVRvision Init", ELL_INFO);
+			_ovrCam->InitDevice(0, w, h, 60);
 			_ovrListener.Init(w, h);
+			gLogManager.log("Done OVRvision Init", ELL_INFO);
 		}
 	}
 
@@ -584,7 +587,7 @@ public:
 			if (camtype == ECameraType::Ovrvision ||
 				camtype == ECameraType::OvrvisionCompressed)
 			{
-				gLogManager.log("Linking Overvision",ELL_INFO);
+				gLogManager.log("Begin Linking Overvision",ELL_INFO);
 				src->AddPostCaptureListener(&_ovrListener,0);
 				src->ConvertToGray8(!optimizeOVR);
 				if (!_ovrCam)
@@ -595,6 +598,7 @@ public:
 					_ovrSettings = _ovrCam->GetCameraSettings();
 					_ovrCam->Stop();
 				}
+				gLogManager.log("Done Linking Overvision", ELL_INFO);
 			}
 			ret = src;
 		}

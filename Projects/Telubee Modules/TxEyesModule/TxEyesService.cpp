@@ -30,6 +30,7 @@
 #include "ModuleSharedMemory.h"
 #include "INetworkPortAssigner.h"
 #include "Benchmarks.h"
+#include "GStreamerCore.h"
 
 #include <conio.h>
 #include <XMLTextNode.h>
@@ -217,6 +218,8 @@ public:
 
 		m_context = context;
 		m_resolution.set(1280, 720);
+
+		video::GStreamerCore::Ref();
 		printf("Initing..\n");
 //#if USE_POINTGREY && USE_WEBCAMERA
 		core::string camType = core::StringUtil::ToLower(context->appOptions.GetOptionValue("CameraConnection", "directshow"));
@@ -449,6 +452,8 @@ public:
 			video::GstNetworkVideoStreamer* hs = new video::GstNetworkVideoStreamer();
 			hs->AddListener(this);
 			hs->SetVideoSrc(src);
+			printf("Done Video Streamer\n");
+			gLogManager.log("Done Video Streamer", ELL_INFO);
 
 			m_streamers->AddStream(hs, "Video");
 
