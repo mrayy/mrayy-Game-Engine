@@ -141,7 +141,10 @@ float KondoClass::getAngle(byte servoID) {
 }
 
 float KondoClass::setAngle(byte servoID,float angle) {
-	return posDeg(setPosition(servoID,degPos(angle)));
+  int v=setPosition(servoID,degPos(angle));
+  if(v==ICS_FALSE)
+    return -1000;
+	return posDeg(v);
 }
 
 

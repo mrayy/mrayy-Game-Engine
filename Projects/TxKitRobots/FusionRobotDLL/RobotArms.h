@@ -149,7 +149,7 @@ public:
 	void SetArmAngles(TargetArm arm, float *angles,int n);
 	void SetHand(TargetArm, float* angles, int n);
 
-	void Start(bool leftArm,bool rightArm);
+	void Start(bool leftArm,bool rightArm,bool enableReadingAngles);
 	void Stop(bool force=false);
 
 	void Update(float dt);

@@ -183,6 +183,7 @@ namespace mray
 		}
 		gLogManager.log("Connecting to: "+port, ELL_INFO);
 		m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(30), serial::eightbits, serial::parity_even);
+		m_serial->open();
 		connected = m_serial->isOpen();
 		if (!connected)
 		{

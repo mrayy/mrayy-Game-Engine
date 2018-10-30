@@ -54,11 +54,12 @@ DWORD timerThreadRobot(ThreeAxisHead *robot, LPVOID pdata) {
 	return 0;
 }
 
-bool ThreeAxisHead::Connect(const core::string& port)
+bool ThreeAxisHead::Connect(const core::string& port,bool enableAngleLog)
 {
 	Disconnect();
 
-	m_serial = new serial::Serial(port, 115200, serial::Timeout(0,10), serial::eightbits, serial::parity_none, serial::stopbits_one);
+	m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(20), serial::eightbits, serial::parity_none, serial::stopbits_one);
+	//m_serial->open();
 	if (!m_serial->isOpen())
 	{
 		connected = false;
@@ -68,10 +69,16 @@ bool ThreeAxisHead::Connect(const core::string& port)
 	}
 	else
 	{
+		_sendCommand("q");//disable angle logging
+		Sleep(50);
 		connected = true;
-		_sendCommand("sa");//disable angle logging
+		enableAngleLog = true;
+		if (enableAngleLog)
+			_sendCommand("ea");//disable angle logging
+		else
+			_sendCommand("sa");
 		_sendCommand("es");//enable stabilization
-		if(false)
+		if(enableAngleLog)
 			m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
 		else m_robotThread = 0;
 
@@ -107,17 +114,22 @@ void ThreeAxisHead::Disconnect()
 void ThreeAxisHead::CheckSerial()
 {
 	std::string str;
-	if (m_serial->available() == 0)
-		return;
-	_rcvbuffer+=m_serial->read(m_serial->available());
-
-	std::size_t index = _rcvbuffer.find_first_of('\n');
-	if (index!= std::string::npos)
-	{
-		str = _rcvbuffer.substr(0, index + 1);
-		_rcvbuffer = _rcvbuffer.substr(index + 1);
+// 	if (m_serial->available() == 0)
+// 		return;
+	_rcvbuffer += m_serial->readline();// m_serial->available());
+	std::size_t index = 0;
+	bool found = false;
+	do {
+		index = _rcvbuffer.find_first_of('\n');
+		if (index != std::string::npos)
+		{
+			str = _rcvbuffer.substr(0, index + 1);
+			_rcvbuffer = _rcvbuffer.substr(index + 1);
+			found = true;
+		}
+	} while (index != std::string::npos);
+	if(found)
 		_onSerialData(str.length(), &str[0]);
-	}
 }
 void ThreeAxisHead::_sendCommand(const std::string& cmd)
 {
@@ -132,6 +144,8 @@ void ThreeAxisHead::SetRotation(const math::vector3d& rotation)
 	char sCommand[128];
 	sprintf_s(sCommand, 128, "d,%d,%d,%d", (int)(rotation.z * 100), (int)(rotation.y * 100), (int)(rotation.x * 100));
 	_sendCommand(sCommand);
+
+	//CheckSerial();
 	//m_rotation = rotation;
 }
 math::vector3d ThreeAxisHead::GetRotation()
@@ -187,9 +201,9 @@ void ThreeAxisHead::_onSerialData(int size, char *buffer)
 	if (lst[0] == "ang")//angles
 	{
 		lst = core::StringUtil::Split(lst[1], ",");
-		m_rotation.y = core::StringConverter::toFloat(lst[0]);
-		m_rotation.x = core::StringConverter::toFloat(lst[1]);
-		m_rotation.z = core::StringConverter::toFloat(lst[2]);
+		m_rotation.z = -core::StringConverter::toFloat(lst[0]);
+		m_rotation.y = -core::StringConverter::toFloat(lst[1]);
+		m_rotation.x = -core::StringConverter::toFloat(lst[2]);
 	}
 }
 

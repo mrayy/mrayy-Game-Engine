@@ -36,9 +36,6 @@
     <ClInclude Include="movingAverage.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="Tserial_event.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="RobotSerialPort.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -87,9 +84,6 @@
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="serial\serial.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="serial\Tserial_event.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="serial\win.cpp">

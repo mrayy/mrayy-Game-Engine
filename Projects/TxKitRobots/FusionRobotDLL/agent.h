@@ -41,6 +41,7 @@ public:
 	float xSpeed = 1, ySpeed = 1, Rotation = 1;
 	bool BaseEnabled = true, HeadEnabled = true, armEnabled = false;
 	int ArmVersion = 0;
+	bool EnableAngleLog= true;
 };
 
 RobotConfig _config;
@@ -172,6 +173,8 @@ void load_parameters() {
 					_config.BaseEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "ArmEnabled") == 0)
 					_config.armEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "EnableAngleLog") == 0)
+					_config.EnableAngleLog = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "ArmVersion") == 0)
 					_config.ArmVersion = strToInt(token[1]);
 

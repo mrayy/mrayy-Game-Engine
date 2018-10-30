@@ -42,6 +42,7 @@ public:
 		StreamEyegazeRaw
 	};
 
+
 	//http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
 	float fov;			//horizontal field of view for the camera measured in degrees
 	float cameraOffset;	//physical offset from human eye
@@ -64,6 +65,8 @@ public:
 	ECameraCaptureType captureType;//RAW,JPEG,H264
 	ECameraType  cameraType; //FOV,OMNI
 	EStreamCodec streamType;
+
+	std::vector<math::vector4d> customRects;
 
 public:
 	TelubeeCameraConfiguration();

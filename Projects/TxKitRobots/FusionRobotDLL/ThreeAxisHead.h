@@ -27,7 +27,10 @@ public:
 
 	serial::Serial *GetComEvent(){ return m_serial; }
 
-	virtual bool Connect(const core::string& port);
+	virtual bool Connect(const core::string& port) {
+		return Connect(port, false);
+	}
+	virtual bool Connect(const core::string& port, bool enableAngleLog);
 	virtual bool IsConnected();
 	virtual void Disconnect();
 

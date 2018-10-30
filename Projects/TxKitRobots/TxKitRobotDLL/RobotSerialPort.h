@@ -74,6 +74,8 @@ public:
 
 	virtual void tuningMode() {};
 
+	virtual void DebugRender(mray::TBee::ServiceRenderContext* context);
+
 };
 
 

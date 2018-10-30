@@ -595,12 +595,13 @@ void RobotArms::SetHand(TargetArm arm, float* angles, int n)
 			_rightHand[i].SetValue(angles[i]);
 	}
 }
-void RobotArms::Start(bool leftArm, bool rightArm)
+void RobotArms::Start(bool leftArm, bool rightArm, bool enableReadingAngles)
 {
 	_off = false;
 	_enableSending = true;
 	LArmEnabled = leftArm;
 	RArmEnabled = rightArm;
+	_enableReading = enableReadingAngles;
 }
 void RobotArms::Stop(bool force )
 {

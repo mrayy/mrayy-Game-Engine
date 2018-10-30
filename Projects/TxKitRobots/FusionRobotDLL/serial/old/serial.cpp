@@ -1,7 +1,7 @@
 /* Copyright 2012 William Woodall and John Harrison */
 #include <algorithm>
 
-#if !defined(_WIN32) && !defined(__OpenBSD__) && !defined(__FreeBSD__)
+#if !defined(_WIN32) && !defined(__OpenBSD__)
 # include <alloca.h>
 #endif
 
@@ -26,7 +26,7 @@ using std::string;
 
 using serial::Serial;
 using serial::SerialException;
-using serial::IOException;	
+using serial::IOException;
 using serial::bytesize_t;
 using serial::parity_t;
 using serial::stopbits_t;

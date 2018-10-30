@@ -1,3 +1,8 @@
+//IMPORTANT: 
+// Board type: SparkFun Pro Micro 
+// Processor: 5V, 16MHz
+//If board bricked, shorten GND and RST twice and quickly reupload empty sketch (only 8 seconds available)
+
 #include "Kondo.h"
 #include "MPU6050_tockn.h"
 #include <Wire.h>
@@ -22,19 +27,24 @@ bool isFree=true;
 bool debugAng=false;
 bool stabilizer=true;
 
+unsigned long currenttime,lasttime;
+
 void SetHeadAngles(float tilt,float yaw,float roll)
 {
   if(isFree)
     return;
-  realAngles[0]=Kondo.setAngle(2,tilt);
-  realAngles[1]=Kondo.setAngle(1,yaw);
-  realAngles[2]=Kondo.setAngle(3,roll);
-  if(debugAng)
+
+  float v;
+  v=Kondo.setAngle(2,tilt);if(v!=ICS_FALSE && abs(v)<200)realAngles[0]=(v);
+  v=Kondo.setAngle(1,yaw);if(v!=ICS_FALSE && abs(v)<200)realAngles[1]=(v);
+  v=Kondo.setAngle(3,roll);if(v!=ICS_FALSE && abs(v)<200)realAngles[2]=(v);
+  if(debugAng && abs(currenttime-lasttime)>16000)
   {
+    lasttime=currenttime;
     Serial.print("@ang ");
-    Serial.print(realAngles[0]);Serial.print(",");
+    Serial.print(realAngles[0]-mpu6050.getAngleX());Serial.print(",");
     Serial.print(realAngles[1]);Serial.print(",");
-    Serial.print(realAngles[2]);Serial.println("#");
+    Serial.print(realAngles[2]-mpu6050.getAngleY());Serial.println("#");
   }
 }
 //@0,90,0#
@@ -67,6 +77,8 @@ void setup()
   //Wire.setSpeed(1);
   mpu6050.begin();
   mpu6050.calcGyroOffsets(true);
+
+  currenttime=lasttime=micros();
 }
 
 void ProcessInput()
@@ -145,6 +157,8 @@ void ProcessSerial()
 
 void loop()
 {
+  currenttime=micros();
+  
   if(stabilizer){
     mpu6050.update();
     eulerAngles.z()=mpu6050.getAngleX();

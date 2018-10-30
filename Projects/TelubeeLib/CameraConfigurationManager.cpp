@@ -89,6 +89,18 @@ void TelubeeCameraConfiguration::LoadFromXML(xml::XMLElement*e)
 		else if (attr->value == "JPEG")
 			captureType = ECameraCaptureType::CaptureJpeg;
 	}
+
+	xml::XMLElement* elem = e->getSubElement("rect");
+	while (elem)
+	{
+		attr=elem->getAttribute("value");
+		if (attr)
+		{
+			math::vector4d v = core::StringConverter::toVector4d(attr->value);
+			customRects.push_back(v);
+		}
+		elem = elem->nextSiblingElement("rect");
+	}
 }
 
 
@@ -126,6 +138,13 @@ xml::XMLElement* TelubeeCameraConfiguration::ExportToXML(xml::XMLElement*elem)
 			e->addAttribute("LeftRotation", v);
 		else
 			e->addAttribute("RightRotation", v);
+	}
+
+	for (int i = 0; i < customRects.size(); ++i)
+	{
+		xml::XMLElement* r = new xml::XMLElement("rect");
+		r->addAttribute("value", core::StringConverter::toString(customRects[i]));
+		e->addSubElement(r);
 	}
 
 	switch (cameraType)

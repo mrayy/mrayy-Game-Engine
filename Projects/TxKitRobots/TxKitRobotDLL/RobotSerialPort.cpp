@@ -17,6 +17,7 @@
 #include "StringUtil.h"
 #include "ILogManager.h"
 #include "TxKitBraccio.h"
+#include "ServiceContext.h"
 
 float testPosx = 100.00;
 float testPosy = 100.00; 
@@ -148,7 +149,7 @@ DWORD RobotSerialPort::timerThreadRobot(RobotSerialPort *robot, LPVOID pdata){
 	int count = 0;
 	while (!isDone){
 		robot->_ProcessRobot();
-		Sleep(1);
+		Sleep(10);
 		if (!threadStart)
 			Sleep(100);
 	}
@@ -814,4 +815,24 @@ void RobotSerialPort::ParseParameters(const std::map<std::string, std::string>& 
 	{
 		m_impl->autoFindPort = core::StringConverter::toBool(it->second);
 	}
+}
+
+void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
+{
+
+	core::string msg;
+	char buffer[512];
+
+	bool Connected = m_impl->m_headController->IsConnected();
+	msg = core::string("Head Connected: ") + (Connected?"Yes":"No");
+
+	sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", tilt, pan, roll);
+	msg = core::string("Head Rotation: ") + buffer;
+	context->RenderText(msg, 10, 0);
+
+	math::vector3d r=m_impl->m_headController->GetRotation();
+
+	sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", r.x, r.y, r.z);
+	msg = core::string("Head Actual: ") + buffer;
+	context->RenderText(msg, 10, 0);
 }
