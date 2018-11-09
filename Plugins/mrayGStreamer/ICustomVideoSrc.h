@@ -34,6 +34,7 @@ public:
 
 	virtual std::string BuildStringH264(int i);
 	virtual std::string BuildStringVP8(int i);
+	virtual std::string BuildStringVP9(int i);
 
 	virtual std::string GetCameraStr(int i) = 0;
 	virtual std::string GetPipelineStr(int i) = 0;

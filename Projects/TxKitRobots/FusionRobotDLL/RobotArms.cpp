@@ -421,7 +421,8 @@ void RobotArms::ProcessThread()
 			}
 			if (_state == EState::Wait)
 				_timeToWait = 100;
-			_sleep( _timeToWait);
+			if(_timeToWait>0)
+				_sleep( _timeToWait);
 			//   System.Threading._sleep(30);
 		}
 		catch (std::exception& e)
@@ -502,6 +503,12 @@ void RobotArms::_On()
 }
 void RobotArms::_Off()
 {
+	for (int i = 0; i < 7; ++i)
+	{
+		RobotArms::JoinInfo&j1 = GetLeftArm()[i];
+		RobotArms::JoinInfo&j2 = GetRightArm()[i];
+		j1.temp = j2.temp = 0;
+	}
 	cmd[0] = CMD_ONOFF;
 	cmd[1] = (byte)0x0;
 	_sendCommand(cmd, 2);

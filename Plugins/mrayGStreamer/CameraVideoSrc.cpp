@@ -190,8 +190,10 @@ std::string CameraVideoSrc::GetEncodingStr(int i)
 
 		//interlaced=true sliced-threads=false  "// 
 		//videoStr += " ! rtph264pay ";
-	}
-	if (m_encoder == "JPEG")
+	}else if (m_encoder == "VP9")
+	{
+		videoStr += BuildStringVP9(i);
+	}else if (m_encoder == "JPEG")
 	{
 		if (m_impl->m_captureType != "JPEG")
 		{
@@ -243,11 +245,11 @@ std::string CameraVideoSrc::_generateString(int i)
 // 				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
 			videoStr += "  ! rawvideoparse format=gray8 width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y*2);
-		}
+		}/*
 		else {
 			videoStr += "  ! rawvideoparse format=yuy2 width=" + core::StringConverter::toString(m_impl->m_frameSize.x) +
 				" height=" + core::StringConverter::toString(m_impl->m_frameSize.y);
-		}
+		}*/
 	//	videoStr += " ! videoconvert ";// +",framerate=" + core::StringConverter::toString(m_fps) + "/1 ";
 
 	}

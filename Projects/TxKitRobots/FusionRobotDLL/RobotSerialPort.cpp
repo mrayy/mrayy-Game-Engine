@@ -161,7 +161,7 @@ DWORD RobotSerialPort::timerThreadRobot(RobotSerialPort *robot, LPVOID pdata){
 	while (!isDone){
 		robot->_ProcessRobot();
 
-		Sleep(1);
+		Sleep(10);
 		if (!threadStart)
 			Sleep(100);
 	}

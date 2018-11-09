@@ -309,6 +309,8 @@ std::string AppSrcVideoSrc::GetPipelineStr(int i)
 		videoStr += BuildStringH264(i);
 	else if (m_encoder == "VP8")
 		videoStr += BuildStringVP8(i);
+	else if (m_encoder == "VP9")
+		videoStr += BuildStringVP9(i);
 
 	return videoStr;
 }

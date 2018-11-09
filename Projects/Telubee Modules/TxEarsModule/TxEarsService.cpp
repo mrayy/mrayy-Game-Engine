@@ -16,6 +16,7 @@
 #include "StringUtil.h"
 #include "ModuleSharedMemory.h"
 #include "INetworkPortAssigner.h"
+#include "GStreamerCore.h"
 #include <conio.h>
 
 namespace mray
@@ -91,6 +92,7 @@ public:
 			return;
 
 		m_context = context;
+		video::GStreamerCore::Ref();
 		m_context->serviceLoader->RegisterCapability(TxEarsService::ModuleName, "EarsSupported", "Yes");
 		{
 			sound::DirectSoundInputStream inputStream;
