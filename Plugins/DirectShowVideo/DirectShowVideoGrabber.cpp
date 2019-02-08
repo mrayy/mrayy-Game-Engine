@@ -42,10 +42,7 @@ DirectShowVideoGrabber::DirectShowVideoGrabber()
 }
 DirectShowVideoGrabber::~DirectShowVideoGrabber()
 {
-	if(m_inited)
-	{
-		s_videoInput->stopDevice(m_device);
-	}
+	Stop();
 	--s_refCount;
 	if(s_refCount==0)
 		delete s_videoInput;
@@ -132,9 +129,12 @@ bool DirectShowVideoGrabber::InitDevice(int device,int w,int h,int fps)
 
 void DirectShowVideoGrabber::Stop()
 {
-	if(m_inited)
+	if (m_inited)
+	{
+		m_inited = false;
+		Sleep(10);
 		s_videoInput->stopDevice(m_device);
-	m_inited = false;
+	}
 }
 void DirectShowVideoGrabber::Start()
 {

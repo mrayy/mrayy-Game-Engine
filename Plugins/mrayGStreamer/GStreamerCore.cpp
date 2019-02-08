@@ -194,6 +194,7 @@ void GStreamerCore::_StartLoop()
 	m_threadFunc = new GstMainLoopThread();
  	m_mainLoopThread = OS::IThreadManager::getInstance().createThread(m_threadFunc);
  	m_mainLoopThread->start(0);
+	gLogManager.log("GStreamer Initialized",ELL_SUCCESS);
 }
 
 void GStreamerCore::_StopLoop()

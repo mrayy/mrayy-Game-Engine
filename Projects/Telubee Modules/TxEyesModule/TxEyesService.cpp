@@ -232,11 +232,14 @@ public:
 		if (camType == "pointgrey")
 			m_cameraType=ECameraType::PointGrey ;
 
+		bool force_ddshow = false;
+
 		m_optimizedOVRVision = core::StringConverter::toBool(context->appOptions.GetOptionValue("OptimizedOVR","false"));
 		m_enableEyegaze = core::StringConverter::toBool(context->appOptions.GetOptionValue("Eyegaze", "false"));
 //		m_eyegazeSize = core::StringConverter::toVector2d(context->appOptions.GetOptionValue("EyegazeSize"));
 		m_eyegazeLevels = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeLevels", "0"));
 		m_eyegazeFoV = core::StringConverter::toInt(context->appOptions.GetOptionValue("EyegazeFOV", "15"));
+		force_ddshow = core::StringConverter::toBool(context->appOptions.GetOptionValue("ForceDShow", "False"));
 		if (m_eyegazeFoV == 0)
 			m_eyegazeFoV = 10;
 /*#else 
@@ -265,7 +268,7 @@ public:
 			//Create Camera Controller
 			if (m_camConfig->captureType == TBee::TelubeeCameraConfiguration::CaptureRaw)
 			{
-				if (false && (m_cameraType == ECameraType::Ovrvision || m_cameraType == ECameraType::OvrvisionCompressed))
+				if (force_ddshow && (m_cameraType == ECameraType::Webcam))
 				{
 					gLogManager.log("Creating Raw Capture Camera", ELL_INFO);
 
@@ -458,6 +461,7 @@ public:
 			m_streamers->AddStream(hs, "Video");
 
 			m_streamsCount = src->GetStreamsCount();
+			gLogManager.log("Stream count: "+core::StringConverter::toString(m_streamsCount), ELL_INFO);
 
 		}
 #endif
