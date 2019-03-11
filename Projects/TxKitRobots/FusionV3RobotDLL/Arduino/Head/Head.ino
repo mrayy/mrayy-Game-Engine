@@ -1,5 +1,3 @@
-
-//Written by: MHD Yamen Saraiji
 //IMPORTANT: 
 // Board type: SparkFun Pro Micro 
 // Processor: 5V, 16MHz

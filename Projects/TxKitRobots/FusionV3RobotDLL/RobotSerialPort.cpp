@@ -7,7 +7,7 @@
 #include "serial.h"
 #include "agent.h"
 #include "movingAverage.h"
-#include "FusionRobotDLL.h"
+#include "FusionV3RobotDLL.h"
 #include "Point3d.h"
 #include "quaternion.h"
 #include "IBaseController.h"
@@ -70,7 +70,8 @@ class RobotSerialPortImpl
 
 		std::string m_headPort;
 		std::string m_basePort;
-		std::string m_armsPort;
+		std::string m_LArmsPort;
+		std::string m_RArmsPort;
 
 		ulong lastTime;
 
@@ -195,9 +196,11 @@ void RobotSerialPort::_ProcessRobot()
 		{
 			if (_config.armEnabled && m_impl->m_armsController && !m_impl->m_armsController->IsConnected())
 			{
-				if (m_impl->m_armsPort == "")
-					m_impl->m_armsPort = _config.armCOM;
-				ret = m_impl->m_armsController->Connect(m_impl->m_armsPort, _config.ArmVersion);
+				if (m_impl->m_LArmsPort == "")
+					m_impl->m_LArmsPort = _config.LArmCOM;
+				if (m_impl->m_LArmsPort == "")
+					m_impl->m_RArmsPort = _config.RArmCOM;
+				ret = m_impl->m_armsController->Connect(m_impl->m_LArmsPort, m_impl->m_RArmsPort);
 				if (ret) {
 					ok |= true;
 				}
@@ -258,7 +261,7 @@ void RobotSerialPort::_ProcessRobot()
 			}
 			if (_config.armEnabled && m_impl->m_armsController && m_impl->m_armsController->IsConnected())
 			{
-				if (m_impl->m_armsController->GetStatus() != RobotArms::EState::Operate)
+				if (m_impl->m_armsController->GetStatus() != ArmsController::EState::Operate)
 					ok = false;
 			}
 			if(ok)
@@ -753,7 +756,7 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 
 	{
 
-		m_jointsValues.resize(5 * 2 + 2 * 7 * 3);
+		m_jointsValues.resize(3 * 2 + 2 * 7 * 3+2*4);
 		math::vector3d rot = m_impl->m_headController->GetRotation();
 		m_jointsValues[0] = tilt;
 		m_jointsValues[1] = -rot.x;
@@ -765,8 +768,8 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 		int offset = 6;
 		for (int i = 0; i < 7; ++i)
 		{
-			RobotArms::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
-			RobotArms::JoinInfo&j2 = m_impl->m_armsController->GetRightArm()[i];
+			ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
+			ArmsController::JoinInfo&j2 = m_impl->m_armsController->GetRightArm()[i];
 			m_jointsValues[offset + i * 3 + 0] = j1.targetAngle;
 			m_jointsValues[offset + i * 3 + 1] = j1.currAngle;
 			m_jointsValues[offset + i * 3 + 2] = j1.temp;
@@ -774,6 +777,12 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 			m_jointsValues[offset + 21 + i * 3 + 0] = j2.targetAngle;
 			m_jointsValues[offset + 21 + i * 3 + 1] = j2.currAngle;
 			m_jointsValues[offset + 21 + i * 3 + 2] = j2.temp;
+		}
+		offset += 7 * 3*2;
+		for (int i = 0; i < 4; ++i)
+		{
+			m_jointsValues[offset + i] = m_impl->m_armsController->GetHandSensor(RobotArms::Left)[i];
+			m_jointsValues[offset + 4 + i] = m_impl->m_armsController->GetHandSensor(RobotArms::Right)[i];
 		}
 	}
 
@@ -786,19 +795,19 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 
 	core::string msg;
 	char buffer[512];
-	RobotArms::EState st = m_impl->m_armsController->GetStatus();
+	ArmsController::EState st = m_impl->m_armsController->GetStatus();
 
 	sprintf_s(buffer, "%-2.2f, %-2.2f, %-2.2f", tilt, pan, roll);
 	msg = core::string("Head Rotation: ") + buffer;
 	context->RenderText(msg, 10, 0);
 
 	msg = core::string("Arms Status: ");
-	if (st == RobotArms::Wait)msg += "Wait";
-	if (st == RobotArms::Initialize)msg += "Initialize";
-	if (st == RobotArms::Initializing)msg += "Initializing";
-	if (st == RobotArms::Operate)msg += "Operate";
-	if (st == RobotArms::Shutdown)msg += "Shutdown";
-	if (st == RobotArms::Shutingdown)msg += "Shutingdown";
+	if (st == ArmsController::Wait)msg += "Wait";
+	if (st == ArmsController::Initialize)msg += "Initialize";
+	if (st == ArmsController::Initializing)msg += "Initializing";
+	if (st == ArmsController::Operate)msg += "Operate";
+	if (st == ArmsController::Shutdown)msg += "Shutdown";
+	if (st == ArmsController::Shutingdown)msg += "Shutingdown";
 	context->RenderText(msg, 5, 0);
 	 
 
@@ -816,14 +825,14 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 	}
 	for (int i = 0; i < 7; ++i)
 	{
-		RobotArms::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
+		ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
 		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", j1.targetAngle,j1.currAngle,j1.temp);
 		msg = core::string("Left  J[") + core::StringConverter::toString(i) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
 	}
 	for (int i = 0; i < 7; ++i)
 	{
-		RobotArms::JoinInfo&j1 = m_impl->m_armsController->GetRightArm()[i];
+		ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetRightArm()[i];
 		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", j1.targetAngle, j1.currAngle, j1.temp);
 		msg = core::string("Right J[") + core::StringConverter::toString(i) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
@@ -834,7 +843,7 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 	{
 
 		sprintf_s(buffer, " %-2.2f\t/ %-2.2f", m_leftHand[i], m_rightHand[i]);
-		msg = core::string("J[") + core::StringConverter::toString(i / 2) + "]:" + buffer;
+		msg = core::string("J[") + core::StringConverter::toString(i) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
 	}
 	context->RenderText("   \tSensors: L/R", 10, 0);
