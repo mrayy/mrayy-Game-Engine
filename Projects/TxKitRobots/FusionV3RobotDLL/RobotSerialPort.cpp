@@ -194,12 +194,17 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EConnecting:
 		if (!_connectionOpen)
 		{
-			if (_config.armEnabled && m_impl->m_armsController && !m_impl->m_armsController->IsConnected())
+			if ((_config.LArmEnabled || _config.RArmEnabled )&& m_impl->m_armsController)// && !m_impl->m_armsController->IsConnected())
 			{
-				if (m_impl->m_LArmsPort == "")
+				if (_config.LArmEnabled)
 					m_impl->m_LArmsPort = _config.LArmCOM;
-				if (m_impl->m_LArmsPort == "")
+				else
+					m_impl->m_LArmsPort = "";
+
+				if (_config.RArmEnabled)
 					m_impl->m_RArmsPort = _config.RArmCOM;
+				else
+					m_impl->m_RArmsPort = "";
 				ret = m_impl->m_armsController->Connect(m_impl->m_LArmsPort, m_impl->m_RArmsPort);
 				if (ret) {
 					ok |= true;
@@ -259,7 +264,7 @@ void RobotSerialPort::_ProcessRobot()
 				m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 5);
 				m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 5);
 			}
-			if (_config.armEnabled && m_impl->m_armsController && m_impl->m_armsController->IsConnected())
+			if ((_config.LArmEnabled || _config.RArmEnabled) && m_impl->m_armsController && m_impl->m_armsController->IsConnected())
 			{
 				if (m_impl->m_armsController->GetStatus() != ArmsController::EState::Operate)
 					ok = false;
@@ -299,7 +304,7 @@ void RobotSerialPort::_ProcessRobot()
 		gLogManager.log("Disconnecting Robot", ELL_INFO);
 		if (debug_print)
 			printf("Disconnecting Robot\n", ret);
-		if (_config.armEnabled && m_impl->m_armsController)
+		if ((_config.LArmEnabled || _config.RArmEnabled) && m_impl->m_armsController)
 		{
 			m_impl->m_armsController->Stop();
 		}
@@ -848,10 +853,12 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 	}
 	context->RenderText("   \tSensors: L/R", 10, 0);
 	float* vals = m_impl->m_armsController->GetHandSensor(RobotArms::Right);
-	msg = core::string("   \tRight:") + core::StringConverter::toString(vals[0]) + ", " + core::StringConverter::toString(vals[1]) ;
+	msg = core::string("   \tRight:") + core::StringConverter::toString(vals[0]) + ", " + core::StringConverter::toString(vals[1]) 
+		+ ", " + core::StringConverter::toString(vals[2]) ;
 	context->RenderText(msg, 10, 0);
 	vals = m_impl->m_armsController->GetHandSensor(RobotArms::Left);
-	msg = core::string("   \tLeft:") + core::StringConverter::toString(vals[0]) + ", " + core::StringConverter::toString(vals[1]) ;
+	msg = core::string("   \tLeft:") + core::StringConverter::toString(vals[0]) + ", " + core::StringConverter::toString(vals[1])
+		+ ", " + core::StringConverter::toString(vals[2]);
 	context->RenderText(msg, 10, 0);
 
 	msg = "Battery:" + core::StringConverter::toString(m_impl->m_armsController->GetBatteryLevel(), 3) + "V";

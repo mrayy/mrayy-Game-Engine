@@ -39,7 +39,7 @@ public:
 	int robot_baudRate = 115200, head_baudRate = 115200;
 	float xAxis = 1, yAxis = 1, zAxis = 1;
 	float xSpeed = 1, ySpeed = 1, Rotation = 1;
-	bool BaseEnabled = true, HeadEnabled = true, armEnabled = false;
+	bool BaseEnabled = true, HeadEnabled = true, LArmEnabled = false, RArmEnabled = false;
 	int ArmVersion = 0;
 	bool EnableAngleLog= true;
 };
@@ -174,8 +174,10 @@ void load_parameters() {
 					_config.HeadEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "BaseEnabled") == 0)
 					_config.BaseEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
-				else if (strcmp(token[0], "ArmEnabled") == 0)
-					_config.armEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "LArmEnabled") == 0)
+					_config.LArmEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "RArmEnabled") == 0)
+					_config.RArmEnabled = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "EnableAngleLog") == 0)
 					_config.EnableAngleLog = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "ArmVersion") == 0)

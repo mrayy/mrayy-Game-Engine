@@ -81,6 +81,9 @@ void setup()
   mpu6050.calcGyroOffsets(true);
 
   currenttime=lasttime=micros();
+
+  //isFree=false;
+  //SetHeadAngles(40,100,140);
 }
 
 void ProcessInput()

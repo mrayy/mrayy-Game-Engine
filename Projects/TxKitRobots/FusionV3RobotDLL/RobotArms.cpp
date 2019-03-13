@@ -30,7 +30,6 @@ float* RobotArms::GetHandSensor(TargetArm hand) {
 
 bool RobotArms::Connect(const core::string& lPort, const core::string& rPort)
 {
-	return true;
 	Disconnect();
 	bool left = true;
 	bool right = true;
@@ -51,7 +50,6 @@ bool RobotArms::Connect(const core::string& lPort, const core::string& rPort)
 }
 bool RobotArms::IsConnected()
 {
-	return true;
 	bool left = true;
 	bool right = true;
 	

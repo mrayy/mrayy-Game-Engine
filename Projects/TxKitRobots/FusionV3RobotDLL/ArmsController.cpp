@@ -226,7 +226,7 @@ namespace mray
 		short val;
 		if (ReadData(data) > 0)
 		{
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < 3; ++i)
 			{
 				d[0] = data[2 * i + 1];
 				d[1] = data[2 * i + 0];
@@ -259,12 +259,12 @@ namespace mray
 			break;
 		case EState::Initialize:
 			_state = EState::Initializing;
-			if (ArmEnabled)
+			/*if (ArmEnabled)
 				_UpdateJoints(timeMS, true, true);
 			_sleep(timeMS);
 			_timer = 0;
 			if (ArmEnabled)
-				_UpdateJoints(timeMS);
+				_UpdateJoints(timeMS);*/
 			break;
 		case EState::Initializing:
 			if (_timer > timeMS)
@@ -278,7 +278,7 @@ namespace mray
 			if (ArmEnabled) {
 				_UpdateJoints(servoUpdate, false, true, true);
 				//_updateHand(TargetArm::Right);
-				//_readHand(TargetArm::Right);
+				_readHand();
 			}
 			if (ArmEnabled)
 				_timeToWait += servoUpdate;
@@ -288,8 +288,8 @@ namespace mray
 			break;
 		case EState::Shutdown:
 			_timer = 0;
-			if (ArmEnabled)
-				_UpdateJoints(timeMS, true, true);
+			/*if (ArmEnabled)
+				_UpdateJoints(timeMS, true, true);*/
 			_state = EState::Shutingdown;
 			break;
 		case EState::Shutingdown:

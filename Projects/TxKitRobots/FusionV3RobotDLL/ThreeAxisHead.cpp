@@ -96,12 +96,14 @@ void ThreeAxisHead::Disconnect()
 	connected = false;
 	if (m_robotThread != 0)
 	{
-		Sleep(100);
 		TerminateThread(m_robotThread, 0);
+		Sleep(100);
 		m_robotThread = 0;
 	}
 	SetRotation(0);
+	Sleep(100);
 	_sendCommand("q");
+	Sleep(100);
 
 	if (m_serial != 0)
 	{
