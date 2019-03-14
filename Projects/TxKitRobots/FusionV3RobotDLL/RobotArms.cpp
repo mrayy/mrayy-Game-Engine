@@ -13,7 +13,7 @@ RobotArms::RobotArms()
 	m_rightArm = new ArmsController();
 	m_leftEnabled = false;
 	m_leftEnabled = false;
-
+	_connected = false;
 }
 RobotArms::~RobotArms()
 {
@@ -38,29 +38,29 @@ bool RobotArms::Connect(const core::string& lPort, const core::string& rPort)
 	if (lPort != "")
 	{
 		m_leftEnabled = true;
-		left = m_leftArm->Connect(lPort);
+		left = m_leftArm->Connect(lPort,true);
 	}
 	if (rPort != "")
 	{
 		m_rightEnabled = true;
-		right = m_rightArm->Connect(rPort);
+		right = m_rightArm->Connect(rPort,false);
 	}
+	_connected = left & right;
 	//m_serial->owner = this;
-	return left && right;
+	return _connected;
 }
 bool RobotArms::IsConnected()
 {
-	bool left = true;
-	bool right = true;
-	
-	if(m_leftEnabled )
-		left = m_leftArm->IsConnected();
-	if (m_rightEnabled)
-		right = m_rightArm->IsConnected();
-	return left && right;
+	return _connected;
 }
 void RobotArms::Disconnect()
 {
+	_connected = false;
+	if (!m_leftArm->IsConnected() && !m_rightArm->IsConnected())
+		return;
+	m_leftArm->SafeShutdown(3000);
+	m_rightArm->SafeShutdown(3000);
+	_sleep(3000);
 	m_leftArm->Disconnect();
 	m_rightArm->Disconnect();
 }

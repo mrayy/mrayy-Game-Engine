@@ -25,6 +25,8 @@ protected:
 
 	bool m_leftEnabled;
 	bool m_rightEnabled;
+
+	bool _connected;
 public:
 	RobotArms();
 	virtual ~RobotArms();

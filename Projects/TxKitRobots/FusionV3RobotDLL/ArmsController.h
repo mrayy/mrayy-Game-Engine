@@ -23,7 +23,7 @@ public:
 	};
 	struct JoinInfo
 	{
-		JoinInfo() :_samples(10)
+		JoinInfo() :_samples(30)
 		{
 			targetAngle = 0;
 			currAngle = 0;
@@ -47,7 +47,7 @@ protected:
 
 
 	JoinInfo _Arm[7];
-	JoinInfo _Hand[5];
+	JoinInfo _Hand[6];
 
 	float _adcValues[4];
 
@@ -127,8 +127,9 @@ public:
 	ArmsController();
 	virtual ~ArmsController();
 
-	virtual bool Connect(const core::string& port);
+	virtual bool Connect(const core::string& port,bool left);
 	virtual bool IsConnected();
+	void SafeShutdown(int timeout);
 	virtual void Disconnect();
 	bool IsEnabled() {
 		return ArmEnabled;

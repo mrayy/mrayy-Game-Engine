@@ -194,7 +194,7 @@ void RobotSerialPort::_ProcessRobot()
 	case ERobotControllerStatus::EConnecting:
 		if (!_connectionOpen)
 		{
-			if ((_config.LArmEnabled || _config.RArmEnabled )&& m_impl->m_armsController)// && !m_impl->m_armsController->IsConnected())
+			if ((_config.LArmEnabled || _config.RArmEnabled )&& m_impl->m_armsController && !m_impl->m_armsController->IsConnected())
 			{
 				if (_config.LArmEnabled)
 					m_impl->m_LArmsPort = _config.LArmCOM;
@@ -318,7 +318,6 @@ void RobotSerialPort::_ProcessRobot()
  		if (m_impl->m_armsController)
  			m_impl->m_armsController->Disconnect();
 		m_impl->m_headController->Disconnect();
-		_connectionOpen = false;
 		_status = ERobotControllerStatus::EStopped;
 		break;
 	case ERobotControllerStatus::EStopped:

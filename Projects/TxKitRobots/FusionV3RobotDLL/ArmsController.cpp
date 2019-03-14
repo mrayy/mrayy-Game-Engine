@@ -15,7 +15,7 @@ namespace mray
 	const byte CMD_ALL_HAND_GET = 0x10;
 	const byte CMD_ALL_ARMHAND_SET = 0x13;
 	const byte CMD_ALL_TEMP = 0x0A;
-	const byte CMD_ALL_JOINTTarget_SET = 0x0D;
+	const byte CMD_ALL_JOINTTarget_SET = 0x13;
 	const byte CMD_ALL_JOINTTarget_GET = 0x0C;
 	const byte CMD_ALL_Battery_GET = 0x0E;
 
@@ -47,11 +47,20 @@ namespace mray
 	}
 
 
-	bool ArmsController::Connect(const core::string& port)
+	bool ArmsController::Connect(const core::string& port,bool left)
 	{
-		MidPos = new float[7]{ 15, -42, 0, 90, 0, 0, 0 };
-		ShutdownPos = new float[7]{ 0, -10, 0, 0, 0, 0, 0 };
-		Signs = new bool[7]{ false, false, true, true, true, false, false }; //XX-X-X
+		if (left)
+		{
+			MidPos = new float[7]{ 15, 42, 0, 90, 0, 0, 0 };
+			ShutdownPos = new float[7]{ 0, 10, 0, 0, 0, 0, 0 };
+			Signs = new bool[7]{ true, false, true, false, true, false, false }; //XX-X-X
+		}
+		else
+		{
+			MidPos = new float[7]{ 15, -42, 0, 90, 0, 0, 0 };
+			ShutdownPos = new float[7]{ 0, -10, 0, 0, 0, 0, 0 };
+			Signs = new bool[7]{ false, false, true, true, true, false, true }; //XX-X-X
+		}
 		Disconnect();
 
 		m_serial = new serial::Serial("\\\\.\\" + port, 3000000, serial::Timeout::simpleTimeout(30), serial::eightbits, serial::parity_none);
@@ -102,11 +111,11 @@ namespace mray
 		cmd[0] = CMD_ALL_HAND_SET;
 
 		
-		for (int i = 0; i < 3; ++i)
-			cmd[1 + i] = (byte)(math::clamp<float>(_Hand[i].targetAngle, 25, 150.0f));
+		for (int i = 0; i < 6; ++i)
+			cmd[1 + i] = 150-(byte)(math::clamp<float>(_Hand[i].targetAngle, 25, 150.0f));
 
 
-		_sendCommand(cmd, 2 + 3);
+		_sendCommand(cmd, 1 + 6);
 	}
 	void ArmsController::_UpdateJoints(ushort time, bool midPos, bool immediate, bool hand)
 	{
@@ -114,8 +123,10 @@ namespace mray
 			cmd[0] = CMD_ALL_JOINTTarget_SET;
 		else
 			cmd[0] = CMD_ALL_JOINTANGLE_SET;
-		if (hand)
-			cmd[0] = CMD_ALL_ARMHAND_SET;
+// 		if (hand)
+// 			cmd[0] = CMD_ALL_ARMHAND_SET;
+
+		hand = false;
 
 		byte bytes[24];
 		int offset = 0;
@@ -259,12 +270,12 @@ namespace mray
 			break;
 		case EState::Initialize:
 			_state = EState::Initializing;
-			/*if (ArmEnabled)
+			if (ArmEnabled)
 				_UpdateJoints(timeMS, true, true);
 			_sleep(timeMS);
 			_timer = 0;
 			if (ArmEnabled)
-				_UpdateJoints(timeMS);*/
+				_UpdateJoints(timeMS);/**/
 			break;
 		case EState::Initializing:
 			if (_timer > timeMS)
@@ -277,7 +288,7 @@ namespace mray
 			
 			if (ArmEnabled) {
 				_UpdateJoints(servoUpdate, false, true, true);
-				//_updateHand(TargetArm::Right);
+				_updateHand();
 				_readHand();
 			}
 			if (ArmEnabled)
@@ -288,8 +299,8 @@ namespace mray
 			break;
 		case EState::Shutdown:
 			_timer = 0;
-			/*if (ArmEnabled)
-				_UpdateJoints(timeMS, true, true);*/
+			/**/if (ArmEnabled)
+				_UpdateJoints(timeMS, true, true);
 			_state = EState::Shutingdown;
 			break;
 		case EState::Shutingdown:
@@ -315,8 +326,8 @@ namespace mray
 			try
 			{
 				ProcessState();
-				_timeToWait += 5;
-
+				_timeToWait += 10;
+				/**/
 				if (_buffer.size() > 0) {
 
 					m_serial->write(&_buffer[0], _buffer.size());
@@ -417,12 +428,12 @@ namespace mray
 		_sendCommand(cmd, 2);
 		_sleep(200);
 	}
-	void ArmsController::_Close()
+	void ArmsController::SafeShutdown(int timeout)
 	{
 		if (!connected)
 			return;
-		_enableSending = false;
 		connected = false;
+		_enableSending = false;
 		if (m_robotThread != 0)
 		{
 			WaitForSingleObject(m_robotThread, INFINITE);
@@ -434,7 +445,9 @@ namespace mray
 		_state = EState::Shutdown;
 		if (ArmEnabled)
 			_UpdateJoints(timeMS, false, true);
-		_sleep(timeMS);
+	}
+	void ArmsController::_Close()
+	{
 		_state = EState::Wait;
 
 		_Off();
@@ -485,8 +498,10 @@ namespace mray
 	{
 		for (int i = 0; i < n; ++i)
 		{
-			_Hand[i].SetValue(angles[i]);
+			_Hand[i+1].SetValue(angles[i]);
 		}
+
+		_Hand[0].SetValue(150- _Hand[1].targetAngle);
 	}
 	void ArmsController::Start(bool enabled, bool enableReadingAngles)
 	{
