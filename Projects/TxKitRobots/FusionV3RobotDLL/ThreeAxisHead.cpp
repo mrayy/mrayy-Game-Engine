@@ -58,10 +58,11 @@ bool ThreeAxisHead::Connect(const core::string& port,bool enableAngleLog)
 {
 	Disconnect();
 
-	m_serial = new serial::Serial(port, 115200, serial::Timeout::simpleTimeout(20), serial::eightbits, serial::parity_none, serial::stopbits_one);
+	m_serial = new serial::Serial(port, 115200);// , serial::Timeout::simpleTimeout(20), serial::eightbits, serial::parity_none, serial::stopbits_one);
 	//m_serial->open();
 	if (!m_serial->isOpen())
 	{
+		gLogManager.log("Failed to start head!", ELL_WARNING);
 		connected = false;
 	//	printf("Failed to connect robot\n");
 		delete m_serial;
@@ -72,7 +73,7 @@ bool ThreeAxisHead::Connect(const core::string& port,bool enableAngleLog)
 		_sendCommand("q");//disable angle logging
 		Sleep(50);
 		connected = true;
-		enableAngleLog = true;
+		enableAngleLog = false;
 		if (enableAngleLog)
 			_sendCommand("ea");//disable angle logging
 		else
@@ -81,6 +82,7 @@ bool ThreeAxisHead::Connect(const core::string& port,bool enableAngleLog)
 		if(enableAngleLog)
 			m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
 		else m_robotThread = 0;
+		gLogManager.log("Head Started!", ELL_SUCCESS);
 
 	}
 	return m_serial && m_serial->isOpen();
@@ -144,7 +146,9 @@ void ThreeAxisHead::SetRotation(const math::vector3d& rotation)
 		return;
 	int packet_size;
 	char sCommand[128];
-	sprintf_s(sCommand, 128, "d,%d,%d,%d", (int)(rotation.z * 100), (int)(rotation.y * 100), (int)(rotation.x * 100));
+	math::vector3d rot=rotation;
+	rot.x= math::clamp(rotation.x, -38.0f, 38.0f);
+	sprintf_s(sCommand, 128, "d,%d,%d,%d", (int)(rot.z * 100), (int)(rot.y * 100), (int)(rot.x * 100));
 	_sendCommand(sCommand);
 
 	//CheckSerial();

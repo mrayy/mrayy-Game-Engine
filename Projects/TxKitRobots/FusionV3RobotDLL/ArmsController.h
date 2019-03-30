@@ -23,7 +23,7 @@ public:
 	};
 	struct JoinInfo
 	{
-		JoinInfo() :_samples(30)
+		JoinInfo() :_samples(10)
 		{
 			targetAngle = 0;
 			currAngle = 0;
@@ -72,6 +72,7 @@ protected:
 	float _temperatureTime;
 	ushort timeMS;
 	float _timer;
+	ushort handTimer;
 
 	float _timeToWait;
 

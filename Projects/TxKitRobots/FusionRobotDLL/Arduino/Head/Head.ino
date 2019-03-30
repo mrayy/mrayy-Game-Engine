@@ -35,7 +35,9 @@ void SetHeadAngles(float tilt,float yaw,float roll)
 {
   if(isFree)
     return;
-
+  tilt=min(40,max(-40,tilt));
+  yaw=min(90,max(-90,yaw));
+  roll=min(40,max(-40,roll));
   float v;
   v=Kondo.setAngle(2,tilt);if(v!=ICS_FALSE && abs(v)<200)realAngles[0]=(v);
   v=Kondo.setAngle(1,yaw);if(v!=ICS_FALSE && abs(v)<200)realAngles[1]=(v);

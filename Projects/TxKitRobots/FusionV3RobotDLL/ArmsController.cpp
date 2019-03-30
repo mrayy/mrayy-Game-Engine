@@ -112,7 +112,7 @@ namespace mray
 
 		
 		for (int i = 0; i < 6; ++i)
-			cmd[1 + i] = 150-(byte)(math::clamp<float>(_Hand[i].targetAngle, 25, 150.0f));
+			cmd[1 + i] = 180-(byte)(math::clamp<float>(_Hand[i].targetAngle, 30.0f, 150.0f));
 
 
 		_sendCommand(cmd, 1 + 6);
@@ -288,8 +288,12 @@ namespace mray
 			
 			if (ArmEnabled) {
 				_UpdateJoints(servoUpdate, false, true, true);
-				_updateHand();
-				_readHand();
+				//if (handTimer > 50)
+				{
+					handTimer = 0;
+					_updateHand();
+					_readHand();
+				}
 			}
 			if (ArmEnabled)
 				_timeToWait += servoUpdate;
@@ -326,7 +330,7 @@ namespace mray
 			try
 			{
 				ProcessState();
-				_timeToWait += 10;
+				_timeToWait += 5;
 				/**/
 				if (_buffer.size() > 0) {
 
@@ -338,6 +342,8 @@ namespace mray
 					_timeToWait = 100;
 				if (_timeToWait > 0)
 					_sleep(_timeToWait);
+
+				handTimer += _timeToWait;
 				//   System.Threading._sleep(30);
 			}
 			catch (std::exception& e)
@@ -498,10 +504,10 @@ namespace mray
 	{
 		for (int i = 0; i < n; ++i)
 		{
-			_Hand[i+1].SetValue(angles[i]);
+			_Hand[i].SetValue(angles[i]);
 		}
 
-		_Hand[0].SetValue(150- _Hand[1].targetAngle);
+		//_Hand[0].SetValue(180 - _Hand[1].targetAngle);
 	}
 	void ArmsController::Start(bool enabled, bool enableReadingAngles)
 	{
