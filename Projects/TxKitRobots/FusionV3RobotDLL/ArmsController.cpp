@@ -506,8 +506,8 @@ namespace mray
 		{
 			_Hand[i].SetValue(angles[i]);
 		}
-
-		//_Hand[0].SetValue(180 - _Hand[1].targetAngle);
+		if(n!=6)
+			_Hand[5].SetValue(180 - _Hand[0].targetAngle);
 	}
 	void ArmsController::Start(bool enabled, bool enableReadingAngles)
 	{
