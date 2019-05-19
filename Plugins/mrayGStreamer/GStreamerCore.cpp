@@ -178,7 +178,7 @@ void GStreamerCore::_Init()
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "nicesrc", strdup("nicesrc"), nicesrc_plugin_init, "1.0.4", "BSD", "libnice", "nice", "http://libnice.org");
 
 		gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "nicesink", strdup("nicesink"), nicesink_plugin_init, "1.0.4", "BSD", "libnice", "nice", "http://libnice.org");
-#endif
+#endif 
 		gLogManager.log("GStreamerCore - GStreamer inited", ELL_INFO);
 	}
 
