@@ -23,7 +23,7 @@ public:
 	};
 	struct JoinInfo
 	{
-		JoinInfo() :_samples(10)
+		JoinInfo() :_samples(3)
 		{
 			targetAngle = 0;
 			currAngle = 0;
@@ -56,6 +56,8 @@ protected:
 	HANDLE m_robotThread;
 
 	std::vector<byte> _buffer;
+
+	short _lastServos[7];
 
 	byte _readByte();
 

@@ -39,8 +39,8 @@ protected:
 	float m_leftArm[7];
 	float m_rightArm[7];
 
-	float m_leftHand[5];
-	float m_rightHand[5];
+	float m_leftHand[6];
+	float m_rightHand[6];
 
 	bool _connectionOpen;
 	ERobotControllerStatus _status;

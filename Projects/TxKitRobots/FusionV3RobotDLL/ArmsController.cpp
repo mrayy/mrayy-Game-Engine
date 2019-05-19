@@ -39,6 +39,9 @@ namespace mray
 		_timer = 0;
 		timeMS = 3000;
 
+		for (int i = 0; i < 7; ++i)
+			_lastServos[i] = 0;
+
 	}
 	ArmsController::~ArmsController()
 	{
@@ -132,6 +135,7 @@ namespace mray
 		int offset = 0;
 
 		int _jointsCount = 7;
+		bool changed = false;
 		for (int i = 0; i < _jointsCount; ++i)
 		{
 			float angle = 0;
@@ -151,12 +155,24 @@ namespace mray
 			}
 
 			short servo = AngleToServo(angle, Signs[i]);
+			/*if (i == 0 || i==1)
+				servo = servo * 1.3f;*/
+
+			//if (_lastServos[i] != servo)
+			{
+				changed = true;
+				_lastServos[i] = servo;
+			}
+
 			memcpy(bytes, &servo, sizeof(servo));
 			//bytes = BitConverter.GetBytes();
 			cmd[1 + i * 2 + 0] = bytes[1];
 			cmd[1 + i * 2 + 1] = bytes[0];
 			offset += 2;
 		}
+
+//		if (!changed)
+	//		return;
 
 		if (hand || time >= 0)
 		{
@@ -204,6 +220,8 @@ namespace mray
 				memcpy(&val, d, sizeof(val));
 				//val=BitConverter.ToInt16(d, 0)
 				float a = ServoToAngle(val,Signs[i]);
+				/*if (i == 0 || i == 1)
+					a = a * 1.3f;*/
 				_SetValue( i, a);
 			}
 		}
@@ -340,8 +358,8 @@ namespace mray
 				}
 				if (_state == EState::Wait)
 					_timeToWait = 100;
-				if (_timeToWait > 0)
-					_sleep(_timeToWait);
+				//if (_timeToWait > 0)
+				//	_sleep(_timeToWait);
 
 				handTimer += _timeToWait;
 				//   System.Threading._sleep(30);

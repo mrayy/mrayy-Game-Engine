@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#define IS_LEFT
+//#define IS_LEFT
 
 #ifdef IS_LEFT
 #define ESP_NAME "HaptixModule-Left"
@@ -34,12 +34,16 @@ RTC_DATA_ATTR int bootCount = 0;
 
 EEPROMClass  INACTIVE_TIMEOUT("eeprom0", 0x100);
 
-#define PWM_FREQ 16000
+#define PWM_FREQ 32000
 #define PWM_RESOLUTION 8
-#define USE_SIGMADELTA
+//#define USE_SIGMADELTA
 
 #define min(a,b) (a<b?a:b)
 #define max(a,b) (a>b?a:b)
+
+
+BluetoothSerial SerialBT;
+
 
 void setup_PWM(int pin)
 {
@@ -83,17 +87,21 @@ class Actuator
 
     void SetSpeed(int speed,float limit)
     {
+      int val=0;
       _limit=limit;
       if (speed > 0)
       {
         digitalWrite(_dir, LOW);
-        pwm_write(_pwm, min(255, (int)(speed*_limit)));
+        val=min(255, (int)(speed*_limit));
+        pwm_write(_pwm, val);
       } else
       {
 
         digitalWrite(_dir, HIGH);
-        pwm_write(_pwm, min(255, -(int)(speed*_limit)));
+        val=min(255, -(int)(speed*_limit));
+        pwm_write(_pwm, val);
       }
+      SerialBT.println(val);
     }
 };
 
@@ -115,7 +123,6 @@ Actuator _actuators[4] = {
 #endif
 
 
-BluetoothSerial SerialBT;
 
 #define LED_BUILTIN 22
 //#define LED_BUILTIN 2
@@ -283,6 +290,6 @@ void loop()
     Blink(5, 50);
     esp_deep_sleep_start();
   }
-  delay(60);
+  delay(30);
 
 }

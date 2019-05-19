@@ -261,8 +261,8 @@ void RobotSerialPort::_ProcessRobot()
 				m_impl->m_armsController->SetArmAngles(RobotArms::Left, m_leftArm, 7);
 				m_impl->m_armsController->SetArmAngles(RobotArms::Right, m_rightArm, 7);
 
-				m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 5);
-				m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 5);
+				m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 6);
+				m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 6);
 			}
 			if ((_config.LArmEnabled || _config.RArmEnabled) && m_impl->m_armsController && m_impl->m_armsController->IsConnected())
 			{
@@ -288,8 +288,8 @@ void RobotSerialPort::_ProcessRobot()
 			m_impl->m_armsController->SetArmAngles(RobotArms::Left, m_leftArm, 7);
 			m_impl->m_armsController->SetArmAngles(RobotArms::Right,m_rightArm, 7);
 
-			m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 5);
-			m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 5);
+			m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 6);
+			m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 6);
 		}
 		m_headCounter++;
 		if (m_baseCounter > 120)
@@ -752,10 +752,10 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 		m_leftArm[i] = st.customAngles[i];
 		m_rightArm[i] = st.customAngles[7+i];
 	}
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 6; ++i)
 	{
 		m_leftHand[i] = st.customAngles[14+i];
-		m_rightHand[i] = st.customAngles[14+5 + i];
+		m_rightHand[i] = st.customAngles[14+6 + i];
 	}
 
 	{
@@ -843,7 +843,7 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 	}
 
 	context->RenderText("   \tHands: L/R", 10, 0);
-	for (int i = 0; i < 5; i ++)
+	for (int i = 0; i < 6; i ++)
 	{
 
 		sprintf_s(buffer, " %-2.2f\t/ %-2.2f", m_leftHand[i], m_rightHand[i]);
