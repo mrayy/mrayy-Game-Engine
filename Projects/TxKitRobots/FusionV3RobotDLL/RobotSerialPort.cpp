@@ -306,7 +306,7 @@ void RobotSerialPort::_ProcessRobot()
 			printf("Disconnecting Robot\n", ret);
 		if ((_config.LArmEnabled || _config.RArmEnabled) && m_impl->m_armsController)
 		{
-			m_impl->m_armsController->Stop();
+			m_impl->m_armsController->Disconnect();
 		}
 		if (_config.HeadEnabled)
 			m_impl->m_headController->Disconnect();

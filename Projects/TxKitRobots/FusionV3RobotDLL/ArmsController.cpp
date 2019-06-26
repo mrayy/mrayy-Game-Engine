@@ -322,7 +322,7 @@ namespace mray
 		case EState::Shutdown:
 			_timer = 0;
 			/**/if (ArmEnabled)
-				_UpdateJoints(timeMS, true, true);
+				_UpdateJoints(timeMS, false, true);
 			_state = EState::Shutingdown;
 			break;
 		case EState::Shutingdown:
