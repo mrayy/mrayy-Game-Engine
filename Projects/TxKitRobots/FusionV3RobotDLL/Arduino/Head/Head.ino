@@ -3,9 +3,6 @@
 // Processor: 5V, 16MHz
 //If board bricked, shorten GND and RST twice and quickly reupload empty sketch (only 8 seconds available)
 
-
-// Updated --> Board ESP32
-
 #include "Kondo.h"
 #include "MPU6050_tockn.h"
 #include <Wire.h>
@@ -149,9 +146,9 @@ void ProcessInput(int paramsN,Stream* srcStream)
       isFree=false;
       if(paramsN<3)
         break;
-      angles[0]=atof(values[1])/100.0f;
-      angles[1]=atof(values[2])/100.0f;
-      angles[2]=atof(values[3])/100.0f;
+      angles[0]=atof(values[1]);
+      angles[1]=atof(values[2]);
+      angles[2]=atof(values[3]);
      inputQuat=Quaternion(angles[0],Vector<3>(1,0,0))*Quaternion(angles[1],Vector<3>(0,1,0))*Quaternion(angles[2],Vector<3>(0,0,1));
      applyRotation();
      break;
@@ -172,6 +169,7 @@ void ProcessInput(int paramsN,Stream* srcStream)
      break;
      case 'y'://yaw damping
       yawDamping=atof(values[1]);
+      yawDamping=max(min(yawDamping,1.0f),0.0f);
      break;
      case 's':
       if(values[0][1]=='a')
