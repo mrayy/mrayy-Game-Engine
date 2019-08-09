@@ -5,6 +5,8 @@
 #include "serial/serial.h"
 #include <windows.h>
 #include "movingAverage.h"
+#include "PID.h"
+#include "ITimer.h"
 
 namespace mray
 {
@@ -34,10 +36,22 @@ public:
 		float targetAngle;
 		float currAngle;
 		float temp;
+		float PIDVal;
+
+		PID _pid;
 
 		void SetValue(float v)
 		{
 			targetAngle = _samples.getNext(v);
+		}
+		void internalUpdate(double dt)
+		{
+			PIDVal=_pid.calculate(dt, targetAngle, currAngle);
+		}
+
+		float GetValue()
+		{
+			return  currAngle + PIDVal;//PIDVal;//
 		}
 	};
 protected:
@@ -88,6 +102,9 @@ protected:
 
 	int _version;
 
+	double _lastTime;
+
+	OS::ITimer* _ticker;
 
 	static float NormalizeAngle(float v)
 	{
@@ -127,7 +144,7 @@ protected:
 
 	static DWORD timerThreadRobot(ArmsController *robot, LPVOID pdata);
 public:
-	ArmsController();
+	ArmsController(const core::string& pidFile);
 	virtual ~ArmsController();
 
 	virtual bool Connect(const core::string& port,bool left);

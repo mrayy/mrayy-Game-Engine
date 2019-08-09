@@ -222,7 +222,7 @@ void RobotSerialPort::_ProcessRobot()
 			}
 			 if (m_impl->m_armsController && m_impl->m_armsController->IsConnected())
 			 {
-				 m_impl->m_armsController->Start(true, true,false);
+				 m_impl->m_armsController->Start(true, true,true);
 				 gLogManager.log("Arms Connected", ELL_INFO);
 				 if (debug_print)
 					 printf("Arms Connected!\n", ret);
@@ -827,20 +827,32 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 		msg = core::string("Head  J[") + core::StringConverter::toString(i) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
 	}
+	float totalError = 0;
 	for (int i = 0; i < 7; ++i)
 	{
 		ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
-		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", j1.targetAngle,j1.currAngle,j1.temp);
+		float err = fabs(j1.targetAngle - j1.currAngle);
+		totalError += err;
+		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f \t/ %-2.2f \t/ Err %-2.2f", j1.targetAngle,j1.currAngle,j1.temp, j1.PIDVal, err);
 		msg = core::string("Left  J[") + core::StringConverter::toString(i) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
 	}
+	sprintf_s(buffer, "%-2.2f", totalError);
+	msg = core::string("TotalError: ") + buffer;
+	context->RenderText(msg, 10, 0);
+	totalError = 0;
 	for (int i = 0; i < 7; ++i)
 	{
 		ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetRightArm()[i];
-		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f", j1.targetAngle, j1.currAngle, j1.temp);
+		float err = fabs(j1.targetAngle - j1.currAngle);
+		totalError += err;
+		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f\t/ Err %-2.2f", j1.targetAngle, j1.currAngle, j1.temp, err);
 		msg = core::string("Right J[") + core::StringConverter::toString(i) + "]:" + buffer;
 		context->RenderText(msg, 10, 0);
 	}
+	sprintf_s(buffer, "%-2.2f", totalError);
+	msg = core::string("TotalError: ") + buffer;
+	context->RenderText(msg, 10, 0);
 
 	context->RenderText("   \tHands: L/R", 10, 0);
 	for (int i = 0; i < 6; i ++)
@@ -923,8 +935,16 @@ std::string RobotSerialPort::ExecCommand(const std::string& cmd, const std::stri
 		if (_config.BaseEnabled && m_impl->m_baseController)
 			return core::StringConverter::toString(m_impl->m_baseController->GetBatteryLevel());
 	}
-	else
-		if (m_impl->m_baseController)
+	else if (cmd == "laser")
+	{
+		if (m_impl->m_headController)
+			m_impl->m_headController->SetLaser(core::StringConverter::toInt(args));
+	}
+	else if (cmd == "pandamp")
+	{
+		if (m_impl->m_headController)
+			m_impl->m_headController->SetPanDamping(core::StringConverter::toFloat(args));
+	}else if (m_impl->m_baseController)
 		return m_impl->m_baseController->ExecCommand(cmd, args);
 	return "";
 }

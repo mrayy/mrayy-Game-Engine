@@ -34,6 +34,9 @@ public:
 	virtual bool IsConnected();
 	virtual void Disconnect();
 
+	void SetLaser(int value);
+	void SetPanDamping(float value);
+
 	virtual void SetRotation(const math::vector3d& rotation);
 	virtual math::vector3d GetRotation() ;
 	void _onSerialData(int size, char *buffer);

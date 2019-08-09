@@ -2,6 +2,11 @@
 #include "stdafx.h"
 #include "ArmsController.h"
 
+#include "IOSystem.h"
+#include "IFileSystem.h"
+#include "StreamReader.h"
+#include "StringUtil.h"
+
 namespace mray
 {
 
@@ -22,7 +27,7 @@ namespace mray
 
 	bool Masks[7] = { true, true, true, true, true, true, true };
 
-	ArmsController::ArmsController()
+	ArmsController::ArmsController(const core::string& pidFileName)
 	{
 		_state = EState::Wait;
 		connected = false;
@@ -39,14 +44,34 @@ namespace mray
 		_timer = 0;
 		timeMS = 3000;
 
+		_ticker = gOSystem.createTimer();
+
 		for (int i = 0; i < 7; ++i)
 			_lastServos[i] = 0;
 
+		OS::IStreamPtr pidFile=gFileSystem.createTextFileReader(pidFileName);
+		if (pidFile && pidFile->isOpen())
+		{
+			OS::StreamReader reader(pidFile);
+
+			for (int i = 0; i < 7; ++i) {
+				core::string line=reader.readLine();
+				std::vector<core::string> vals= core::StringUtil::Split(line, ",");
+				if (vals.size() != 3)
+					continue;
+
+				_Arm[i]._pid.SetKp(core::StringConverter::toFloat(vals[0]));
+				_Arm[i]._pid.SetKi(core::StringConverter::toFloat(vals[1]));
+				_Arm[i]._pid.SetKd(core::StringConverter::toFloat(vals[2]));
+			}
+			pidFile->close();
+		}
 	}
 	ArmsController::~ArmsController()
 	{
 		Disconnect();
 		delete m_serial;
+		delete _ticker;
 	}
 
 
@@ -205,7 +230,7 @@ namespace mray
 
 	void ArmsController::_readJoints()
 	{
-
+		gLogManager.log("Reading Joints\n",ELL_INFO);
 		cmd[0] = CMD_ALL_JOINTANGLE_GET;
 		_sendCommand(cmd, 1);
 		byte d[2];
@@ -284,6 +309,7 @@ namespace mray
 				_On();
 				_timer = 0;
 				_state = EState::Initialize;
+				_lastTime = _ticker->getSeconds();
 			}
 			break;
 		case EState::Initialize:
@@ -294,12 +320,18 @@ namespace mray
 			_timer = 0;
 			if (ArmEnabled)
 				_UpdateJoints(timeMS);/**/
+			_lastTime = _ticker->getSeconds();
 			break;
 		case EState::Initializing:
 			if (_timer > timeMS)
 			{
 				_timer = 0;
 				_state = EState::Operate;
+				_lastTime = _ticker->getSeconds();
+				for (int i = 0; i < 7; ++i)
+				{
+					_Arm[i]._pid.reset();
+				}
 			}
 			break;
 		case EState::Operate:
@@ -335,10 +367,18 @@ namespace mray
 			break;
 		}
 
+
 		if (_enableReading)
 		{
 			if (ArmEnabled)
 				_readJoints();
+		}
+		double currTime = _ticker->getSeconds();
+		double dt = (currTime - _lastTime)/1000.0f;
+		_lastTime = currTime;
+		for (int i = 0; i < 7; ++i)
+		{
+			_Arm[i].internalUpdate(dt);
 		}
 	}
 	void ArmsController::ProcessThread()
@@ -498,7 +538,7 @@ namespace mray
 
 	float ArmsController::_GetValue( int id)
 	{
-		return _Arm[id].targetAngle;
+		return _Arm[id].GetValue();
 	}
 	void ArmsController::_SetValue( int id, float val)
 	{

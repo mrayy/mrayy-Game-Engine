@@ -169,7 +169,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_EXPORTS;FusionV3RobotDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -200,6 +200,7 @@
     <ClInclude Include="IHeadController.h" />
     <ClInclude Include="IRobotComponent.h" />
     <ClInclude Include="movingAverage.h" />
+    <ClInclude Include="PID.h" />
     <ClInclude Include="RobotArms.h" />
     <ClInclude Include="RobotSerialPort.h" />
     <ClInclude Include="serial\serial.h" />
@@ -227,6 +228,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="movingAverage.cpp" />
+    <ClCompile Include="PID.cpp" />
     <ClCompile Include="RobotArms.cpp" />
     <ClCompile Include="RobotSerialPort.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>

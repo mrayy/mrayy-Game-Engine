@@ -69,6 +69,9 @@
     <ClInclude Include="ArmsController.h">
       <Filter>Source Files\Robot</Filter>
     </ClInclude>
+    <ClInclude Include="PID.h">
+      <Filter>Source Files\Robot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -102,6 +105,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ArmsController.cpp">
+      <Filter>Source Files\Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="PID.cpp">
       <Filter>Source Files\Robot</Filter>
     </ClCompile>
   </ItemGroup>

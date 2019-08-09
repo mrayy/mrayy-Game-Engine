@@ -537,6 +537,13 @@ public:
 				m_RobotHandler->GetRobotController()->ShutdownRobot();
 			}
 		}
+		else 
+		{
+			if (m_RobotHandler->GetRobotController() != 0)
+			{
+				m_RobotHandler->GetRobotController()->ExecCommand(msgV[0], value);
+			}
+		}
 	}
 };
 

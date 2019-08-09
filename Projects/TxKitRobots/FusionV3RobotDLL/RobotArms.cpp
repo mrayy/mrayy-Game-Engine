@@ -9,8 +9,8 @@ namespace mray
 
 RobotArms::RobotArms()
 {
-	m_leftArm = new ArmsController();
-	m_rightArm = new ArmsController();
+	m_leftArm = new ArmsController("leftArm.pid");
+	m_rightArm = new ArmsController("rightArm.pid");
 	m_leftEnabled = false;
 	m_leftEnabled = false;
 	_connected = false;

@@ -96,6 +96,7 @@ void ThreeAxisHead::Disconnect()
 	if (!m_serial)
 		return;
 	connected = false;
+	SetLaser(0);
 	if (m_robotThread != 0)
 	{
 		TerminateThread(m_robotThread, 0);
@@ -113,6 +114,20 @@ void ThreeAxisHead::Disconnect()
 		delete m_serial;
 		m_serial = 0;
 	}
+}
+void ThreeAxisHead::SetLaser(int value) {
+
+	if (!m_serial)
+		return;
+	value = math::clamp(value, 0, 100);
+	_sendCommand("l," + core::StringConverter::toString(value));
+}
+void ThreeAxisHead::SetPanDamping(float value) {
+
+	if (!m_serial)
+		return;
+	value = math::clamp(value, 0.0f, 1.0f);
+	_sendCommand("y," + core::StringConverter::toString(value,4));
 }
 
 void ThreeAxisHead::CheckSerial()
