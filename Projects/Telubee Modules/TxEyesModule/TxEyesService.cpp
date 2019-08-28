@@ -78,16 +78,18 @@ public:
 
 	struct CameraSettings
 	{
-		CameraSettings(){}
-		CameraSettings(const math::vector2d& sz, int bits, int f)
+		CameraSettings():scalingFactor(1){}
+		CameraSettings(const math::vector2d& sz, int bits, int f,float scaling=1)
 		{
 			size = sz;
 			bitrate = bits;
+			scalingFactor = scaling;
 			fps = f;
 		}
 		math::vector2di size;
 		int bitrate;
 		int fps;
+		float scalingFactor;
 	};
 	std::vector<CameraSettings> m_cameraSettings;
 	CameraSettings m_currentSettings;
@@ -183,6 +185,9 @@ public:
 			s.size = core::StringConverter::toVector2d(e->getValueString("Resolution"));
 			s.fps = e->getValueInt("FPS");
 			s.bitrate = e->getValueInt("Bitrate");
+			s.scalingFactor = e->getValueFloat("ScalingFactor");
+			if (s.scalingFactor <0.1f)
+				s.scalingFactor = 1;
 			m_cameraSettings.push_back(s);
 			e = e->nextSiblingElement("Setting");
 		}
@@ -232,6 +237,7 @@ public:
 		if (camType == "pointgrey")
 			m_cameraType=ECameraType::PointGrey ;
 
+		float scalingFactor = 1;
 		bool force_ddshow = false;
 
 		m_optimizedOVRVision = core::StringConverter::toBool(context->appOptions.GetOptionValue("OptimizedOVR","false"));
@@ -442,6 +448,7 @@ public:
 
 			src->SetResolution(m_resolution.x, m_resolution.y, fps, true);
 			src->SetBitRate(m_currentSettings.bitrate);
+			src->SetScalingFactor(m_currentSettings.scalingFactor);
 
 			printf("Loading Parameters\n");
 			src->LoadParameters(m_paramsElement->getSubElement("Encoder"));

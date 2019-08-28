@@ -51,7 +51,7 @@ public:
 
 		float GetValue()
 		{
-			return  currAngle + PIDVal;//PIDVal;//
+			return targetAngle;// currAngle + PIDVal;//PIDVal;//
 		}
 	};
 protected:

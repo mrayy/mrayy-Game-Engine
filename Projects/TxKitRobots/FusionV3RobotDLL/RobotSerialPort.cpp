@@ -222,7 +222,7 @@ void RobotSerialPort::_ProcessRobot()
 			}
 			 if (m_impl->m_armsController && m_impl->m_armsController->IsConnected())
 			 {
-				 m_impl->m_armsController->Start(true, true,true);
+				 m_impl->m_armsController->Start(true, true,false);
 				 gLogManager.log("Arms Connected", ELL_INFO);
 				 if (debug_print)
 					 printf("Arms Connected!\n", ret);

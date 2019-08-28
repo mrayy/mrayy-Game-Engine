@@ -22,12 +22,15 @@ protected:
 	int m_fps;
 	int m_bitRate;
 	int m_mtuSize;
+
+	float m_scalingFactor;
 public:
 	ICustomVideoSrc()
 	{
 		m_mtuSize = 1400;
 		m_bitRate = 3000;
 		m_fps = 30;
+		m_scalingFactor = 1;
 		m_encoder = "H264";
 	}
 	virtual ~ICustomVideoSrc(){}
@@ -49,7 +52,8 @@ public:
 
 	virtual void SetSeparateStreams(bool separate) = 0;
 	virtual bool IsSeparateStreams() = 0;
-
+	virtual void SetScalingFactor(float factor) {
+	}
 	// return type of presented data:
 	// RAW: Raw Image Data
 	// MJPEG: Decoded JPEG Data

@@ -40,6 +40,10 @@ public:
 
 	void ConvertToGray8(bool convert);
 
+	virtual void SetScalingFactor(float factor) {
+		m_scalingFactor = factor;
+	}
+
 	virtual math::vector2di GetFrameSize(int i);
 
 	void AddPostCaptureListener(IMyListenerCallback* listener,int i);
