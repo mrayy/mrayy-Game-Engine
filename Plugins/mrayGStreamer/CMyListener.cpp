@@ -119,15 +119,15 @@ gst_my_listener_class_init(GstMyListenerClass * klass)
 		"Simple Listener",
 		"mrayyamen@gmail.com");
 
-	g_object_class_install_property(gobject_class, PROP_CAPS,
-		g_param_spec_boxed("caps", "Caps",
-		"The caps of the source pad", GST_TYPE_CAPS,
-		GParamFlags(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+ 	g_object_class_install_property(gobject_class, PROP_CAPS,
+ 		g_param_spec_boxed("caps", "Caps",
+ 		"The caps of the source pad", GST_TYPE_CAPS,
+ 		GParamFlags(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
-	gst_element_class_add_pad_template(gstelement_class,
-		gst_static_pad_template_get(&src_factory));
-	gst_element_class_add_pad_template(gstelement_class,
-		gst_static_pad_template_get(&sink_factory));
+// 	gst_element_class_add_pad_template(gstelement_class,
+// 		gst_static_pad_template_get(&src_factory));
+// 	gst_element_class_add_pad_template(gstelement_class,
+// 		gst_static_pad_template_get(&sink_factory));
 }
 
 /* initialize the new element

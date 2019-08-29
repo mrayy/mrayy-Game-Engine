@@ -194,7 +194,7 @@
     <ClCompile Include="TxEyesModule.cpp" />
     <ClCompile Include="CameraProfile.cpp" />
     <ClCompile Include="capDevice.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">

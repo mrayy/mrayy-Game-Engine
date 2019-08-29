@@ -43,7 +43,7 @@ public:
 		m_captureType = "RAW";
 		m_convertToGray8 = false;
 		m_separateStreams = false;
-		m_addListeners = true;
+		m_addListeners = false;
 	}
 	virtual ~CameraVideoSrcImpl()
 	{
