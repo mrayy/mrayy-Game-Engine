@@ -162,7 +162,7 @@ DWORD RobotSerialPort::timerThreadRobot(RobotSerialPort *robot, LPVOID pdata){
 	while (!isDone){
 		robot->_ProcessRobot();
 
-		Sleep(10);
+		Sleep(20);
 		if (!threadStart)
 			Sleep(100);
 	}
@@ -231,7 +231,7 @@ void RobotSerialPort::_ProcessRobot()
 			{
 				if (m_impl->m_headPort == "")
 					m_impl->m_headPort = _config.headCOM;
-				ret = m_impl->m_headController->Connect(m_impl->m_headPort,_config.EnableAngleLog);
+				ret = m_impl->m_headController->Connect(m_impl->m_headPort,_config.EnableAngleLog, _config.EnableLaser);
 				if (ret) {
 					gLogManager.log("Head Connected", ELL_INFO);
 					if (debug_print)
@@ -278,8 +278,10 @@ void RobotSerialPort::_ProcessRobot()
 
 		//printf("thread h: %d \r", count++);
 		//if (m_headCounter > 5)
+		if (_config.HeadEnabled)
 		{
-			head_control(pan*_config.yAxis, tilt*_config.xAxis, roll*_config.zAxis);
+			m_impl->m_headController->SetRotation(math::vector3d(tilt*_config.xAxis, pan*_config.yAxis, roll*_config.zAxis));
+			m_impl->m_headController->SetLaser((m_rightHand[0]-50.0f));
 			m_headCounter = 0;
 		}
 
@@ -291,8 +293,11 @@ void RobotSerialPort::_ProcessRobot()
 			m_impl->m_armsController->SetHand(RobotArms::Left, m_leftHand, 6);
 			m_impl->m_armsController->SetHand(RobotArms::Right, m_rightHand, 6);
 		}
+		else
+		{
+		}
 		m_headCounter++;
-		if (m_baseCounter > 120)
+		if (m_baseCounter > 10)
 		{
 			//base_control(robot_vx * _config.xSpeed, robot_vy*_config.ySpeed, robot_rot*_config.Rotation, baseConnected ? RUN : STOP);
 			m_baseCounter = 0;
@@ -462,7 +467,6 @@ int RobotSerialPort::head_control(float pan, float tilt, float roll){
 		return false;
 	//gLogManager.log("Rotation", ELL_INFO);
 
-	m_impl->m_headController->SetRotation(math::vector3d(tilt,pan,roll));
 
 	return true;
 
@@ -699,6 +703,24 @@ void quaternion2Euler(const math::quaternion& q, double res[], RotSeq rotSeq)
 
 }
 
+void toEulerianAngle(const math::quaternion& q, double* res)
+{
+	double ysqr = q.y * q.y;
+	double t0 = -2.0f * (ysqr + q.z * q.z) + 1.0f;
+	double t1 = +2.0f * (q.x * q.y - q.w * q.z);
+	double t2 = -2.0f * (q.x * q.z + q.w * q.y);
+	double t3 = +2.0f * (q.y * q.z - q.w * q.x);
+	double t4 = -2.0f * (q.x * q.x + ysqr) + 1.0f;
+
+	t2 = t2 > 1.0f ? 1.0f : t2;
+	t2 = t2 < -1.0f ? -1.0f : t2;
+
+	res[2] = math::toDeg(std::asin(t2));
+	res[1] = math::toDeg(std::atan2(t1, t0));
+	res[0] = math::toDeg(std::atan2(t3, t4));
+}
+
+
 void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 {
 // 	if (!IsConnected())
@@ -739,12 +761,16 @@ void RobotSerialPort::UpdateRobotStatus(const RobotStatus& st)
 	else
 	{
 		double res[3];
-		quaternion2Euler(q2, res, RotSeq::yxz);
+		quaternion2Euler(q, res, RotSeq::xyz);
 		//q.toEulerAngles(angles);
+// 		res[2] = angles.x;
+// 		res[1] = angles.y;
+// 		res[0] = angles.z;
+// 		toEulerianAngle(q, res);
 
-		tilt = m_impl->mvRobot[HEAD][1]->getNext(res[1]);//2
-		pan = m_impl->mvRobot[HEAD][0]->getNext(res[2]); //0
-		roll = m_impl->mvRobot[HEAD][2]->getNext(res[0]);//1
+		tilt = res[1];// m_impl->mvRobot[HEAD][0]->getNext(res[1]);//2
+		pan = res[0];// m_impl->mvRobot[HEAD][1]->getNext(res[0]); //0
+		roll = res[2];// m_impl->mvRobot[HEAD][2]->getNext(res[2]);//1
 	}
 
 	for (int i = 0; i < 7; ++i)
@@ -813,46 +839,56 @@ void RobotSerialPort::DebugRender(mray::TBee::ServiceRenderContext* context)
 	if (st == ArmsController::Shutdown)msg += "Shutdown";
 	if (st == ArmsController::Shutingdown)msg += "Shutingdown";
 	context->RenderText(msg, 5, 0);
-	 
+
 
 
 	context->RenderText(core::string("Robot Joint Values:"), 5, 0);
 
 	msg = "";
 	context->RenderText("   \tIK\t/ Real", 10, 0);
-	for (int i = 0; i < 3; ++i)
+	if (_config.HeadEnabled)
 	{
-		
-		sprintf_s(buffer, " %-2.2f\t/ %-2.2f", m_jointsValues[i * 2], m_jointsValues[i * 2 + 1]);
-		msg = core::string("Head  J[") + core::StringConverter::toString(i) + "]:" + buffer;
-		context->RenderText(msg, 10, 0);
+		for (int i = 0; i < 3; ++i)
+		{
+
+			sprintf_s(buffer, " %-2.2f\t/ %-2.2f", m_jointsValues[i * 2], m_jointsValues[i * 2 + 1]);
+			msg = core::string("Head  J[") + core::StringConverter::toString(i) + "]:" + buffer;
+			context->RenderText(msg, 10, 0);
+		}
 	}
 	float totalError = 0;
-	for (int i = 0; i < 7; ++i)
+
+	if (_config.LArmEnabled)
 	{
-		ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
-		float err = fabs(j1.targetAngle - j1.currAngle);
-		totalError += err;
-		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f \t/ %-2.2f \t/ Err %-2.2f", j1.targetAngle,j1.currAngle,j1.temp, j1.PIDVal, err);
-		msg = core::string("Left  J[") + core::StringConverter::toString(i) + "]:" + buffer;
+		for (int i = 0; i < 7; ++i)
+		{
+			ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetLeftArm()[i];
+			float err = fabs(j1.targetAngle - j1.currAngle);
+			totalError += err;
+			sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f \t/ %-2.2f \t/ Err %-2.2f", j1.targetAngle, j1.currAngle, j1.temp, j1.PIDVal, err);
+			msg = core::string("Left  J[") + core::StringConverter::toString(i) + "]:" + buffer;
+			context->RenderText(msg, 10, 0);
+		}
+		sprintf_s(buffer, "%-2.2f", totalError);
+		msg = core::string("TotalError: ") + buffer;
 		context->RenderText(msg, 10, 0);
 	}
-	sprintf_s(buffer, "%-2.2f", totalError);
-	msg = core::string("TotalError: ") + buffer;
-	context->RenderText(msg, 10, 0);
 	totalError = 0;
-	for (int i = 0; i < 7; ++i)
+	if (_config.RArmEnabled)
 	{
-		ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetRightArm()[i];
-		float err = fabs(j1.targetAngle - j1.currAngle);
-		totalError += err;
-		sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f\t/ Err %-2.2f", j1.targetAngle, j1.currAngle, j1.temp, err);
-		msg = core::string("Right J[") + core::StringConverter::toString(i) + "]:" + buffer;
+		for (int i = 0; i < 7; ++i)
+		{
+			ArmsController::JoinInfo&j1 = m_impl->m_armsController->GetRightArm()[i];
+			float err = fabs(j1.targetAngle - j1.currAngle);
+			totalError += err;
+			sprintf_s(buffer, " %-2.2f\t/ %-2.2f\t/ %-2.2f\t/ Err %-2.2f", j1.targetAngle, j1.currAngle, j1.temp, err);
+			msg = core::string("Right J[") + core::StringConverter::toString(i) + "]:" + buffer;
+			context->RenderText(msg, 10, 0);
+		}
+		sprintf_s(buffer, "%-2.2f", totalError);
+		msg = core::string("TotalError: ") + buffer;
 		context->RenderText(msg, 10, 0);
 	}
-	sprintf_s(buffer, "%-2.2f", totalError);
-	msg = core::string("TotalError: ") + buffer;
-	context->RenderText(msg, 10, 0);
 
 	context->RenderText("   \tHands: L/R", 10, 0);
 	for (int i = 0; i < 6; i ++)

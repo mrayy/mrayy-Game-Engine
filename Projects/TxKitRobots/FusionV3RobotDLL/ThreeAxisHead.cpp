@@ -38,6 +38,7 @@ ThreeAxisHead::ThreeAxisHead()
 {
 	connected = false;
 	m_serial = 0;
+	m_laserEnabled = false;
 }
 ThreeAxisHead::~ThreeAxisHead()
 {
@@ -46,19 +47,32 @@ ThreeAxisHead::~ThreeAxisHead()
 }
 
 DWORD timerThreadRobot(ThreeAxisHead *robot, LPVOID pdata) {
-	int count = 0;
-	while (robot->IsConnected()) {
-		robot->CheckSerial();
-		Sleep(10);
-	}
+	robot->_ProcessThread();
 	return 0;
 }
 
-bool ThreeAxisHead::Connect(const core::string& port,bool enableAngleLog)
+void ThreeAxisHead::_ProcessThread()
 {
-	Disconnect();
+	gLogManager.log("Head Thread Started",ELL_INFO);
+	Sleep(3000);
+	while (IsConnected()) {
+		_sendRotation();
+		CheckSerial();
+		Sleep(10);
+	}
+	gLogManager.log("Head Thread Closing", ELL_INFO);
+}
 
-	m_serial = new serial::Serial(port, 115200);// , serial::Timeout::simpleTimeout(20), serial::eightbits, serial::parity_none, serial::stopbits_one);
+bool ThreeAxisHead::Connect(const core::string& port, bool enableAngleLog, bool laserEnabled)
+{
+	m_laserEnabled = laserEnabled;
+	if (IsConnected())
+	{
+		Disconnect();
+		Sleep(1000);
+	}
+
+	m_serial = new serial::Serial(port, 115200 , serial::Timeout::simpleTimeout(20), serial::eightbits, serial::parity_none, serial::stopbits_one);
 	//m_serial->open();
 	if (!m_serial->isOpen())
 	{
@@ -70,18 +84,20 @@ bool ThreeAxisHead::Connect(const core::string& port,bool enableAngleLog)
 	}
 	else
 	{
-		_sendCommand("q");//disable angle logging
+		//_sendCommand("q");//disable angle logging
 		Sleep(50);
 		connected = true;
 		enableAngleLog = false;
+		m_enableAngleLog = enableAngleLog;
 		if (enableAngleLog)
 			_sendCommand("ea");//disable angle logging
 		else
 			_sendCommand("sa");
 		_sendCommand("es");//enable stabilization
-		if(enableAngleLog)
-			m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
-		else m_robotThread = 0;
+		m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
+		/*
+				if(enableAngleLog)
+		else m_robotThread = 0;*/
 		gLogManager.log("Head Started!", ELL_SUCCESS);
 
 	}
@@ -99,12 +115,13 @@ void ThreeAxisHead::Disconnect()
 	SetLaser(0);
 	if (m_robotThread != 0)
 	{
+		WaitForSingleObject(m_robotThread, INFINITE);
 		TerminateThread(m_robotThread, 0);
-		Sleep(100);
+		Sleep(300);
 		m_robotThread = 0;
 	}
-	SetRotation(0);
-	Sleep(100);
+	//SetRotation(0);
+	//Sleep(100);
 	_sendCommand("q");
 	Sleep(100);
 
@@ -114,10 +131,11 @@ void ThreeAxisHead::Disconnect()
 		delete m_serial;
 		m_serial = 0;
 	}
+	gLogManager.log("Head Disconnected", ELL_INFO);
 }
 void ThreeAxisHead::SetLaser(int value) {
 
-	if (!m_serial)
+	if (!m_serial || !m_laserEnabled)
 		return;
 	value = math::clamp(value, 0, 100);
 	_sendCommand("l," + core::StringConverter::toString(value));
@@ -132,6 +150,8 @@ void ThreeAxisHead::SetPanDamping(float value) {
 
 void ThreeAxisHead::CheckSerial()
 {
+	if (!m_enableAngleLog)
+		return;
 	std::string str;
 // 	if (m_serial->available() == 0)
 // 		return;
@@ -153,19 +173,27 @@ void ThreeAxisHead::CheckSerial()
 void ThreeAxisHead::_sendCommand(const std::string& cmd)
 {
 	std::string str = "@"+cmd + "#";
+	//gLogManager.log(str, ELL_INFO);
 	m_serial->write(str);
+}
+
+void ThreeAxisHead::_sendRotation()
+{
+	int packet_size;
+	char sCommand[128];
+	math::vector3d rot = m_sentRotation;
+	//rot.x = math::clamp(m_sentRotation.x, -38.0f, 38.0f);
+	sprintf_s(sCommand, 128, "d,%.2f,%.2f,%.2f", (rot.x), (rot.y), (rot.z));
+	_sendCommand(sCommand);
 }
 void ThreeAxisHead::SetRotation(const math::vector3d& rotation)
 {
 	if (!m_serial)
 		return;
-	int packet_size;
-	char sCommand[128];
-	math::vector3d rot=rotation;
-	rot.x= math::clamp(rotation.x, -38.0f, 38.0f);
-	sprintf_s(sCommand, 128, "d,%d,%d,%d", (int)(rot.z * 100), (int)(rot.y * 100), (int)(rot.x * 100));
-	_sendCommand(sCommand);
+	m_sentRotation =rotation;
+	m_rotation = rotation;
 
+	//_sendRotation();
 	//CheckSerial();
 	//m_rotation = rotation;
 }

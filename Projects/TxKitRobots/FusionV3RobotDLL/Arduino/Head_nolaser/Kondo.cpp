@@ -84,7 +84,6 @@ int KondoClass::setFree(byte id)
 
      if ((id != idMax(id)) || ( ! maxMin(MAX_POS, MIN_POS, pos)) ) //範囲外の時
      {
-       //Serial.println("Error ID/MINMAX");
        return ICS_FALSE;
      }
 
@@ -94,10 +93,11 @@ int KondoClass::setFree(byte id)
 
      //送受信
 
+
+
      flg = synchronize(txCmd, sizeof txCmd, rxCmd, sizeof rxCmd);
      if (flg == false)
      {
-       //Serial.println("Error synchronize");
        return ICS_FALSE;
      }
 
@@ -320,35 +320,32 @@ bool KondoClass::synchronize(byte *txBuf, byte txLen, byte *rxBuf, byte rxLen)
 	int rxSize; //受信数
 
 	_serial->flush(); //待つ
- enHigh(); //送信切替
-  _serial->write(txBuf, txLen);
-  _serial->flush();   //待つ
+	enHigh(); //送信切替
+	_serial->write(txBuf, txLen);
+	_serial->flush();   //待つ
   delayMicroseconds(600);
 /*
-  while (_serial->available() > 0) //受信バッファを消す
-  {
-    // buff = icsSerial->read();  //空読み
-    _serial->read();    //空読み
-  }*/
+	while (_serial->available() > 0) //受信バッファを消す
+	{
+		// buff = icsSerial->read();	//空読み
+		_serial->read();		//空読み
+	}*/
 
-  enLow();  //受信切替
+	enLow();  //受信切替
 
 
-    if (_serial->available() > 0) //受信バッファを消す
-    {
+  	if (_serial->available() > 0) //受信バッファを消す
+  	{
       for(int i=0;i<rxLen;++i)
       {
-          rxBuf[i]=_serial->read();   //空読み
+  		    rxBuf[i]=_serial->read();		//空読み
       }
       rxSize=rxLen;
-    }
- //rxSize = _serial->readBytes(rxBuf, rxLen);
+  	}
+	//rxSize = _serial->readBytes(rxBuf, rxLen);
 
 	if (rxSize != rxLen) //受信数確認
 	{
-  /*Serial.print(rxLen);
-  Serial.print(", ");
-    Serial.println(rxSize);*/
 		return false;
 	}
 	return true;

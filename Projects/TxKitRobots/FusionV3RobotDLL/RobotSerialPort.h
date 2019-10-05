@@ -46,9 +46,7 @@ protected:
 	ERobotControllerStatus _status;
 	IRobotStatusProvider* m_robotStatusProvider;
 	HANDLE m_robotThread;
-// 	int yamahaInitialize();
-// 	int yamahaXY_control(float pos_x, float pos_y, int control);
-	int head_control(float pan, float tilt, float roll);
+	int head_control(float tilt, float pan, float roll);
 
 	void _ProcessRobot();
 	static DWORD WINAPI timerThreadRobot(RobotSerialPort *robot, LPVOID pdata);

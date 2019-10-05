@@ -16,21 +16,30 @@ protected:
 	bool connected;
 	HANDLE m_robotThread;
 	math::vector3d m_rotation;
+	math::vector3d m_sentRotation;
 
+	bool m_enableAngleLog;
 	std::string _buffer;
 	std::string _rcvbuffer;
 
+	bool m_laserEnabled;
+
 	void _sendCommand(const std::string& cmd);
+	void _sendRotation();
 public:
 	ThreeAxisHead();
 	virtual ~ThreeAxisHead();
 
 	serial::Serial *GetComEvent(){ return m_serial; }
 
-	virtual bool Connect(const core::string& port) {
+	virtual bool Connect(const core::string& port)
+	{
 		return Connect(port, false);
 	}
-	virtual bool Connect(const core::string& port, bool enableAngleLog);
+	virtual bool Connect(const core::string& port,bool laserEnabled) {
+		return Connect(port, false, laserEnabled);
+	}
+	virtual bool Connect(const core::string& port, bool enableAngleLog, bool laserEnabled);
 	virtual bool IsConnected();
 	virtual void Disconnect();
 
@@ -42,6 +51,7 @@ public:
 	void _onSerialData(int size, char *buffer);
 
 	void CheckSerial();
+	void _ProcessThread();
 };
 
 }

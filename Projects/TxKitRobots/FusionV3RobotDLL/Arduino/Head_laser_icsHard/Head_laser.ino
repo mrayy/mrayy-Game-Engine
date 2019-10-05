@@ -12,7 +12,7 @@
 #include "imumaths.h"
 #include "BluetoothSerial.h"
 
-#include <analogWrite.h>
+#include "analogWrite.h"
 
 #define ESP_NAME "HeadBT"
 
@@ -36,6 +36,7 @@ Stream*targetStream = &Serial;
 Vector<3> eulerAngles;
 char* values[10];
 float angles[3];
+float IMUAngles[3];
 float realAngles[3];
 
 bool isFree = true;
@@ -50,8 +51,17 @@ float yawDamping = 0.99;
 
 int laserValue;
 
-unsigned long currenttime, lasttime;
+unsigned long currenttime, lasttime,starttime;
 unsigned long reportMillis = 30;
+
+bool speedSet=false;
+
+float clamp(float x,float a,float b)
+{
+  if(x<a)return a;
+  if(x>b)return b;
+  return x;
+}
 
 class FPSCounter
 {
@@ -89,13 +99,20 @@ void SetHeadAngles(float tilt, float yaw, float roll)
 {
   if (isFree)
     return;
-
+/*  Serial.print(tilt);
+  Serial.print(", ");
+  Serial.print(yaw);
+  Serial.print(", ");
+  Serial.println(roll);*/
   float v;
-  v = Kondo.setAngle(2, tilt); if (v != ICS_FALSE && abs(v) < 200)realAngles[0] = (v);
-  v = Kondo.setAngle(1, yaw); if (v != ICS_FALSE && abs(v) < 200)realAngles[1] = (v); //else TargetSerial.println(v);
-  v = Kondo.setAngle(3, roll); if (v != ICS_FALSE && abs(v) < 200)realAngles[2] = (v);
+  v = Kondo.setAngle(1, yaw);// if (v != ICS_FALSE && abs(v) < 200)realAngles[1] = (v); //else TargetSerial.println(v);
+  v = Kondo.setAngle(2, roll);// if (v != ICS_FALSE && abs(v) < 200)realAngles[2] = (v);
+  v = Kondo.setAngle(3, tilt); //if (v != ICS_FALSE && abs(v) < 200)realAngles[0] = (v);
   if (debugAng && abs(currenttime - lasttime) > reportMillis)
   {
+ //   realAngles[1] =Kondo.getAngle(1);
+  //  realAngles[2] =Kondo.getAngle(2);
+   // realAngles[0] =Kondo.getAngle(3);
     lasttime = currenttime;
     String str = "@ang ";
     str += (realAngles[0] - mpu6050.getAngleX());
@@ -111,31 +128,33 @@ void SetHeadAngles(float tilt, float yaw, float roll)
 void applyRotation()
 {
   if (stabilizer)
-    appliedQuat = IMUQuat * inputQuat;
+    appliedQuat = IMUQuat  *  inputQuat;
   else
     appliedQuat = inputQuat;
 
-  eulerAngles = Quaternion::toEuler(appliedQuat, Quaternion::xzy);
+  eulerAngles = Quaternion::toEuler(appliedQuat, Quaternion::xyz);
   /*if(isDebug)
     {
     Serial.print(eulerAngles.z()); Serial.print(" ");
     Serial.print(eulerAngles.x());Serial.print(" ");
     Serial.print(eulerAngles.y());Serial.println();
     }*/
-  SetHeadAngles(eulerAngles.z(), eulerAngles.x(), eulerAngles.y());
+  SetHeadAngles(eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
 }
 
 void setup()
 {
   Serial.begin(115200);
   SerialBT.begin(ESP_NAME); //Bluetooth device name
-  Kondo.begin(115200, &Serial2); // 115200,625000,1250000
+  Kondo.begin(115200,18, &Serial2); // 115200,625000,1250000
   Kondo.setFree(1);
   Kondo.setFree(2);
   Kondo.setFree(3);
 
   Wire.begin(21, 22, 400000);
-  //Wire.setSpeed(1);
+  Kondo.setSpeed(1,20);
+  Kondo.setSpeed(2,20);
+  Kondo.setSpeed(3,20);
   mpu6050.begin();
   mpu6050.calcGyroOffsets(ENABLE_DEBUG);
 
@@ -155,14 +174,23 @@ void ProcessInput(int paramsN, Stream* srcStream)
     Serial.print(angles[2]);Serial.println(" ");*/
   switch (values[0][0]) {
     case 'd':
+      if(isFree)
+      {
+        Kondo.setAngle(3, 0);
+        Kondo.setAngle(1, 0);
+        Kondo.setAngle(2, 0);
+        speedSet=false;
+        starttime=millis();
+      }
       isFree = false;
-      if (paramsN < 3)
+      if (paramsN < 3 || !speedSet)
         break;
       angles[0] = atof(values[1]);
-      angles[1] = atof(values[2]);
+      angles[1] = clamp(atof(values[2]),-80,80);
       angles[2] = atof(values[3]);
-      inputQuat = Quaternion(angles[0], Vector<3>(1, 0, 0)) * Quaternion(angles[1], Vector<3>(0, 1, 0)) * Quaternion(angles[2], Vector<3>(0, 0, 1));
-      applyRotation();
+      inputQuat = Quaternion(angles[0], Vector<3>(1, 0, 0)) * Quaternion(angles[1], Vector<3>(0, 1, 0)) * Quaternion(angles[2], Vector<3>(0, 0, 1));//.fromEuler(angles[0],angles[1],angles[2]);//
+      if(!stabilizer)
+        applyRotation();
       break;
     case 'e':
       if (values[0][1] == 'a')
@@ -200,10 +228,28 @@ void ProcessInput(int paramsN, Stream* srcStream)
       break;
     case 'q':
       isFree = true;
+      Kondo.setSpeed(1,20);
+      delay(20);
+      Kondo.setSpeed(2,20);
+      delay(20);
+      Kondo.setSpeed(3,20);
+      delay(100);
+      
+      Kondo.setAngle(3, -70);
+      Kondo.setAngle(1, 0);
+      Kondo.setAngle(2, 0);
+
+      delay(1000);
       Kondo.setFree(1);
       Kondo.setFree(2);
       Kondo.setFree(3);
+      
+      speedSet=false;
       break;
+    case 'v':
+    Serial.println("Head Module 3.0");
+    
+    break;
   }
 }
 
@@ -243,6 +289,18 @@ void loop()
   if (stabilizer && !isFree) {
     mpu6050.update();
 
+    if(!speedSet && currenttime-starttime>1000)
+    {
+      Kondo.setSpeed(1,127);
+      delay(20);
+      Kondo.setSpeed(2,127);
+      delay(20);
+      Kondo.setSpeed(3,127);
+      delay(20);
+      speedSet=true;
+      
+    }
+
     yawErr = (yawErr + (mpu6050.getAngleZ() - lastYaw)) * yawDamping;
     lastYaw = mpu6050.getAngleZ();
     /*
@@ -251,14 +309,21 @@ void loop()
         Serial.print(mpu6050.getAngleY());
         Serial.print(",");
         Serial.println(mpu6050.getAngleZ());*/
-    IMUQuat.fromEuler(mpu6050.getAngleX(), yawErr, mpu6050.getAngleY());
+    IMUQuat.fromEuler(-mpu6050.getAngleX(), yawErr, mpu6050.getAngleY());
+    IMUAngles[0]=-mpu6050.getAngleX();
+    IMUAngles[1]=yawErr;
+    IMUAngles[2]=mpu6050.getAngleY();
+    //Serial.print(IMUQuat.x());Serial.print(",");
+    //Serial.print(IMUQuat.y());Serial.print(",");
+    //Serial.print(IMUQuat.z());Serial.print(",");
+    //Serial.println(IMUQuat.w());
     //IMUQuat=transformQuat*IMUQuat;
     applyRotation();
   }
   ProcessSerial(&Serial);
   ProcessSerial(&SerialBT);
 
-  if (angles[0] > 45)
+  if (angles[0] > 0 || isFree)
     analogWrite(LASER_PIN, 0);
   else
     analogWrite(LASER_PIN, laserValue);

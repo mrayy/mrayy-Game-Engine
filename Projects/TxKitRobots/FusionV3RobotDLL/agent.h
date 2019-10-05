@@ -42,6 +42,7 @@ public:
 	bool BaseEnabled = true, HeadEnabled = true, LArmEnabled = false, RArmEnabled = false;
 	int ArmVersion = 0;
 	bool EnableAngleLog= true;
+	bool EnableLaser = false;
 };
 
 RobotConfig _config;
@@ -182,6 +183,8 @@ void load_parameters() {
 					_config.EnableAngleLog = strcmp(token[1], "Yes") == 0 ? true : false;
 				else if (strcmp(token[0], "ArmVersion") == 0)
 					_config.ArmVersion = strToInt(token[1]);
+				else if (strcmp(token[0], "EnableLaser") == 0)
+					_config.EnableLaser = strcmp(token[1], "Yes") == 0 ? true : false;
 
 			}
 

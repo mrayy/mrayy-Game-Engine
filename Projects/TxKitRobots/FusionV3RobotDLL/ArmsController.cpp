@@ -295,7 +295,7 @@ namespace mray
 	{
 		int servoUpdate = 0;
 		_timeToWait = 0;
-		_readBattery();
+		//_readBattery();
 		if (_enableTemperature && _temperatureTime >= TemperatureTime)
 		{
 			_temperatureTime = 0;
@@ -372,13 +372,13 @@ namespace mray
 		{
 			if (ArmEnabled)
 				_readJoints();
-		}
-		double currTime = _ticker->getSeconds();
-		double dt = (currTime - _lastTime)/1000.0f;
-		_lastTime = currTime;
-		for (int i = 0; i < 7; ++i)
-		{
-			_Arm[i].internalUpdate(dt);
+			double currTime = _ticker->getSeconds();
+			double dt = (currTime - _lastTime)/1000.0f;
+			_lastTime = currTime;
+			for (int i = 0; i < 7; ++i)
+			{
+				_Arm[i].internalUpdate(dt);
+			}
 		}
 	}
 	void ArmsController::ProcessThread()
@@ -399,7 +399,7 @@ namespace mray
 				if (_state == EState::Wait)
 					_timeToWait = 100;
 				//if (_timeToWait > 0)
-				//	_sleep(_timeToWait);
+				//	_sleep(20);
 
 				handTimer += _timeToWait;
 				//   System.Threading._sleep(30);
@@ -515,6 +515,16 @@ namespace mray
 		_state = EState::Wait;
 
 		_Off();
+
+		connected = false;
+		_enableSending = false;
+		if (m_robotThread != 0)
+		{
+			WaitForSingleObject(m_robotThread, INFINITE);
+		}
+
+		TerminateThread(m_robotThread, 0);
+		m_robotThread = 0;
 		if (m_serial != 0)
 		{
 			m_serial->close();
