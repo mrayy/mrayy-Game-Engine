@@ -4,8 +4,9 @@
 #include "stdafx.h"
 #include "ServiceLoader.h"
 #include "CrashHandler.h"
-
 #include <signal.h>
+#include "stackwalker.h"
+
 
 #ifdef _WIN32
 int const sigClosed = SIGBREAK;
@@ -37,8 +38,29 @@ void OnExitSig(int)
 {
 	OnExit();
 }
+
+class StackWalkerToLog: public StackWalker
+{
+protected:
+	virtual void OnOutput(LPCSTR szText) { 
+
+		gLogManager.log(szText, ELL_INFO);
+	}
+};
+
+
+void handler(int sig) {
+
+	gLogManager.log("Exception!", ELL_INFO);
+	StackWalkerToLog sw;
+	sw.ShowCallstack();
+	//exit(1);
+}
 int _tmain(int argc, _TCHAR* argv[])
 {
+
+
+	signal(SIGSEGV, handler);
 	signal(sigClosed, OnExitSig);
 
 	atexit(OnExit);
@@ -53,6 +75,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	s_loader=new ServiceLoader();
 	if (s_loader->Init(argc, argv))
 	{
+
 		s_loader->Run();
 	}
 	OnExit();
