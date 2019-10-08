@@ -94,6 +94,8 @@ bool ThreeAxisHead::Connect(const core::string& port, bool enableAngleLog, bool 
 		else
 			_sendCommand("sa");
 		_sendCommand("es");//enable stabilization
+		SetRotation(0);
+		_sendRotation();
 		m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
 		/*
 				if(enableAngleLog)

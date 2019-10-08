@@ -342,7 +342,7 @@ namespace mray
 				{
 					handTimer = 0;
 					_updateHand();
-					_readHand();
+					//_readHand();
 				}
 			}
 			if (ArmEnabled)
