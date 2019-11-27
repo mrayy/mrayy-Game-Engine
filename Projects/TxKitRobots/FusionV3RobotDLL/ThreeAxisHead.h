@@ -39,7 +39,7 @@ public:
 	virtual bool Connect(const core::string& port,bool laserEnabled) {
 		return Connect(port, false, laserEnabled);
 	}
-	virtual bool Connect(const core::string& port, bool enableAngleLog, bool laserEnabled);
+	virtual bool Connect(const core::string& port, bool enableAngleLog, bool laserEnabled, bool enableStabilizer=true);
 	virtual bool IsConnected();
 	virtual void Disconnect();
 

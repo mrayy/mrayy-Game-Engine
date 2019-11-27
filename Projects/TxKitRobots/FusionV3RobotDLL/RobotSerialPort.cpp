@@ -231,7 +231,7 @@ void RobotSerialPort::_ProcessRobot()
 			{
 				if (m_impl->m_headPort == "")
 					m_impl->m_headPort = _config.headCOM;
-				ret = m_impl->m_headController->Connect(m_impl->m_headPort,_config.EnableAngleLog, _config.EnableLaser);
+				ret = m_impl->m_headController->Connect(m_impl->m_headPort,_config.EnableAngleLog, _config.EnableLaser, _config.EnableStabilizer);
 				if (ret) {
 					gLogManager.log("Head Connected", ELL_INFO);
 					if (debug_print)
@@ -926,6 +926,19 @@ void RobotSerialPort::ShutdownRobot()
 	if (_status == EStopped || _status == EStopping)
 		return;
 	_status = EStopping;
+}
+
+void RobotSerialPort::ForceShutdownRobot() {
+
+	gLogManager.log("Force shutdown", ELL_WARNING);
+	if ((_config.LArmEnabled || _config.RArmEnabled) && m_impl->m_armsController)
+	{
+		m_impl->m_armsController->Stop(true);
+	}
+	if (_config.HeadEnabled)
+		m_impl->m_headController->Disconnect();
+
+	_status = EDisconnected;
 }
 
 bool RobotSerialPort::GetJointValues(std::vector<float>& values)

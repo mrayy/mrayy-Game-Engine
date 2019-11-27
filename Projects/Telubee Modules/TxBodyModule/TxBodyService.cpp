@@ -495,6 +495,14 @@ public:
 		{
 			m_robotData.connected = core::StringConverter::toBool(vals[0].c_str());
 		}
+		else if (msgV[0].equals_ignore_case("ForceOff"))
+		{
+
+			if (m_RobotHandler->GetRobotController() != 0)
+			{
+				m_RobotHandler->GetRobotController()->ForceShutdownRobot();
+			}
+		}
 		else if (msgV[0].equals_ignore_case("Head"))
 		{
 			ParseJoint(m_robotData.head, msgV[1], vals);

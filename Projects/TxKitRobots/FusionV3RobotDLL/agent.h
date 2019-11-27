@@ -43,6 +43,7 @@ public:
 	int ArmVersion = 0;
 	bool EnableAngleLog= true;
 	bool EnableLaser = false;
+	bool EnableStabilizer = true;
 };
 
 RobotConfig _config;
@@ -185,6 +186,8 @@ void load_parameters() {
 					_config.ArmVersion = strToInt(token[1]);
 				else if (strcmp(token[0], "EnableLaser") == 0)
 					_config.EnableLaser = strcmp(token[1], "Yes") == 0 ? true : false;
+				else if (strcmp(token[0], "Stabilizer") == 0)
+					_config.EnableStabilizer = strcmp(token[1], "Yes") == 0 ? true : false;
 
 			}
 

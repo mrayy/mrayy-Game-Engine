@@ -56,10 +56,13 @@ void
 Serial::SerialImpl::open ()
 {
   if (port_.empty ()) {
-    throw invalid_argument ("Empty port is invalid.");
+   // throw invalid_argument ("Empty port is invalid.");
+	  return;
   }
   if (is_open_ == true) {
-    throw SerialException ("Serial port already open.");
+    //throw SerialException ("Serial port already open.");
+	  return;
+
   }
 
   // See: https://github.com/wjwwood/serial/issues/84
@@ -80,10 +83,13 @@ Serial::SerialImpl::open ()
     case ERROR_FILE_NOT_FOUND:
       // Use this->getPort to convert to a std::string
       ss << "Specified port, " << this->getPort() << ", does not exist.";
-      THROW (IOException, ss.str().c_str());
+      //THROW (IOException, ss.str().c_str());
+	  return;
+
     default:
       ss << "Unknown error opening the serial port: " << create_file_err;
-      THROW (IOException, ss.str().c_str());
+	  return;
+	  // THROW (IOException, ss.str().c_str());
     }
   }
 
@@ -96,7 +102,8 @@ Serial::SerialImpl::reconfigurePort ()
 {
   if (fd_ == INVALID_HANDLE_VALUE) {
     // Can only operate on a valid file descriptor
-    THROW (IOException, "Invalid file descriptor, is the serial port open?");
+	  return;
+	  // THROW (IOException, "Invalid file descriptor, is the serial port open?");
   }
 
   DCB dcbSerialParams = {0};
@@ -105,7 +112,8 @@ Serial::SerialImpl::reconfigurePort ()
 
   if (!GetCommState(fd_, &dcbSerialParams)) {
     //error getting state
-    THROW (IOException, "Error getting the serial port state.");
+	  return;
+	  //THROW (IOException, "Error getting the serial port state.");
   }
 
   // setup baud rate
@@ -233,7 +241,8 @@ Serial::SerialImpl::reconfigurePort ()
   } else if (parity_ == parity_space) {
     dcbSerialParams.Parity = SPACEPARITY;
   } else {
-    throw invalid_argument ("invalid parity");
+	  return;
+	  // throw invalid_argument ("invalid parity");
   }
 
   // setup flowcontrol
@@ -259,7 +268,8 @@ Serial::SerialImpl::reconfigurePort ()
   // activate settings
   if (!SetCommState(fd_, &dcbSerialParams)){
     CloseHandle(fd_);
-    THROW (IOException, "Error setting serial port settings.");
+	return;
+	// THROW (IOException, "Error setting serial port settings.");
   }
 
   // Setup timeouts
@@ -270,7 +280,8 @@ Serial::SerialImpl::reconfigurePort ()
   timeouts.WriteTotalTimeoutConstant = timeout_.write_timeout_constant;
   timeouts.WriteTotalTimeoutMultiplier = timeout_.write_timeout_multiplier;
   if (!SetCommTimeouts(fd_, &timeouts)) {
-    THROW (IOException, "Error setting timeouts.");
+	  return;
+	  // THROW (IOException, "Error setting timeouts.");
   }
 }
 
@@ -284,7 +295,9 @@ Serial::SerialImpl::close ()
       if (ret == 0) {
         stringstream ss;
         ss << "Error while closing serial port: " << GetLastError();
-        THROW (IOException, ss.str().c_str());
+		is_open_ = false;
+		return;
+		// THROW (IOException, ss.str().c_str());4
       } else {
         fd_ = INVALID_HANDLE_VALUE;
       }
@@ -309,7 +322,8 @@ Serial::SerialImpl::available ()
   if (!ClearCommError(fd_, NULL, &cs)) {
     stringstream ss;
     ss << "Error while checking status of the serial port: " << GetLastError();
-    THROW (IOException, ss.str().c_str());
+    //THROW (IOException, ss.str().c_str());
+	return 0;
   }
   return static_cast<size_t>(cs.cbInQue);
 }
@@ -331,13 +345,16 @@ size_t
 Serial::SerialImpl::read (uint8_t *buf, size_t size)
 {
   if (!is_open_) {
-    throw PortNotOpenedException ("Serial::read");
+   // throw PortNotOpenedException ("Serial::read");
+	  return 0;
   }
   DWORD bytes_read;
   if (!ReadFile(fd_, buf, static_cast<DWORD>(size), &bytes_read, NULL)) {
     stringstream ss;
     ss << "Error while reading from the serial port: " << GetLastError();
-    THROW (IOException, ss.str().c_str());
+    //THROW (IOException, ss.str().c_str());
+	return 0;
+
   }
   return (size_t) (bytes_read);
 }
@@ -346,13 +363,17 @@ size_t
 Serial::SerialImpl::write (const uint8_t *data, size_t length)
 {
   if (is_open_ == false) {
-    throw PortNotOpenedException ("Serial::write");
+  //  throw PortNotOpenedException ("Serial::write");
+	  return 0;
   }
   DWORD bytes_written;
   if (!WriteFile(fd_, data, static_cast<DWORD>(length), &bytes_written, NULL)) {
     stringstream ss;
     ss << "Error while writing to the serial port: " << GetLastError();
-    THROW (IOException, ss.str().c_str());
+    //THROW (IOException, ss.str().c_str());
+	return 0;
+
+
   }
   return (size_t) (bytes_written);
 }

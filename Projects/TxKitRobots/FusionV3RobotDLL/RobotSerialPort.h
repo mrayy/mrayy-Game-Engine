@@ -69,6 +69,7 @@ public:
 
 	virtual ERobotControllerStatus GetRobotStatus();
 	virtual void ShutdownRobot() ;
+	virtual void ForceShutdownRobot();
 	virtual bool GetJointValues(std::vector<float>& values) ;
 	virtual const mray::TBee::RobotCapabilities* GetRobotCaps()const { return &m_caps; }
 

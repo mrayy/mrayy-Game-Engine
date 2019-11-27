@@ -399,7 +399,7 @@ namespace mray
 				if (_state == EState::Wait)
 					_timeToWait = 100;
 				//if (_timeToWait > 0)
-				//	_sleep(20);
+					_sleep(20);
 
 				handTimer += _timeToWait;
 				//   System.Threading._sleep(30);

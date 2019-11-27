@@ -61,6 +61,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 
 	signal(SIGSEGV, handler);
+	signal(SIGTERM, handler);
+	signal(SIGINT, handler);
+	signal(SIGILL, handler);
 	signal(sigClosed, OnExitSig);
 
 	atexit(OnExit);

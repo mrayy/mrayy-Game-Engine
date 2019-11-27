@@ -25,7 +25,7 @@ public:
 	};
 	struct JoinInfo
 	{
-		JoinInfo() :_samples(3)
+		JoinInfo() :_samples(1)
 		{
 			targetAngle = 0;
 			currAngle = 0;

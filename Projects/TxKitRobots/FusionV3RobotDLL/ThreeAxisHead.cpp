@@ -54,16 +54,16 @@ DWORD timerThreadRobot(ThreeAxisHead *robot, LPVOID pdata) {
 void ThreeAxisHead::_ProcessThread()
 {
 	gLogManager.log("Head Thread Started",ELL_INFO);
-	Sleep(3000);
+	Sleep(1000);
 	while (IsConnected()) {
 		_sendRotation();
 		CheckSerial();
-		Sleep(10);
+		Sleep(30);
 	}
 	gLogManager.log("Head Thread Closing", ELL_INFO);
 }
 
-bool ThreeAxisHead::Connect(const core::string& port, bool enableAngleLog, bool laserEnabled)
+bool ThreeAxisHead::Connect(const core::string& port, bool enableAngleLog, bool laserEnabled,bool enableStabilizer)
 {
 	m_laserEnabled = laserEnabled;
 	if (IsConnected())
@@ -71,8 +71,16 @@ bool ThreeAxisHead::Connect(const core::string& port, bool enableAngleLog, bool 
 		Disconnect();
 		Sleep(1000);
 	}
+	gLogManager.log("Connecting to head", ELL_INFO);
 
-	m_serial = new serial::Serial(port, 115200 , serial::Timeout::simpleTimeout(20), serial::eightbits, serial::parity_none, serial::stopbits_one);
+	try {
+		m_serial = new serial::Serial(port, 115200);//, serial::Timeout::simpleTimeout(20), serial::eightbits, serial::parity_none, serial::stopbits_one);
+
+	}
+	catch (serial::SerialException& e) {
+	}
+	catch (serial::IOException& e) {
+	}
 	//m_serial->open();
 	if (!m_serial->isOpen())
 	{
@@ -84,22 +92,30 @@ bool ThreeAxisHead::Connect(const core::string& port, bool enableAngleLog, bool 
 	}
 	else
 	{
+		gLogManager.log("Head connected, setting up", ELL_INFO);
 		//_sendCommand("q");//disable angle logging
 		Sleep(50);
 		connected = true;
 		enableAngleLog = false;
 		m_enableAngleLog = enableAngleLog;
 		if (enableAngleLog)
-			_sendCommand("ea");//disable angle logging
+			_sendCommand("ea");// angle logging
 		else
 			_sendCommand("sa");
-		_sendCommand("es");//enable stabilization
+		Sleep(100);
+		if (enableStabilizer)
+			_sendCommand("es");//enable stabilization
+		else 
+			_sendCommand("ss");//disable stabilization
+		Sleep(100);
 		SetRotation(0);
 		_sendRotation();
-		m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
-		/*
-				if(enableAngleLog)
-		else m_robotThread = 0;*/
+		//Sleep(400);
+		gLogManager.log("Starting head thread", ELL_INFO);
+		
+		//if(enableAngleLog)
+			m_robotThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)timerThreadRobot, this, NULL, NULL);
+		//else m_robotThread = 0; 
 		gLogManager.log("Head Started!", ELL_SUCCESS);
 
 	}
@@ -194,6 +210,8 @@ void ThreeAxisHead::SetRotation(const math::vector3d& rotation)
 		return;
 	m_sentRotation =rotation;
 	m_rotation = rotation;
+
+
 
 	//_sendRotation();
 	//CheckSerial();

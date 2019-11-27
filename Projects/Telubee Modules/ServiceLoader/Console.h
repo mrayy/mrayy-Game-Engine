@@ -36,7 +36,7 @@ void    Console::clear()
 
     GetConsoleScreenBufferInfo(STDOUT, &csbi);
     FillConsoleOutputCharacter(STDOUT, (TCHAR)' ', csbi.dwSize.X * csbi.dwSize.Y, coordScreen, &written);
-    GetConsoleScreenBufferInfo(STDOUT, &csbi);
+    //GetConsoleScreenBufferInfo(STDOUT, &csbi);
     FillConsoleOutputAttribute(STDOUT, csbi.wAttributes, csbi.dwSize.X * csbi.dwSize.Y, coordScreen, &written);
 }
 
@@ -48,7 +48,7 @@ void    Console::clear(int line)
 
     GetConsoleScreenBufferInfo(STDOUT, &csbi);
     FillConsoleOutputCharacter(STDOUT, (TCHAR)' ', csbi.dwSize.X, coordScreen, &written);
-    GetConsoleScreenBufferInfo(STDOUT, &csbi);
+    //GetConsoleScreenBufferInfo(STDOUT, &csbi);
     FillConsoleOutputAttribute(STDOUT, csbi.wAttributes, csbi.dwSize.X, coordScreen, &written);
 }
 

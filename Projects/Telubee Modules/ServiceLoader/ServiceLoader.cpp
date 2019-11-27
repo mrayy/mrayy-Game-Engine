@@ -56,7 +56,7 @@ namespace mray
 			m_currPos += math::vector2di(x, y);
 			Console::locate(m_currPos.x, m_currPos.y);
 			Console::setColor(clr.R>0.5, clr.G>0.5, clr.B>0.5);
-			printf("%s\n", txt.c_str());
+			printf("%s", txt.c_str());
 			m_currPos.y++;
 		}
 		virtual void Reset()
@@ -391,13 +391,21 @@ void ServiceLoader::Run()
 
 	float dt=30.0/1000.0f;
 
+	int counter = 0;
+
 	while (m_serviceModule->GetServiceStatus() != TBee::EServiceStatus::Shutdown)
 	{
 		_MonitorEvents();
 		_UpdateServiceStatus();
 		m_serviceModule->Update(dt);
-		_RenderInfo();
-		Sleep(dt*1000);
+
+		if (counter % 20 == 0)
+		{
+			counter = 0;
+			_RenderInfo();
+		}
+		counter++;
+		Sleep(50);
 
 		if(_kbhit()){
 			if(_getch()==27)

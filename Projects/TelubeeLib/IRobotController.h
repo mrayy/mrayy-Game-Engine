@@ -105,6 +105,7 @@ public:
 	//New Functions 27/7/2015
 	virtual ERobotControllerStatus GetRobotStatus() = 0;
 	virtual void ShutdownRobot() = 0;
+	virtual void ForceShutdownRobot() { ShutdownRobot(); }
 	virtual bool GetJointValues(std::vector<float>& values) = 0;
 	virtual void ManualControlRobot() {};
 
